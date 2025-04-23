@@ -1463,35 +1463,55 @@ export default function App() {
     },
     []
   );
+  
+  const handleMouseBackButton = useCallback((e: MouseEvent) => {
+    if (e.button === 3) {
+      e.preventDefault();
+      updatePageHistoryIndex('decrement');
+    }
+  }, [updatePageHistoryIndex]);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', handleMouseBackButton);
+    return () => {
+      window.removeEventListener('mouseup', handleMouseBackButton);
+    };
+  }, [handleMouseBackButton]);
+
+
 
   const changeCurrentActivePage = useCallback(
     (pageClass: PageTitles, data?: PageData) => {
+          // 1. 获取当前导航历史状态
       const navigationHistory = { ...store.state.navigationHistory };
       const { pageTitle, onPageChange } =
         navigationHistory.history[navigationHistory.pageHistoryIndex];
 
       const currentPageData = navigationHistory.history[navigationHistory.pageHistoryIndex].data;
+       
+      // 2. 检查是否需要切换页面
       if (
         pageTitle !== pageClass ||
         (currentPageData && data && isDataChanged(currentPageData, data))
       ) {
+         // 3. 调用页面切换回调(如果存在)
         if (onPageChange) onPageChange(pageClass, data);
-
+        // 4. 创建新的页面数据对象
         const pageData = {
           pageTitle: pageClass,
           data
         };
-
+        // 5. 截断历史记录并添加新页面
         navigationHistory.history = navigationHistory.history.slice(
           0,
           navigationHistory.pageHistoryIndex + 1
         );
         navigationHistory.history.push(pageData);
         navigationHistory.pageHistoryIndex += 1;
-
+        // 6. 清除多选状态
         toggleMultipleSelections(false);
         log(`User navigated to '${pageClass}'`);
-
+         // 7. 关键步骤：通过dispatch更新状态
         dispatch({
           type: 'UPDATE_NAVIGATION_HISTORY',
           data: navigationHistory
@@ -1562,6 +1582,8 @@ export default function App() {
     }
   }, []);
 
+
+  
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
       const ctrlCombinations = [

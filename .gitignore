@@ -1,4 +1,6 @@
 node_modules
+record
+.cursor
 dist
 out
 .DS_Store
