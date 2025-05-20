@@ -95,6 +95,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@hello-pangea/dnd": "^18.0.1",
+    "@monyone/aho-corasick": "^1.0.4",
     "@neos21/detect-chinese": "^0.0.2",
     "@sglkc/kuroshiro": "^1.0.1",
     "@sglkc/kuroshiro-analyzer-kuromoji": "^1.0.1",
@@ -103,6 +104,8 @@
     "@tanstack/react-store": "^0.7.0",
     "@tanstack/react-virtual": "^3.10.4",
     "@vitalets/google-translate-api": "^9.2.0",
+    "better-sqlite3": "^11.9.1",
+    "compromise": "^14.14.4",
     "didyoumean2": "^7.0.2",
     "discord-rpc": "^4.0.1",
     "electron-store": "^10.0.0",
