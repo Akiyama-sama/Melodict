@@ -389,7 +389,7 @@
         "showArtistArtworkNearSongControls": "播放控制栏显示艺人封面 (左下角)",
         "disableBackgroundArtworksDescription": "关闭部分页面（歌曲详情页，艺人详情页）用作背景的大尺寸封面图片",
         "disableBackgroundArtworks": "禁用背景大图",
-        "playlistArtworksDescription": "更改“歌单”页面中History的封面。",
+        "playlistArtworksDescription": "更改“歌单”页面中（Favorites,History）的封面。",
         "enablePlaylistArtworks": "封面由最近播放的歌曲封面生成",
         "shuffleArtworkFromSongCovers": "封面由随机歌曲封面生成",
         "accessibility": "辅助功能",

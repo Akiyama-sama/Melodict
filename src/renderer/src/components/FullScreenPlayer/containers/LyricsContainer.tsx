@@ -10,6 +10,7 @@ import i18n from '../../../i18n';
 
 type Props = {
   isLyricsVisible: boolean;
+  isFullLyricsScreen: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
 };
 
@@ -18,7 +19,7 @@ const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isLyricsVisible, setIsLyricsAvailable } = props;
+  const { isLyricsVisible, setIsLyricsAvailable, isFullLyricsScreen } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
@@ -144,11 +145,10 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full !max-h-screen w-full !max-w-full select-none flex-col items-start overflow-auto pb-[25%] pl-20 pr-[20%] pt-20 transition-[filter] delay-200 group-focus-within/fullScreenPlayer:blur-sm group-focus-within:brightness-50 group-hover/fullScreenPlayer:blur-sm group-hover/fullScreenPlayer:brightness-50 ${
-        !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
-      }`}
+      className={`mini-player-lyrics-container appear-from-bottom w-full  select-none flex-col items-start overflow-auto  py-20 transition-[filter] delay-200  ${!isFullLyricsScreen && 'px-20'}`}
       id="miniPlayerLyricsContainer"
     >
+     
       {isLyricsVisible && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
         <>
           {lyricsComponents}
