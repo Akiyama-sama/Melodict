@@ -8,7 +8,12 @@
     "allowJs": true,
     "types": [ "node", "jest" ],
     "verbatimModuleSyntax": false,
-    "erasableSyntaxOnly": false
+    "erasableSyntaxOnly": false,
+    "paths": {
+      "@/*": [
+        "tests/*"
+      ],
+    },
   },
-  "include": [ "src/types/" ]
+  "include": [ "src/types/*", "tests/**/*", "src/main/analyzeLyric/mapper/englishPhraseMapper.ts", "src/main/analyzeLyric/mapper/englishWordMapper.ts", "src/main/analyzeLyric/tokenizer/englishTokenizer.ts", "src/main/analyzeLyric/fillToken/fillEnglishToken.ts", "src/main/analyzeLyric/tokenizer/englishPhrasesMatch.ts" ]
 }

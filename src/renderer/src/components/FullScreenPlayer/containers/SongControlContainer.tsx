@@ -18,6 +18,8 @@ type Props = {
   isLyricsAvailable: boolean;
   isMouseActive: boolean;
   isFullLyricsScreen: boolean;
+  isAnalyzeLyrics: boolean;
+  setIsAnalyzeLyrics: (callback: (state: boolean) => boolean) => void;
   setIsFullLyricsScreen: (callback: (state: boolean) => boolean) => void;
   setIsLyricsVisible: (callback: (state: boolean) => boolean) => void;
 };
@@ -38,7 +40,7 @@ const SongControlContainer = (props: Props) => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive, isFullLyricsScreen, setIsFullLyricsScreen } = props;
+  const { isAnalyzeLyrics, setIsAnalyzeLyrics, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive, isFullLyricsScreen, setIsFullLyricsScreen } = props;
 
 /*   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
@@ -94,6 +96,16 @@ const SongControlContainer = (props: Props) => {
         /> */}
 
           <div className="song-controls-container flex h-fit justify-center items-center">
+            <Button
+              className="analyze-lyrics-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white dark:after:bg-dark-font-color-highlight"
+              iconClassName={`!text-2xl ${
+                isAnalyzeLyrics ? '!text-font-color-highlight dark:!text-dark-font-color-highlight' : 'material-icons-round-outlined'
+              }`}
+              isDisabled={!currentSongData.isKnownSource}
+              iconName='contextual_token'
+              clickHandler={() => setIsAnalyzeLyrics((prevState) => !prevState)}
+              removeFocusOnClick
+            />
             <Button
               className="favorite-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white dark:after:bg-dark-font-color-highlight"
               iconClassName={`!text-2xl ${

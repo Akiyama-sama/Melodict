@@ -1,5 +1,5 @@
-import {findMatchPhrasesTermIndexRange,getOriginalTermList } from "./englishPhrasesMatch";
-import { getAllPhrases } from "./englishPhraseMapper";
+import {findMatchPhrasesTermIndexRange,getOriginalTermList } from "../src/main/analyzeLyric/tokenizer/englishPhrasesMatch";
+import { getAllPhrases } from "../src/main/analyzeLyric/mapper/englishPhraseMapper";
 
 import utils from 'util';
 const testCases = [

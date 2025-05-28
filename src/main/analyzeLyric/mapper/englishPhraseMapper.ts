@@ -2,23 +2,14 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import { app } from 'electron'; 
 import fs from 'fs';
-import { EnglishDictinaryPhrase } from './englishType';
-export interface Phrase {
-    phrase:       string;
-    translations: Translation[];
+
+
+interface RawPhrasesRow {
+  phrase: string;
+  translations_json: string;
 }
-
-export interface Translation {
-    tran:     string;
-    sentence: string;
-    sCN:      string;
-}
-
-const dbFilePath = path.resolve(process.cwd(), 'resources/phrases/englishPhrases.db');
-
 // --- 全局变量存储数据库连接 ---
 let db: Database.Database | null = null;
-
 /**
  * 初始化/获取数据库连接
  * @returns {Database.Database}
@@ -38,7 +29,7 @@ function getDbConnection(dbFilePath:string): Database.Database {
               try {
                   const parentDir = path.dirname(dbFilePath);
                   const files = fs.readdirSync(parentDir);
-                  //console.error(`Files in ${parentDir}:`, files);
+                  console.error(`Files in ${parentDir}:`, files);
               } catch (readDirError) {
                   console.error(`Could not read directory ${path.dirname(dbFilePath)}:`, readDirError);
               }
@@ -70,9 +61,9 @@ function getDbConnection(dbFilePath:string): Database.Database {
     return db;
   }
 
-export function getAllPhrases():string[]{
+export function getAllPhrases(dbFilePath:string):string[]{
     const connection = getDbConnection(dbFilePath); // 获取数据库连接
-    const rows = connection.prepare('SELECT phrase FROM phrases').all();
+    const rows = connection.prepare('SELECT phrase FROM phrases').all() as RawPhrasesRow[];
     return rows.map(row => row.phrase);
 }
 
@@ -81,10 +72,10 @@ export function getOnePhrase(phrase:string,dbFilePath:string):EnglishDictinaryPh
     const phraseLower = phrase.toLowerCase(); 
     const connection = getDbConnection(dbFilePath); // 获取数据库连接
     
-    console.log(`Looking up phrase: '${phraseLower}' in database.`); // 新增日志
+    //console.log(`Looking up phrase: '${phraseLower}' in database.`); // 新增日志
     // 修正：确保 SQL 查询也选择了 'translations' 列
-    const row = connection.prepare('SELECT phrase, translations_json FROM phrases WHERE phrase = ?').get(phraseLower);
-    console.log('Query result (row):', row); // 新增日志
+    const row = connection.prepare('SELECT phrase, translations_json FROM phrases WHERE phrase = ?').get(phraseLower) as RawPhrasesRow;
+    //console.log('Query result (row):', row); // 新增日志
 
     try {
         if (row && typeof row.translations_json === 'string') {
@@ -100,19 +91,19 @@ export function getOnePhrase(phrase:string,dbFilePath:string):EnglishDictinaryPh
         } else {
           if (!row) {
             console.log(`Phrase '${phraseLower}' not found in database.`);
-          } else if (row.translations === undefined) {
+          } else if (row.translations_json === undefined) {
             console.warn(`Phrase '${phraseLower}' found, but 'translations' field is missing from the query result or database schema.`);
-          } else if (row.translations === null) {
+          } else if (row.translations_json === null) {
             console.warn(`Phrase '${phraseLower}' found, but 'translations' field is null in the database.`);
-          } else if (typeof row.translations !== 'string') {
-            console.warn(`Phrase '${phraseLower}' found, but 'translations' field is not a string. Type: ${typeof row.translations}, Value:`, row.translations);
+          } else if (typeof row.translations_json !== 'string') {
+            console.warn(`Phrase '${phraseLower}' found, but 'translations' field is not a string. Type: ${typeof row.translations_json}, Value:`, row.translations_json);
           }
           return null; // 未找到或数据格式不正确
         }
       } catch (error) {
          if (error instanceof SyntaxError) {
              // 特别处理 JSON 解析错误
-             console.error(`Error parsing JSON data for phrase "${phraseLower}". Raw translations data: '${row?.translations}'. Error:`, error);
+             console.error(`Error parsing JSON data for phrase "${phraseLower}". Raw translations data: '${row?.translations_json}'. Error:`, error);
          } else {
             console.error(`Error looking up phrase "${phraseLower}":`, error);
          }

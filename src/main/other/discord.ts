@@ -61,20 +61,34 @@ function loginRPC() {
   });
 }
 
-function setDiscordRPC(data: typeof defaultPayload.activity) {
-  if (discord.user) {
-    const payload = {
-      pid: process.pid,
-      activity: data
-    };
-    if (data) {
-      data.instance = true;
-      data.type = ActivityType.Listening;
-    }
-    lastPayload = payload;
-    logger.debug(JSON.stringify(payload, null, 2));
-    discord.request('SET_ACTIVITY', payload); //send raw payload to discord RPC server
+function setDiscordRPC(data: typeof defaultPayload.activity | null) {
+  if (!discord || !discord.user) {
+    logger.warn('Discord client not ready or user not available. Cannot set/clear activity.');
+    return;
   }
+
+  if (data === null) {
+    logger.debug('Clearing Discord RPC activity.');
+    discord.clearActivity(process.pid).catch((err: any) => {
+      logger.error('Failed to clear Discord RPC activity', { err });
+    });
+    lastPayload = defaultPayload;
+    return;
+  }
+
+  const payload = {
+    pid: process.pid,
+    activity: data
+  };
+  if (data) {
+    data.instance = true;
+    data.type = ActivityType.Listening;
+  }
+  lastPayload = payload;
+  logger.debug(`Setting Discord RPC activity: ${JSON.stringify(payload, null, 2)}`);
+  discord.request('SET_ACTIVITY', payload).catch((err: any) => {
+    logger.error('Failed to send SET_ACTIVITY request to Discord RPC', { err });
+  });
 }
 
 export { Initialize, setDiscordRPC };

@@ -92,7 +92,8 @@ import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
-
+import  getAnalyzedLyrics  from './analyzeLyric/getAnalyzedLyrics';
+import getFilledToken from './analyzeLyric/getFilledToken';
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
     ipcMain.on('app/close', () => app.quit());
@@ -206,6 +207,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/getTranslatedLyrics', (_, languageCode: LanguageCodes) =>
       getTranslatedLyrics(languageCode as string)
     );
+    ipcMain.handle('app/getAnalyzedLyrics', () => getAnalyzedLyrics());
+    ipcMain.handle('app/getFilledToken', (_, token:AnalyzedGeneralToken) => getFilledToken(token));
 
     ipcMain.handle('app/romanizeLyrics', async () => await romanizeLyrics());
 

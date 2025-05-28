@@ -1,8 +1,6 @@
 //fillEnglishTokens.ts
-import { LyricEnglishToken ,EnglishWord, EnglishDictionaryWord,EnglishPhrase,EnglishDictinaryPhrase} from "./englishType";
-import {ENGLISH_PHRASE_KIND,ENGLISH_WORD_KIND,ENGLISH_ABBREVIATION_KIND} from './englishType';
-import { getOnePhrase } from "./englishPhraseMapper";
-import { getOneEnglishWord } from "./englishWordMapper";
+import { getOnePhrase } from "../mapper/englishPhraseMapper";
+import { getOneEnglishWord } from "../mapper/englishWordMapper";
 import path from "path";
 
 const englishDictDbFilePath = path.resolve(process.cwd(), 'resources/dictionaries/english_dict_level8.db'); 
@@ -13,15 +11,15 @@ const englishPhraseDbFilePath = path.resolve(process.cwd(), 'resources/phrases/e
  * @param LyricEnglishToken
  * @returns LyricEnglishToken//填充好所有信息的
  */
-export function fillLyricEnglishToken(lyricEnglishToken:LyricEnglishToken):LyricEnglishToken|undefined{
-    if (lyricEnglishToken.type === undefined) {
+export function fillLyricEnglishToken(lyricEnglishToken:LyricEnglishToken):LyricEnglishToken{
+    if (lyricEnglishToken.details === undefined) {
         console.log("标识属性方法: 'type' 属性未定义。");
-        return;
+        return lyricEnglishToken;
       }
     //判断是什么类型的EnglishToken
-    const tokenType=lyricEnglishToken.type;
+    const tokenType=lyricEnglishToken.details;
     switch(tokenType.kind){
-        case ENGLISH_WORD_KIND: {
+        case "word": {
             //wordToken信息填充策略：
             //默认：字典填充
             // 可选：LLM填充，meaningInSentence,posInSentence 由LLM提供，englishDictionaryWord字典数据库填充
@@ -30,12 +28,12 @@ export function fillLyricEnglishToken(lyricEnglishToken:LyricEnglishToken):Lyric
             return filledEnglishWordToken
             break;
         }
-        case ENGLISH_PHRASE_KIND: {
+        case "phrase": {
             const filledEnglishPhraseToken=fillEnglishPhraseTokenByDictionary(lyricEnglishToken,englishPhraseDbFilePath)
             return filledEnglishPhraseToken
             break;
         }
-        case ENGLISH_ABBREVIATION_KIND:
+        case "abbreviation":
             return lyricEnglishToken;
             break;//之前填充好了的
 
@@ -52,13 +50,13 @@ export function fillLyricEnglishToken(lyricEnglishToken:LyricEnglishToken):Lyric
  */
 export function fillEnglishWordTokenByDictionary(englishToken:LyricEnglishToken,dbFilePath:string):LyricEnglishToken {
     /* 保证type为EnglishWord*/
-    const englishWordToken=englishToken.type as EnglishWord
+    const englishWordToken=englishToken.details as EnglishWord
     const englishDictionaryWord:EnglishDictionaryWord|null=getOneEnglishWord(englishWordToken.englishWord,dbFilePath);
     const englishDictionaryRootWord:EnglishDictionaryWord|null=getOneEnglishWord(englishWordToken.englishRootWord,dbFilePath);
     if(englishDictionaryWord&&englishDictionaryRootWord){
         return {
             ...englishToken,
-            type:{
+            details:{
                 ...englishWordToken,
                 englishDictionaryWord:englishDictionaryWord,
                 englishDictionaryRootWord:englishDictionaryRootWord
@@ -67,7 +65,7 @@ export function fillEnglishWordTokenByDictionary(englishToken:LyricEnglishToken,
     }else if(englishDictionaryRootWord){
         return {
             ...englishToken,
-            type:{
+            details:{
                 ...englishWordToken,
                 englishDictionaryRootWord:englishDictionaryRootWord
             }
@@ -86,12 +84,12 @@ export function fillEnglishWordTokenByDictionary(englishToken:LyricEnglishToken,
  */
 export function fillEnglishPhraseTokenByDictionary(englishToken:LyricEnglishToken,dbFilePath:string):LyricEnglishToken {
     /* 保证type为EnglishPhrase*/
-    const englishPhraseToken=englishToken.type as EnglishPhrase
+    const englishPhraseToken=englishToken.details as EnglishPhrase
     const englishPhrase:EnglishDictinaryPhrase|null=getOnePhrase(englishPhraseToken.englishPhrase,dbFilePath);
     if(englishPhrase){
         return {
             ...englishToken,
-            type:{
+            details:{
                 ...englishPhraseToken,
                 englishDictionaryPhrase:englishPhrase
             }

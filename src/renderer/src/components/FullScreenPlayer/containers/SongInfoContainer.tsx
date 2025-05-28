@@ -50,7 +50,7 @@ const SongInfoContainer = ({songPos}: Props) => {
         fallbackSrc={DefaultSongCover}
         loading="eager"
         alt="Song Cover"
-        className="aspect-auto w-full rounded-md object-cover shadow-md"
+        className="aspect-auto w-full rounded-xl object-cover shadow-md"
       />
       <div className="song-info-container">
         {currentSongData.title && (

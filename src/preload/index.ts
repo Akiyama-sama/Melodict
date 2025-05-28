@@ -213,6 +213,12 @@ const lyrics = {
   getTranslatedLyrics: (languageCode: LanguageCodes): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/getTranslatedLyrics', languageCode),
 
+  getAnalyzedLyrics: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/getAnalyzedLyrics'),
+
+  getFilledToken: (token:AnalyzedGeneralToken): Promise<AnalyzedGeneralToken | undefined> =>
+    ipcRenderer.invoke('app/getFilledToken', token),
+
   romanizeLyrics: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/romanizeLyrics'),
 
   convertLyricsToPinyin: (): Promise<SongLyrics | undefined> =>

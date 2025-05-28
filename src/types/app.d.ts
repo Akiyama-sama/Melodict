@@ -265,8 +265,17 @@ declare global {
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
+    analyzedTexts?:AnalyzedLyricLine; //analyzed lyrics data
   }
-
+  interface AnalyzedLyricLine{
+    language:string,
+    tokens:AnalyzedGeneralToken[]
+    analysisStatus: 'unanalyzed' | 'pending' | 'analyzed' | 'error'
+    errorMessage?: string;
+    sourceTextHash:string;
+  }
+  type AnalyzedGeneralToken = LyricEnglishToken;
+  
   // Holds all the lyrics data, whether synced or unsynced
   interface LyricsData {
     isSynced: boolean;

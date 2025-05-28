@@ -1041,7 +1041,6 @@ export default function App() {
 
   useEffect(() => {
     let artworkPath: string | undefined;
-
     const updateMediaSessionMetaData = () => {
       if (store.state.currentSongData.artwork !== undefined) {
         if (typeof store.state.currentSongData.artwork === 'object') {

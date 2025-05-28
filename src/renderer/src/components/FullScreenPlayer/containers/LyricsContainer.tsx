@@ -10,6 +10,7 @@ import i18n from '../../../i18n';
 
 type Props = {
   isLyricsVisible: boolean;
+  isAnalyzeLyrics: boolean;
   isFullLyricsScreen: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
 };
@@ -19,7 +20,7 @@ const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isLyricsVisible, setIsLyricsAvailable, isFullLyricsScreen } = props;
+  const { isLyricsVisible, setIsLyricsAvailable, isFullLyricsScreen, isAnalyzeLyrics } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
@@ -57,7 +58,9 @@ const LyricsContainer = (props: Props) => {
             else if (res?.lyrics.originalLanguage == 'ko')
               setLyrics(await window.api.lyrics.convertLyricsToRomaja());
           }
-
+          if (isAnalyzeLyrics) {
+            setLyrics(await window.api.lyrics.getAnalyzedLyrics()); 
+          }
           return undefined;
         })
         .catch((err) => console.error(err));
@@ -72,13 +75,13 @@ const LyricsContainer = (props: Props) => {
     isLyricsVisible,
     preferences.autoTranslateLyrics,
     preferences.autoConvertLyrics,
-    setIsLyricsAvailable
+    setIsLyricsAvailable,
+    isAnalyzeLyrics
   ]);
 
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
       const { isSynced, parsedLyrics, offset = 0 } = lyrics.lyrics;
-
       if (isSynced) {
         const syncedLyricsLines = parsedLyrics.map((lyric, index) => {
           const { originalText: text, end = 0, start = 0 } = lyric;
@@ -90,6 +93,8 @@ const LyricsContainer = (props: Props) => {
               syncedLyrics={{ start, end }}
               translatedLyricLines={lyric.translatedTexts}
               convertedLyric={lyric.romanizedText}
+              analyzedLyric={lyric.analyzedTexts}
+              isAnalyzeLyrics={isAnalyzeLyrics}
             />
           );
         });
@@ -103,6 +108,7 @@ const LyricsContainer = (props: Props) => {
               start: 0,
               end: (parsedLyrics[0]?.start || 0) + offset
             }}
+            isAnalyzeLyrics={isAnalyzeLyrics}
           />
         );
 
@@ -119,6 +125,7 @@ const LyricsContainer = (props: Props) => {
               lyric={line.originalText}
               translatedLyricLines={line.translatedTexts}
               convertedLyric={line.romanizedText}
+              isAnalyzeLyrics={isAnalyzeLyrics}
             />
           );
         });

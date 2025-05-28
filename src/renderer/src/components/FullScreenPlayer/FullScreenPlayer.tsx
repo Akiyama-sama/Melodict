@@ -25,6 +25,7 @@ const FullScreenPlayer = () =>
 
     const [isLyricsVisible, setIsLyricsVisible] = useState(true);
     const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
+    const [isAnalyzeLyrics, setIsAnalyzeLyrics] = useState(false);
     const [songPos, setSongPos] = useState(0);
     const [isFullLyricsScreen, setIsFullLyricsScreen] = useState(true);
     const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
@@ -80,6 +81,7 @@ const FullScreenPlayer = () =>
             }
             
             <LyricsContainer
+              isAnalyzeLyrics={isAnalyzeLyrics}
               isFullLyricsScreen={isFullLyricsScreen}
               isLyricsVisible={isLyricsVisible}
               setIsLyricsAvailable={setIsLyricsAvailable}
@@ -93,9 +95,10 @@ const FullScreenPlayer = () =>
             setIsLyricsVisible={setIsLyricsVisible}
             isLyricsAvailable={isLyricsAvailable}
             isMouseActive={isMouseActive}
+            isAnalyzeLyrics={isAnalyzeLyrics}
+            setIsAnalyzeLyrics={setIsAnalyzeLyrics}
           />
           
-          {/* <SongInfoContainer songPos={songPos} /> */}
           <SeekBarSlider
             name="full-screen-player-seek-slider"
             id="fullScreenPlayerSeekSlider"

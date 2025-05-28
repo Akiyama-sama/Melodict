@@ -9,7 +9,7 @@ import LyricsProgressBar from './LyricsProgressBar';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
-
+import { AnalyzedGeneralToken } from '../AnalyedLyrics/AnalyzedGeneralToken';
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
   translatedLyricLines?: TranslatedLyricLine[];
@@ -17,6 +17,8 @@ interface LyricProp {
   index: number;
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
+  analyzedLyric?: AnalyzedLyricLine;
+  isAnalyzeLyrics: boolean;
 }
 
 const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
@@ -40,7 +42,9 @@ const LyricLine = (props: LyricProp) => {
     translatedLyricLines = [],
     convertedLyric,
     syncedLyrics,
-    isAutoScrolling = true
+    isAutoScrolling = true,
+    analyzedLyric,
+    isAnalyzeLyrics
   } = props;
 
   const handleLyricsActivity = useCallback(
@@ -127,6 +131,7 @@ const LyricLine = (props: LyricProp) => {
 
     const extendedLyricLines = convertedLyric.map((extendedText, i) => {
       return (
+        
         <EnhancedSyncedLyricWord
           key={i}
           isActive={isInRange}
@@ -141,7 +146,21 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, convertedLyric]);
 
-  const lyricStringLinePrimary = translatedLyricString ?? convertedLyricString ?? lyricString;
+  const analyzedLyricString = useMemo(() => {
+    if (!analyzedLyric || analyzedLyric.analysisStatus === 'unanalyzed' || !isAnalyzeLyrics) return undefined;
+    //return analyzedLyric.tokens.map((token) => token.pre+token.text+token.post).join(' ');
+    return analyzedLyric.tokens.map((token,index) => {
+      return (
+        <AnalyzedGeneralToken
+          key={index}
+          isInRange={isInRange}
+          token={token}
+        />
+      )
+    })
+  }, [analyzedLyric]);
+  
+  const lyricStringLinePrimary =analyzedLyricString??translatedLyricString ?? convertedLyricString ?? lyricString;
   let lyricStringLineSecondaryUpper;
   // if (!preferences.compactLyrics && translatedLyricString)
   if (translatedLyricString) lyricStringLineSecondaryUpper = convertedLyricString ?? lyricString;
@@ -163,11 +182,11 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `cursor-pointer blur-[1px] ${
               isInRange
-                ? '!scale-100 font-medium text-font-color-highlight !text-opacity-90 !blur-0 dark:!text-dark-font-color-highlight [&>div>span]:!mr-3'
+                ? '!scale-100 font-medium text-font-color-highlight !text-opacity-90 !blur-0 dark:text-dark-font-color-highlight [&>div>span]:!mr-3'
                 : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
           : '!text-4xl'
-      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white'} ${
+      } ${playerType === 'mini' && '!mb-2 !text-4xl !text-font-color-white'} ${
         playerType === 'full' &&
         '!mb-6 origin-left !items-start !justify-start !text-left !text-7xl !text-font-color-white'
       }`}

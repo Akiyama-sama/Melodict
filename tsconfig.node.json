@@ -5,7 +5,8 @@
     "src/main/**/*",
     "src/preload/**/*",
     "src/common/*",
-    "src/types/*.d.ts"
+    "src/types/*.d.ts",
+    "src/types/english_analyzed_lyrics.d.ts"
   ],
   "compilerOptions": {
     "module": "ES2022",

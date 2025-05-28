@@ -1,7 +1,5 @@
 import nlp from 'compromise';
 import { AhoCorasick } from '@monyone/aho-corasick';
-import { getAllPhrases } from './englishPhraseMapper';
-import utils from 'util';
 // 候选匹配词信息接口
 interface CandidateMatchTermInfo {
   textToMatch: string; // 用于匹配的规范化文本
@@ -10,7 +8,7 @@ interface CandidateMatchTermInfo {
   isContractionComponent?: boolean; // 标记这是否是缩写词展开后的一个部分
 }
 
-export function getOriginalTermList(lyricLine: string) {
+export function getOriginalTermList(lyricLine: string):any[]/* compromise Term[] */{
   const doc = nlp(lyricLine);
   const originalTerms = doc.termList();
   return originalTerms;
@@ -97,8 +95,8 @@ function generateCandidateMatchSequence(lyricLine: string): {
       }
     } else if (termView.has('#Verb')) {
       //console.log('动词', termView.text('normal'), '.');
-      const isAuxiliary = termView.has('#Auxiliary');
-      const isModal = termView.has('#Modal');
+      // const isAuxiliary = termView.has('#Auxiliary');
+      // const isModal = termView.has('#Modal');
       if (termView.text('normal') == '')
         return; //如果是缩略语后的空字符串识别为动词
       /* if (!isAuxiliary && !isModal) */
@@ -239,17 +237,34 @@ export function findMatchPhrasesTermIndexRange(
   //console.log('matchText', matchText);
   // 2. 构建 Aho-Corasick 自动机
   // @monyone/aho-corasick 期望的 keywords 是 string[]
-  // 你的 allPhrases 已经是这种格式了
   const aho = new AhoCorasick(allPhrases);
-
   // 3. 在 matchText 中执行搜索
   const acResults = aho.matchInText(matchText);
 
-  const finalMatches: MatchedPhraseCandidateInfo[] = [];
+  const initialMatches: MatchedPhraseCandidateInfo[] = [];
 
-  // 4. 将 Aho-Corasick 的字符索引匹配结果转换回基于 candidate 序列的索引
-  acResults.forEach((result) => {
+  //4. 处理切割原歌词但匹配上的短语 (Filter AC results to ensure no word splitting)
+  const filteredAcResults = acResults.filter(result => {
+    const matchedCharStart = result.begin;
+    const matchedCharEnd = result.end; //
+
+    // Check if the matched phrase starts exactly at the beginning of a candidate's text in matchText
+    const startsOnCandidateBoundary = candidatePositions.some(
+        (cp) => cp.charStart === matchedCharStart
+    );
+    // Check if the matched phrase ends exactly at the end of a candidate's text in matchText
+    const endsOnCandidateBoundary = candidatePositions.some(
+        (cp) => cp.charEnd === matchedCharEnd
+    );
+
+    // Only keep matches that align perfectly with candidate boundaries
+    return startsOnCandidateBoundary && endsOnCandidateBoundary;
+  });
+
+  // 5. 将过滤后的 Aho-Corasick 的字符索引匹配结果转换回基于 candidate 序列的索引
+  filteredAcResults.forEach((result) => { // Iterate over filtered results
     // result: { begin: number (字符起始), end: number (字符结束), keyword: string }
+    
     const matchedCharStart = result.begin;
     const matchedCharEnd = result.end; // AC 返回的 end 是开区间
 
@@ -272,7 +287,6 @@ export function findMatchPhrasesTermIndexRange(
       if (matchedCharEnd - 1 >= pos.charStart && matchedCharEnd - 1 < pos.charEnd) {
         lastCandidateIndex = pos.originalCandidateIndex;
         // 找到了覆盖结束点的 candidate，通常可以停止查找这个匹配的结束 candidate
-        // 但为了确保，我们可以继续，但通常这个就是
       }
     }
 
@@ -330,7 +344,7 @@ export function findMatchPhrasesTermIndexRange(
         ) {
           originalTermEndIndex = originalTermStartIndex + 1;
         }
-        finalMatches.push({
+        initialMatches.push({
           keyword: result.keyword,
           phraseTokens: result.keyword.split(' '),
           candidateStartIndex: firstCandidateIndex,
@@ -345,87 +359,160 @@ export function findMatchPhrasesTermIndexRange(
       console.warn('无法定位AC匹配结果的candidate边界:', result, firstCandInfo, lastCandInfo);
     }
   });
-
+ 
   {
-    /*5.处理重叠匹配。Aho-Corasick 会找出所有匹配。*/
+    /*6.处理重叠匹配。Aho-Corasick 会找出所有匹配。*/
   }
 
   // 如果一个匹配完全包含在另一个匹配中，则只保留较长的那个。
   // 或者，如果它们共享起始点，保留较长的。如果共享结束点，保留较长的。
   // 初步的 finalMatches 可能包含重叠
-  const initialMatches: MatchedPhraseCandidateInfo[] = [];
-  acResults.forEach((result) => {
-    // ... (之前你写的从 acResults 映射到 initialMatches 中单个元素的逻辑)
-    // ... 我将你之前 forEach 内部的逻辑提取出来，并假设它填充了 initialMatches
-    // 示例填充（你需要用你已有的完整映射逻辑替换这里）：
-    const matchedCharStart = result.begin;
-    const matchedCharEnd = result.end;
+  // const initialMatches: MatchedPhraseCandidateInfo[] = []; // Moved and renamed
+  // acResults.forEach((result) => { // This entire loop is now redundant and removed
+  // ... (之前你写的从 acResults 映射到 initialMatches 中单个元素的逻辑)
+  // ... 我将你之前 forEach 内部的逻辑提取出来，并假设它填充了 initialMatches
+  // 示例填充（你需要用你已有的完整映射逻辑替换这里）：
+  // const matchedCharStart = result.begin;
+  // const matchedCharEnd = result.end;
 
-    const firstCandInfo = candidatePositions.find(
-      (p) => p.charStart <= matchedCharStart && p.charEnd > matchedCharStart
-    );
-    const lastCandInfo = candidatePositions.find(
-      (p) => p.charStart <= matchedCharEnd - 1 && p.charEnd > matchedCharEnd - 1
-    );
+  // const firstCandInfo = candidatePositions.find(
+  // (p) => p.charStart <= matchedCharStart && p.charEnd > matchedCharStart
+  // );
+  // const lastCandInfo = candidatePositions.find(
+  // (p) => p.charStart <= matchedCharEnd - 1 && p.charEnd > matchedCharEnd - 1
+  // );
 
-    if (firstCandInfo && lastCandInfo) {
-      const firstCandidateIndex = firstCandInfo.originalCandidateIndex;
-      const lastCandidateIndex = lastCandInfo.originalCandidateIndex;
+  // if (firstCandInfo && lastCandInfo) {
+  // const firstCandidateIndex = firstCandInfo.originalCandidateIndex;
+  // const lastCandidateIndex = lastCandInfo.originalCandidateIndex;
 
-      if (
-        firstCandidateIndex !== -1 &&
-        lastCandidateIndex !== -1 &&
-        firstCandidateIndex <= lastCandidateIndex
-      ) {
-        const firstMatchedCandidate = candidates[firstCandidateIndex];
-        const lastMatchedCandidate = candidates[lastCandidateIndex];
+  // if (
+  // firstCandidateIndex !== -1 &&
+  // lastCandidateIndex !== -1 &&
+  // firstCandidateIndex <= lastCandidateIndex
+  // ) {
+  // const firstMatchedCandidate = candidates[firstCandidateIndex];
+  // const lastMatchedCandidate = candidates[lastCandidateIndex];
 
-        const originalTermStartIndex = firstMatchedCandidate.originalTermIndex;
-        let originalTermEndIndex = lastMatchedCandidate.originalTermIndex + 1;
+  // const originalTermStartIndex = firstMatchedCandidate.originalTermIndex;
+  // let originalTermEndIndex = lastMatchedCandidate.originalTermIndex + 1;
 
-        let allFromSameOriginalContraction = true;
-        if (lastCandidateIndex > firstCandidateIndex) {
-          for (let k = firstCandidateIndex; k <= lastCandidateIndex; k++) {
-            if (
-              candidates[k].originalTermIndex !== originalTermStartIndex ||
-              !candidates[k].isContractionComponent
-            ) {
-              allFromSameOriginalContraction = false;
-              break;
-            }
-          }
-        } else if (!candidates[firstCandidateIndex].isContractionComponent) {
-          allFromSameOriginalContraction = false;
-        }
+  // let allFromSameOriginalContraction = true;
+  // if (lastCandidateIndex > firstCandidateIndex) {
+  // for (let k = firstCandidateIndex; k <= lastCandidateIndex; k++) {
+  // if (
+  // candidates[k].originalTermIndex !== originalTermStartIndex ||
+  // !candidates[k].isContractionComponent
+  // ) {
+  // allFromSameOriginalContraction = false;
+  // break;
+  // }
+  // }
+  // } else if (!candidates[firstCandidateIndex].isContractionComponent) {
+  // allFromSameOriginalContraction = false;
+  // }
 
-        if (
-          allFromSameOriginalContraction &&
-          candidates[firstCandidateIndex].isContractionComponent
-        ) {
-          originalTermEndIndex = originalTermStartIndex + 1;
-        }
+  // if (
+  // allFromSameOriginalContraction &&
+  // candidates[firstCandidateIndex].isContractionComponent
+  // ) {
+  // originalTermEndIndex = originalTermStartIndex + 1;
+  // }
 
-        // originalTextSegment 的填充逻辑（你需要提供）
-        // const originalTextSegment = ... ;
+  // initialMatches.push({ // Ensure this pushes to initialMatches
+  // keyword: result.keyword,
+  // phraseTokens: result.keyword.split(' '),
+  // candidateStartIndex: firstCandidateIndex,
+  // candidateEndIndex: lastCandidateIndex + 1,
+  // originalTermStartIndex: originalTermStartIndex,
+  // originalTermEndIndex: originalTermEndIndex
+  // // originalTextSegment: originalTextSegment, // 确保填充
+  // });
+  // } else {
+  // console.warn('无法将AC匹配结果映射回candidate索引:', result);
+  // }
+  // } else {
+  // console.warn('无法定位AC匹配结果的candidate边界:', result, firstCandInfo, lastCandInfo);
+  // }
+  // });
 
-        initialMatches.push({
-          keyword: result.keyword,
-          phraseTokens: result.keyword.split(' '),
-          candidateStartIndex: firstCandidateIndex,
-          candidateEndIndex: lastCandidateIndex + 1,
-          originalTermStartIndex: originalTermStartIndex,
-          originalTermEndIndex: originalTermEndIndex
-          // originalTextSegment: originalTextSegment, // 确保填充
-        });
-      } else {
-        console.warn('无法将AC匹配结果映射回candidate索引:', result);
-      }
-    } else {
-      console.warn('无法定位AC匹配结果的candidate边界:', result, firstCandInfo, lastCandInfo);
-    }
-  });
+  // {
+  /*6.处理重叠匹配。Aho-Corasick 会找出所有匹配。*/
+  // }
 
-  // --- 重叠解决逻辑开始 ---
+  // 如果一个匹配完全包含在另一个匹配中，则只保留较长的那个。
+  // 或者，如果它们共享起始点，保留较长的。如果共享结束点，保留较长的。
+  // 初步的 finalMatches 可能包含重叠
+  // const initialMatches: MatchedPhraseCandidateInfo[] = []; // Moved and renamed
+  // acResults.forEach((result) => { // This entire loop is now redundant and removed
+  // ... (之前你写的从 acResults 映射到 initialMatches 中单个元素的逻辑)
+  // ... 我将你之前 forEach 内部的逻辑提取出来，并假设它填充了 initialMatches
+  // 示例填充（你需要用你已有的完整映射逻辑替换这里）：
+  // const matchedCharStart = result.begin;
+  // const matchedCharEnd = result.end;
+
+  // const firstCandInfo = candidatePositions.find(
+  // (p) => p.charStart <= matchedCharStart && p.charEnd > matchedCharStart
+  // );
+  // const lastCandInfo = candidatePositions.find(
+  // (p) => p.charStart <= matchedCharEnd - 1 && p.charEnd > matchedCharEnd - 1
+  // );
+
+  // if (firstCandInfo && lastCandInfo) {
+  // const firstCandidateIndex = firstCandInfo.originalCandidateIndex;
+  // const lastCandidateIndex = lastCandInfo.originalCandidateIndex;
+
+  // if (
+  // firstCandidateIndex !== -1 &&
+  // lastCandidateIndex !== -1 &&
+  // firstCandidateIndex <= lastCandidateIndex
+  // ) {
+  // const firstMatchedCandidate = candidates[firstCandidateIndex];
+  // const lastMatchedCandidate = candidates[lastCandidateIndex];
+
+  // const originalTermStartIndex = firstMatchedCandidate.originalTermIndex;
+  // let originalTermEndIndex = lastMatchedCandidate.originalTermIndex + 1;
+
+  // let allFromSameOriginalContraction = true;
+  // if (lastCandidateIndex > firstCandidateIndex) {
+  // for (let k = firstCandidateIndex; k <= lastCandidateIndex; k++) {
+  // if (
+  // candidates[k].originalTermIndex !== originalTermStartIndex ||
+  // !candidates[k].isContractionComponent
+  // ) {
+  // allFromSameOriginalContraction = false;
+  // break;
+  // }
+  // }
+  // } else if (!candidates[firstCandidateIndex].isContractionComponent) {
+  // allFromSameOriginalContraction = false;
+  // }
+
+  // if (
+  // allFromSameOriginalContraction &&
+  // candidates[firstCandidateIndex].isContractionComponent
+  // ) {
+  // originalTermEndIndex = originalTermStartIndex + 1;
+  // }
+
+  // initialMatches.push({ // Ensure this pushes to initialMatches
+  // keyword: result.keyword,
+  // phraseTokens: result.keyword.split(' '),
+  // candidateStartIndex: firstCandidateIndex,
+  // candidateEndIndex: lastCandidateIndex + 1,
+  // originalTermStartIndex: originalTermStartIndex,
+  // originalTermEndIndex: originalTermEndIndex
+  // // originalTextSegment: originalTextSegment, // 确保填充
+  // });
+  // } else {
+  // console.warn('无法将AC匹配结果映射回candidate索引:', result);
+  // }
+  // } else {
+  // console.warn('无法定位AC匹配结果的candidate边界:', result, firstCandInfo, lastCandInfo);
+  // }
+  // });
+
+  // --- 重叠解决逻辑开始 --- 
   if (initialMatches.length === 0) {
     return [];
   }
@@ -470,5 +557,4 @@ export function findMatchPhrasesTermIndexRange(
   resolvedMatches.sort((a, b) => a.candidateStartIndex - b.candidateStartIndex);
 
   return resolvedMatches;
-  return finalMatches;
 }

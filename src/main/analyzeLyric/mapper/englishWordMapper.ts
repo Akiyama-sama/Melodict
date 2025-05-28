@@ -2,18 +2,31 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs'; // 需要 fs 来检查文件是否存在
 import { app } from 'electron'; // 导入 app 模块判断是否打包
-import { EnglishDictionaryWord } from './englishType';
 
 
 
 // --- 全局变量存储数据库连接 ---
 let db: Database.Database | null = null;
 
+interface RawDictionaryRow {
+  word: string;
+  usphone: string;
+  ukphone: string;
+  translations: string | null; // JSON 字符串或 NULL
+  sentences: string | null;    // 'sentence' 在您的代码中，可能是笔误，假设是 'sentences'
+  phrases: string | null;
+  synonyms: string | null;
+  antonyms: string | null;
+  relatedWords: string | null;
+  bookId: string;
+  // 确保这里的属性名和大小写与数据库列名完全一致
+}
+
 /**
  * 初始化/获取数据库连接
  * @returns {Database.Database}
  */
-function getDbConnection(dbFilePath:string): Database.Database {
+export function getDbConnection(dbFilePath:string): Database.Database {
     if (!db) {
       try {
           //console.log(`Attempting to open database at: ${dbFilePath}`);
@@ -24,7 +37,7 @@ function getDbConnection(dbFilePath:string): Database.Database {
               try {
                   const parentDir = path.dirname(dbFilePath);
                   const files = fs.readdirSync(parentDir);
-                  //console.error(`Files in ${parentDir}:`, files);
+                  console.error(`Files in ${parentDir}:`, files);
               } catch (readDirError) {
                   console.error(`Could not read directory ${path.dirname(dbFilePath)}.`);
               }
@@ -61,7 +74,7 @@ export function getOneEnglishWord(word:string,dbFilePath:string):EnglishDictiona
 
     // 执行查询
     try {
-      const row = stmt.get(word);
+      const row = stmt.get(word) as RawDictionaryRow;
       if(!row){
         console.log(`单词${word}在词典中不存在`);
         return null;
@@ -71,7 +84,7 @@ export function getOneEnglishWord(word:string,dbFilePath:string):EnglishDictiona
         usphone:row.usphone,
         ukphone:row.ukphone,
         translations:JSON.parse(row.translations||'[]'),
-        sentences:JSON.parse(row.sentence||'[]'),
+        sentences:JSON.parse(row.sentences||'[]'),
         phrases:JSON.parse(row.phrases||'[]'),
         synonyms:JSON.parse(row.synonyms||'[]'),
         antonyms:JSON.parse(row.antonyms||'[]'),

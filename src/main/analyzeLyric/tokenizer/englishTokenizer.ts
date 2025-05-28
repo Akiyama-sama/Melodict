@@ -1,15 +1,16 @@
 // 文件名: englishTokenizer.ts
 import nlp from 'compromise';
-import { LyricEnglishToken,EnglishPhrase,EnglishWord,EnglishAbbreviation } from './englishType';
 import { getOriginalTermList,findMatchPhrasesTermIndexRange } from './englishPhrasesMatch';
-import {getAllPhrases} from './englishPhraseMapper';
-import {ENGLISH_PHRASE_KIND,ENGLISH_WORD_KIND,ENGLISH_ABBREVIATION_KIND} from './englishType';
+import {getAllPhrases} from '../mapper/englishPhraseMapper';
+import path from 'path';
+
+const dbFilePath = path.resolve(process.cwd(), 'resources/phrases/englishPhrases.db');
 
 export function tokenizeEnglishLyricLine(lyricLine:string):LyricEnglishToken[]{
   //1.获取初始的englishTerms
   const englishTerms=getOriginalTermList(lyricLine);
   //2.获取匹配的短语在englishTerms中的索引范围
-  const allPhrases=getAllPhrases();//短语数据库路径硬编码，需要优化
+  const allPhrases=getAllPhrases(dbFilePath);
   const matchedPhrasesInfo=findMatchPhrasesTermIndexRange(allPhrases,lyricLine);
   /* interface MatchedPhraseCandidateInfo 示例{
     keyword: string;                      // AC 返回的匹配到的短语字符串 (例如 "be used to")
@@ -29,7 +30,7 @@ export function tokenizeEnglishLyricLine(lyricLine:string):LyricEnglishToken[]{
     originalPhraseTermsArray.push(originalPhraseTerms);
     const originalPhraseText:string=joinTerms(originalPhraseTerms);
     const englishPhrase:EnglishPhrase={
-      kind:ENGLISH_PHRASE_KIND,
+      kind:"phrase",
       englishPhrase:matchedPhraseInfo.keyword  //真正的短语内容
     }//先为空对象，填满信息需查询数据库
     const englishToken:LyricEnglishToken={
@@ -39,7 +40,7 @@ export function tokenizeEnglishLyricLine(lyricLine:string):LyricEnglishToken[]{
       pre:originalPhraseTerms[0].pre, //短语中第一个Term的pre
       post:originalPhraseTerms[originalPhraseTerms.length-1].post, //短语中最后一个Term的post
       language:'en',
-      type:englishPhrase,
+      details:englishPhrase,
     }
     englishTokens.push(englishToken);
   })
@@ -53,25 +54,25 @@ export function tokenizeEnglishLyricLine(lyricLine:string):LyricEnglishToken[]{
       pre:filteredTerm.pre,
       post:filteredTerm.post,
       language:'en',
-      type:undefined,
+      details:undefined,
     }
     //判断是否是缩略词
     if(filteredTerm.text.includes("'")){
       //console.log('缩略词',filteredTerm.text);
       const filteredDoc=nlp(filteredTerm.text);//根据之前的经验，应该需要后一个词才能让nlp识别出来所有的缩略词
       const englishAbbreviation:EnglishAbbreviation={
-        kind:ENGLISH_ABBREVIATION_KIND,
+        kind:"abbreviation",
         abbreviationTokens:filteredDoc.contractions().expand().out('text')
       }
       englishToken={
         ...englishToken,
-        type:englishAbbreviation,
+        details:englishAbbreviation,
       }
       englishTokens.push(englishToken);
     }else{ //不是缩略词，认为是单词
       //console.log('单词',filteredTerm.text);
       const englishWord:EnglishWord={
-        kind:ENGLISH_WORD_KIND,
+        kind:"word",
         englishWord:filteredTerm.text,
         englishRootWord:getEnglishRootWord(filteredTerm.text),
         posInSentence:filteredTerm.chunk,
@@ -79,7 +80,7 @@ export function tokenizeEnglishLyricLine(lyricLine:string):LyricEnglishToken[]{
       }
       englishToken={
         ...englishToken,
-        type:englishWord,
+        details:englishWord,
       }
       englishTokens.push(englishToken);
     }
@@ -93,7 +94,7 @@ export function tokenizeEnglishLyricLine(lyricLine:string):LyricEnglishToken[]{
 *@param terms:Term[]对象
 *@returns result:string  Term[]拼接过后的字符串
 */
-function joinTerms(terms):string{
+function joinTerms(terms:any[]):string{
   const result = terms.map(term => {
     // 确保 pre, text, post 都是字符串，以防它们在某些 Term 对象中缺失或为 null/undefined
     const pre = term.pre || '';
@@ -109,7 +110,7 @@ function joinTerms(terms):string{
  * @param filterTermsArray 
  * @returns filteredTerms Term[]
  */
-function filterPhrasesTerms(originalTerms,filterTermsArray):any[]/* 返回Term[] */{ 
+function filterPhrasesTerms(originalTerms:any[],filterTermsArray:any[]):any[]/* 返回Term[] */{ 
   const filterTerms=filterTermsArray.flat();
   const filteredTerms=originalTerms.filter(term=>!filterTerms.includes(term));
   return filteredTerms;
