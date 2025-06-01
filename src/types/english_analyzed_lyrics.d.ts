@@ -1,12 +1,5 @@
 //english_analyzed_lyrics.d.ts
-interface LyricToken {
-  text: string;
-  startChar: number;
-  endChar: number;
-  pre: string;
-  post: string;
-  language: string;
-}
+
 interface LyricEnglishToken extends LyricToken {
   language: 'en';
   details?: EnglishTokenDetails;

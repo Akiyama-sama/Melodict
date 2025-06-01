@@ -274,7 +274,15 @@ declare global {
     errorMessage?: string;
     sourceTextHash:string;
   }
-  type AnalyzedGeneralToken = LyricEnglishToken;
+  type AnalyzedGeneralToken = LyricEnglishToken | LyricJapaneseToken;
+  interface LyricToken {
+    text: string;
+    startChar: number;
+    endChar: number;
+    pre: string;
+    post: string;
+    language: string;
+  }
   
   // Holds all the lyrics data, whether synced or unsynced
   interface LyricsData {

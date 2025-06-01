@@ -1,11 +1,12 @@
 // 文件名: japaneseTokenizer.ts
 import Kuromoji from '@sglkc/kuromoji';
 import path from 'path';
-import { toKana, toRomaji,toHiragana,toKatakana } from 'wanakana';
+import { toHiragana, toKatakana, toRomaji } from 'wanakana';
+
 // **重要**: 确保这个路径正确指向你项目中 kuromoji 库自带的字典目录
 const dicPath = path.resolve(process.cwd(), 'node_modules', '@sglkc', 'kuromoji', 'dict');
 
-// 使用一个 Promise 来确保 tokenizer 只被初始化一次
+// 模块级变量，用于存储同步初始化后的分词器实例
 let tokenizerPromise: Promise<Kuromoji.Tokenizer<Kuromoji.IpadicFeatures>> | null = null;
 
 /**
@@ -32,13 +33,14 @@ export function getTokenizer(): Promise<Kuromoji.Tokenizer<Kuromoji.IpadicFeatur
 }
 
 /**
- * 对日文文本进行分词
+ * 对日文文本进行分词 (同步方法)。
+ * 必须在 initializeKuromojiTokenizerSync() 成功完成后调用。
  * @param {string} text - 需要分词的日文文本
- * @returns {Promise<LyricJapaneseToken[]>} - 分词结果数组
+ * @returns {LyricJapaneseToken[]} - 分词结果数组
  */
-export async function tokenizeJapaneseText(text: string): Promise<LyricJapaneseToken[]> {
+export async function tokenizeJapaneseLyricLine(text: string): Promise<LyricJapaneseToken[]> {
   try {
-    const tokenizer = await getTokenizer(); // 等待初始化完成
+    const tokenizer = await getTokenizer(); // 同步获取分词器
     const rawTokens: Kuromoji.IpadicFeatures[] = tokenizer.tokenize(text);
     const finalOutputTokens: LyricJapaneseToken[] = [];
     let rawTokenIndex = 0;
@@ -46,7 +48,6 @@ export async function tokenizeJapaneseText(text: string): Promise<LyricJapaneseT
     while (rawTokenIndex < rawTokens.length) {
       const currentRawToken = rawTokens[rawTokenIndex];
 
-      // 只处理非符号且非空白的 token 作为主要的 LyricToken
       if (currentRawToken.pos !== '記号' && currentRawToken.pos_detail_1 !== '空白') {
         const lyricToken: LyricJapaneseToken = {
           text: currentRawToken.surface_form,
@@ -65,13 +66,11 @@ export async function tokenizeJapaneseText(text: string): Promise<LyricJapaneseT
           basic_form: currentRawToken.basic_form,
           reading: currentRawToken.reading,
           pronunciation: currentRawToken.pronunciation,
-          hiragana: toHiragana(currentRawToken.reading,{ passRomaji: true }), 
-          katakana: toKatakana(currentRawToken.reading,{ passRomaji: true }), 
-          romaji: toRomaji(currentRawToken.reading),   
-          
+          hiragana: toHiragana(currentRawToken.reading, { passRomaji: true }),
+          katakana: toKatakana(currentRawToken.reading, { passRomaji: true }),
+          romaji: toRomaji(currentRawToken.reading),
         };
 
-        // 处理前置开括号
         if (rawTokenIndex > 0) {
           const prevRawToken = rawTokens[rawTokenIndex - 1];
           if (prevRawToken.pos === '記号' && prevRawToken.pos_detail_1 === '括弧開') {
@@ -79,28 +78,28 @@ export async function tokenizeJapaneseText(text: string): Promise<LyricJapaneseT
           }
         }
 
-        // 处理后置闭括号或其他标点
         if (rawTokenIndex < rawTokens.length - 1) {
           const nextRawToken = rawTokens[rawTokenIndex + 1];
           if (nextRawToken.pos === '記号') {
             if (nextRawToken.pos_detail_1 === '括弧閉') {
               lyricToken.post = nextRawToken.surface_form;
-              rawTokenIndex++; // 跳过已消费的闭括号
+              rawTokenIndex++;
             } else if (nextRawToken.pos_detail_1 !== '空白' && nextRawToken.pos_detail_1 !== '括弧開') {
-              // 其他标点 (非空白，非下一个token的开括号)
               lyricToken.post = nextRawToken.surface_form;
-              rawTokenIndex++; // 跳过已消费的标点
+              rawTokenIndex++;
             }
           }
         }
         finalOutputTokens.push(lyricToken);
       }
-      // 对于符号token（如果未被作为pre/post消费）或空白token，则直接跳过
       rawTokenIndex++;
     }
     return finalOutputTokens;
   } catch (error) {
     console.error(`Error during tokenization for text "${text}":`, error);
-    throw error; // 将错误抛出，以便 Jest 测试可以捕获
+    if (error instanceof Error && error.message.includes('Kuromoji tokenizer has not been initialized')) {
+      throw error;
+    }
+    return [];
   }
 }

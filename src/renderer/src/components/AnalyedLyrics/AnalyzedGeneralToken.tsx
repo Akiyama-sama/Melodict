@@ -1,12 +1,12 @@
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import GeneralTokenCard from './GeneralTokenCard';
 
 type propTypes = {
   token: AnalyzedGeneralToken;
-  isInRange: boolean;
+  language: string;
 };
 
 export const AnalyzedGeneralToken = (props: propTypes) => {
@@ -14,11 +14,36 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
   const tokenRef = useRef<HTMLSpanElement>(null);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const { paletteData } = currentSongData;
-  const { token, isInRange } = props;
+  const { token, language } = props;
   const { text, pre, post } = token;
 
   const [portalRootElement, setPortalRootElement] = useState<HTMLElement | null>(null);
 
+  const japaneseTokenText = useMemo(() => {
+    if (language !== 'ja') return undefined
+    const japaneseToken = token as LyricJapaneseToken;
+    
+    const hiraganaText = japaneseToken.hiragana==japaneseToken.text?' ':japaneseToken.hiragana
+    return(
+      <div className='flex flex-col'>
+        <div className='text-2xl text-center mb-1 h-7'>{hiraganaText}</div>
+        <div className='flex'>
+          {pre && <span>{pre}</span>}
+          <span>{text}</span>
+          {post && <span>{post}</span>}
+        </div>
+      </div>
+    ) 
+  }, [token, language]);
+
+  const englishTokenText = useMemo(() => {
+    if (language !== 'en') return undefined
+    const englishToken = token as LyricEnglishToken;
+    const { text, pre, post } = englishToken;
+    return  pre + text + post
+  }, [token, language]);
+
+  const tokenText=japaneseTokenText || englishTokenText
   useEffect(() => {
     const portalEl = document.getElementById('portal-root');
     setPortalRootElement(portalEl);
@@ -36,10 +61,9 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
   }, [isActive]);
 
   if (text === '') return undefined;
-
-  const isVerb = token.details?.kind === 'word' && token.details.posInSentence?.includes('Verb');
-  const isPhrase = token.details?.kind === 'phrase';
-  const tokenText = pre + text + post;
+  
+  const isVerb = checkIsVerb(token,language);
+  
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -62,7 +86,9 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
         role="button"
         tabIndex={0}
         aria-expanded={isActive}
-        className={`analyzed-general-token mr-8 inline-block hover:underline relative focus:outline-none opacity-100 z-10`}
+        className={`analyzed-general-token  inline-block hover:underline relative focus:outline-none opacity-100 z-10
+          ${language=='ja'? 'mr-2' : 'mr-8'}
+          `}
         style={{
           color: isVerb ? paletteData?.DarkVibrant?.hex : '',
         }}
@@ -89,12 +115,10 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
   );
 };
 
-// Helper function to calculate card position for Portal (fixed positioning)
 const getCardPositionForPortal = (parentRect: DOMRect) => {
     const windowHeight = window.innerHeight;
     const windowWidth = window.innerWidth;
     
-    const cardMinWidth = 280;
     const cardMaxWidth = 400; 
     const cardEstimatedHeight = 200; // 需要根据实际内容调整或动态获取
     
@@ -171,4 +195,15 @@ const getCardPositionForPortal = (parentRect: DOMRect) => {
     if (left !== undefined) finalPosition.left = `${left}px`;
 
     return finalPosition;
+};
+
+const checkIsVerb = (token: AnalyzedGeneralToken,language: string) => {
+  if (language === 'ja') {
+    const japaneseToken = token as LyricJapaneseToken;
+    return japaneseToken.pos === '動詞';
+  }else if (language === 'en') {
+    const englishToken = token as LyricEnglishToken;
+    return englishToken.details?.kind === 'word' && englishToken.details.posInSentence?.includes('Verb');
+  }
+  return false;
 };

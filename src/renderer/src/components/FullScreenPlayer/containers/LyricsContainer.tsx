@@ -132,7 +132,7 @@ const LyricsContainer = (props: Props) => {
       }
     }
     return [];
-  }, [lyrics]);
+  }, [lyrics,isAnalyzeLyrics]);
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {

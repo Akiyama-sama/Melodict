@@ -148,17 +148,18 @@ const LyricLine = (props: LyricProp) => {
 
   const analyzedLyricString = useMemo(() => {
     if (!analyzedLyric || analyzedLyric.analysisStatus === 'unanalyzed' || !isAnalyzeLyrics) return undefined;
-    //return analyzedLyric.tokens.map((token) => token.pre+token.text+token.post).join(' ');
+   
     return analyzedLyric.tokens.map((token,index) => {
+      const language = token.language;
       return (
         <AnalyzedGeneralToken
           key={index}
-          isInRange={isInRange}
           token={token}
+          language={language}
         />
       )
     })
-  }, [analyzedLyric]);
+  }, [analyzedLyric,isAnalyzeLyrics]);
   
   const lyricStringLinePrimary =analyzedLyricString??translatedLyricString ?? convertedLyricString ?? lyricString;
   let lyricStringLineSecondaryUpper;

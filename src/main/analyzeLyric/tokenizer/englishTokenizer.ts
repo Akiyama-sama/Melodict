@@ -6,7 +6,7 @@ import path from 'path';
 
 const dbFilePath = path.resolve(process.cwd(), 'resources/phrases/englishPhrases.db');
 
-export function tokenizeEnglishLyricLine(lyricLine:string):LyricEnglishToken[]{
+export  async function tokenizeEnglishLyricLine(lyricLine:string): Promise<LyricEnglishToken[]>{
   //1.获取初始的englishTerms
   const englishTerms=getOriginalTermList(lyricLine);
   //2.获取匹配的短语在englishTerms中的索引范围
