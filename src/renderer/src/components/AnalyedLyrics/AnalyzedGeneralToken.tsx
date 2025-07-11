@@ -1,9 +1,8 @@
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, lazy } from 'react';
 import ReactDOM from 'react-dom';
-import GeneralTokenCard from './GeneralTokenCard';
-
+const GeneralTokenCard = lazy(() => import('./GeneralTokenCard'));
 type propTypes = {
   token: AnalyzedGeneralToken;
   language: string;
@@ -11,7 +10,7 @@ type propTypes = {
 
 export const AnalyzedGeneralToken = (props: propTypes) => {
   const [isActive, setIsActive] = useState(false);
-  const tokenRef = useRef<HTMLSpanElement>(null);
+  //const tokenRef = useRef<HTMLSpanElement>(null);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const { paletteData } = currentSongData;
   const { token, language } = props;
@@ -25,7 +24,7 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
     
     const hiraganaText = japaneseToken.hiragana==japaneseToken.text?' ':japaneseToken.hiragana
     return(
-      <div className='flex flex-col'>
+      <div className='japanese-token flex flex-col'>
         <div className='text-2xl text-center mb-1 h-7'>{hiraganaText}</div>
         <div className='flex'>
           {pre && <span>{pre}</span>}
@@ -34,17 +33,17 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
         </div>
       </div>
     ) 
-  }, [token, language]);
+  }, [token, language,pre,post,text]);
 
   const englishTokenText = useMemo(() => {
     if (language !== 'en') return undefined
     const englishToken = token as LyricEnglishToken;
     const { text, pre, post } = englishToken;
-    return  pre + text + post
+    return <span className='english-token'>{pre + text + post}</span>
   }, [token, language]);
 
   const tokenText=japaneseTokenText || englishTokenText
-  useEffect(() => {
+  /* useEffect(() => {
     const portalEl = document.getElementById('portal-root');
     setPortalRootElement(portalEl);
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,7 +57,7 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [isActive]);
+  }, [isActive]); */
 
   if (text === '') return undefined;
   
@@ -75,14 +74,14 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
     }
   };
 
-  const cardPosition = isActive && tokenRef.current 
+/*   const cardPosition = isActive && tokenRef.current 
     ? getCardPositionForPortal(tokenRef.current.getBoundingClientRect()) 
-    : undefined;
+    : undefined; */
 
   return (
     <>
       <span
-        ref={tokenRef}
+        //ref={tokenRef}
         role="button"
         tabIndex={0}
         aria-expanded={isActive}
@@ -100,7 +99,7 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
       >
         {tokenText}
       </span>
-      {isActive && portalRootElement && cardPosition && (
+      {/* {isActive && portalRootElement && cardPosition && (
         ReactDOM.createPortal(
           <GeneralTokenCard
             token={token}
@@ -110,7 +109,7 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
           />,
           portalRootElement
         )
-      )}
+      )} */}
     </>
   );
 };

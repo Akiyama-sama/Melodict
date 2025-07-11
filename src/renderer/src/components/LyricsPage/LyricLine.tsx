@@ -18,7 +18,7 @@ interface LyricProp {
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
   analyzedLyric?: AnalyzedLyricLine;
-  isAnalyzeLyrics: boolean;
+  isAnalyzeLyrics?: boolean;
 }
 
 const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
@@ -159,12 +159,12 @@ const LyricLine = (props: LyricProp) => {
         />
       )
     })
-  }, [analyzedLyric,isAnalyzeLyrics]);
+  }, [analyzedLyric]);
   
-  const lyricStringLinePrimary =analyzedLyricString??translatedLyricString ?? convertedLyricString ?? lyricString;
+  const lyricStringLinePrimary =analyzedLyricString?? lyricString??translatedLyricString ?? convertedLyricString
   let lyricStringLineSecondaryUpper;
   // if (!preferences.compactLyrics && translatedLyricString)
-  if (translatedLyricString) lyricStringLineSecondaryUpper = convertedLyricString ?? lyricString;
+  if (translatedLyricString) lyricStringLineSecondaryUpper = convertedLyricString??translatedLyricString;
 
   return (
     <div

@@ -3,12 +3,11 @@ import { lyricLineTokenizer } from './tokenizer/lyricLineTokenizer';
 import { franc } from 'franc-min';
 import crypto from 'crypto';
 import logger from '../logger';
-const getAnalyzedLyrics = async () => {
-  const cachedLyrics = getCachedLyrics();
+const getAnalyzedLyrics = async (): Promise<SongLyrics | undefined> => {
+  let cachedLyrics = getCachedLyrics();
 
   if (!cachedLyrics) return;
   
-
   const { parsedLyrics } = cachedLyrics.lyrics;
   const allLyrics = parsedLyrics.map((line: LyricLine) => line.originalText).join('');
   const language = getLyricLineLanguage(allLyrics);
@@ -70,6 +69,7 @@ const getAnalyzedLyrics = async () => {
   };
 
   updateCachedLyrics(() => newCachedLyrics);
+  cachedLyrics=undefined;
   //logger.info('Analyzed lyrics', { parsedLyrics: cachedLyrics.lyrics.parsedLyrics });
   return newCachedLyrics;
 };
