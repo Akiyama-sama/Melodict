@@ -7,13 +7,14 @@ type propTypes = {
   id?: string;
   token: AnalyzedGeneralToken;
   language: string;
+  isInRange: boolean;
 };
 
 export const AnalyzedGeneralToken = (props: propTypes) => {
   const tokenRef = useRef<HTMLSpanElement>(null);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const { paletteData } = currentSongData;
-  const { token, language } = props;
+  const { token, language, isInRange } = props;
   const { text, pre, post } = token;
 
   const japaneseTokenText = useMemo(() => {
@@ -24,7 +25,7 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
       japaneseToken.hiragana == japaneseToken.text ? ' ' : japaneseToken.hiragana;
     return (
       <div className="japanese-token flex flex-col">
-        <div className="mb-1 h-7 text-center text-2xl">{hiraganaText}</div>
+        <div className="mb-1 h-7 text-center text-2xl hover:no-underline">{hiraganaText}</div>
         <div className="flex">
           {pre && <span>{pre}</span>}
           <span>{text}</span>
@@ -68,7 +69,7 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
             tabIndex={0}
             className={`analyzed-general-token relative inline-block hover:underline focus:outline-none ${language == 'ja' ? 'mr-2' : 'mr-8'} `}
             style={{
-              color: isVerb ? paletteData?.DarkVibrant?.hex : ''
+              color: isVerb ? paletteData?.Vibrant?.hex : ''
             }}
           >
             {tokenText}

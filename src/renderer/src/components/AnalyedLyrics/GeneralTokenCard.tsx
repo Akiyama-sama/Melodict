@@ -1,7 +1,6 @@
-import { useMemo, useRef, useEffect, type CSSProperties } from 'react';
+import { useMemo, useRef } from 'react';
 import EnglishTokenCard from './EnglishTokenCard';
-import Button from '../Button';
-
+import JapanseTokenCard from './JapaneseTokenCard';
 type propTypes = {
   token: AnalyzedGeneralToken;
   paletteData: PaletteData | undefined;
@@ -16,6 +15,9 @@ const GeneralTokenCard = (props: propTypes) => {
     return <EnglishTokenCard token={token as LyricEnglishToken} />;
   }, [token]);
 
+  const japaneseToken = <JapanseTokenCard token={token as LyricJapaneseToken} />;
+
+  const tokenCard = language == 'ja' ? japaneseToken : englishToken;
   return (
     <div
       ref={cardRef}
@@ -36,7 +38,7 @@ const GeneralTokenCard = (props: propTypes) => {
         />
       </div>*/}
 
-      <div className="p-4">{englishToken}</div>
+      <div className="p-4">{tokenCard}</div>
     </div>
   );
 };
