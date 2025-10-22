@@ -1,10 +1,10 @@
-import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
+import { getCachedLyrics } from '../core/getSongLyrics';
 import { lyricLineTokenizer } from './tokenizer/lyricLineTokenizer';
 import { franc } from 'franc-min';
 import crypto from 'crypto';
 import logger from '../logger';
-const getAnalyzedLyrics = async (): Promise<SongLyrics | undefined> => {
-  let cachedLyrics = getCachedLyrics();
+const getAnalyzedLyrics = async () => {
+  const cachedLyrics = getCachedLyrics();
 
   if (!cachedLyrics) return;
   
@@ -12,7 +12,7 @@ const getAnalyzedLyrics = async (): Promise<SongLyrics | undefined> => {
   const allLyrics = parsedLyrics.map((line: LyricLine) => line.originalText).join('');
   const language = getLyricLineLanguage(allLyrics);
 
-  const newParsedLyricsPromises=parsedLyrics.map(async (line: LyricLine) => {
+  const newParsedLyricsPromise=parsedLyrics.map(async(line: LyricLine) => {
 
     const originalTextLine =
       typeof line.originalText === 'string'
@@ -59,19 +59,12 @@ const getAnalyzedLyrics = async (): Promise<SongLyrics | undefined> => {
       analyzedTexts:analyzedLyrics
     }
   });
-  const newParsedLyrics = await Promise.all(newParsedLyricsPromises);
-  const newCachedLyrics: SongLyrics = {
-    ...cachedLyrics,
-    lyrics: {
-      ...cachedLyrics.lyrics,
-      parsedLyrics: newParsedLyrics
-    }
-  };
-
-  updateCachedLyrics(() => newCachedLyrics);
-  cachedLyrics=undefined;
-  //logger.info('Analyzed lyrics', { parsedLyrics: cachedLyrics.lyrics.parsedLyrics });
-  return newCachedLyrics;
+  const newParsedLyrics=await Promise.all(newParsedLyricsPromise)
+  cachedLyrics.lyrics={
+    ...cachedLyrics.lyrics,
+    parsedLyrics:newParsedLyrics,
+  }
+  return cachedLyrics;
 };
 
 const getTextHash = (text: string) => {

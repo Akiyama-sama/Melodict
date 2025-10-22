@@ -47,8 +47,10 @@ const LyricLine = (props: LyricProp) => {
     isAnalyzeLyrics
   } = props;
 
-  const handleLyricsActivity = useCallback(
-    (e: Event) => {
+  const activityHandlerRef = useRef<(e: Event) => void>();
+
+  useEffect(() => {
+    activityHandlerRef.current = (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
 
@@ -66,21 +68,22 @@ const LyricLine = (props: LyricProp) => {
 
               document.dispatchEvent(lyricsScrollIntoViewEvent);
             }
-          } else {
+          } else if (isTheCurrnetLineRef.current) {
             isTheCurrnetLineRef.current = false;
             setIsInRange(false);
           }
         }
       }
-    },
-    [isAutoScrolling, syncedLyrics]
-  );
+    };
+  }, [isAutoScrolling, syncedLyrics]);
 
   useEffect(() => {
-    document.addEventListener('player/positionChange', handleLyricsActivity);
+    const listener = (e: Event) => activityHandlerRef.current?.(e);
 
-    return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
-  }, [handleLyricsActivity]);
+    document.addEventListener('player/positionChange', listener);
+
+    return () => document.removeEventListener('player/positionChange', listener);
+  }, []);
 
   const lyricString = useMemo(() => {
     if (typeof lyric === 'string') return lyric.replaceAll(syncedLyricsRegex, '').trim();
@@ -131,7 +134,6 @@ const LyricLine = (props: LyricProp) => {
 
     const extendedLyricLines = convertedLyric.map((extendedText, i) => {
       return (
-        
         <EnhancedSyncedLyricWord
           key={i}
           isActive={isInRange}
@@ -147,24 +149,20 @@ const LyricLine = (props: LyricProp) => {
   }, [isInRange, convertedLyric]);
 
   const analyzedLyricString = useMemo(() => {
-    if (!analyzedLyric || analyzedLyric.analysisStatus === 'unanalyzed' || !isAnalyzeLyrics) return undefined;
-   
-    return analyzedLyric.tokens.map((token,index) => {
+    if (!analyzedLyric || analyzedLyric.analysisStatus === 'unanalyzed' || !isAnalyzeLyrics)
+      return undefined;
+    return analyzedLyric.tokens.map((token, index) => {
       const language = token.language;
-      return (
-        <AnalyzedGeneralToken
-          key={index}
-          token={token}
-          language={language}
-        />
-      )
-    })
-  }, [analyzedLyric]);
-  
-  const lyricStringLinePrimary =analyzedLyricString?? lyricString??translatedLyricString ?? convertedLyricString
+      return <AnalyzedGeneralToken key={index} token={token} language={language} />;
+    });
+  }, [analyzedLyric, isAnalyzeLyrics]);
+
+  const lyricStringLinePrimary =
+    analyzedLyricString ?? lyricString ?? translatedLyricString ?? convertedLyricString;
   let lyricStringLineSecondaryUpper;
   // if (!preferences.compactLyrics && translatedLyricString)
-  if (translatedLyricString) lyricStringLineSecondaryUpper = convertedLyricString??translatedLyricString;
+  if (translatedLyricString)
+    lyricStringLineSecondaryUpper = convertedLyricString ?? translatedLyricString;
 
   return (
     <div

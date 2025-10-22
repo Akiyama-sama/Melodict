@@ -298,6 +298,7 @@ declare global {
     // isConvertedToRomaja: boolean;
     isReset: boolean;
     parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced)
+    //tokenizeStatus?:'unTokenize'|'pending'|'tokenized'
     unparsedLyrics: string;
     offset?: number;
     originalLanguage?: string; // Language of the original lyrics (optional)

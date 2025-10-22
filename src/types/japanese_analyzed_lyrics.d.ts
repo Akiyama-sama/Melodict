@@ -13,8 +13,8 @@ declare global {
         conjugated_type: string;
         conjugated_form: string;
         basic_form: string;
-        reading?: string | undefined;
-        pronunciation?: string | undefined;
+        reading?: string ;
+        pronunciation?: string ;
       }
 }
 
