@@ -411,6 +411,8 @@
     "autoTranslateLyrics": "Tự động dịch lời bài hát",
     "autoConvertLyricsDescription": "Kích hoạt tự động chuyển đổi lời bài hát được hỗ trợ sang ký tự Latin. Hiện tại, Nora hỗ trợ chuyển đổi lời bài hát tiếng Nhật sang Romaji, tiếng Trung sang Bính âm và tiếng Hàn sang Romaja.",
     "autoConvertLyrics": "Tự động chuyển đổi lời bài hát",
+    "autoAnalyzeLyricsDescription": "Khi được bật, hệ thống sẽ tự động phân tích lời bài hát và phân tách từ (Tokenizer).",
+    "autoAnalyzeLyrics": "Tự động phân tích lời bài hát",
     "lrcFileCustomSaveLocationDescription": "Chọn một vị trí tùy chỉnh để lưu tệp LRC của bài hát, nếu bạn không muốn lưu chúng trong cùng thư mục của bài hát tương ứng.",
     "selectedCustomLocation": "Vị trí tùy chỉnh đã chọn",
     "setCustomLocation": "Đặt vị trí tùy chỉnh",

@@ -414,7 +414,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     enableImageBasedDynamicThemes: false,
     doNotShowHelpPageOnLyricsEditorStartUp: false,
     autoTranslateLyrics: false,
-    autoConvertLyrics: false
+    autoConvertLyrics: false,
+    autoAnalyzeLyrics: true
   },
   playback: {
     currentSong: {
@@ -479,7 +480,8 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
     enableDiscordRPC: false,
-    saveVerboseLogs: false
+    saveVerboseLogs: false,
+    autoAnalyzeLyrics: true
   },
   windowPositions: {},
   windowDiamensions: {},

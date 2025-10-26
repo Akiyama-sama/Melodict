@@ -58,6 +58,14 @@ const LyricsSettings = () => {
     setAutoConvertLyrics(autoConvertLyrics);
   }, []);
 
+  const [autoAnalyzeLyrics, setAutoAnalyzeLyrics] = useState(false);
+
+  useEffect(() => {
+    const autoAnalyzeLyrics = storage.preferences.getPreferences('autoAnalyzeLyrics');
+
+    setAutoAnalyzeLyrics(autoAnalyzeLyrics);
+  }, []);
+
   return (
     <li className="main-container audio-playback-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -232,6 +240,18 @@ const LyricsSettings = () => {
               storage.preferences.setPreferences('autoConvertLyrics', state);
             }}
             labelContent={t('settingsPage.autoConvertLyrics')}
+          />
+        </li>
+        <li className="secondary-container auto-analyze-lyrics mb-4">
+          <div className="description">{t('settingsPage.autoAnalyzeLyricsDescription')}</div>
+          <Checkbox
+            id="autoAnalyzeLyrics"
+            isChecked={autoAnalyzeLyrics}
+            checkedStateUpdateFunction={(state) => {
+              setAutoAnalyzeLyrics(state);
+              storage.preferences.setPreferences('autoAnalyzeLyrics', state);
+            }}
+            labelContent={t('settingsPage.autoAnalyzeLyrics')}
           />
         </li>
       </ul>

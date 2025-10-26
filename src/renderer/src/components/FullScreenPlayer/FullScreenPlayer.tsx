@@ -25,12 +25,12 @@ const FullScreenPlayer = () =>
 
     const [isLyricsVisible, setIsLyricsVisible] = useState(true);
     const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
-    const [isAnalyzeLyrics, setIsAnalyzeLyrics] = useState(false);
+    const [isAnalyzeLyrics, setIsAnalyzeLyrics] = useState(preferences.autoAnalyzeLyrics);
     const [songPos, setSongPos] = useState(0);
     const [isFullLyricsScreen, setIsFullLyricsScreen] = useState(true);
     const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
     const { isMouseActive } = useMouseActiveState(fullScreenPlayerContainerRef, {
-      idleTimeout: 1000,
+      idleTimeout: 3000,
       range: 50,
       idleOnMouseOut: true
     });
@@ -70,16 +70,14 @@ const FullScreenPlayer = () =>
         </div>
         <TitleBar />
         <div
-          className={`flex max-w-full flex-col justify-end ${isMouseActive && 'group/fullScreenPlayer'}` }
+          className={`flex max-w-full flex-col justify-end ${isMouseActive && 'group/fullScreenPlayer'}`}
           ref={fullScreenPlayerContainerRef}
         >
-          <div className={`full-screen-player-main-container grid grid-cols-${isFullLyricsScreen ? '2' : '1'} absolute top-0 h-full !max-h-screen w-full !max-w-full`}>
-            {isFullLyricsScreen&& 
-            <SongInfoContainer 
-              songPos={songPos} 
-              />
-            }
-            
+          <div
+            className={`full-screen-player-main-container grid grid-cols-${isFullLyricsScreen ? '2' : '1'} absolute top-0 h-full !max-h-screen w-full !max-w-full`}
+          >
+            {isFullLyricsScreen && <SongInfoContainer songPos={songPos} />}
+
             <LyricsContainer
               isAnalyzeLyrics={isAnalyzeLyrics}
               isFullLyricsScreen={isFullLyricsScreen}
@@ -98,7 +96,7 @@ const FullScreenPlayer = () =>
             isAnalyzeLyrics={isAnalyzeLyrics}
             setIsAnalyzeLyrics={setIsAnalyzeLyrics}
           />
-          
+
           <SeekBarSlider
             name="full-screen-player-seek-slider"
             id="fullScreenPlayerSeekSlider"
@@ -107,9 +105,7 @@ const FullScreenPlayer = () =>
             className={`full-screen-player-seek-slider absolute h-fit w-full appearance-none bg-background-color-3/25 outline-none outline-1 outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-background-color-3 before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:!outline group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 ${
               isMouseActive && 'peer-hover/songInfoContainer:before:h-3'
             } ${!isCurrentSongPlaying && isLyricsVisible && '!-translate-y-8 !scale-x-95'}`}
-             
           />
-          
         </div>
       </div>
     );

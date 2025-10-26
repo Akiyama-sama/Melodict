@@ -58,10 +58,12 @@ const LyricsContainer = (props: Props) => {
             else if (res?.lyrics.originalLanguage == 'ko')
               setLyrics(await window.api.lyrics.convertLyricsToRomaja());
           }
-          if (isAnalyzeLyrics) {
-            setLyrics(await window.api.lyrics.getAnalyzedLyrics()); 
-          }
           return undefined;
+        })
+        .then(async () => {
+          if (isAnalyzeLyrics) {
+            setLyrics(await window.api.lyrics.getAnalyzedLyrics());
+          }
         })
         .catch((err) => console.error(err));
     }
@@ -132,7 +134,7 @@ const LyricsContainer = (props: Props) => {
       }
     }
     return [];
-  }, [lyrics,isAnalyzeLyrics]);
+  }, [lyrics, isAnalyzeLyrics]);
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
@@ -152,10 +154,9 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-full  select-none flex-col items-start overflow-auto  py-20 transition-[filter] delay-200  ${!isFullLyricsScreen && 'px-20'}`}
+      className={`mini-player-lyrics-container appear-from-bottom w-full select-none flex-col items-start overflow-auto py-20 transition-[filter] delay-200 ${!isFullLyricsScreen && 'px-20'}`}
       id="miniPlayerLyricsContainer"
     >
-     
       {isLyricsVisible && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
         <>
           {lyricsComponents}

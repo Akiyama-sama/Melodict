@@ -265,14 +265,14 @@ declare global {
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
-    analyzedTexts?:AnalyzedLyricLine; //analyzed lyrics data
+    analyzedTexts?: AnalyzedLyricLine; //analyzed lyrics data
   }
-  interface AnalyzedLyricLine{
-    language:string,
-    tokens:AnalyzedGeneralToken[]
-    analysisStatus: 'unanalyzed' | 'pending' | 'analyzed' | 'error'
+  interface AnalyzedLyricLine {
+    language: string;
+    tokens: AnalyzedGeneralToken[];
+    analysisStatus: 'unanalyzed' | 'pending' | 'analyzed' | 'error';
     errorMessage?: string;
-    sourceTextHash:string;
+    sourceTextHash: string;
   }
   type AnalyzedGeneralToken = LyricEnglishToken | LyricJapaneseToken;
   interface LyricToken {
@@ -283,7 +283,7 @@ declare global {
     post: string;
     language: string;
   }
-  
+
   // Holds all the lyrics data, whether synced or unsynced
   interface LyricsData {
     isSynced: boolean;
@@ -459,6 +459,7 @@ declare global {
       saveLyricsInLrcFilesForSupportedSongs: boolean;
       enableDiscordRPC: boolean;
       saveVerboseLogs: boolean;
+      autoAnalyzeLyrics: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -534,6 +535,7 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
+    autoAnalyzeLyrics: boolean;
   }
 
   interface CurrentSong {
