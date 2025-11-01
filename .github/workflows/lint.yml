@@ -24,10 +24,13 @@ jobs:
         with:
           node-version: 20
           check-latest: true
+          cache: 'pnpm'
 
-      # ESLint and Prettier must be in `package.json`
-      - name: Install Node.js dependencies
-        run: npm ci
+      - name: Install pnpm and dependencies
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: true
 
       - name: Run linters
         uses: wearerequired/lint-action@v2

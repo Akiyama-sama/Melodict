@@ -15,9 +15,13 @@ jobs:
         with:
           node-version: 20
           check-latest: true
+          cache: 'pnpm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install pnpm and dependencies
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: true
 
       - name: Run Jest tests
         run: npm run test
