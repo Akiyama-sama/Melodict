@@ -411,7 +411,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     lyricsAutomaticallySaveState: 'NONE',
     showTrackNumberAsSongIndex: true,
     allowToPreventScreenSleeping: true,
-    enableImageBasedDynamicThemes: false,
+    enableImageBasedDynamicThemes: true,
     doNotShowHelpPageOnLyricsEditorStartUp: false,
     autoTranslateLyrics: false,
     autoConvertLyrics: false,
@@ -465,7 +465,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
 };
 
 export const USER_DATA_TEMPLATE: UserData = {
-  language: 'en',
+  language: 'zh',
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {

@@ -31,7 +31,7 @@ const requiredItemsForImport = [
 const optionalItemsForImport = ['localStorageData.json', 'blacklist.json', 'listening_data.json'];
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
-  title: `Select a Destination where you saved Nora's Exported App Data`,
+  title: `Select a Destination where you saved Melodict's Exported App Data`,
   buttonLabel: 'Select Destination',
   properties: ['openDirectory', 'createDirectory']
 };

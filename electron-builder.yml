@@ -1,31 +1,37 @@
-appId: com.sandakannipunajith.nora
-productName: Nora
-executableName: Nora
-copyright: Copyright © 2024 Sandakan Nipunajith
+appId: com.akiyama.melodict
+productName: Melodict
+executableName: Melodict
+copyright: Copyright © 2025 Akiyama-sama
 icon: ./build/icon.ico
 artifactName: '${productName} v${version}-${os}-${arch}.${ext}'
 
 extraMetadata:
-  description: Nora
+  description: Melodict
 
 directories:
   buildResources: build
 
+extraResources:
+  - from: resources/phrases
+    to: phrases
+  - from: resources/dictionaries
+    to: dictionaries
+  - from: node_modules/@sglkc/kuromoji/dict
+    to: kuromoji-dict
 files:
+  - out/**/*
   - '!**/.vscode/*'
   - '!src/*'
+  - '!resources/**/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-  - '!**/resources/other/*'
-  - '!**/resources/installer_assets/*'
-  - '!**/resources/other/*'
-
 asarUnpack:
-  - resources/**
   - node_modules/sharp/**/*
   - node_modules/@img/**/*
+  - node_modules/@sglkc/kuromoji/**/*
+  - node_modules/better-sqlite3/**/*
 
 fileAssociations:
   - ext: mp3
@@ -62,12 +68,12 @@ fileAssociations:
     role: Editor
 
 win:
-  executableName: Nora
+  executableName: Melodict
   target:
     - target: nsis
       arch:
         - x64
-        - arm64
+        #- arm64
 
 nsis:
   shortcutName: '${productName}'
@@ -75,7 +81,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   installerIcon: ./build/icon.ico
-  installerSidebar: ./build/installer_assets/sidebar.bmp
+  #installerSidebar: ./build/installer_assets/sidebar.bmp
   license: ./LICENSE.txt
   oneClick: false
   perMachine: false
@@ -113,6 +119,6 @@ linux:
 npmRebuild: true
 
 protocols:
-  name: nora-protocol
+  name: melodict-protocol
   schemes:
-    - nora
+    - melodict

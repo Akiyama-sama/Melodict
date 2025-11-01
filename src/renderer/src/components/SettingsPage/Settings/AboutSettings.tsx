@@ -66,7 +66,7 @@ const AboutSettings = () => {
           <div className="flex items-center">
             <Img src={AppIcon} className="aspect-square max-h-12 rounded-md shadow-md" alt="" />
             <div className="ml-4 flex flex-col">
-              <span className="block">Nora</span>
+              <span className="block">Melodict</span>
               <span className="text-sm font-light">
                 v{version}{' '}
                 {elapsed && (
@@ -97,7 +97,7 @@ const AboutSettings = () => {
             </div>
           </div>
           <div className="flex items-center justify-center gap-6">
-            <Button
+            {/*<Button
               className="about-link !mr-0 block w-fit cursor-pointer !rounded-none !border-0 bg-transparent !p-0 leading-[0] opacity-70 outline-1 outline-offset-2 transition-opacity hover:bg-transparent hover:opacity-100 focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
               iconName="language"
               iconClassName="!text-2xl !leading-none"
@@ -129,7 +129,7 @@ const AboutSettings = () => {
                 )
               }
               tabIndex={0}
-            />
+            />*/}
             <Img
               src={isDarkMode ? GithubLightIcon : GithubDarkIcon}
               className="w-6 cursor-pointer !opacity-70 !transition-opacity hover:!opacity-100"
@@ -152,15 +152,15 @@ const AboutSettings = () => {
         <div className="mb-4 flex items-center gap-4">
           <img
             alt="GitHub all releases"
-            src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads"
+            src="https://img.shields.io/github/downloads/Akiyama-sama/Melodict/total?label=all%20time%20downloads"
           />
           <img
             alt="GitHub release (latest by date)"
-            src={`https://img.shields.io/github/downloads/Sandakan/Nora/v${version}/total`}
+            src={`https://img.shields.io/github/downloads/Akiyama-sama/Melodict/v${version}/total`}
           />
           <Hyperlink
             linkTitle={t('settingsPage.noraGithubIssues')}
-            link="https://github.com/Sandakan/Nora/issues"
+            link="https://github.com/Akiyama-sama/Melodict/issues"
           >
             <img
               alt="GitHub issues"
@@ -168,7 +168,7 @@ const AboutSettings = () => {
             />
           </Hyperlink>
 
-          <Hyperlink
+          {/*<Hyperlink
             linkTitle={t('settingsPage.noraLocalizationStatus')}
             link="https://crowdin.com/project/nora"
           >
@@ -176,7 +176,7 @@ const AboutSettings = () => {
               src="https://badges.crowdin.net/nora/localized.svg"
               alt={t('settingsPage.noraLocalizationStatus')}
             />
-          </Hyperlink>
+          </Hyperlink>*/}
         </div>
         <ul className="mb-4 list-disc pl-4 text-sm">
           <li>{t('settingsPage.noraDescription')}</li>
@@ -187,7 +187,7 @@ const AboutSettings = () => {
                 Hyperlink: (
                   <Hyperlink
                     linkTitle={t('settingsPage.otoMusicOnPlayStore')}
-                    link="https://play.google.com/store/apps/details?id=com.piyush.music"
+                    link="https://github.com/Sandakan/Nora"
                   />
                 )
               }}
@@ -386,7 +386,7 @@ const AboutSettings = () => {
               components={{
                 Hyperlink: (
                   <Hyperlink
-                    link={`${bugs.url}/new/choose`}
+                    link={`${bugs.url}`}
                     linkTitle={t('settingsPage.createIssueOnNoraGithubRepo')}
                   />
                 )
@@ -395,7 +395,7 @@ const AboutSettings = () => {
           </div>
           <Hyperlink
             label={t('settingsPage.emailContact')}
-            link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
+            link="mailto:lichengyu2005119@gmail.com?subject=Regarding Nora&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
             linkTitle={t('settingsPage.emailContact')}
             noValidityCheck
           />
@@ -410,7 +410,7 @@ const AboutSettings = () => {
                 Hyperlink: (
                   <Hyperlink
                     link={author.url}
-                    linkTitle={t('settingsPage.sandakanGithubProfile')}
+                    linkTitle={t('settingsPage.akiyamaGithubProfile')}
                     className="mr-1"
                   />
                 )
@@ -421,12 +421,12 @@ const AboutSettings = () => {
             <Hyperlink
               label={
                 <>
-                  #VisitSriLanka{' '}
+                  #VisitChongqing{' '}
                   <Img src={SLFlag} alt="" className="ml-1 inline w-[24px] hover:underline" />
                 </>
               }
-              link="https://www.google.com/search?q=beautiful+sri+lanka"
-              linkTitle={t('settingsPage.beautifulSriLanka')}
+              link="https://maps.app.goo.gl/j1v5wiph6Mw9ns7RA"
+              linkTitle={t('settingsPage.beautifulChongqing')}
             />
           </div>
         </div>

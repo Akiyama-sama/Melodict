@@ -92,7 +92,7 @@ import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
-import  getAnalyzedLyrics  from './analyzeLyric/getAnalyzedLyrics';
+import getAnalyzedLyrics from './analyzeLyric/getAnalyzedLyrics';
 import getFilledToken from './analyzeLyric/getFilledToken';
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -208,7 +208,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getTranslatedLyrics(languageCode as string)
     );
     ipcMain.handle('app/getAnalyzedLyrics', () => getAnalyzedLyrics());
-    ipcMain.handle('app/getFilledToken', (_, token:AnalyzedGeneralToken) => getFilledToken(token));
+    ipcMain.handle('app/getFilledToken', (_, token: AnalyzedGeneralToken) => getFilledToken(token));
 
     ipcMain.handle('app/romanizeLyrics', async () => await romanizeLyrics());
 
@@ -422,7 +422,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.on('app/loginToLastFmInBrowser', () =>
       shell.openExternal(
-        `http://www.last.fm/api/auth/?api_key=${import.meta.env.MAIN_VITE_LAST_FM_API_KEY}&cb=nora://auth?service=lastfm`
+        `http://www.last.fm/api/auth/?api_key=${import.meta.env.MAIN_VITE_LAST_FM_API_KEY}&cb=melodict://auth?service=lastfm`
       )
     );
 

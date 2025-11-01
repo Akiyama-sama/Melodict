@@ -52,7 +52,7 @@ const convertLyricsToRomaja = async () => {
     const { title, artist, album, lang, length, offset, copyright } =
       getLrcLyricsMetadata(cachedLyrics);
 
-    lyricsArr.push(`[re:Nora (https://github.com/Sandakan/Nora)]`);
+    lyricsArr.push(`[re:Melodict (https://github.com/Akiyama-sama/Melodict)]`);
     lyricsArr.push(`[ve:${version}]`);
     lyricsArr.push(`[ti:${title}]`);
 

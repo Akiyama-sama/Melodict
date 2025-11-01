@@ -326,7 +326,7 @@
     "enableImageBasedDynamicThemes": "启用动态主题",
     "enableImageBasedDynamicThemesDescription": "根据当前播放歌曲封面的色调动态更改应用主题。",
     "language": "语言",
-    "languageDescription": "选择您希望 Nora 显示的语言。",
+    "languageDescription": "选择您希望 Melodict 显示的语言。",
     "audioPlayback": "音频播放",
     "showRemainingSongDuration": "显示歌曲剩余时长",
     "showRemainingSongDurationDescription": "显示歌曲的剩余时长，而非默认的总时长。",
@@ -337,7 +337,7 @@
     "second": "秒",
     "second_other": "秒",
     "accounts": "账户",
-    "integrateLastFm": "将 Last.fm 与 Nora 集成。",
+    "integrateLastFm": "将 Last.fm 与 Melodict 集成。",
     "lastFmLogo": "Last.fm 图标",
     "lastFmConnected": "Last.fm 已连接",
     "lastFmNotConnected": "Last.fm 未连接",
@@ -354,7 +354,7 @@
     "sendFavoritesToLastFm": "发送收藏数据",
     "sendNowPlayingToLastFmDescription": "当您开始播放歌曲时，自动将当前播放歌曲数据发送到 Last.fm。",
     "sendNowPlayingToLastFm": "发送当前播放歌曲数据",
-    "enableDiscordRpcDescription": "将 Discord Rich Presence 与 Nora 集成。",
+    "enableDiscordRpcDescription": "将 Discord Rich Presence 与 Melodict 集成。",
     "enableDiscordRpc": "启用 Discord Rich Presence",
     "doNotSaveLyricsAutomatically": "不自动保存歌词",
     "syncedLyricsOnly": "仅同步歌词 (LRC)",
@@ -371,7 +371,7 @@
     "saveLyricsInLrcFiles": "为支持内嵌歌词的歌曲额外保存LRC文件",
     "autoTranslateLyricsDescription": "启用后，系统将自动把歌词翻译为您所选的语言。值得注意的是，即便歌词原文与所选的目标语言相同，翻译过程仍会启动",
     "autoTranslateLyrics": "自动翻译歌词",
-    "autoConvertLyricsDescription": "启用后，可自动将受支持语言的歌词转换为拉丁字母。目前，Nora 支持将日语歌词转换为罗马音（Romaji），中文歌词转换为汉语拼音（Pinyin），以及韩语歌词转换为罗马字标记法（Romaja）",
+    "autoConvertLyricsDescription": "启用后，可自动将受支持语言的歌词转换为拉丁字母。目前，Melodict 支持将日语歌词转换为罗马音（Romaji），中文歌词转换为汉语拼音（Pinyin），以及韩语歌词转换为罗马字标记法（Romaja）",
     "autoConvertLyrics": "自动转换歌词",
     "autoAnalyzeLyricsDescription": "启用后，系统将自动分析歌词，将其分词化(Tokenizer)",
     "autoAnalyzeLyrics": "自动分析歌词",
@@ -400,17 +400,17 @@
     "performance": "性能",
     "removeAnimationOnBatteryDescription": "当您的设备使用电池供电时，自动移除应用内的动画效果，以帮助延长电池续航时间。",
     "removeAnimationOnBattery": "电池供电时禁用动画",
-    "allowToPreventScreenSleepingDescription": "允许 Nora 在某些无用户操作的场景下（例如全屏显示歌词时）阻止屏幕自动休眠，以确保内容持续显示",
+    "allowToPreventScreenSleepingDescription": "允许 Melodict 在某些无用户操作的场景下（例如全屏显示歌词时）阻止屏幕自动休眠，以确保内容持续显示",
     "allowToPreventScreenSleeping": "允许应用阻止屏幕休眠",
     "startupAndWindowCustomization": "启动和窗口设置",
-    "autoLaunchAtStartDescription": "启用后，Nora 将在您登录电脑时自动启动运行。",
+    "autoLaunchAtStartDescription": "启用后，Melodict 将在您登录电脑时自动启动运行。",
     "autoLaunchAtStart": "开机自启动",
-    "hideWindowAtStartDescription": "设置 Nora 启动后主窗口的初始状态，例如是直接显示还是在后台静默启动。",
+    "hideWindowAtStartDescription": "设置 Melodict 启动后主窗口的初始状态，例如是直接显示还是在后台静默启动。",
     "hideWindowAtStart": "启动后最小化到系统托盘",
-    "hideWindowOnCloseDescription": "配置当您点击关闭按钮时 Nora 的行为。",
+    "hideWindowOnCloseDescription": "配置当您点击关闭按钮时 Melodict 的行为。",
     "hideWindowOnClose": "点击关闭按钮时最小化到托盘",
     "storage": "存储空间",
-    "storageDescription": "查看 Nora 如何管理您的音乐库并利用您的存储空间。",
+    "storageDescription": "查看 Melodict 如何管理您的音乐库并利用您的存储空间。",
     "fullStorageSpace": "总存储空间使用情况",
     "fullStorageOutOfUsage": "{{total}} 中的 {{value}}",
     "freeSpace": "可用空间",
@@ -432,20 +432,20 @@
     "generateStorageMetrics": "生成存储空间使用报告",
     "generateStorageMetricsAgain": "重新生成存储空间使用报告",
     "noStorageMetrics": "看来您还没有生成存储空间使用报告。",
-    "storageMetricsGenerationDisclaimer": "生成存储空间使用报告是一项计算需求较高的任务，这意味着 Nora 可能会暂时无响应。请耐心等待...",
+    "storageMetricsGenerationDisclaimer": "生成存储空间使用报告是一项计算需求较高的任务，这意味着 Melodict 可能会暂时无响应。请耐心等待...",
     "storageMetricsGenerationError": "我们这边似乎出了点问题。请向开发者报告此问题。",
     "advanced": "高级",
     "saveVerboseLogsDescription": "保存详细日志用于调试目的。这将增加日志文件的大小。",
     "saveVerboseLogs": "保存详细日志",
     "about": "关于",
     "releasedOn": "发布于 {{val, datetime}}",
-    "noraWebsite": "Nora 官方网站",
-    "noraDiscordServer": "Nora 官方 Discord 服务器",
-    "noraGithubRepo": "Nora Github 仓库",
-    "noraGithubIssues": "Nora Github 问题反馈",
-    "noraLocalizationStatus": "Nora 本地化状态",
-    "noraDescription": "Nora 是一款使用 Electron 和 React 构建的优雅音乐播放器。",
-    "noraInspiration": "灵感来源于 Piyush Mamidwar 的 <Hyperlink>Oto Music for Android</Hyperlink>。",
+    "noraWebsite": "Melodict 官方网站",
+    "noraDiscordServer": "Melodict 官方 Discord 服务器",
+    "noraGithubRepo": "Melodict Github 仓库",
+    "noraGithubIssues": "Melodict Github 问题反馈",
+    "noraLocalizationStatus": "Melodict 本地化状态",
+    "noraDescription": "Melodict 是一款使用 Electron 和 React 构建的优雅音乐播放器。",
+    "noraInspiration": "灵感来源于 Sandakan 的 <Hyperlink>Nora</Hyperlink>。",
     "otoMusicOnPlayStore": "Google Play 商店中的 Oto Music for Android",
     "noraLicenseNotice": "本产品根据 <Button>MIT 许可证</Button> 授权。",
     "appLicense": "应用许可证",
@@ -467,9 +467,9 @@
     "createIssueOnNoraGithubRepo": "在 $t(settingsPage.noraGithubRepo) 上提交问题",
     "contact": "如果您对应用有任何关于 Bug、功能请求等反馈，请<Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>。",
     "emailContact": "或通过我的电子邮件联系我。",
-    "loveNora": "由 <Hyperlink>Sandakan Nipunajith</Hyperlink> 用 <span>❤</span> 精心制作。",
-    "sandakanGithubProfile": "Sandakan 的 Github 个人资料",
-    "beautifulSriLanka": "美丽的斯里兰卡"
+    "loveNora": "由 <Hyperlink>Akiyama</Hyperlink> 用 <span>❤</span> 精心制作。",
+    "akiyamaGithubProfile": "Akiyama 的 Github 个人资料",
+    "beautifulChongqing": "美丽的重庆"
   },
   "artistInfoPage": {
     "likeArtist": "喜欢 {{name}}",
@@ -577,7 +577,7 @@
     "updateAddedToBeSavedLater": "当前播放歌曲的元数据更新将在歌曲播放完毕后保存。",
     "pendingUpdateAvailable": "此歌曲有一个待保存的元数据更新。",
     "saveTagsNotSupportedTitle": "不支持",
-    "saveTagsNotSupportedDescription": "<P1>Nora 当前不支持编辑 <Format/> 格式的歌曲元数据。</P1><P2>目前仅支持 <SupportedFormat/> 格式。",
+    "saveTagsNotSupportedDescription": "<P1>Melodict 当前不支持编辑 <Format/> 格式的歌曲元数据。</P1><P2>目前仅支持 <SupportedFormat/> 格式。",
     "albumArtistNotMentioned": "歌曲已属于名为“{{title}}”的专辑，但其艺人“{{artists}}”未被指定为此歌曲的专辑艺人。",
     "songAlbumArtistMismatch": "选定的专辑艺人“{{albumArtists}}”与选定专辑“{{albumTitle}}”的艺人“{{songAlbumArtists}}”不匹配。",
     "searchForArtists": "在此搜索艺人",
@@ -681,7 +681,7 @@
   "resetAppConfirmationPrompt": {
     "confirmAppReset": "确认重置应用",
     "message": "重置应用将移除所有用户数据，包括与歌曲、收藏夹、偏好设置、已应用设置等相关的数据，但不会删除歌曲文件本身。请注意，此操作<span>不可撤销</span>。",
-    "restartAfterReset": "Nora 将在重置完成后重启。",
+    "restartAfterReset": "Melodict 将在重置完成后重启。",
     "systemPlaylistsRemovalProhibited": "系统默认歌单（如“历史记录”、“收藏夹”等）无法被移除。"
   },
   "addSongsToPlaylistsPrompt": {
@@ -734,7 +734,7 @@
     "removeFolder": "移除文件夹"
   },
   "lyricsEditorHelpPrompt": {
-    "title": "Nora 歌词编辑器使用指南",
+    "title": "Melodict 歌词编辑器使用指南",
     "subTitle1": "如何开始使用编辑器？",
     "subTitle1Message": " <ol><li>请先播放您希望编辑歌词的目标歌曲。（提示：若当前播放的并非目标歌曲，应用将限制对歌词元数据的修改，以防出错。）</li><li>单击编辑器页面任意空白区域，确保页面已获取操作焦点。（提示：页面焦点是保证相关快捷键正常响应的必要条件。）</li><li>从歌曲起始处开始播放。若希望对播放过程有更精细的把控，建议将歌曲设置为单曲循环模式。</li><li>当歌曲人声与某行歌词同步时，立即按下 <ShortcutButton>$t(appShortcutsPrompt.enterKey)</ShortcutButton> 键。此时，编辑器将自动高亮下一行歌词，并将当前播放时间记录为该高亮歌词的起始时间标签。</li><li>重复以上步骤，直至歌曲最后一行歌词编辑完毕。</li></ol>",
     "subTitle2": "歌词编辑器支持哪些快捷键？",
@@ -748,7 +748,7 @@
     "saveEditedLyrics": "保存编辑后的歌词",
     "copyLyrics": "复制歌词",
     "saveLyricsToSong": "将歌词保存到歌曲文件",
-    "saveLyricsNotSupported": "Nora 当前不支持为 “{{format}}” 音频格式的歌曲内嵌歌词。",
+    "saveLyricsNotSupported": "Melodict 当前不支持为 “{{format}}” 音频格式的歌曲内嵌歌词。",
     "saveLyricsFormatInfo": "* 歌词将以 <Hyperlink>LRC 格式</Hyperlink>（外部文件）保存。",
     "readAboutLrcFormat": "进一步了解 LRC 歌词格式"
   },
@@ -768,7 +768,7 @@
     "outdatedChangelogNotice": "您可能正在查看过时的更新日志。",
     "versionCheckError": "<br/><span>检查新更新失败。我们这边出了一些问题。<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
     "versionCheckNetworkError": "<br/><span> 我们无法检查新更新。请检查您的网络连接并重试。<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
-    "noraReleases": "Nora 发行版本",
+    "noraReleases": "Melodict 发行版本",
     "changelog": "更新日志",
     "doNotRemindThisVersionUpdate": "不再提醒我关于此应用版本的信息。",
     "current": "当前版本",
@@ -833,16 +833,16 @@
   },
   "clearLocalStoragePrompt": {
     "title": "确认清除本地存储数据",
-    "description": "此过程将清除 Nora 中任何已损坏的本地存储数据，并将其恢复到默认设置。",
-    "effect": "<p>继续此操作将影响以下数据：</p><ul><li>Nora 中的大多数偏好设置</li><li>播放设置，例如当前播放的歌曲、音量等。</li><li>当前队列数据</li><li>已忽略的建议数据，例如推荐艺人、独立艺人和重复项</li><li>页面排序数据</li><li>均衡器数据</li><li>歌词编辑器设置</li></ul>",
-    "restartNotice": "此过程完成后，Nora 将重新启动。"
+    "description": "此过程将清除 Melodict 中任何已损坏的本地存储数据，并将其恢复到默认设置。",
+    "effect": "<p>继续此操作将影响以下数据：</p><ul><li>Melodict 中的大多数偏好设置</li><li>播放设置，例如当前播放的歌曲、音量等。</li><li>当前队列数据</li><li>已忽略的建议数据，例如推荐艺人、独立艺人和重复项</li><li>页面排序数据</li><li>均衡器数据</li><li>歌词编辑器设置</li></ul>",
+    "restartNotice": "此过程完成后，Melodict 将重新启动。"
   },
   "musixmatchDisclaimerPrompt": {
     "title": "免责声明 - Musixmatch 歌词",
-    "message": "<li> Musixmatch 歌词作为一项评估功能添加到本软件中，可能随时被移除。</li><li>Nora 与 Musixmatch 歌词或其任何关联公司或子公司没有任何关联、授权、维护、赞助或认可关系。</li><li>本应用程序的维护者呼吁用户本着个人责任公平使用此功能，遵守 Musixmatch 歌词实施的版权规定，按其预期方式使用。</li>",
+    "message": "<li> Musixmatch 歌词作为一项评估功能添加到本软件中，可能随时被移除。</li><li>Melodict 与 Musixmatch 歌词或其任何关联公司或子公司没有任何关联、授权、维护、赞助或认可关系。</li><li>本应用程序的维护者呼吁用户本着个人责任公平使用此功能，遵守 Musixmatch 歌词实施的版权规定，按其预期方式使用。</li>",
     "implementationNotice": "实现来自 Fashni 的 <Hyperlink/>。",
     "hyperlinkTitle": "MxLRC Github 仓库",
-    "contactAboutComplaints": "如果您有任何投诉，可以通过 Nora Discord 服务器或我的<Hyperlink>电子邮件</Hyperlink>与我联系。"
+    "contactAboutComplaints": "如果您有任何投诉，可以通过 Melodict Discord 服务器或我的<Hyperlink>电子邮件</Hyperlink>与我联系。"
   },
   "musixmatchSettingsPrompt": {
     "title": "Musixmatch 设置",
@@ -854,7 +854,7 @@
     "tokenUpdateFailed": "更新令牌失败。",
     "tokenMissingCharacters": "令牌 (TOKEN) 应为包含 54 个字符的字符串。（还需 {{count}} 个字符）。",
     "tokenIncorrectCharacters": "令牌 (TOKEN) 应仅包含字母数字字符。",
-    "savedTokenAvailableMessage": "<Title><span/> 已保存可用令牌。</Title><p> Nora 中已有用户保存的有效 Musixmatch 令牌。</p> <p> 仅当服务无法正常工作时，您才需要更改令牌。</p>"
+    "savedTokenAvailableMessage": "<Title><span/> 已保存可用令牌。</Title><p> Melodict 中已有用户保存的有效 Musixmatch 令牌。</p> <p> 仅当服务无法正常工作时，您才需要更改令牌。</p>"
   },
   "customizeSelectedMetadataPrompt": {
     "selected": "已选择",
@@ -1002,7 +1002,7 @@
     "SONG_REPARSE_FAILED": "重新解析歌曲时发生错误。"
   },
   "discordrpc": {
-    "noraOnGitHub": "Nora 在 GitHub 上",
+    "noraOnGitHub": "Melodict 在 GitHub 上",
     "untitledSong": "无标题歌曲",
     "unknownArtist": "未知艺人",
     "playingASong": "正在播放歌曲"

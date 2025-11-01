@@ -45,7 +45,7 @@ const parseLrclibResponseData = (
   if ('statusCode' in data) return undefined;
 
   const lyricsArr: string[] = [];
-  lyricsArr.push(`[re:Nora (https://github.com/Sandakan/Nora)]`);
+  lyricsArr.push(`[re:Melodict (https://github.com/Akiyama-sama/Melodict)]`);
   lyricsArr.push(`[ve:${version}]`);
   lyricsArr.push(`[ti:${data.trackName}]`);
   lyricsArr.push(`[ar:${data.artistName}]`);
@@ -82,7 +82,7 @@ const fetchLyricsFromLrclib = async (
   abortSignal?: AbortSignal
 ): Promise<ParsedLrclibLyrics | undefined> => {
   const headers = new Headers();
-  headers.append('User-Agent', `Nora ${version} (${repository.url})`);
+  headers.append('User-Agent', `Melodict ${version} (${repository.url})`);
 
   const url = new URL('/api/get', LRCLIB_BASE_URL);
 

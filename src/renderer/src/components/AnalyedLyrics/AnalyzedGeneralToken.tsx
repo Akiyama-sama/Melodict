@@ -25,10 +25,13 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
       japaneseToken.hiragana == japaneseToken.text ? ' ' : japaneseToken.hiragana;
     return (
       <div className="japanese-token flex flex-col">
-        <div className="mb-1 h-7 text-center text-2xl hover:no-underline">{hiraganaText}</div>
-        <div className="flex">
+        <div className="mb-1 mt-0 h-7 text-center text-2xl">{hiraganaText}</div>
+
+        <div className="flex group-hover:underline">
           {pre && <span>{pre}</span>}
+
           <span>{text}</span>
+
           {post && <span>{post}</span>}
         </div>
       </div>
@@ -37,7 +40,8 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
 
   const englishTokenText = useMemo(() => {
     if (language !== 'en') return undefined;
-    return <span className="english-token">{pre + text + post}</span>;
+
+    return <span className="english-token group-hover:underline">{pre + text + post}</span>;
   }, [language, pre, text, post]);
 
   const tokenText = japaneseTokenText || englishTokenText;
@@ -47,40 +51,29 @@ export const AnalyzedGeneralToken = (props: propTypes) => {
 
   return (
     <>
-      {/*<span
-        //ref={tokenRef}
-        role="button"
-        popoverTarget="message-card"
-        tabIndex={0}
-        className={`analyzed-general-token relative z-10 inline-block opacity-100 hover:underline focus:outline-none ${language == 'ja' ? 'mr-2' : 'mr-8'} `}
-        style={{
-          color: isVerb ? paletteData?.DarkVibrant?.hex : ''
-        }}
-      >
-        {tokenText}
-      </span>*/}
-
       <Popover>
-        <PopoverTrigger onClick={(e) => e.stopPropagation()}>
-          <span
+        <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+          <div
             //ref={tokenRef}
+
             role="button"
             popoverTarget="message-card"
             tabIndex={0}
-            className={`analyzed-general-token relative inline-block hover:underline focus:outline-none ${language == 'ja' ? 'mr-2' : 'mr-8'} `}
+            className={`analyzed-general-token group relative inline-block focus:outline-none ${language == 'ja' ? 'mr-2' : 'mr-8'} `}
             style={{
               color: isVerb ? paletteData?.Vibrant?.hex : ''
             }}
           >
             {tokenText}
-          </span>
+          </div>
         </PopoverTrigger>
+
         <PopoverPortal>
           <PopoverContent
             side="bottom"
             avoidCollisions={true}
             collisionPadding={10}
-            sticky="always"
+            sticky="partial"
           >
             <GeneralTokenCard token={token} paletteData={paletteData} />
           </PopoverContent>

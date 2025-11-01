@@ -216,7 +216,7 @@ const lyrics = {
   getAnalyzedLyrics: (): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/getAnalyzedLyrics'),
 
-  getFilledToken: (token:AnalyzedGeneralToken): Promise<AnalyzedGeneralToken | undefined> =>
+  getFilledToken: (token: AnalyzedGeneralToken): Promise<AnalyzedGeneralToken | undefined> =>
     ipcRenderer.invoke('app/getFilledToken', token),
 
   romanizeLyrics: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/romanizeLyrics'),
@@ -466,7 +466,7 @@ const utils = {
     return base;
   },
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {
-    return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm, '');
+    return filePath.replace(/melodict:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm, '');
   }
 };
 

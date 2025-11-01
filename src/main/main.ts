@@ -55,7 +55,7 @@ import roundTo from '../common/roundTo';
 import { createReadStream, existsSync, statSync } from 'fs';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
-const DEFAULT_APP_PROTOCOL = 'nora';
+const DEFAULT_APP_PROTOCOL = 'melodict';
 
 const MAIN_WINDOW_MIN_SIZE_X = 700;
 const MAIN_WINDOW_MIN_SIZE_Y = 500;
@@ -133,7 +133,7 @@ const APP_INFO = {
   }
 };
 
-logger.debug(`Starting up Nora`, { APP_INFO });
+logger.debug(`Starting up Melodict`, { APP_INFO });
 
 const installExtensions = async () => {
   try {
@@ -166,7 +166,7 @@ const createWindow = async () => {
     height: 700,
     minHeight: 500,
     minWidth: 700,
-    title: 'Nora',
+    title: 'Melodict',
     webPreferences: {
       zoomFactor: 0.9,
       preload: path.resolve(import.meta.dirname, '../preload/index.mjs')
@@ -206,7 +206,7 @@ const createWindow = async () => {
 
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: 'nora',
+    scheme: 'melodict',
     privileges: {
       standard: true,
       secure: true,
@@ -237,12 +237,12 @@ app
     }
 
     // protocol.registerFileProtocol('nora', registerFileProtocol);
-    protocol.handle('nora', handleFileProtocol);
+    protocol.handle('melodict', handleFileProtocol);
 
     tray = new Tray(appIcon);
     const trayContextMenu = Menu.buildFromTemplate([
       {
-        label: 'Show/Hide Nora',
+        label: 'Show/Hide Melodict',
         type: 'normal',
         click: () => (mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()),
         role: 'hide'
@@ -252,7 +252,7 @@ app
     ]);
 
     tray.setContextMenu(trayContextMenu);
-    tray.setToolTip('Nora');
+    tray.setToolTip('Melodict');
 
     tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
     tray.addListener('double-click', () => {
@@ -358,7 +358,7 @@ function handleBeforeQuit() {
     clearTempArtworkFolder();
     clearDiscordRpcActivity();
     mainWindow.webContents.send('app/beforeQuitEvent');
-    logger.debug(`Quiting Nora`, { uptime: `${Math.floor(process.uptime())} seconds` });
+    logger.debug(`Quiting Melodict`, { uptime: `${Math.floor(process.uptime())} seconds` });
   } catch (error) {
     logger.error('Error occurred when quiting the app.', { error });
   }
@@ -417,7 +417,7 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
 
 // function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
 //   const urlWithQueries = decodeURI(request.url).replace(
-//     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+//     /melodcit:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
 //     ''
 //   );
 
@@ -433,12 +433,12 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
 const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
   try {
     const urlWithQueries = decodeURI(request.url).replace(
-      /(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
+      /(melodict:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
       ''
     );
     const [filePath] = urlWithQueries.split('?');
 
-    // logger.verbose('Serving file from nora://', { filePath });
+    // logger.verbose('Serving file from melodict://', { filePath });
 
     if (!existsSync(filePath)) {
       logger.error(`File not found: ${filePath}`);
@@ -482,7 +482,7 @@ const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalRespons
 
 // const handleFileProtocol = async (req: GlobalRequest) => {
 //   try {
-//     logger.debug('Serving file from nora://', { url: req.url });
+//     logger.debug('Serving file from melodict://', { url: req.url });
 //     const { pathname } = new URL(req.url);
 //     const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
 
@@ -579,7 +579,7 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
 
 function manageSecondInstanceArgs(args: string[]) {
   for (const arg of args) {
-    if (arg.includes('nora://auth')) return manageAuthServices(arg);
+    if (arg.includes('melodict://auth')) return manageAuthServices(arg);
   }
   return undefined;
 }
@@ -803,7 +803,7 @@ export async function toggleAutoLaunch(autoLaunchState: boolean) {
 
   app.setLoginItemSettings({
     openAtLogin: autoLaunchState,
-    name: 'Nora',
+    name: 'Melodict',
     openAsHidden
   });
 

@@ -178,7 +178,7 @@ export const getPlaylistArtworkPath = (
 
 export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
   const strippedPath = filePath.replaceAll(
-    /nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
+    /melodict:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
     ''
   );
 

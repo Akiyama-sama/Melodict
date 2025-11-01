@@ -60,10 +60,13 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
       const { unsynchronisedLyrics, synchronisedLyrics } = songData;
       return parseLyricsFromID3Format(synchronisedLyrics, unsynchronisedLyrics);
     }
-    logger.warn(`Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`, {
-      songPath,
-      songExt
-    });
+    logger.warn(
+      `Melodict doesn't support reading lyrics metadata from songs in ${songExt} format.`,
+      {
+        songPath,
+        songExt
+      }
+    );
     // No lyrics found on the audio_source.
     return undefined;
   } catch (error) {

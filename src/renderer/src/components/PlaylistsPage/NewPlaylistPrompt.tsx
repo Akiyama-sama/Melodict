@@ -63,7 +63,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
     <div className="flex flex-col items-center justify-center">
       <div className="img-container relative mb-8 max-w-[50%] rounded-xl">
         <Img
-          src={artworkPath ? `nora://localfiles/${artworkPath}` : PlaylistDefaultCover}
+          src={artworkPath ? `melodict://localfiles/${artworkPath}` : PlaylistDefaultCover}
           alt="Playlist default cover"
           loading="eager"
           className="aspect-square w-full max-w-[15rem] rounded-xl shadow-lg"

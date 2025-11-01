@@ -361,7 +361,7 @@
     "enableImageBasedDynamicThemesDescription": "Thay đổi chủ đề ứng dụng dựa trên chủ đề của ảnh bìa bài hát đang phát",
 
     "language": "Ngôn ngữ",
-    "languageDescription": "Chọn ngôn ngữ bạn muốn Nora hiển thị.",
+    "languageDescription": "Chọn ngôn ngữ bạn muốn Melodict hiển thị.",
 
     "audioPlayback": "Phát lại",
     "showRemainingSongDuration": "Hiện thời gian còn lại",
@@ -374,7 +374,7 @@
     "second_other": "giây",
 
     "accounts": "Tài khoản",
-    "integrateLastFm": "Tích hợp Last.fm với Nora.",
+    "integrateLastFm": "Tích hợp Last.fm với Melodict.",
     "lastFmLogo": "Logo LastFM",
     "lastFmConnected": "Đã kết nối LastFM",
     "lastFmNotConnected": "Chưa kết nối LastFM",
@@ -391,7 +391,7 @@
     "sendFavoritesToLastFm": "Gửi dữ liệu thích",
     "sendNowPlayingToLastFmDescription": "Tự động gửi dữ liệu bài hát hiện tại đến Last.fm khi bạn bắt đầu phát một bài hát.",
     "sendNowPlayingToLastFm": "Gửi dữ liệu bài hát hiện tại",
-    "enableDiscordRpcDescription": "Tích hợp Discord Rich Presence với Nora",
+    "enableDiscordRpcDescription": "Tích hợp Discord Rich Presence với Melodict",
     "enableDiscordRpc": "Kích hoạt Discord Rich Presence",
 
     "doNotSaveLyricsAutomatically": "Không tự động lưu lời bài hát",
@@ -405,11 +405,11 @@
     "musixmatchEnabled": "Musixmatch Lyrics đã được kích hoạt",
     "saveLyricsAutomaticallyDescription": "Chọn một tùy chọn để tự động lưu lời bài hát khi nội dung trang lời bài hát được tải.",
     "saveLyricsAutomaticallyInfo": "Lời bài hát được tải về tự động sẽ được lưu sau khi bài hát hiện tại kết thúc để tránh bất kỳ sự hỏng hóc nào xảy ra.",
-    "saveLyricsInLrcFilesDescription": "Kích hoạt lưu lời bài hát vào tệp LRC cho các bài hát hỗ trợ chỉnh sửa thông tin. Nora sẽ lưu lời bài hát trong tệp LRC nếu tệp bài hát không hỗ trợ chỉnh sửa thông tin.",
+    "saveLyricsInLrcFilesDescription": "Kích hoạt lưu lời bài hát vào tệp LRC cho các bài hát hỗ trợ chỉnh sửa thông tin. Melodict sẽ lưu lời bài hát trong tệp LRC nếu tệp bài hát không hỗ trợ chỉnh sửa thông tin.",
     "saveLyricsInLrcFiles": "Lưu lời bài hát trong tệp LRC cho các bài hát được hỗ trợ",
     "autoTranslateLyricsDescription": "Kích hoạt tự động dịch lời bài hát sang ngôn ngữ bạn chọn. Lời bài hát sẽ được dịch tự động ngay cả khi lời bài hát có cùng ngôn ngữ với ngôn ngữ bạn đã chọn.",
     "autoTranslateLyrics": "Tự động dịch lời bài hát",
-    "autoConvertLyricsDescription": "Kích hoạt tự động chuyển đổi lời bài hát được hỗ trợ sang ký tự Latin. Hiện tại, Nora hỗ trợ chuyển đổi lời bài hát tiếng Nhật sang Romaji, tiếng Trung sang Bính âm và tiếng Hàn sang Romaja.",
+    "autoConvertLyricsDescription": "Kích hoạt tự động chuyển đổi lời bài hát được hỗ trợ sang ký tự Latin. Hiện tại, Melodict hỗ trợ chuyển đổi lời bài hát tiếng Nhật sang Romaji, tiếng Trung sang Bính âm và tiếng Hàn sang Romaja.",
     "autoConvertLyrics": "Tự động chuyển đổi lời bài hát",
     "autoAnalyzeLyricsDescription": "Khi được bật, hệ thống sẽ tự động phân tích lời bài hát và phân tách từ (Tokenizer).",
     "autoAnalyzeLyrics": "Tự động phân tích lời bài hát",
@@ -443,19 +443,19 @@
     "performance": "Hiệu suất",
     "removeAnimationOnBatteryDescription": "Loại bỏ các hiệu ứng động trong ứng dụng khi hệ thống của bạn sử dụng pin.",
     "removeAnimationOnBattery": "Loại bỏ hiệu ứng động khi sử dụng pin.",
-    "allowToPreventScreenSleepingDescription": "Cho phép Nora ngăn màn hình tắt trong các tình huống không có hoạt động người dùng như hiện lời bài hát.",
+    "allowToPreventScreenSleepingDescription": "Cho phép Melodict ngăn màn hình tắt trong các tình huống không có hoạt động người dùng như hiện lời bài hát.",
     "allowToPreventScreenSleeping": "Cho phép ngăn màn hình tắt.",
 
     "startupAndWindowCustomization": "Cài đặt khởi động và Windows",
-    "autoLaunchAtStartDescription": "Bật tùy chọn này sẽ tự động khởi chạy Nora khi bạn đăng nhập vào máy tính của bạn.",
+    "autoLaunchAtStartDescription": "Bật tùy chọn này sẽ tự động khởi chạy Melodict khi bạn đăng nhập vào máy tính của bạn.",
     "autoLaunchAtStart": "Tự động khởi chạy khi bật máy",
-    "hideWindowAtStartDescription": "Cấu hình xem Nora có nên hiện khi khởi động hay không.",
-    "hideWindowAtStart": "Khởi chạy Nora trong khay hệ thống khi khởi động",
-    "hideWindowOnCloseDescription": "Cấu hình cách Nora hoạt động khi bạn nhấp vào nút Đóng.",
-    "hideWindowOnClose": "Ẩn Nora vào khay hệ thống khi nhấp vào nút Đóng.",
+    "hideWindowAtStartDescription": "Cấu hình xem Melodict có nên hiện khi khởi động hay không.",
+    "hideWindowAtStart": "Khởi chạy Melodict trong khay hệ thống khi khởi động",
+    "hideWindowOnCloseDescription": "Cấu hình cách Melodict hoạt động khi bạn nhấp vào nút Đóng.",
+    "hideWindowOnClose": "Ẩn Melodict vào khay hệ thống khi nhấp vào nút Đóng.",
 
     "storage": "Lưu trữ",
-    "storageDescription": "Xem cách Nora quản lý thư viện của bạn và sử dụng bộ nhớ của bạn.",
+    "storageDescription": "Xem cách Melodict quản lý thư viện của bạn và sử dụng bộ nhớ của bạn.",
 
     "fullStorageSpace": "Toàn bộ dung lượng lưu trữ",
     "fullStorageOutOfUsage": "{{value}} trên tổng số {{total}}",
@@ -478,18 +478,18 @@
     "generateStorageMetrics": "Tạo số liệu lưu trữ",
     "generateStorageMetricsAgain": "Tạo lại số liệu lưu trữ",
     "noStorageMetrics": "Có vẻ như không có số liệu lưu trữ nào được tạo.",
-    "storageMetricsGenerationDisclaimer": "Tạo số liệu lưu trữ yêu cầu tính toán tương đối nhiều, Nora có thể tạm thời không phản hồi. Hãy kiên nhẫn...",
+    "storageMetricsGenerationDisclaimer": "Tạo số liệu lưu trữ yêu cầu tính toán tương đối nhiều, Melodict có thể tạm thời không phản hồi. Hãy kiên nhẫn...",
     "storageMetricsGenerationError": "Có vẻ như có gì đó không ổn ở phía chúng tôi. Vui lòng báo cáo vấn đề này với nhà phát triển.",
 
     "about": "Về ứng dụng",
     "releasedOn": "Phát hành vào {{val, datetime}}",
-    "noraWebsite": "Trang web chính thức của Nora",
-    "noraDiscordServer": "Máy chủ Discord chính thức của Nora",
-    "noraGithubRepo": "kho mã nguồn của Nora trên GitHub",
-    "noraGithubIssues": "Trang issue của Nora trên GitHub",
-    "noraLocalizationStatus": "Trạng thái dịch thuật của Nora",
-    "noraDescription": "Nora là một trình phát nhạc thanh lịch được xây dựng bằng Electron và React.",
-    "noraInspiration": "Lấy cảm hứng từ <Hyperlink>Oto Music cho Android</Hyperlink> bởi Piyush Mamidwar.",
+    "noraWebsite": "Trang web chính thức của Melodict",
+    "noraDiscordServer": "Máy chủ Discord chính thức của Melodict",
+    "noraGithubRepo": "kho mã nguồn của Melodict trên GitHub",
+    "noraGithubIssues": "Trang issue của Melodict trên GitHub",
+    "noraLocalizationStatus": "Trạng thái dịch thuật của Melodict",
+    "noraDescription": "Melodict là một trình phát nhạc thanh lịch được xây dựng bằng Electron và React.",
+    "noraInspiration": "Lấy cảm hứng từ <Hyperlink>Nora</Hyperlink> bởi Sandakan.",
     "otoMusicOnPlayStore": "Oto Music trên Cửa hàng Play",
     "noraLicenseNotice": "Sản phẩm này được cấp phép dưới <Button>giấy phép mã nguồn mở MIT.</Button>",
     "appLicense": "Giấy phép ứng dụng",
@@ -512,9 +512,9 @@
     "createIssueOnNoraGithubRepo": "tạo issue mới trong $t(settingsPage.noraGithubRepo)",
     "contact": "Nếu bạn có bất kỳ phản hồi nào liên quan đến lỗi, yêu cầu tính năng mới,... về ứng dụng, vui lòng <Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>",
     "emailContact": "hoặc liên hệ tôi qua email.",
-    "loveNora": "Được tạo ra với tất cả <span>❤</span> của <Hyperlink>Sandakan Nipunajith</Hyperlink>và những người đóng góp.",
-    "sandakanGithubProfile": "Trang cá nhân của Sandakan trên GitHub",
-    "beautifulSriLanka": "Sri Lanka Tuyệt Đẹp"
+    "loveNora": "Được tạo ra với tất cả <span>❤</span> của <Hyperlink>Akiyama</Hyperlink>và những người đóng góp.",
+    "akiyamaGithubProfile": "Trang cá nhân của Akiyama trên GitHub",
+    "beautifulChongqing": "Chongqing Tuyệt Đẹp"
   },
 
   "artistInfoPage": {
@@ -630,7 +630,7 @@
     "updateAddedToBeSavedLater": "Thông tin đã cập nhật của bài hát đang phát sẽ được lưu lại sau khi phát xong.",
     "pendingUpdateAvailable": "Bài hát này có thông tin đã thay đổi đang chờ được lưu.",
     "saveTagsNotSupportedTitle": "Không được hỗ trợ",
-    "saveTagsNotSupportedDescription": "<P1>Hiện tại Nora không hỗ trợ chỉnh sửa thông tin bài hát có định dạng <Format/>.</P1><P2>Hiện tại chỉ định dạng <SupportedFormat/> được hỗ trợ.",
+    "saveTagsNotSupportedDescription": "<P1>Hiện tại Melodict không hỗ trợ chỉnh sửa thông tin bài hát có định dạng <Format/>.</P1><P2>Hiện tại chỉ định dạng <SupportedFormat/> được hỗ trợ.",
     "albumArtistNotMentioned": "Bài hát đã nằm trong album '{{title}}' nhưng nghệ sĩ '{{artists}}' không được chỉ định là nghệ sĩ album của bài hát này.",
     "songAlbumArtistMismatch": "Nghệ sĩ album đã chọn '{{albumArtists}}' không khớp với nghệ sĩ của album '{{albumTitle}}' đã chọn: '{{songAlbumArtists}}'.",
     "searchForArtists": "Tìm kiếm nghệ sĩ ở đây",
@@ -744,7 +744,7 @@
   "resetAppConfirmationPrompt": {
     "confirmAppReset": "Xác nhận đặt lại ứng dụng",
     "message": "Đặt lại ứng dụng sẽ xoá tất cả dữ liệu người dùng, bao gồm dữ liệu về bài hát, trạng thái thích, cấu hình, cài đặt đã áp dụng, v.v.; nhưng KHÔNG bao gồm các bài hát. Hãy nhớ rằng quá trình này <span>KHÔNG THỂ ĐẢO NGƯỢC</span>.",
-    "restartAfterReset": "Nora sẽ khởi động lại sau khi đặt lại.",
+    "restartAfterReset": "Melodict sẽ khởi động lại sau khi đặt lại.",
     "systemPlaylistsRemovalProhibited": "Bạn không thể xoá các danh sách phát như Lịch sử hoặc Đã thích."
   },
 
@@ -805,7 +805,7 @@
   },
 
   "lyricsEditorHelpPrompt": {
-    "title": "Cách sử dụng Trình soạn thảo lời của Nora",
+    "title": "Cách sử dụng Trình soạn thảo lời của Melodict",
     "subTitle1": "Làm thế nào để bắt đầu sử dụng trình soạn thảo?",
     "subTitle1Message": " <ol><li>Phát bài hát bạn muốn chỉnh sửa lời bài hát. (Nếu bạn đang không phát đúng bài, ứng dụng sẽ ngăn không cho phép thêm dữ liệu không chính xác vào các dòng lời bài hát.)</li><li>Click vào khu vực trang để tập trung vào trang. (Tập trung trang là cần thiết để các phím tắt cụ thể của trang hoạt động.)</li><li>Bắt đầu bài hát từ đầu. Nếu bạn muốn có thêm kiểm soát về phát lại, đặt chế độ phát thành lặp lại bài hát hiện tại.</li><li>Khi ca sĩ đang hát một dòng lời bài hát, nhấn <ShortcutButton>$t(appShortcutsPrompt.enterKey)</ShortcutButton> để đánh dấu dòng lời tiếp theo và thêm thời gian hiện tại vào thời gian bắt đầu.</li><li>Tiếp tục cho đến dòng lời cuối cùng.</li></ol>",
     "subTitle2": "Có những phím tắt nào tôi có thể sử dụng trong Trình soạn thảo lời?",
@@ -820,7 +820,7 @@
     "saveEditedLyrics": "Lưu lời đã sửa",
     "copyLyrics": "Sao chép lời",
     "saveLyricsToSong": "Lưu lời vào bài hát",
-    "saveLyricsNotSupported": "Hiện tại, Nora không hỗ trợ lưu lời vào các bài hát trong định dạng âm thanh '{{format}}'.",
+    "saveLyricsNotSupported": "Hiện tại, Melodict không hỗ trợ lưu lời vào các bài hát trong định dạng âm thanh '{{format}}'.",
     "saveLyricsFormatInfo": "* Lời bài hát được lưu dưới <Hyperlink>định dạng LRC</Hyperlink>.",
     "readAboutLrcFormat": "Đọc thêm về định dạng LRC"
   },
@@ -841,7 +841,7 @@
     "outdatedChangelogNotice": "Bạn có thể đang xem nhật ký thay đổi đã lỗi thời.",
     "versionCheckError": "<br/><span>Không thể kiểm tra cập nhật. Có lỗi xảy ra ở phía chúng tôi.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
     "versionCheckNetworkError": "<br/><span>Chúng tôi không thể kiểm tra cập nhật. Kiểm tra lại kết nối mạng của bạn và thử lại.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
-    "noraReleases": "Các bản phát hành của Nora",
+    "noraReleases": "Các bản phát hành của Melodict",
     "changelog": "Nhật ký thay đổi",
     "doNotRemindThisVersionUpdate": "Đừng nhắc tôi về bản cập nhật này của ứng dụng nữa.",
     "current": "Hiện tại",
@@ -915,17 +915,17 @@
 
   "clearLocalStoragePrompt": {
     "title": "Xác nhận xoá dữ liệu lưu trữ cục bộ",
-    "description": "Quá trình này sẽ xoá bất kỳ dữ liệu lưu trữ cục bộ bị hỏng nào trong Nora và đưa nó trở lại cài đặt mặc định.",
-    "effect": "<p>Thực hiện hành động này sẽ ảnh hưởng đến các dữ liệu sau: </p><ul><li>Hầu hết các cài đặt trong Nora</li><li>Các cài đặt phát lại như bài hát đang phát, âm lượng, v.v.</li><li>Dữ liệu hàng đợi hiện tại</li><li>Dữ liệu gợi ý bị bỏ qua như nghệ sĩ nổi bật, phân tách nghệ sĩ và nghệ sĩ bị trùng lặp</li><li>Dữ liệu sắp xếp trang</li><li>Dữ liệu Bộ chỉnh âm</li><li>Cài đặt trình soạn thảo lời</li></ul>",
-    "restartNotice": "Nora sẽ khởi động lại sau quá trình này."
+    "description": "Quá trình này sẽ xoá bất kỳ dữ liệu lưu trữ cục bộ bị hỏng nào trong Melodict và đưa nó trở lại cài đặt mặc định.",
+    "effect": "<p>Thực hiện hành động này sẽ ảnh hưởng đến các dữ liệu sau: </p><ul><li>Hầu hết các cài đặt trong Melodict</li><li>Các cài đặt phát lại như bài hát đang phát, âm lượng, v.v.</li><li>Dữ liệu hàng đợi hiện tại</li><li>Dữ liệu gợi ý bị bỏ qua như nghệ sĩ nổi bật, phân tách nghệ sĩ và nghệ sĩ bị trùng lặp</li><li>Dữ liệu sắp xếp trang</li><li>Dữ liệu Bộ chỉnh âm</li><li>Cài đặt trình soạn thảo lời</li></ul>",
+    "restartNotice": "Melodict sẽ khởi động lại sau quá trình này."
   },
 
   "musixmatchDisclaimerPrompt": {
     "title": "Tuyên bố miễn trừ trách nhiệm - Musixmatch Lyrics",
-    "message": "<li> Musixmatch Lyrics được thêm vào như một tính năng thử nghiệm cho phần mềm này và có thể bị xoá bất kỳ lúc nào.</li><li>Nora không có mối liên kết, được ủy quyền, duy trì, tài trợ hoặc được tài trợ bởi Musixmatch hoặc bất kỳ công ty liên kết hoặc chi nhánh nào của họ.</li><li>Người quản lý và đóng góp của ứng dụng này kêu gọi người dùng có trách nhiệm cá nhân trong việc sử dụng tính năng này một cách công bằng, vì tính năng này được sử dụng theo mục đích tuân thủ bản quyền do Musixmatch thực hiện.</li>",
+    "message": "<li> Musixmatch Lyrics được thêm vào như một tính năng thử nghiệm cho phần mềm này và có thể bị xoá bất kỳ lúc nào.</li><li>Melodict không có mối liên kết, được ủy quyền, duy trì, tài trợ hoặc được tài trợ bởi Musixmatch hoặc bất kỳ công ty liên kết hoặc chi nhánh nào của họ.</li><li>Người quản lý và đóng góp của ứng dụng này kêu gọi người dùng có trách nhiệm cá nhân trong việc sử dụng tính năng này một cách công bằng, vì tính năng này được sử dụng theo mục đích tuân thủ bản quyền do Musixmatch thực hiện.</li>",
     "implementationNotice": "Implementation from Fashni's <Hyperlink/>.",
     "hyperlinkTitle": "Kho lưu trữ GitHub của MxLRC",
-    "contactAboutComplaints": "Nếu bạn có bất kỳ khiếu nại nào, bạn có thể liên hệ với tôi qua máy chủ Discord của Nora, hoặc qua <Hyperlink>email</Hyperlink> của tôi."
+    "contactAboutComplaints": "Nếu bạn có bất kỳ khiếu nại nào, bạn có thể liên hệ với tôi qua máy chủ Discord của Melodict, hoặc qua <Hyperlink>email</Hyperlink> của tôi."
   },
 
   "musixmatchSettingsPrompt": {
@@ -938,7 +938,7 @@
     "tokenUpdateFailed": "Không thể cập nhật token.",
     "tokenMissingCharacters": "TOKEN phải là một chuỗi có 54 ký tự. (Cần thêm {{count}} ký tự).",
     "tokenIncorrectCharacters": "TOKEN chỉ được chứa các ký tự chữ và số.",
-    "savedTokenAvailableMessage": "<Title><span/> Token đã lưu có sẵn.</Title><p> Một token Musixmatch hợp lệ đã được lưu bởi người dùng trong Nora.</p> <p> Bạn chỉ cần thay đổi token nếu dịch vụ không hoạt động đúng.</p>"
+    "savedTokenAvailableMessage": "<Title><span/> Token đã lưu có sẵn.</Title><p> Một token Musixmatch hợp lệ đã được lưu bởi người dùng trong Melodict.</p> <p> Bạn chỉ cần thay đổi token nếu dịch vụ không hoạt động đúng.</p>"
   },
 
   "customizeSelectedMetadataPrompt": {
@@ -1099,7 +1099,7 @@
   },
 
   "discordrpc": {
-    "noraOnGitHub": "Nora trên GitHub",
+    "noraOnGitHub": "Melodict trên GitHub",
     "untitledSong": "Bài hát không tên",
     "unknownArtist": "nghệ sĩ không rõ",
     "playingASong": "Đang phát"

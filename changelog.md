@@ -2,9 +2,33 @@
 
 > [!TIP]
 >
-> ### The latest version, **( v3.1.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v4.0.0-alpha )** contains a lot of new features and improvements. As always expect some bugs in the app.
+
+- ### **v4.0.0-alpha - ( 31<sup>th</sup> of October 2025 )**
+
+- ### 🎉 New Features and Updates
+
+  - 更改项目名称为`Melodict` ，寓意Melody+dictionary，希望通过这项产品帮助用户能在旋律之中无痛的记忆词汇
+  - 支持鼠标侧键后退到上一个路由
+  - 给歌词添加了英语分词，支持检测英语短语
+  - 支持点击查询每个英文分词，类型有：单词、短语、缩略词
+  - 给歌词添加了日语分词，并在汉字与片假名头上添加了平假名
+  - 在设置中添加了一项设置，用户可以手动设置是否打开全屏歌词页面的时候自动开始分词
+  - 添加了界面语言的中文选项
+
+- ### 🔨 Fixes and Improvements
+
+  - 修改FullLyricPage布局，让其左侧为专辑页面，右侧显示歌词
+
+- ### 🚀 Development updates
+
+  - 包管理器由npm迁移到了pnpm
+  - 添加了众多依赖
+
+
 
 <br>
+
 
 ![Nora v3.1.0-stable version artwork](resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
 

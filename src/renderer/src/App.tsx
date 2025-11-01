@@ -360,7 +360,7 @@ export default function App() {
 
   useEffect(() => {
     const displayDefaultTitleBar = () => {
-      document.title = `Nora`;
+      document.title = `Melodict`;
       storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
     };
     const playSongIfPlayable = () => {
@@ -1146,7 +1146,7 @@ export default function App() {
         state: artists,
         assets: {
           large_image: 'nora_logo',
-          //large_text: 'Nora', //Large text will also be displayed as the 3rd line (state) so I skipped it for now
+          //large_text: 'Melodict', //Large text will also be displayed as the 3rd line (state) so I skipped it for now
           small_image: onlineArtworkLink ?? 'song_artwork',
           small_text: firstArtistWithArtwork
             ? firstArtistWithArtwork.name
@@ -1155,7 +1155,7 @@ export default function App() {
         buttons: [
           {
             label: t('discordrpc.noraOnGitHub'),
-            url: 'https://github.com/Sandakan/Nora/'
+            url: 'https://github.com/Akiyama-sama/Melodict/'
           }
         ]
       });
@@ -1462,13 +1462,16 @@ export default function App() {
     },
     []
   );
-  
-  const handleMouseBackButton = useCallback((e: MouseEvent) => {
-    if (e.button === 3) {
-      e.preventDefault();
-      updatePageHistoryIndex('decrement');
-    }
-  }, [updatePageHistoryIndex]);
+
+  const handleMouseBackButton = useCallback(
+    (e: MouseEvent) => {
+      if (e.button === 3) {
+        e.preventDefault();
+        updatePageHistoryIndex('decrement');
+      }
+    },
+    [updatePageHistoryIndex]
+  );
 
   useEffect(() => {
     window.addEventListener('mouseup', handleMouseBackButton);
@@ -1477,23 +1480,21 @@ export default function App() {
     };
   }, [handleMouseBackButton]);
 
-
-
   const changeCurrentActivePage = useCallback(
     (pageClass: PageTitles, data?: PageData) => {
-          // 1. 获取当前导航历史状态
+      // 1. 获取当前导航历史状态
       const navigationHistory = { ...store.state.navigationHistory };
       const { pageTitle, onPageChange } =
         navigationHistory.history[navigationHistory.pageHistoryIndex];
 
       const currentPageData = navigationHistory.history[navigationHistory.pageHistoryIndex].data;
-       
+
       // 2. 检查是否需要切换页面
       if (
         pageTitle !== pageClass ||
         (currentPageData && data && isDataChanged(currentPageData, data))
       ) {
-         // 3. 调用页面切换回调(如果存在)
+        // 3. 调用页面切换回调(如果存在)
         if (onPageChange) onPageChange(pageClass, data);
         // 4. 创建新的页面数据对象
         const pageData = {
@@ -1510,7 +1511,7 @@ export default function App() {
         // 6. 清除多选状态
         toggleMultipleSelections(false);
         log(`User navigated to '${pageClass}'`);
-         // 7. 关键步骤：通过dispatch更新状态
+        // 7. 关键步骤：通过dispatch更新状态
         dispatch({
           type: 'UPDATE_NAVIGATION_HISTORY',
           data: navigationHistory
@@ -1581,8 +1582,6 @@ export default function App() {
     }
   }, []);
 
-
-  
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
       const ctrlCombinations = [

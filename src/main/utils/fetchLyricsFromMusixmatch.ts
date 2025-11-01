@@ -110,7 +110,7 @@ export const parseMusicmatchDataFromLyrics = async (
       // [ve:version of program]
       output.unshift(
         `[by:Implementation from Fashni's MxLRC (https://github.com/fashni/MxLRC)]`,
-        `[re:Nora (${repository.url})]`,
+        `[re:Melodict (${repository.url})]`,
         `[ve:${version}]`
       );
 

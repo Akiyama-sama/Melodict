@@ -361,7 +361,7 @@
     "enableImageBasedDynamicThemesDescription": "Change app theme dynamically based on the theme of the current playing song cover image",
 
     "language": "Language",
-    "languageDescription": "Select the language you want Nora to be displayed in.",
+    "languageDescription": "Select the language you want Melodict to be displayed in.",
 
     "audioPlayback": "Audio playback",
     "showRemainingSongDuration": "Show remaining song duration",
@@ -374,7 +374,7 @@
     "second_other": "seconds",
 
     "accounts": "Accounts",
-    "integrateLastFm": "Integrate Last.fm with Nora.",
+    "integrateLastFm": "Integrate Last.fm with Melodict.",
     "lastFmLogo": "LastFM logo",
     "lastFmConnected": "LastFM connected",
     "lastFmNotConnected": "LastFM not connected",
@@ -391,7 +391,7 @@
     "sendFavoritesToLastFm": "Send favorites data",
     "sendNowPlayingToLastFmDescription": "Send the currently playing song data to Last.fm automatically when you start to play a song.",
     "sendNowPlayingToLastFm": "Send currently playing song data",
-    "enableDiscordRpcDescription": "Integrate Discord Rich Presence with Nora",
+    "enableDiscordRpcDescription": "Integrate Discord Rich Presence with Melodict",
     "enableDiscordRpc": "Enable Discord Rich Presence",
 
     "doNotSaveLyricsAutomatically": "Don't save lyrics automatically",
@@ -405,11 +405,11 @@
     "musixmatchEnabled": "Musixmatch Lyrics is enabled",
     "saveLyricsAutomaticallyDescription": "Select an option to save song lyrics automatically when fetched in lyrics page.",
     "saveLyricsAutomaticallyInfo": "Automatically downloaded lyrics will be saved after the current song is finished to prevent any corruption from happening.",
-    "saveLyricsInLrcFilesDescription": "Enable saving lyrics in LRC files for songs that support metadata editing. Nora will save lyrics in an LRC file if the song file doesn't support metadata editing.",
+    "saveLyricsInLrcFilesDescription": "Enable saving lyrics in LRC files for songs that support metadata editing. Melodict will save lyrics in an LRC file if the song file doesn't support metadata editing.",
     "saveLyricsInLrcFiles": "Also save lyrics in LRC files for supported songs",
     "autoTranslateLyricsDescription": "Enable automatic translation of lyrics to your selected language. Lyrics will be automatically translated even if the lyrics have the same language as your selected language.",
     "autoTranslateLyrics": "Auto translate lyrics",
-    "autoConvertLyricsDescription": "Enable automatic conversion of supported lyrics to Latin characters. Currently, Nora supports converting Japanese, Chinese, and Korean lyrics to their respective Romanization systems.",
+    "autoConvertLyricsDescription": "Enable automatic conversion of supported lyrics to Latin characters. Currently, Melodict supports converting Japanese, Chinese, and Korean lyrics to their respective Romanization systems.",
     "autoConvertLyrics": "Auto convert lyrics",
     "autoAnalyzeLyricsDescription": "When enabled, the system will automatically analyze lyrics and tokenize them (Tokenizer).",
     "autoAnalyzeLyrics": "Auto-analyze lyrics",
@@ -443,19 +443,19 @@
     "performance": "Performance",
     "removeAnimationOnBatteryDescription": "Removes the animations in the app when your system is on battery power.",
     "removeAnimationOnBattery": "Remove animations when on battery power.",
-    "allowToPreventScreenSleepingDescription": "Allow Nora to prevent the display from going to sleep in situations with no user activity like displaying lyrics.",
+    "allowToPreventScreenSleepingDescription": "Allow Melodict to prevent the display from going to sleep in situations with no user activity like displaying lyrics.",
     "allowToPreventScreenSleeping": "Allow preventing the display from going to sleep.",
 
     "startupAndWindowCustomization": "Startup and Windows settings",
-    "autoLaunchAtStartDescription": "Enabling this setting will automatically launch Nora when you login to your computer.",
+    "autoLaunchAtStartDescription": "Enabling this setting will automatically launch Melodict when you login to your computer.",
     "autoLaunchAtStart": "Auto launch at startup",
-    "hideWindowAtStartDescription": "Configure whether Nora should be visible when it's started up.",
-    "hideWindowAtStart": "Launch Nora in the System Tray on startup",
-    "hideWindowOnCloseDescription": "Configure how Nora should behave when you click the close button.",
-    "hideWindowOnClose": "Hide Nora to the System Tray when the close button is clicked.",
+    "hideWindowAtStartDescription": "Configure whether Melodict should be visible when it's started up.",
+    "hideWindowAtStart": "Launch Melodict in the System Tray on startup",
+    "hideWindowOnCloseDescription": "Configure how Melodict should behave when you click the close button.",
+    "hideWindowOnClose": "Hide Melodict to the System Tray when the close button is clicked.",
 
     "storage": "Storage",
-    "storageDescription": "See how Nora manages your library and utilizes your storage.",
+    "storageDescription": "See how Melodict manages your library and utilizes your storage.",
 
     "fullStorageSpace": "Full storage usage",
     "fullStorageOutOfUsage": "{{value}} out of {{total}}",
@@ -478,7 +478,7 @@
     "generateStorageMetrics": "Generate storage metrics",
     "generateStorageMetricsAgain": "Generate storage metrics again",
     "noStorageMetrics": "Seems like you haven't generated storage metrics yet.",
-    "storageMetricsGenerationDisclaimer": "Generating storage metrics is a relatively demanding computational task, this means Nora may become unresponsive temporarily. Please be patient...",
+    "storageMetricsGenerationDisclaimer": "Generating storage metrics is a relatively demanding computational task, this means Melodict may become unresponsive temporarily. Please be patient...",
     "storageMetricsGenerationError": "Seems like something went wrong on our end. Please report this to the developer.",
 
     "advanced": "Advanced",
@@ -487,13 +487,13 @@
 
     "about": "About",
     "releasedOn": "Released on {{val, datetime}}",
-    "noraWebsite": "Nora's official website",
-    "noraDiscordServer": "Nora's official Discord server",
-    "noraGithubRepo": "Nora's Github repository",
-    "noraGithubIssues": "Nora's Github issues",
-    "noraLocalizationStatus": "Nora localization status",
-    "noraDescription": "Nora is an elegant music player built using Electron and React.",
-    "noraInspiration": "Inspired by <Hyperlink>Oto Music for Android</Hyperlink> by Piyush Mamidwar.",
+    "noraWebsite": "Melodict's official website",
+    "noraDiscordServer": "Melodict's official Discord server",
+    "noraGithubRepo": "Melodict's Github repository",
+    "noraGithubIssues": "Melodict's Github issues",
+    "noraLocalizationStatus": "Melodict localization status",
+    "noraDescription": "Melodict is an elegant music player built using Electron and React.",
+    "noraInspiration": "Inspired by <Hyperlink>Nora</Hyperlink> by Sandakan.",
     "otoMusicOnPlayStore": "Oto Music for Android on the Play Store",
     "noraLicenseNotice": "This product is licensed under the <Button>MIT licence.</Button>",
     "appLicense": "App license",
@@ -516,9 +516,9 @@
     "createIssueOnNoraGithubRepo": "create an issue on $t(settingsPage.noraGithubRepo)",
     "contact": "If you have any feedback about bugs, feature requests (etc.) about the app, please <Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>",
     "emailContact": "or contact me through my email.",
-    "loveNora": "Made with <span>❤</span> by <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
-    "sandakanGithubProfile": "Sandakan's Github profile",
-    "beautifulSriLanka": "Beautiful Sri Lanka"
+    "loveNora": "Made with <span>❤</span> by <Hyperlink>Akiyama</Hyperlink>.",
+    "akiyamaGithubProfile": "Akiyama's Github profile",
+    "beautifulChongqing": "Beautiful Chongqing"
   },
 
   "artistInfoPage": {
@@ -634,7 +634,7 @@
     "updateAddedToBeSavedLater": "Metadata updates of currently playing songs will be saved after the song playback is finished.",
     "pendingUpdateAvailable": "A metadata update of this song is pending to be saved.",
     "saveTagsNotSupportedTitle": "Not Supported",
-    "saveTagsNotSupportedDescription": "<P1>Nora currently doesn't support editing song metadata in <Format/> format.</P1><P2>Currently only <SupportedFormat/> format is supported.",
+    "saveTagsNotSupportedDescription": "<P1>Melodict currently doesn't support editing song metadata in <Format/> format.</P1><P2>Currently only <SupportedFormat/> format is supported.",
     "albumArtistNotMentioned": "Song is already part of the album named `{{title}}` but its artist(s) '{{artists}}' is/are not specified as the album artist(s) for this song.",
     "songAlbumArtistMismatch": "Selected album artist(s) '{{albumArtists}}' don't match with the selected album '{{albumTitle}}' artist(s) '{{songAlbumArtists}}'.",
     "searchForArtists": "Search for artists here",
@@ -748,7 +748,7 @@
   "resetAppConfirmationPrompt": {
     "confirmAppReset": "Confirm app reset",
     "message": "Resetting the app removes all user data, including data related to songs, favorites, preferences, applied settings, etc., but NOT the songs themselves. Please note that this action is <span>IRREVERSIBLE</span>.",
-    "restartAfterReset": "Nora will restart after the reset.",
+    "restartAfterReset": "Melodict will restart after the reset.",
     "systemPlaylistsRemovalProhibited": "You cannot remove playlists like History or Favorites."
   },
 
@@ -809,7 +809,7 @@
   },
 
   "lyricsEditorHelpPrompt": {
-    "title": "How to use Nora's lyrics editor",
+    "title": "How to use Melodict's lyrics editor",
     "subTitle1": "How to start using the editor?",
     "subTitle1Message": " <ol><li>Play the song that you are trying to edit lyrics of. (If you are not in the correct song, app will prevent adding incorrect metadata to lyrics lines.)</li><li>Click on the page area to get focus to the page. (Page focus is required for the page-specific keyboard shortcuts to work.)</li><li>Start the song from the begining. If you want more control over the playback, set to repeat the current song.</li><li>When the voice of the song is saying the lyrics line, press <ShortcutButton>$t(appShortcutsPrompt.enterKey)</ShortcutButton> to highlight the next lyrics line and add the current time to start tag.</li><li>Continue until the last lyrics line.</li></ol>",
     "subTitle2": "What are the keyboard shortcuts I can use in the Lyrics Editor?",
@@ -824,7 +824,7 @@
     "saveEditedLyrics": "Save edited lyrics",
     "copyLyrics": "Copy lyrics",
     "saveLyricsToSong": "Save lyrics to song",
-    "saveLyricsNotSupported": "Nora currently doesn't support saving lyrics to songs in '{{format}}' audio format.",
+    "saveLyricsNotSupported": "Melodict currently doesn't support saving lyrics to songs in '{{format}}' audio format.",
     "saveLyricsFormatInfo": "* Lyrics are saved in <Hyperlink>LRC format</Hyperlink>.",
     "readAboutLrcFormat": "Read more about the LRC format"
   },
@@ -845,7 +845,7 @@
     "outdatedChangelogNotice": "You may be viewing an outdated changelog.",
     "versionCheckError": "<br/><span>Failed to check for new updates. Something is wrong in our end.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
     "versionCheckNetworkError": "<br/><span> We couldn't check for new updates. Check you network connection and try again.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
-    "noraReleases": "Nora releases",
+    "noraReleases": "Melodict releases",
     "changelog": "Changelog",
     "doNotRemindThisVersionUpdate": "Do not remind me again about this version of the app.",
     "current": "Current",
@@ -920,17 +920,17 @@
 
   "clearLocalStoragePrompt": {
     "title": "Confirm clearing local storage data",
-    "description": "This process will clear any corrupted local storage data in Nora and revert it back to the default settings.",
-    "effect": "<p>Proceeding this action will affect the following data: </p><ul><li>Most preference settings in Nora</li><li>Playback settings such as currently playing song, volume etc.</li><li>Current queue data</li><li>Ignored suggestions data such as featuring artists, separate artists and duplicates</li><li>Page sorting data</li><li>Equalizer data</li><li>Lyrics editor settings</li></ul>",
-    "restartNotice": "Nora will restart after the process."
+    "description": "This process will clear any corrupted local storage data in Melodict and revert it back to the default settings.",
+    "effect": "<p>Proceeding this action will affect the following data: </p><ul><li>Most preference settings in Melodict</li><li>Playback settings such as currently playing song, volume etc.</li><li>Current queue data</li><li>Ignored suggestions data such as featuring artists, separate artists and duplicates</li><li>Page sorting data</li><li>Equalizer data</li><li>Lyrics editor settings</li></ul>",
+    "restartNotice": "Melodict will restart after the process."
   },
 
   "musixmatchDisclaimerPrompt": {
     "title": "Disclaimer - Musixmatch Lyrics",
-    "message": "<li> Musixmatch Lyrics is added as an evaluation feature to this software and could be removed at any time.</li><li>Nora is in no way affiliated with, authorised, maintained, sponsored or endorsed by Musixmatch Lyrics or any of its affiliates or subsidiaries.</li><li>The maintainers of this application call upon the personal responsibility of its users to use this feature in a fair way, as it is intended to be used by obeying the copyrights implemented by Musixmatch Lyrics.</li>",
+    "message": "<li> Musixmatch Lyrics is added as an evaluation feature to this software and could be removed at any time.</li><li>Melodict is in no way affiliated with, authorised, maintained, sponsored or endorsed by Musixmatch Lyrics or any of its affiliates or subsidiaries.</li><li>The maintainers of this application call upon the personal responsibility of its users to use this feature in a fair way, as it is intended to be used by obeying the copyrights implemented by Musixmatch Lyrics.</li>",
     "implementationNotice": "Implementation from Fashni's <Hyperlink/>.",
     "hyperlinkTitle": "MxLRC Github repository",
-    "contactAboutComplaints": "If you have any complaints, you can contact me through the Nora Discord server, or through my <Hyperlink>email</Hyperlink>."
+    "contactAboutComplaints": "If you have any complaints, you can contact me through the Melodict Discord server, or through my <Hyperlink>email</Hyperlink>."
   },
 
   "musixmatchSettingsPrompt": {
@@ -943,7 +943,7 @@
     "tokenUpdateFailed": "Failed to update the token.",
     "tokenMissingCharacters": "TOKEN should be a string with 54 characters. ({{count}} more characters required).",
     "tokenIncorrectCharacters": "TOKEN should only contain alpha-numeric characters.",
-    "savedTokenAvailableMessage": "<Title><span/> A saved token available.</Title><p> A valid Musixmatch token saved by the user is already available in Nora.</p> <p> You only need to change the token if the service is not functioning properly.</p>"
+    "savedTokenAvailableMessage": "<Title><span/> A saved token available.</Title><p> A valid Musixmatch token saved by the user is already available in Melodict.</p> <p> You only need to change the token if the service is not functioning properly.</p>"
   },
 
   "customizeSelectedMetadataPrompt": {
@@ -1105,7 +1105,7 @@
   },
 
   "discordrpc": {
-    "noraOnGitHub": "Nora on GitHub",
+    "noraOnGitHub": "Melodict on GitHub",
     "untitledSong": "An untitled song",
     "unknownArtist": "an unknown artist",
     "playingASong": "Playing a song"

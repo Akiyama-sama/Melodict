@@ -21,7 +21,7 @@ const GeneralTokenCard = (props: propTypes) => {
   return (
     <div
       ref={cardRef}
-      className="fixed !z-50 min-w-[280px] max-w-[400px] overflow-auto rounded-xl border-0 border-opacity-50 shadow-xl backdrop-blur-sm transition-all duration-200 ease-in-out"
+      className="fixed !z-50 min-w-[280px] max-w-[400px] overflow-auto rounded-xl text-dark-font-color-highlight-2 backdrop-blur-sm transition-all duration-200 ease-in-out"
       style={{
         color: paletteData?.DarkVibrant?.hex || '#333',
         backgroundColor: paletteData?.LightVibrant?.hex || '#fff',

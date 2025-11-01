@@ -35,12 +35,12 @@ const TitleBar = memo(() => {
             <Img
               className="mr-2 h-7 rounded-md p-1 shadow-md"
               src={LightModeLogo}
-              alt="Nora Logo"
+              alt="Melodict Logo"
             />
           </span>
           <span className="app-name-container">
             <span>
-              Nora
+              Melodict
               <sup
                 className={`app-version ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight ${
                   bodyBackgroundImage && '!text-dark-font-color-highlight'

@@ -2,9 +2,12 @@
 import Kuromoji from '@sglkc/kuromoji';
 import path from 'path';
 import { toHiragana, toKatakana, toRomaji } from 'wanakana';
+import { app } from 'electron';
 
 // **重要**: 确保这个路径正确指向你项目中 kuromoji 库自带的字典目录
-const dicPath = path.resolve(process.cwd(), 'node_modules', '@sglkc', 'kuromoji', 'dict');
+const dicPath = app.isPackaged
+  ? path.join(process.resourcesPath, 'kuromoji-dict')
+  : path.resolve(process.cwd(), 'node_modules', '@sglkc', 'kuromoji', 'dict');
 
 // 模块级变量，用于存储同步初始化后的分词器实例
 let tokenizerPromise: Promise<Kuromoji.Tokenizer<Kuromoji.IpadicFeatures>> | null = null;
@@ -68,7 +71,7 @@ export async function tokenizeJapaneseLyricLine(text: string): Promise<LyricJapa
           pronunciation: currentRawToken.pronunciation,
           hiragana: toHiragana(currentRawToken.reading, { passRomaji: true }),
           katakana: toKatakana(currentRawToken.reading, { passRomaji: true }),
-          romaji: toRomaji(currentRawToken.reading),
+          romaji: toRomaji(currentRawToken.reading)
         };
 
         if (rawTokenIndex > 0) {
@@ -84,7 +87,10 @@ export async function tokenizeJapaneseLyricLine(text: string): Promise<LyricJapa
             if (nextRawToken.pos_detail_1 === '括弧閉') {
               lyricToken.post = nextRawToken.surface_form;
               rawTokenIndex++;
-            } else if (nextRawToken.pos_detail_1 !== '空白' && nextRawToken.pos_detail_1 !== '括弧開') {
+            } else if (
+              nextRawToken.pos_detail_1 !== '空白' &&
+              nextRawToken.pos_detail_1 !== '括弧開'
+            ) {
               lyricToken.post = nextRawToken.surface_form;
               rawTokenIndex++;
             }
@@ -97,7 +103,10 @@ export async function tokenizeJapaneseLyricLine(text: string): Promise<LyricJapa
     return finalOutputTokens;
   } catch (error) {
     console.error(`Error during tokenization for text "${text}":`, error);
-    if (error instanceof Error && error.message.includes('Kuromoji tokenizer has not been initialized')) {
+    if (
+      error instanceof Error &&
+      error.message.includes('Kuromoji tokenizer has not been initialized')
+    ) {
       throw error;
     }
     return [];

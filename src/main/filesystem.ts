@@ -23,10 +23,10 @@ import isPathADir from './utils/isPathADir';
 import { clearDiscordRpcActivity } from './other/discordRPC';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
-export const DEFAULT_FILE_URL = 'nora://localfiles/';
+export const DEFAULT_FILE_URL = 'melodict://localfiles/';
 
 export const USER_DATA_TEMPLATE: UserData = {
-  language: 'en',
+  language: 'zh',
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {
@@ -41,7 +41,8 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
     enableDiscordRPC: false,
-    saveVerboseLogs: false
+    saveVerboseLogs: false,
+    autoAnalyzeLyrics: false
   },
   windowPositions: {},
   windowDiamensions: {},

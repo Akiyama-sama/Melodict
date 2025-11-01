@@ -48,10 +48,10 @@ const SongAlbumInput = (props: Props) => {
                           songAlbum.artworkPath
                         )
                         ? songAlbum.artworkPath
-                        : `nora://localfiles/${songAlbum.artworkPath}`
+                        : `melodict://localfiles/${songAlbum.artworkPath}`
                       : DefaultSongArtwork
                     // : songArtworkPath
-                    // ? `nora://localfiles/${songArtworkPath}`
+                    // ? `melodict://localfiles/${songArtworkPath}`
                   }
                   className="aspect-square w-16 rounded-lg"
                   alt=""
