@@ -28,6 +28,10 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
+      - name: Install setuptools for node-gyp on macOS
+        if: matrix.os == 'macos-latest'
+        run: pip3 install setuptools
+
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:

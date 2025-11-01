@@ -1,4 +1,0 @@
-interface AnalyzeLyricLine{
-    originalLyricLine:string,
-    
-}
