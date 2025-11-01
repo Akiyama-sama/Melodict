@@ -5,10 +5,47 @@
       "This update includes experimental support for m4a and opus playback, LRCLIB lyrics, lyrics translations, bug fixes, and major performance improvements."
     ],
     "phase": "stable",
-    "releaseDate": "2025-03-29T10:47:26.654Z",
-    "version": "3.1.0-stable"
+    "releaseDate": "2025-10-31T10:47:26.654Z",
+    "version": "4.0.0-alpha"
   },
   "versions": [
+    {
+      "importantNotes": [
+        "This update includes experimental support for m4a and opus playback, LRCLIB lyrics, lyrics translations, bug fixes, and major performance improvements."
+      ],
+      "notes": {
+        "new": [
+          {
+            "note": "Changed the project name to Melodict, a portmanteau of Melody + dictionary, hoping that this product will help users painlessly memorize vocabulary through melodies."
+          },
+          { "note": "Supported mouse side buttons to go back to the previous route." },
+          {
+            "note": "Added English word segmentation to lyrics, supporting the detection of English phrases."
+          },
+          {
+            "note": "Supported clicking to query each English word segment, with types including: word, phrase, and acronym."
+          },
+          {
+            "note": "Added Japanese word segmentation to lyrics, and added hiragana above kanji and katakana."
+          },
+          {
+            "note": "Added a setting in the settings where users can manually choose whether to automatically start word segmentation when opening the full-screen lyrics page."
+          },
+          { "note": "Added a Chinese option for the interface language." }
+        ],
+        "fixed": [
+          {
+            "note": "Modify the FullLyricPage layout so that the album page is on the left and the lyrics are displayed on the right."
+          }
+        ],
+        "developerUpdates": [
+          { "note": "Package manager migrated from npm to pnpm" },
+          { "note": "Added many dependencies" }
+        ]
+      },
+      "releaseDate": "2025-10-31T10:47:26.654Z",
+      "version": "4.0.0-alpha"
+    },
     {
       "artwork": "/resources/other/release artworks/whats-new-v3.1.0-stable.webp",
       "importantNotes": [

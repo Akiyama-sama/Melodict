@@ -1,71 +1,59 @@
- <h1 align="center">
-   <img class="logo" src="resources/other/nora_logo_banner.webp">
-   <!-- <p>Nora Player</p> -->
- </h1>
+
 
  <div align="center">
-  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads&style=for-the-badge">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Nora/v3.1.0-stable/total?style=for-the-badge">
-  <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Sandakan/Nora?color=blue&label=latest%20version&style=for-the-badge">
-  <a href="https://github.com/Sandakan/Nora/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge"></a>
-  <a href="https://github.com/Sandakan/Nora/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
-  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/Sandakan/Nora/build.yml?branch=master&style=for-the-badge">
+  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Akiyama-sama/Melodict/total?label=all%20time%20downloads&style=for-the-badge">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Akiyama-sama/Melodict/v4.0.0-alpha/total?style=for-the-badge">
+  <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Akiyama-sama/Melodict?color=blue&label=latest%20version&style=for-the-badge">
+  <a href="https://github.com/Sandakan/Nora/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Akiyama-sama/Melodict?style=for-the-badge"></a>
+
+  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/Akiyama-sama/Melodict/build.yml?branch=master&style=for-the-badge">
   <br/>
-  <br/>
-  <a title="Crowdin" target="_blank" href="https://crowdin.com/project/nora"><img src="https://badges.crowdin.net/nora/localized.svg"></a>
+
  </div>
 
  <br/>
 
 <div align="center">
-Nora is an elegant music player built using Electron and React. 
+Melodict 是一款专注于通过歌词分词化（Tokenizer）来帮助语言初学者们熟悉外语的app，目前支持的语言有：英语、日语
 <br>
-Inspired from <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> by Piyush Mamidwar.
+由项目<a href="https://github.com/Sandakan/Nora">Nora</a> fork而来
 </div>
 
 <br/>
 
 <div align="center">
-  <a href="#app-features">Features</a> &bull;
-  <a href="#build-this-project-on-your-system">Build on your system</a> &bull;
-  <a href="#user-feedback">User feedback</a> &bull;
-  <a href="/changelog.md">Changelog</a> &bull;
-  <a href="https://github.com/Sandakan/Nora/releases">Download</a>
+  <a href="#app-features">特性</a> &bull;
+  <a href="#部署">部署</a> &bull;
+  <a href="/changelog.md">日志</a> &bull;
+  <a href="https://github.com/Akiyama-sama/Melodict/releases">下载</a>
 </div>
 
 <br/>
 
-![Nora Banner Artwork](/resources/other/artwork%200.webp)
 
-<br/>
+## 我可以如何下载Melodict?
 
-With simplicity and design in mind, this app was made to overcome problems when using default music apps on platforms that lack essential features.
-
-<br>
-
-## How do I download Nora?
-
-Go to **[Releases page](https://github.com/Sandakan/Nora/releases) > Assets > and choose the appropriate download** or [just click here to download the latest version of Nora](https://github.com/Sandakan/Nora/releases/latest).
+在这个页面中 **[Releases page](https://github.com/Akiyama-sama/Melodict/releases) > Assets > 选择适合您操作系统的版本** or [点击此处下载最新版本的Melodict](https://github.com/Akiyama-sama/Melodict/releases/latest).
 
 ## App features
 
-It packs a horizon of features including,
+它包含一系列功能，包括：
 
-- [x] Organize your songs, artists, albums, and playlists with ease.
-- [x] Create playlists that meet your needs.
-- [x] Sing along with song lyrics[^1].
-- [x] Support for synced lyrics.
-- [x] Keep your favorite songs and artists close to you.
-- [x] Read your favorite artist's biography.
-- [ ] Personalized music shuffling[^2].(Upcoming)
-- [x] Change between Light and Dark themes with ease.
-- [x] A mini-player to help focus on what matters at the moment.
-- [x] Edit the metadata of your songs easily and conveniently [^3].
-- [x] Search through your library with the help of song filters.
+- [x] 支持英语、日语的分词
+- [x] 支持查询歌词中的英语单词、短语含义
+- [x] 轻松整理您的歌曲、艺术家、专辑和播放列表。
+- [x] 创建满足您需求的播放列表。
+- [x] 跟着歌词唱歌。
+- [x] 支持同步歌词。
+- [x] 将您最喜爱的歌曲和艺术家放在身边。
+- [x] 阅读您最喜爱的艺术家的传记。
+- [x] 轻松切换浅色和深色主题。
+- [x] 一个迷你播放器，帮助您专注于当前重要的事情。
+- [x] 轻松便捷地编辑歌曲的元数据。
+- [x] 借助歌曲筛选器在您的音乐库中搜索。
 
 <br>
 
-![Latest Version Artwork](/resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
 
 Visit the [release notes](/changelog.md) to see what's new on the latest release.</p>
 
@@ -91,71 +79,33 @@ Visit the [release notes](/changelog.md) to see what's new on the latest release
 
 <br/>
 
-## User Feedback
 
-<br>
-
-<div align="center"> 
-  <div>
-    <h3><i>" A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes. "</i></h3>
-    <a href="https://www.softpedia.com/get/Multimedia/Audio/Audio-Players/Oto-Music-for-Desktop.shtml"><i>Robert Condorache &bull; Softpedia </i></a>
-  </div> 
-</div>
-
-<br>
-
-<div align="center"> &bull; &bull; &bull; </div>
-
-<br>
-
-<div align="center"> 
-  <div>
-    <h3><i>" The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable. "</i></h3>
-    <a href="https://sspai.com/post/78669"><i>Apps Worth Watching in the Near Future &bull; SSPAI</i></a>
-  </div> 
-</div>
-
-<br>
-
-<div align="center"> &bull; &bull; &bull; </div>
-
-<br>
-
-<div align="center"> 
-  <div>
-    <h3><i>" Just found the most beautiful music player for Windows: Nora "</i></h3>
-    <a href="https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/"><i>r/windowapps &bull; Reddit</i></a>
-  </div> 
-</div>
-
-<br><br>
-
-## Build this project on your system
+## 部署
 
 <br/>
 
-Clone the project
+clone这个项目
 
 ```bash
-  git clone https://github.com/Sandakan/Nora
+  git clone https://github.com/Akiyama-sama/Melodict
 ```
 
-Go to the project's folder
+进入项目目录
 
 ```bash
-  cd Nora
+  cd Melodict
 ```
 
-Install dependencies
+安装依赖
 
 ```bash
-  npm install
+  pnpm install
 ```
 
-Run
+运行
 
 ```bash
-  npm start
+  pnpm run dev
 ```
 
 <!-- <br>
@@ -164,28 +114,19 @@ This project is built using [Electron React Boilerplate](https://github.com/elec
 
 <br>
 
-## Star History
+## 未来展望
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)
-
-## Feedback
-
-If you have any feedback about bugs, feature requests, etc. about the app, please let me know through the official [Nora Discord server](https://discord.gg/c5rGKnBs4y), or my [email](mailto:sandakannipunajith@gmail.com).
+- 分词化取消用第三方依赖以及查数据库的方式，直接依靠大模型来生成
+- 更换Logo，寻找设计师当中...
 
 <br>
 
  <center>
-     Made with <span class="heart">&#10084;</span> by Sandakan Nipunajith.
+     Made with <span class="heart">&#10084;</span> by Akiyama.
     <br>
-    Love, Sri Lanka.
+    Love, Chongqing.
  </center>
 
 <br>
 
 - ##### Every song, artist, album, and song cover used in this demonstration is not owned by myself but owned by their respective owners. They were used for demonstration purposes only. I value all the copyrights of the owners of the above assets.
-
-[^1]: The song lyrics use the [SongLyrics](https://www.npmjs.com/package/songlyrics) package and an implementation from the [MxLRC](https://github.com/fashni/MxLRC) package under the hood.
-
-[^2]: Personalized shuffles and playlists are generated by analyzing the user's listening patterns and the number of times each song gets played.
-
-[^3]: Currently, the app only supports editing mp3 files due to some limitations of the dependencies.

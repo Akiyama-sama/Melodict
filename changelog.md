@@ -8,17 +8,17 @@
 
 - ### 🎉 New Features and Updates
 
-  - 更改项目名称为`Melodict` ，寓意Melody+dictionary，希望通过这项产品帮助用户能在旋律之中无痛的记忆词汇
-  - 支持鼠标侧键后退到上一个路由
-  - 给歌词添加了英语分词，支持检测英语短语
-  - 支持点击查询每个英文分词，类型有：单词、短语、缩略词
-  - 给歌词添加了日语分词，并在汉字与片假名头上添加了平假名
-  - 在设置中添加了一项设置，用户可以手动设置是否打开全屏歌词页面的时候自动开始分词
-  - 添加了界面语言的中文选项
+  - Changed the project name to Melodict, a portmanteau of Melody + dictionary, hoping that this product will help users painlessly memorize vocabulary through melodies.
+  - Supported mouse side buttons to go back to the previous route.
+  - Added English word segmentation to lyrics, supporting the detection of English phrases.
+  - Supported clicking to query each English word segment, with types including: word, phrase, and acronym.
+  - Added Japanese word segmentation to lyrics, and added hiragana above kanji and katakana.
+  - Added a setting in the settings where users can manually choose whether to automatically start word segmentation when opening the full-screen lyrics page.
+  - Added a Chinese option for the interface language.
 
 - ### 🔨 Fixes and Improvements
 
-  - 修改FullLyricPage布局，让其左侧为专辑页面，右侧显示歌词
+  - Modify the FullLyricPage layout so that the album page is on the left and the lyrics are displayed on the right.
 
 - ### 🚀 Development updates
 
