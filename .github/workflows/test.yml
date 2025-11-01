@@ -10,6 +10,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -17,11 +22,8 @@ jobs:
           check-latest: true
           cache: 'pnpm'
 
-      - name: Install pnpm and dependencies
-        uses: pnpm/action-setup@v3
-        with:
-          version: latest
-          run_install: true
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run Jest tests
         run: npm run test
