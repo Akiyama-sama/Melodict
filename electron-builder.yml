@@ -74,7 +74,7 @@ win:
     - target: nsis
       arch:
         - x64
-        # - arm64
+        - arm64
 
 nsis:
   shortcutName: '${productName}'
