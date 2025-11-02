@@ -62,7 +62,7 @@ const TitleBar = memo(() => {
             <NetworkIndicator />
           </div>
           <div className="special-controls-container flex flex-row">
-            {window.api.properties.isInDevelopment && <ChangeThemeBtn />}
+            <ChangeThemeBtn />
             {playerType === 'full' && <GoToMainPlayerBtn />}
           </div>
         </div>

@@ -19,15 +19,16 @@ extraResources:
   - from: node_modules/@sglkc/kuromoji/dict
     to: kuromoji-dict
 files:
-  - out/**/*
   - '!**/.vscode/*'
   - '!src/*'
-  - '!resources/**/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/resources/other/*'
+  - '!**/resources/installer_assets/*'
 asarUnpack:
+  - resources/**
   - node_modules/sharp/**/*
   - node_modules/@img/**/*
   - node_modules/@sglkc/kuromoji/**/*
@@ -73,7 +74,7 @@ win:
     - target: nsis
       arch:
         - x64
-        - arm64
+        # - arm64
 
 nsis:
   shortcutName: '${productName}'
