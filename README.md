@@ -14,7 +14,7 @@
  <br/>
 
 <div align="center">
-Melodict 是一款专注于通过歌词分词化（Tokenizer）来帮助语言初学者们熟悉外语的app，目前支持的语言有：英语、日语
+Melodict 是一款专注于通过歌词分词化（Tokenizer）来帮助语言初学者们熟悉外语的本地音乐播放器，目前支持的语言有：英语、日语
 <br>
 由项目<a href="https://github.com/Sandakan/Nora">Nora</a> fork而来
 </div>
