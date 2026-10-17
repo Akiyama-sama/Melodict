@@ -1,5 +1,6 @@
 import parseLyrics from '../../common/parseLyrics';
 import { callNeteaseForBody } from './client';
+import { readNeteaseLyricsCache, writeNeteaseLyricsCache } from './lyricsCache';
 import { readNeteaseSession } from './session';
 
 /**
@@ -155,6 +156,11 @@ const joinTranslationWithTiming = (baseLyric: string, translationLyric: string):
 };
 
 export const getNeteaseLyrics = async (neteaseId: number): Promise<SongLyrics | undefined> => {
+  // Lyrics are immutable per song, so a cached entry short-circuits the network entirely and
+  // feeds the analysis pipeline the exact same parsed lines it fingerprints on.
+  const cachedLyrics = await readNeteaseLyricsCache(neteaseId);
+  if (cachedLyrics) return cachedLyrics;
+
   const body = await getLyricBody(neteaseId);
 
   // No lyrics at all (instrumental-only or restricted).
@@ -174,11 +180,17 @@ export const getNeteaseLyrics = async (neteaseId: number): Promise<SongLyrics | 
     body.ytlrc?.lyric ?? body.tlyric?.lyric ?? ''
   );
 
-  return {
+  const lyrics: SongLyrics = {
     title: '',
     source: 'NETEASE',
     lyricsType: isEnhanced ? 'ENHANCED_SYNCED' : 'SYNCED',
     lyrics: parseLyrics(withTranslation),
     isOfflineLyricsAvailable: false
   };
+
+  // Write-through: persist the parsed result so later opens (and the analysis pipeline, which
+  // fingerprints on these exact lines) resolve without a network round-trip.
+  await writeNeteaseLyricsCache(neteaseId, lyrics);
+
+  return lyrics;
 };
