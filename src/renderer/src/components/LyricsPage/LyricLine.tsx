@@ -158,12 +158,12 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, convertedLyric]);
 
-  // The original lyric is always the primary (large) line; the translation renders below it in a
+  // The original lyric is always the primary (large) line; the translation renders above it in a
   // smaller size. When no translation exists, romanization takes the secondary slot instead.
   const lyricStringLinePrimary = lyricString;
-  let lyricStringLineSecondaryLower;
-  if (translatedLyricString) lyricStringLineSecondaryLower = translatedLyricString;
-  else lyricStringLineSecondaryLower = convertedLyricString;
+  let lyricStringLineSecondary;
+  if (translatedLyricString) lyricStringLineSecondary = translatedLyricString;
+  else lyricStringLineSecondary = convertedLyricString;
 
   return (
     <div
@@ -217,6 +217,13 @@ const LyricLine = (props: LyricProp) => {
         );
       }}
     >
+      {lyricStringLineSecondary && (
+        <div
+          className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
+        >
+          {lyricStringLineSecondary}
+        </div>
+      )}
       <div
         className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''}`}
       >
@@ -231,13 +238,6 @@ const LyricLine = (props: LyricProp) => {
           lyricStringLinePrimary
         )}
       </div>
-      {lyricStringLineSecondaryLower && (
-        <div
-          className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
-        >
-          {lyricStringLineSecondaryLower}
-        </div>
-      )}
       {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );
