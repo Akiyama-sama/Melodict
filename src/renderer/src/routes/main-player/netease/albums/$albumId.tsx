@@ -115,7 +115,7 @@ function NeteaseAlbumInfoPage() {
                 alt="Netease Album Cover"
                 loading="eager"
               />
-              <div className="album-info-container ml-8">
+              <div className="album-info-container ml-8 min-w-0 flex-1 pr-8">
                 <div className="font-semibold tracking-wider uppercase opacity-50">
                   {t('common.album_one')}
                 </div>

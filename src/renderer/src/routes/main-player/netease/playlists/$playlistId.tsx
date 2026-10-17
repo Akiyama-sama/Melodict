@@ -114,7 +114,7 @@ function NeteasePlaylistInfoPage() {
                 alt="Netease Playlist Cover"
                 loading="eager"
               />
-              <div className="playlist-info-container ml-8">
+              <div className="playlist-info-container ml-8 min-w-0 flex-1 pr-8">
                 <div className="font-semibold tracking-wider uppercase opacity-50">
                   {t('common.playlist_one')}
                 </div>
@@ -132,7 +132,7 @@ function NeteasePlaylistInfoPage() {
                 )}
                 {playlist.description && (
                   <p
-                    className="mt-2 w-full overflow-hidden text-sm text-ellipsis whitespace-nowrap opacity-60"
+                    className="mt-2 line-clamp-2 w-full text-sm opacity-60"
                     title={playlist.description}
                   >
                     {playlist.description}

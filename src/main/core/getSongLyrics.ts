@@ -9,6 +9,8 @@ import { appPreferences } from '../../../package.json';
 import parseLyrics from '../../common/parseLyrics';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
+import { getNeteaseLyrics } from '../netease/lyrics';
+import { tryGetNeteaseIdFromPath } from '../../common/netease';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import saveLyricsToSong from '../saveLyricsToSong';
 // import { decrypt } from '../utils/safeStorage';
@@ -276,6 +278,27 @@ const getSongLyrics = async (
   abortControllerSignal?: AbortSignal
 ): Promise<SongLyrics | undefined> => {
   const { songTitle, songArtists = [], songPath: songPathWithProtocol } = trackInfo;
+
+  // NetEase songs stream through nora://netease/song/<id>; their lyrics come from the NetEase
+  // endpoint directly — no local file to read and nothing to save back.
+  const neteaseId = tryGetNeteaseIdFromPath(songPathWithProtocol);
+  if (neteaseId !== null) {
+    try {
+      const neteaseLyrics = await getNeteaseLyrics(neteaseId);
+      if (neteaseLyrics) {
+        cachedLyrics = { ...neteaseLyrics, title: songTitle };
+        return cachedLyrics;
+      }
+    } catch (error) {
+      logger.info(`No NetEase lyrics found for the requested song.`, { error, neteaseId });
+      sendMessageToRenderer({
+        messageCode: 'LYRICS_FIND_FAILED',
+        data: { title: songTitle }
+      });
+      return undefined;
+    }
+    return undefined;
+  }
 
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
   const isConnectedToInternet = checkIfConnectedToInternet();

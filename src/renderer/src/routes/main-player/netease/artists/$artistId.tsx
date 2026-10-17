@@ -113,7 +113,7 @@ function NeteaseArtistInfoPage() {
                 alt="Netease Artist Avatar"
                 loading="eager"
               />
-              <div className="artist-info-container ml-8">
+              <div className="artist-info-container ml-8 min-w-0 flex-1 pr-8">
                 <div className="font-semibold tracking-wider uppercase opacity-50">
                   {t('common.artist_one')}
                 </div>

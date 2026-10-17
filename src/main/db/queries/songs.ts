@@ -128,14 +128,19 @@ export const getAllSongs = async (
 
   const limit = end - start === 0 ? undefined : end - start;
 
+  // Library ids are DB serials (positive). Foreign sentinel ids (negative, e.g. NetEase songs in
+  // the queue) must be dropped before the SQL `in` clause — they would overflow the integer column
+  // and abort the whole query.
+  const librarySongIds = songIds.filter((id) => Number.isInteger(id) && id > 0);
+
   const timer = timeStart();
   // Fetch all songs with their relations
   const songsData = await trx.query.songs.findMany({
     where: (s) => {
       const filters: SQL[] = [];
 
-      if (songIds && songIds.length > 0) {
-        filters.push(inArray(s.id, songIds));
+      if (librarySongIds.length > 0) {
+        filters.push(inArray(s.id, librarySongIds));
       }
 
       if (filterType === 'favorites' || filterType === 'nonFavorites') {
