@@ -10,6 +10,8 @@ import UpNextSongPopup from '../../SongsControlsContainer/UpNextSongPopup';
 
 type Props = {
   songPos: number;
+  /** When the analysis panel is open the album column narrows to make room for it. */
+  compact?: boolean;
 };
 
 const SongInfoContainer = (props: Props) => {
@@ -18,7 +20,7 @@ const SongInfoContainer = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { songPos } = props;
+  const { songPos, compact = false } = props;
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
@@ -52,8 +54,16 @@ const SongInfoContainer = (props: Props) => {
   }, [currentSongData.artists, currentSongData.songId]);
 
   return (
-    <div className="song-img-and-info-container text-font-color-white flex flex-col justify-center gap-1 px-[10%] lg:ml-4 lg:w-full">
-      <div className="grid auto-rows-min grid-cols-[20rem] items-center justify-center">
+    <div
+      className={`song-img-and-info-container text-font-color-white flex flex-col justify-center gap-1 transition-[padding] duration-300 lg:ml-4 lg:w-full ${
+        compact ? 'px-4' : 'px-[10%]'
+      }`}
+    >
+      <div
+        className={`grid auto-rows-min items-center justify-center ${
+          compact ? 'grid-cols-[minmax(10rem,14rem)]' : 'grid-cols-[20rem]'
+        }`}
+      >
         <Img
           src={currentSongData.artworkPath}
           fallbackSrc={DefaultSongCover}

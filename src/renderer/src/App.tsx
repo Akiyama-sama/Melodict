@@ -37,6 +37,8 @@ import { initializeQueue } from './other/queueSingleton';
 // ? PROMPTS
 const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayableErrorPrompt'));
 
+import NotificationPanel from './components/NotificationPanel/NotificationPanel';
+
 // ? SCREENS
 
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
@@ -378,6 +380,8 @@ export default function App() {
           onDrop={windowManagement.onSongDrop}
         >
           <Outlet />
+          {/* Mounted at the app root so notifications also show over the fullscreen and mini players. */}
+          <NotificationPanel />
         </div>
       </AppUpdateContext.Provider>
       {/* <TanStackRouterDevtools position="bottom-right" /> */}

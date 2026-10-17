@@ -5,7 +5,9 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import { useTranslation } from 'react-i18next';
 
 import roundTo from '../../../../common/roundTo';
+import type { LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import LyricsAnalysisLineContent from '../FullScreenPlayer/analysis/LyricsAnalysisLineContent';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
 import LyricsProgressBar from './LyricsProgressBar';
 
@@ -17,6 +19,10 @@ interface LyricProp {
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
   playerType?: PlayerTypes;
+  /** LLM analysis for this line, when available. Enables clickable learning tokens. */
+  analysis?: LyricsAnalysisLine;
+  activeTokenId?: string;
+  onTokenClick?: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 }
 
 // const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
@@ -50,7 +56,10 @@ const LyricLine = (props: LyricProp) => {
     convertedLyric,
     syncedLyrics,
     isAutoScrolling = true,
-    playerType = 'normal'
+    playerType = 'normal',
+    analysis,
+    activeTokenId,
+    onTokenClick
   } = props;
 
   const handleLyricsActivity = useCallback(
@@ -216,7 +225,16 @@ const LyricLine = (props: LyricProp) => {
       <div
         className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''}`}
       >
-        {lyricStringLinePrimary}
+        {analysis && onTokenClick && typeof lyric === 'string' ? (
+          <LyricsAnalysisLineContent
+            text={getLyricText(lyric)}
+            analysis={analysis}
+            activeTokenId={activeTokenId}
+            onTokenClick={onTokenClick}
+          />
+        ) : (
+          lyricStringLinePrimary
+        )}
       </div>
       {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>

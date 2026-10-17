@@ -71,6 +71,7 @@ import {
 } from './db/queries/userPreferences';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
+import { registerLyricsAnalysisIpc } from './lyricsAnalysis/ipc';
 import {
   allowScreenSleeping,
   changePlayerType,
@@ -126,6 +127,8 @@ import { compare } from './utils/safeStorage';
  *   (e.g., deleting songs).
  */
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
+  registerLyricsAnalysisIpc();
+
   if (mainWindow) {
     ipcMain.on('app/close', () => app.quit());
 

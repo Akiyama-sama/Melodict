@@ -203,6 +203,37 @@ const search = {
     ipcRenderer.invoke('app/clearSearchHistory', searchText)
 };
 
+// $ LYRICS ANALYSIS (LLM)
+const lyricsAnalysis = {
+  prepareSession: (request: LyricsAnalysisRequest): Promise<LyricsAnalysisSnapshot> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/prepareSession', request),
+  getSession: (): Promise<LyricsAnalysisSnapshot | undefined> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/getSession'),
+  onLine: (callback: (event: unknown, payload: LyricsAnalysisLineEvent) => void) =>
+    ipcRenderer.on('app/lyricsAnalysis/line', callback),
+  removeLineListener: (callback: (event: unknown, payload: LyricsAnalysisLineEvent) => void) =>
+    ipcRenderer.removeListener('app/lyricsAnalysis/line', callback),
+  onSnapshot: (callback: (event: unknown, snapshot: LyricsAnalysisSnapshot) => void) =>
+    ipcRenderer.on('app/lyricsAnalysis/snapshot', callback),
+  removeSnapshotListener: (
+    callback: (event: unknown, snapshot: LyricsAnalysisSnapshot) => void
+  ) => ipcRenderer.removeListener('app/lyricsAnalysis/snapshot', callback),
+  getProviderConfig: (): Promise<LyricsAnalysisProviderConfigSummary> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/getProviderConfig'),
+  saveProviderConfig: (input: {
+    baseURL: string;
+    modelId: string;
+    apiKey?: string;
+  }): Promise<LyricsAnalysisProviderConfigSummary> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/saveProviderConfig', input),
+  testProvider: (input?: {
+    baseURL?: string;
+    modelId?: string;
+    apiKey?: string;
+  }): Promise<LyricsAnalysisProviderTestResult> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/testProvider', input)
+};
+
 // $ SONG LYRICS
 const lyrics = {
   getSongLyrics: (
@@ -610,6 +641,7 @@ export const api = {
   fullscreen,
   search,
   lyrics,
+  lyricsAnalysis,
   messages,
   dataUpdates,
   songUpdates,

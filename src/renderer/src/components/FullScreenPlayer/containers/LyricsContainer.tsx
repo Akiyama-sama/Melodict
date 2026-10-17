@@ -3,26 +3,40 @@ import { useStore } from '@tanstack/react-store';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { LyricsAnalysisToken } from '../../../../../common/lyricsAnalysis';
+import useLyricsAnalysis from '../../../hooks/useLyricsAnalysis';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
 import i18n from '../../../i18n';
+import { getLineIdForIndex } from '../../../other/lyricsAnalysisUtils';
 import LyricLine from '../../LyricsPage/LyricLine';
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 
 type Props = {
-  isFullLyricsScreen: boolean;
+  isFullLyricsScreen?: boolean;
   isLyricsVisible: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
+  selectedToken?: { token: LyricsAnalysisToken; line: LyricsAnalysisLine };
+  onTokenClick: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 };
 
 const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isFullLyricsScreen, isLyricsVisible, setIsLyricsAvailable } = props;
+  const { isLyricsVisible, setIsLyricsAvailable, selectedToken, onTokenClick } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
   useSkipLyricsLines(lyrics);
+
+  const { linesById } = useLyricsAnalysis({
+    songPath: currentSongData.path,
+    songTitle: currentSongData.title,
+    songArtists: Array.isArray(currentSongData.artists)
+      ? currentSongData.artists.map((artist) => artist.name)
+      : [],
+    lyrics
+  });
 
   useEffect(() => {
     if (isLyricsVisible) {
@@ -81,15 +95,23 @@ const LyricsContainer = (props: Props) => {
       if (isSynced) {
         const syncedLyricsLines = parsedLyrics.map((lyric, index) => {
           const { originalText: text, end = 0, start = 0 } = lyric;
+          const lineId = getLineIdForIndex(index);
+          const analysis = linesById[lineId];
+
           return (
             <LyricLine
               playerType="full"
-              key={index}
+              key={lineId}
               index={index}
               lyric={text}
               syncedLyrics={{ start, end }}
               translatedLyricLines={lyric.translatedTexts}
               convertedLyric={lyric.romanizedText}
+              analysis={analysis}
+              activeTokenId={
+                selectedToken?.line.lineId === lineId ? selectedToken.token.tokenId : undefined
+              }
+              onTokenClick={onTokenClick}
             />
           );
         });
@@ -127,7 +149,7 @@ const LyricsContainer = (props: Props) => {
       }
     }
     return [];
-  }, [lyrics]);
+  }, [lyrics, linesById, onTokenClick, selectedToken]);
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
@@ -147,9 +169,7 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom min-h-0 w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto py-20 transition-[filter] delay-200 select-none ${
-        !isFullLyricsScreen ? 'px-20' : ''
-      }`}
+      className="mini-player-lyrics-container appear-from-bottom min-h-0 w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto py-20 transition-[filter] delay-200 select-none"
       id="miniPlayerLyricsContainer"
     >
       {isLyricsVisible && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (

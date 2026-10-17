@@ -1,3 +1,14 @@
+import type {
+  LyricsAnalysisError,
+  LyricsAnalysisErrorCode,
+  LyricsAnalysisLine,
+  LyricsAnalysisLineEvent,
+  LyricsAnalysisProviderConfigSummary,
+  LyricsAnalysisProviderTestResult,
+  LyricsAnalysisRequest,
+  LyricsAnalysisSessionStatus,
+  LyricsAnalysisSnapshot
+} from '@common/lyricsAnalysis';
 import type { db } from '@main/db/db';
 import type { GetAllSongListeningDataReturnType } from '@main/db/queries/listens';
 import { ReactElement, ReactNode } from 'react';
@@ -430,6 +441,19 @@ declare global {
     songBlacklist: number[];
     folderBlacklist: string[];
   }
+
+  // ? LYRICS ANALYSIS (LLM) — shapes live in src/common/lyricsAnalysis.ts
+  type LyricsAnalysisRequest = import('@common/lyricsAnalysis').LyricsAnalysisRequest;
+  type LyricsAnalysisSnapshot = import('@common/lyricsAnalysis').LyricsAnalysisSnapshot;
+  type LyricsAnalysisLine = import('@common/lyricsAnalysis').LyricsAnalysisLine;
+  type LyricsAnalysisLineEvent = import('@common/lyricsAnalysis').LyricsAnalysisLineEvent;
+  type LyricsAnalysisSessionStatus = import('@common/lyricsAnalysis').LyricsAnalysisSessionStatus;
+  type LyricsAnalysisError = import('@common/lyricsAnalysis').LyricsAnalysisError;
+  type LyricsAnalysisErrorCode = import('@common/lyricsAnalysis').LyricsAnalysisErrorCode;
+  type LyricsAnalysisProviderConfigSummary =
+    import('@common/lyricsAnalysis').LyricsAnalysisProviderConfigSummary;
+  type LyricsAnalysisProviderTestResult =
+    import('@common/lyricsAnalysis').LyricsAnalysisProviderTestResult;
 
   interface UserSettings {
     language: string;

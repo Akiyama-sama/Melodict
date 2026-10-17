@@ -1,12 +1,14 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LyricsAnalysisLine, LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import useMouseActiveState from '../../hooks/useMouseActiveState';
 import Img from '../Img';
 import SeekBarSlider from '../SeekBarSlider';
 import TitleBar from '../TitleBar/TitleBar';
+import LyricsAnalysisPanel from './analysis/LyricsAnalysisPanel';
 import LyricsContainer from './containers/LyricsContainer';
 import SongControlContainer from './containers/SongControlContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
@@ -26,6 +28,10 @@ const FullScreenPlayer = () => {
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
   const [songPos, setSongPos] = useState(0);
   const [isFullLyricsScreen, setIsFullLyricsScreen] = useState(true);
+  const [selectedToken, setSelectedToken] = useState<{
+    token: LyricsAnalysisToken;
+    line: LyricsAnalysisLine;
+  }>();
 
   const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
   const { isMouseActive } = useMouseActiveState(fullScreenPlayerContainerRef, {
@@ -75,17 +81,29 @@ const FullScreenPlayer = () => {
         <div
           className={`full-screen-player-main-container absolute inset-0 w-full max-w-full! overflow-hidden ${
             isFullLyricsScreen
-              ? 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
+              ? selectedToken
+                ? 'grid grid-cols-[minmax(12rem,18rem)_minmax(0,1fr)_minmax(22rem,30rem)]'
+                : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
               : 'grid grid-cols-1'
           }`}
         >
-          {isFullLyricsScreen && <SongInfoContainer songPos={songPos} />}
+          {isFullLyricsScreen && <SongInfoContainer songPos={songPos} compact={!!selectedToken} />}
 
           <LyricsContainer
             isFullLyricsScreen={isFullLyricsScreen}
             isLyricsVisible={isLyricsVisible}
             setIsLyricsAvailable={setIsLyricsAvailable}
+            selectedToken={selectedToken}
+            onTokenClick={(token, line) => setSelectedToken({ token, line })}
           />
+
+          {selectedToken && (
+            <LyricsAnalysisPanel
+              token={selectedToken.token}
+              line={selectedToken.line}
+              onClose={() => setSelectedToken(undefined)}
+            />
+          )}
         </div>
         <SongControlContainer
           isFullLyricsScreen={isFullLyricsScreen}

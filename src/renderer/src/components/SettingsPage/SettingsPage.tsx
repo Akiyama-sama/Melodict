@@ -11,6 +11,7 @@ import DefaultPageSettings from './Settings/DefaultPageSettings';
 // import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
 import LanguageSettings from './Settings/LanguageSettings';
+import LyricsAnalysisSettings from './Settings/LyricsAnalysisSettings';
 import LyricsSettings from './Settings/LyricsSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
 import PreferencesSettings from './Settings/PreferencesSettings';
@@ -41,6 +42,9 @@ const SettingsPage = () => {
 
           {/* ? LYRICS SETTINGS */}
           <LyricsSettings />
+
+          {/* ? LYRICS ANALYSIS (LLM) SETTINGS */}
+          <LyricsAnalysisSettings />
 
           {/* ? EQUALIZER SETTINGS */}
           <EqualizerSettings />
