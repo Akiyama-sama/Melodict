@@ -39,14 +39,24 @@ const OtherSongControlsContainer = () => {
             iconName: 'graphic_eq',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
-              navigate({ to: '/main-player/settings', hash: 'equalizer-settings-container' })
+              navigate({
+                to: '/main-player/settings',
+                hash: 'equalizer-settings-container',
+                // The settings page selects the section from the hash; scrolling to it would also
+                // scroll the app shell and hide the page header.
+                hashScrollIntoView: false
+              })
           },
           {
             label: t('player.adjustPlaybackSpeed'),
             iconName: 'avg_pace',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
-              navigate({ to: '/main-player/settings', hash: 'audio-playback-settings-container' })
+              navigate({
+                to: '/main-player/settings',
+                hash: 'audio-playback-settings-container',
+                hashScrollIntoView: false
+              })
           },
           { label: '', isContextMenuItemSeperator: true, handlerFunction: () => true },
           {

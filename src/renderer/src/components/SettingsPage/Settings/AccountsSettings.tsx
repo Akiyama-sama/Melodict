@@ -51,7 +51,7 @@ const AccountsSettings = () => {
 
   return (
     <li
-      className="main-container startup-settings-container mb-16"
+      className="main-container accounts-settings-container mb-16"
       id="accounts-settings-container"
     >
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">

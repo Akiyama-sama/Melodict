@@ -16,7 +16,7 @@ const LanguageSettings = () => {
 
   return (
     <li
-      className="main-container performance-settings-container mb-16"
+      className="main-container language-settings-container mb-16"
       id="language-settings-container"
     >
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">

@@ -330,7 +330,7 @@ const LyricsAnalysisSettings = () => {
   ));
 
   return (
-    <li className="main-container lyrics-analysis-settings-container mb-16" id="lyricsAnalysisSettings">
+    <li className="main-container lyrics-analysis-settings-container mb-16" id="lyrics-analysis-settings-container">
       <div className="title-container dark:text-dark-font-color-highlight text-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">translate</span>
         {t('lyricsAnalysis.settings.title')}

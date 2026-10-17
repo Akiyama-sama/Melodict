@@ -394,6 +394,7 @@
     "defaultPage": "默认页面",
     "changeDefaultPageDescription": "自定义应用启动后默认打开的页面",
     "preferences": "偏好设置",
+    "startup": "启动",
     "songIndexingDescription": "启用后，会在“歌曲”页面中的每首歌曲前显示数字索引，方便浏览和定位。",
     "enableSongIndexing": "启用歌曲列表索引",
     "showTrackNumberAsSongIndexDescription": "在“专辑”页面中，将使用歌曲在专辑中的原始曲目号作为歌曲当前的索引编号。",

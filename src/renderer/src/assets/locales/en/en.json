@@ -394,6 +394,7 @@
     "defaultPage": "Default page",
     "changeDefaultPageDescription": "Change the default page you want to see when you open the app.",
     "preferences": "Preferences",
+    "startup": "Startup",
     "songIndexingDescription": "Enables indexing of songs in pages, adding a number to each song in the Songs tab.",
     "enableSongIndexing": "Enable song indexing",
     "showTrackNumberAsSongIndexDescription": "Show track number in front of the song when in albums page.",
