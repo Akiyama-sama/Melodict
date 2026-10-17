@@ -223,7 +223,8 @@
     "playingNow": "正在播放",
     "blacklisted": "已屏蔽",
     "likedThisSong": "已收藏此歌曲",
-    "dislikedThisSong": "你不喜欢这首歌"
+    "dislikedThisSong": "你不喜欢这首歌",
+    "goToArtist": "跳转到歌手"
   },
   "artist": {
     "playAllSongs": "播放全部歌曲",
@@ -277,7 +278,10 @@
     "openFavoritesWithAllTimeMostListenedSortOption": "以“收听最多 (所有时间)”排序方式打开“收藏夹”。",
     "noSongsAvailable": "暂无歌曲",
     "stayCalm": "保持淡定",
-    "favoritesAndRecaps": "收藏与回顾"
+    "favoritesAndRecaps": "收藏与回顾",
+    "neteaseDailyRecommendations": "网易云每日推荐",
+    "neteasePersonalizedPlaylists": "网易云推荐歌单",
+    "openNeteaseSearch": "搜索网易云音乐"
   },
   "searchPage": {
     "addFolder": "添加文件夹",
@@ -696,7 +700,10 @@
   },
   "sideBar": {
     "home": "主页",
-    "search": "搜索"
+    "search": "搜索",
+    "neteaseMyPlaylists": "我的网易云歌单",
+    "neteaseLiked": "网易云喜欢的音乐",
+    "neteaseToplists": "网易云排行榜"
   },
   "renamePlaylistPrompt": {
     "renamePlaylistWithName": "重命名歌单 “{{name}}”",
@@ -1132,5 +1139,26 @@
       "unsavedHint": "修改后记得点击保存；切换服务商会立即改变使用的配置。",
       "modelMissing": "未填写模型 ID"
     }
+  },
+  "netease": {
+    "sectionName": "网易云音乐",
+    "searchTitle": "搜索网易云音乐",
+    "searchPlaceholder": "搜索网易云的歌曲、专辑、歌手和歌单…",
+    "searchStartHint": "在上方输入以搜索网易云音乐曲库。",
+    "noSearchResults": "没有找到结果",
+    "noSearchResultsHint": "换个关键词或换一个搜索分类试试。",
+    "trialBadge": "试听",
+    "likeSong": "收藏到网易云红心",
+    "unlikeSong": "取消网易云红心",
+    "myPlaylists": "我的网易云歌单",
+    "likedSongs": "喜欢的音乐",
+    "toplists": "排行榜",
+    "noPlaylists": "你的网易云账号下没有找到歌单。",
+    "noLikedSongs": "你在网易云标记红心的歌曲会出现在这里。",
+    "notLoggedInSectionTitle": "尚未连接网易云账号",
+    "notLoggedInSectionDescription": "到设置里扫码登录后，即可浏览你的网易云歌单、喜欢的音乐和每日推荐。",
+    "goToLogin": "去设置里登录",
+    "addedToNeteaseLikes": "已将《{{title}}》加入网易云红心。",
+    "removedFromNeteaseLikes": "已将《{{title}}》移出网易云红心。"
   }
 }

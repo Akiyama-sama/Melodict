@@ -81,6 +81,30 @@ const Sidebar = memo(() => {
           isActive: false
         },
         {
+          to: '/main-player/netease/playlists',
+          id: 'NeteaseMyPlaylists',
+          parentClassName: 'netease-my-playlists',
+          icon: 'public',
+          content: t('sideBar.neteaseMyPlaylists'),
+          isActive: false
+        },
+        {
+          to: '/main-player/netease/liked',
+          id: 'NeteaseLiked',
+          parentClassName: 'netease-liked',
+          icon: 'favorite',
+          content: t('sideBar.neteaseLiked'),
+          isActive: false
+        },
+        {
+          to: '/main-player/netease/toplists',
+          id: 'NeteaseToplists',
+          parentClassName: 'netease-toplists',
+          icon: 'leaderboard',
+          content: t('sideBar.neteaseToplists'),
+          isActive: false
+        },
+        {
           to: '/main-player/settings',
           id: 'Settings',
           parentClassName: 'settings',
