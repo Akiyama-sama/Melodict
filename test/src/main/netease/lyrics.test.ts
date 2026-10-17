@@ -38,6 +38,18 @@ describe('convertJsonLrcToLrc', () => {
     expect(convertJsonLrcToLrc(plain)).toBe(plain);
   });
 
+  test('keeps plain LRC lines in mixed JSON + LRC payloads', () => {
+    const input = [
+      '{"t":0,"c":[{"tx":"作词: "},{"tx":"澤野弘之"}]}',
+      '[00:22.590]君を繋ぐ空の星が1つ音を立てても',
+      '[00:33.680]どれも同じ雨に濡れた夢ばかり'
+    ].join('\n');
+
+    expect(convertJsonLrcToLrc(input)).toBe(
+      ['[00:00.000]作词: 澤野弘之', '[00:22.590]君を繋ぐ空の星が1つ音を立てても', '[00:33.680]どれも同じ雨に濡れた夢ばかり'].join('\n')
+    );
+  });
+
   test('skips malformed and empty lines instead of throwing', () => {
     const input = '{"t":1000,"c":[{"tx":"ok"}]}\n{"t":2000,"c":[]}\n{"broken":true}';
     expect(convertJsonLrcToLrc(input)).toBe('[00:01.000]ok');

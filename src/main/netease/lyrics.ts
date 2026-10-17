@@ -59,9 +59,9 @@ const YRC_WORD_REGEX = /[(](?<start>\d+),(?<duration>\d+),\d+[)](?<word>[^()]*)/
 
 /**
  * `lyric_new` returns the `lrc` field as JSON karaoke lines — `{"t":<ms>,"c":[{"tx":..},..]}` —
- * instead of bracketed LRC for most songs. Flattens each line into plain synced LRC
- * (`[mm:ss.mmm]tx1 tx2…`), dropping non-text entries (embedded artist links etc.). Returns the
- * input untouched when it does not start with a JSON line.
+ * instead of bracketed LRC. Payloads mix formats: metadata lines are JSON while the actual lyric
+ * lines may be plain LRC. Flattens JSON lines into bracketed LRC (`[mm:ss.mmm]tx1 tx2…`, dropping
+ * non-text entries like embedded artist links) and keeps plain lines as-is.
  */
 export const convertJsonLrcToLrc = (lrcLyric: string): string => {
   const trimmed = lrcLyric.trim();
@@ -70,7 +70,11 @@ export const convertJsonLrcToLrc = (lrcLyric: string): string => {
   const lines: string[] = [];
   for (const rawLine of trimmed.split('\n')) {
     const line = rawLine.trim();
-    if (!line.startsWith('{')) continue;
+    if (!line.startsWith('{')) {
+      // Already bracketed LRC (mixed payloads) — keep it.
+      lines.push(line);
+      continue;
+    }
 
     try {
       const parsed = JSON.parse(line) as { t?: number; c?: { tx?: string }[] };
