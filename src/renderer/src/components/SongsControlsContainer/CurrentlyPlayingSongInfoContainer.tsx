@@ -72,6 +72,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
     [navigate, currentSongData.isKnownSource]
   );
 
+  const openFullScreenPlayer = useCallback(
+    () => navigate({ to: '/fullscreen-player' }),
+    [navigate]
+  );
+
   const gotToSongAlbumPage = useCallback(
     () =>
       currentSongData.isKnownSource && currentSongData.album
@@ -256,10 +261,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
                `before:absolute before:h-[85%] before:w-[85%] before:rounded-md before:bg-background-color-2 before:bg-dark-background-color-2 before:content-[''] after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
              } */}
         <Img
-          className="aspect-square h-full max-w-full rounded-lg object-cover object-center shadow-xl"
+          className="aspect-square h-full max-w-full cursor-pointer rounded-lg object-cover object-center shadow-xl"
           src={currentSongData.artworkPath}
           fallbackSrc={DefaultSongCover}
           alt="Default song cover"
+          onClick={openFullScreenPlayer}
           onContextMenu={(e) => {
             e.stopPropagation();
             updateContextMenuData(
