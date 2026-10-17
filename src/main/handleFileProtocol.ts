@@ -154,8 +154,9 @@ const handleNeteaseStreamRoute = async (req: GlobalRequest, url: URL) => {
 
   try {
     // Preserving the Range header lets seek requests get 206 bodies; otherwise the CDN answers
-    // 200 with the full body. `net.fetch` follows the CDN's redirects itself.
-    const response = await net.fetch(streamInfo.url, { headers });
+    // 200 with the full body. Node fetch (undici) follows the CDN's redirects itself; Electron's
+    // net.fetch rejects these URLs with net::ERR_INVALID_ARGUMENT even though they are valid.
+    const response = await fetch(streamInfo.url, { headers });
 
     const responseHeaders = new Headers();
     for (const headerName of ['content-type', 'content-length', 'content-range', 'accept-ranges']) {
@@ -168,7 +169,14 @@ const handleNeteaseStreamRoute = async (req: GlobalRequest, url: URL) => {
       headers: responseHeaders
     });
   } catch (error) {
-    logger.error('Failed to proxy a NetEase stream.', { neteaseId, error });
+    const reason = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    let urlHost = '';
+    try {
+      urlHost = new URL(streamInfo.url).host;
+    } catch {
+      // The resolved URL itself was malformed; the reason above is the useful part.
+    }
+    logger.error('Failed to proxy a NetEase stream.', { neteaseId, reason, urlHost });
     return new Response('NetEase stream failed', { status: 502 });
   }
 };

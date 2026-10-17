@@ -1,4 +1,3 @@
-import storage from '@renderer/utils/localStorage';
 import { type ReactNode } from 'react';
 
 export interface AppReducer {
@@ -386,24 +385,26 @@ export {
   USER_DATA_TEMPLATE
 } from './localStorageTemplate';
 
-// Resolved lazily: reading localStorage at module-evaluation time made this module sensitive to
-// import order in the appReducer <-> utils/localStorage cycle (see localStorageTemplate.ts).
-const readLocalStorage = () => storage.getLocalStorage();
-
-export const DEFAULT_REDUCER_DATA: AppReducer = {
+/**
+ * Builds the initial store state from an already-loaded local-storage value. Taking it as a
+ * parameter keeps this module free of `utils/localStorage` (and `store`) imports — the three
+ * form a cycle, and evaluating storage during module init used to break it with
+ * "Cannot access 'storage' before initialization".
+ */
+export const createDefaultReducerData = (localStorage: LocalStorage): AppReducer => ({
   playerType: 'normal',
   player: {
     isCurrentSongPlaying: false,
-    volume: readLocalStorage().playback.volume,
-    isRepeating: readLocalStorage().playback.isRepeating,
-    isShuffling: readLocalStorage().playback.isShuffling,
+    volume: localStorage.playback.volume,
+    isRepeating: localStorage.playback.isRepeating,
+    isShuffling: localStorage.playback.isShuffling,
     songPosition: 0,
     isPlayerStalled: false,
-    playbackRate: readLocalStorage().playback.playbackRate
+    playbackRate: localStorage.playback.playbackRate
   },
   currentSongData: {} as AudioPlayerData,
   upNextSongData: {} as AudioPlayerData,
-  localStorage: readLocalStorage(),
+  localStorage,
   navigationHistory: {
     pageHistoryIndex: 0,
     history: [
@@ -442,6 +443,6 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',
   isOnBatteryPower: false
-};
+});
 
 export default reducer;

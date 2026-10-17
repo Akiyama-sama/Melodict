@@ -3,7 +3,7 @@
 
 export const NETEASE_SCHEME = 'nora';
 export const NETEASE_PROTOCOL_HOST = 'netease';
-export const NETEASE_SONG_PATH_PREFIX = `${NETEASE_PROTOCOL_HOST}://netease/song/`;
+export const NETEASE_SONG_PATH_PREFIX = `${NETEASE_SCHEME}://${NETEASE_PROTOCOL_HOST}/song/`;
 
 /** Audio quality levels exposed to the user; mapped 1:1 to NCM `song_url_v1.level`. */
 export type NeteaseQualityTypes = 'standard' | 'exhigh' | 'lossless';
