@@ -24,6 +24,7 @@ const LyricsContainer = (props: Props) => {
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { isLyricsVisible, setIsLyricsAvailable, selectedToken, onTokenClick } = props;
+  const isPanelOpen = Boolean(selectedToken);
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
@@ -174,7 +175,13 @@ const LyricsContainer = (props: Props) => {
     >
       {isLyricsVisible && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
         <>
-          {lyricsComponents}
+          {isPanelOpen ? (
+            // With the analysis panel open the lyrics column no longer sits beside the cover, so
+            // center the block in the remaining space. The lines themselves stay left-aligned.
+            <div className="mx-auto w-full max-w-[52rem]">{lyricsComponents}</div>
+          ) : (
+            lyricsComponents
+          )}
           {lyricsSource}
         </>
       )}

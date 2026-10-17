@@ -39,7 +39,9 @@ const LanguageSettings = () => {
               return i18n
                 .changeLanguage(val, (err) => {
                   if (err) return console.warn(err);
-                  window.api.userData.saveUserData('language', val);
+                  // The legacy `userData.saveUserData` channel has no handler in the main process,
+                  // so language changes were silently lost on restart. Persist through settings.
+                  window.api.settings.saveUserSettings({ language: val });
                   return window.api.appControls.restartRenderer(`App language changed to ${val}`);
                 })
                 .then(() =>

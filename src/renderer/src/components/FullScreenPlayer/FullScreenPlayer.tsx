@@ -82,20 +82,28 @@ const FullScreenPlayer = () => {
           className={`full-screen-player-main-container absolute inset-0 w-full max-w-full! overflow-hidden ${
             isFullLyricsScreen
               ? selectedToken
-                ? 'grid grid-cols-[minmax(12rem,18rem)_minmax(0,1fr)_minmax(22rem,30rem)]'
+                ? 'grid grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)]'
                 : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
               : 'grid grid-cols-1'
           }`}
         >
-          {isFullLyricsScreen && <SongInfoContainer songPos={songPos} compact={!!selectedToken} />}
+          {/* With the panel open the song info floats over the top third of the lyrics column only,
+              so the lyrics keep their original position and the panel never gets blurred over. */}
+          {isFullLyricsScreen && !selectedToken && <SongInfoContainer songPos={songPos} />}
 
-          <LyricsContainer
-            isFullLyricsScreen={isFullLyricsScreen}
-            isLyricsVisible={isLyricsVisible}
-            setIsLyricsAvailable={setIsLyricsAvailable}
-            selectedToken={selectedToken}
-            onTokenClick={(token, line) => setSelectedToken({ token, line })}
-          />
+          <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+            <LyricsContainer
+              isFullLyricsScreen={isFullLyricsScreen}
+              isLyricsVisible={isLyricsVisible}
+              setIsLyricsAvailable={setIsLyricsAvailable}
+              selectedToken={selectedToken}
+              onTokenClick={(token, line) => setSelectedToken({ token, line })}
+            />
+
+            {isFullLyricsScreen && selectedToken && (
+              <SongInfoContainer songPos={songPos} isOverlay />
+            )}
+          </div>
 
           {selectedToken && (
             <LyricsAnalysisPanel

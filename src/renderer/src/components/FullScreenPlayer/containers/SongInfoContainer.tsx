@@ -10,8 +10,11 @@ import UpNextSongPopup from '../../SongsControlsContainer/UpNextSongPopup';
 
 type Props = {
   songPos: number;
-  /** When the analysis panel is open the album column narrows to make room for it. */
-  compact?: boolean;
+  /**
+   * Floats over the top third of the lyrics column instead of taking a grid column. Used while the
+   * token panel is open, so the lyrics keep their original position and width.
+   */
+  isOverlay?: boolean;
 };
 
 const SongInfoContainer = (props: Props) => {
@@ -20,7 +23,7 @@ const SongInfoContainer = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { songPos, compact = false } = props;
+  const { songPos, isOverlay = false } = props;
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
@@ -55,27 +58,37 @@ const SongInfoContainer = (props: Props) => {
 
   return (
     <div
-      className={`song-img-and-info-container text-font-color-white flex flex-col justify-center gap-1 transition-[padding] duration-300 lg:ml-4 lg:w-full ${
-        compact ? 'px-4' : 'px-[10%]'
+      className={`song-img-and-info-container text-font-color-white flex flex-col justify-center gap-1 transition-[padding] duration-300 ${
+        isOverlay
+          ? // Floats over the top third of the (relative) lyrics column only, so the analysis panel
+            // stays clear. The lyrics scroll underneath and the gradient keeps text legible.
+            'absolute top-0 left-0 z-10 h-[34%] w-full justify-center overflow-hidden bg-linear-to-b from-black/85 via-black/60 to-transparent px-10 pt-10 pb-12'
+          : 'lg:ml-4 lg:w-full px-[10%]'
       }`}
     >
       <div
-        className={`grid auto-rows-min items-center justify-center ${
-          compact ? 'grid-cols-[minmax(10rem,14rem)]' : 'grid-cols-[20rem]'
-        }`}
+        className={
+          isOverlay
+            ? 'flex flex-row items-center gap-6'
+            : 'grid auto-rows-min grid-cols-[20rem] items-center justify-center'
+        }
       >
         <Img
           src={currentSongData.artworkPath}
           fallbackSrc={DefaultSongCover}
           loading="eager"
           alt="Song Cover"
-          className="aspect-auto w-full rounded-xl object-cover shadow-md"
+          className={`aspect-auto rounded-xl object-cover shadow-md ${
+            isOverlay ? 'h-36 w-36 shrink-0' : 'w-full'
+          }`}
         />
-        <div className="song-info-container">
+        <div className={`song-info-container ${isOverlay ? 'min-w-0' : ''}`}>
           {currentSongData.title && (
             <div className="song-title relative grid w-full max-w-full items-center">
               <div
-                className="text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden py-2 text-5xl font-medium text-ellipsis whitespace-normal outline-offset-1 focus-visible:outline!"
+                className={`text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden py-2 font-medium text-ellipsis whitespace-normal outline-offset-1 focus-visible:outline! ${
+                  isOverlay ? 'text-3xl' : 'text-5xl'
+                }`}
                 id="currentSongTitle"
                 title={currentSongData.title}
               >
@@ -119,11 +132,19 @@ const SongInfoContainer = (props: Props) => {
             className="text-md! w-fit"
             isSemiTransparent
           />
+          {isOverlay && (
+            <div className="song-duration mt-1 text-sm opacity-75">
+              {preferences?.showSongRemainingTime ? '-' : ''}
+              {songDuration.minutes}:{songDuration.seconds}
+            </div>
+          )}
         </div>
-        <div className="song-duration opacity-75">
-          {preferences?.showSongRemainingTime ? '-' : ''}
-          {songDuration.minutes}:{songDuration.seconds}
-        </div>
+        {!isOverlay && (
+          <div className="song-duration opacity-75">
+            {preferences?.showSongRemainingTime ? '-' : ''}
+            {songDuration.minutes}:{songDuration.seconds}
+          </div>
+        )}
       </div>
     </div>
   );

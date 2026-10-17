@@ -1025,5 +1025,38 @@
     "untitledSong": "无标题歌曲",
     "unknownArtist": "未知艺人",
     "playingASong": "正在播放歌曲"
+  },
+  "lyricsAnalysis": {
+    "panelTitle": "词语详情",
+    "closePanel": "关闭侧边栏",
+    "lineContext": "所在歌词",
+    "meaning": "在本句中的含义",
+    "grammarFunction": "语法作用",
+    "pronunciation": "发音",
+    "generatedByAi": "由你所配置的 AI 模型生成，可能存在错误。",
+    "notifications": {
+      "invalidApiKey": "AI 服务拒绝了你的 API Key，请在「设置 > 歌词解析」中检查。",
+      "endpointUnreachable": "无法连接到 AI 服务，请检查 Base URL 和网络连接。",
+      "analysisFailed": "歌词解析失败，请到「设置 > 歌词解析」测试连接。"
+    },
+    "settings": {
+      "title": "歌词解析（AI）",
+      "description": "一个兼容 OpenAI 的接口，用于把歌词拆分成可点击的学习词块。支持 OpenAI 及大多数第三方中转服务。",
+      "baseURL": "Base URL",
+      "baseURLHint": "需要包含版本前缀，例如 https://api.openai.com/v1。",
+      "apiKey": "API Key",
+      "apiKeyHint": "当系统钥匙串可用时，Key 会加密保存在本机。",
+      "apiKeyStoredPlaceholder": "留空则保留已保存的 Key",
+      "apiKeyStoredHint": "已保存 Key。只有需要替换时才输入新的 Key。",
+      "modelId": "模型 ID",
+      "modelIdHint": "用于解析的对话模型，例如 gpt-4o-mini。",
+      "save": "保存",
+      "testConnection": "测试连接",
+      "saved": "歌词解析设置已保存。",
+      "saveFailed": "无法保存歌词解析设置。",
+      "testSucceeded": "连接成功",
+      "testFailed": "连接失败",
+      "latency": "往返耗时：{{ms}} 毫秒"
+    }
   }
 }
