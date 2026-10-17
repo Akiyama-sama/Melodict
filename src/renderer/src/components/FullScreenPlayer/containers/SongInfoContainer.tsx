@@ -7,6 +7,7 @@ import DefaultSongCover from '../../../assets/images/webp/song_cover_default.web
 import calculateTime from '../../../utils/calculateTime';
 import Img from '../../Img';
 import UpNextSongPopup from '../../SongsControlsContainer/UpNextSongPopup';
+import LyricsAnalysisStatusIndicator from '../analysis/LyricsAnalysisStatusIndicator';
 
 type Props = {
   songPos: number;
@@ -134,16 +135,22 @@ const SongInfoContainer = (props: Props) => {
             isSemiTransparent
           />
           {isOverlay && (
-            <div className="song-duration mt-1 text-sm opacity-75">
-              {preferences?.showSongRemainingTime ? '-' : ''}
-              {songDuration.minutes}:{songDuration.seconds}
+            <div className="song-duration mt-1 flex items-center gap-2 text-sm">
+              <LyricsAnalysisStatusIndicator />
+              <span className="opacity-75">
+                {preferences?.showSongRemainingTime ? '-' : ''}
+                {songDuration.minutes}:{songDuration.seconds}
+              </span>
             </div>
           )}
         </div>
         {!isOverlay && (
-          <div className="song-duration opacity-75">
-            {preferences?.showSongRemainingTime ? '-' : ''}
-            {songDuration.minutes}:{songDuration.seconds}
+          <div className="song-duration flex items-center gap-2">
+            <LyricsAnalysisStatusIndicator />
+            <span className="opacity-75">
+              {preferences?.showSongRemainingTime ? '-' : ''}
+              {songDuration.minutes}:{songDuration.seconds}
+            </span>
           </div>
         )}
       </div>

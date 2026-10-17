@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { getRawLyricLineText } from '../other/lyricsAnalysisUtils';
+import {
+  IDLE_LYRICS_ANALYSIS_STATUS,
+  deriveLyricsAnalysisUiStatus,
+  setLyricsAnalysisUiStatus
+} from '../other/lyricsAnalysisStatus';
 
 type UseLyricsAnalysisOptions = {
   songPath?: string;
@@ -44,6 +49,28 @@ const useLyricsAnalysis = (options: UseLyricsAnalysisOptions) => {
   );
 
   const songKey = songPath && inputLines.length > 0 ? songPath : undefined;
+
+  const completedLines = useMemo(
+    () => Object.values(linesById).filter((line) => line.tokens.length > 0).length,
+    [linesById]
+  );
+
+  // The status icon is rendered in the song-info column, outside this hook's tree, so publish the
+  // derived state to a store the icon subscribes to. The snapshot reset for a new song happens in an
+  // effect below, so compare song paths here to avoid flashing the previous song's state.
+  useEffect(() => {
+    setLyricsAnalysisUiStatus(
+      deriveLyricsAnalysisUiStatus({
+        isEnabled,
+        totalLines: inputLines.length,
+        completedLines,
+        snapshot: snapshot?.songPath === songKey ? snapshot : undefined
+      })
+    );
+  }, [isEnabled, inputLines.length, completedLines, snapshot, songKey]);
+
+  // Unmounting (leaving the fullscreen player) must not leave a stale icon behind.
+  useEffect(() => () => setLyricsAnalysisUiStatus(IDLE_LYRICS_ANALYSIS_STATUS), []);
 
   useEffect(() => {
     if (!isEnabled || !songKey || !songTitle) return undefined;
