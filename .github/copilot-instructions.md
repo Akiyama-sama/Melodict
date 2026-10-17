@@ -802,11 +802,11 @@ useEffect(() => {
 ### Running Tests
 
 ```bash
-npm test                    # Run all tests in watch mode
-npm run coverage            # Run tests with coverage report
-npm run check-types         # TypeScript type checking
-npm run lint                # ESLint
-npm run prettier-check      # Prettier formatting check
+pnpm test                   # Run all tests in watch mode
+pnpm run coverage           # Run tests with coverage report
+pnpm run check-types        # TypeScript type checking
+pnpm run lint               # oxlint
+pnpm run format-check       # oxfmt formatting check
 ```
 
 ### Test Patterns
@@ -853,44 +853,44 @@ const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 ```bash
 # Development
-npm start                   # Preview production build
-npm run dev                 # Hot-reload development mode
+pnpm start                   # Preview production build
+pnpm run dev                 # Hot-reload development mode
 
 # Type Checking
-npm run typecheck           # Check all TypeScript
-npm run typecheck:node      # Check main process only
-npm run typecheck:web       # Check renderer process only
+pnpm run typecheck           # Check all TypeScript
+pnpm run typecheck:node      # Check main process only
+pnpm run typecheck:web       # Check renderer process only
 
 # Building
-npm run build               # Build all processes (main + preload + renderer)
-npm run build:win           # Build Windows installer (x64 + arm64)
-npm run build:win-x64       # Build Windows installer (x64 only)
-npm run build:mac           # Build macOS installer
-npm run build:linux         # Build Linux installer
-npm run build:unpack        # Build without packaging (for testing)
+pnpm run build               # Build all processes (main + preload + renderer)
+pnpm run build:win           # Build Windows installer (x64 + arm64)
+pnpm run build:win-x64       # Build Windows installer (x64 only)
+pnpm run build:mac           # Build macOS installer
+pnpm run build:linux         # Build Linux installer
+pnpm run build:unpack        # Build without packaging (for testing)
 
 # Database (Drizzle ORM)
-npm run db:migrate          # Run pending migrations
-npm run db:generate         # Generate migration files from schema
-npm run db:push             # Push schema changes without migrations
-npm run db:studio           # Open Drizzle Studio (database GUI)
-npm run db:drop             # Drop database (custom script)
+pnpm run db:migrate          # Run pending migrations
+pnpm run db:generate         # Generate migration files from schema
+pnpm run db:push             # Push schema changes without migrations
+pnpm run db:studio           # Open Drizzle Studio (database GUI)
+pnpm run db:drop             # Drop database (custom script)
 
 # Routing (TanStack Router)
-npm run renderer:generate-routes   # Generate route tree
-npm run renderer:watch-routes      # Watch and auto-generate routes
+pnpm run renderer:generate-routes   # Generate route tree
+pnpm run renderer:watch-routes      # Watch and auto-generate routes
 ```
 
 ### Project-Specific npm Scripts
 
 ```bash
 # Code Quality
-npm run format              # Auto-fix formatting with Prettier
-npm run lint-fix            # Auto-fix linting issues
-npm run eslint-inspector    # Open ESLint config inspector
+pnpm run format              # Auto-fix formatting with Prettier
+pnpm run lint-fix            # Auto-fix linting issues
+pnpm run eslint-inspector    # Open ESLint config inspector
 
 # Pre-commit
-npm run husky-test          # Run before commits (Prettier + tests)
+pnpm run husky-test          # Run before commits (Prettier + tests)
 ```
 
 ---
@@ -1150,13 +1150,13 @@ For detailed TanStack Query patterns, see the **TanStack Query Patterns skill**.
 
 When making changes:
 
-1. **Run type checks**: `npm run typecheck`
+1. **Run type checks**: `pnpm run typecheck`
 2. **Run tests**: `npm test`
-3. **Format code**: `npm run format`
-4. **Fix linting**: `npm run lint-fix`
-5. **Test production build**: `npm run build:unpack` → `npm start`
+3. **Format code**: `pnpm run format`
+4. **Fix linting**: `pnpm run lint-fix`
+5. **Test production build**: `pnpm run build:unpack` → `pnpm start`
 
-**Pre-commit**: Husky runs `npm run husky-test` (Prettier check + tests).
+**Pre-commit**: Husky runs `pnpm run husky-test` (Prettier check + tests).
 
 ---
 

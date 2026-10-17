@@ -177,19 +177,19 @@ test/
 
 ```bash
 # Run all tests
-npm test
+pnpm test
 
 # Run tests for specific directory
-npm test test/src/main/fs/
+pnpm test test/src/main/fs/
 
 # Run single test file
-npm test test/src/main/fs/getParentFolderPaths.test.ts
+pnpm test test/src/main/fs/getParentFolderPaths.test.ts
 
 # Run integration tests
-npm test test/integration/
+pnpm test test/integration/
 
 # Run with coverage
-npm run coverage
+pnpm run coverage
 ```
 
 ## Related Documentation

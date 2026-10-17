@@ -17,9 +17,9 @@
 ## Checklist:
 
 - [ ] Have you checked to ensure there aren't other open [Pull Requests](https://github.com/Sandakan/Nora/pulls) for the same update/change?
-- [ ] Have you linted your code locally before submission with `npm run lint` and `npm run prettier-write` commands?
-- [ ] Have you successfully run the app with your changes locally with `npm run dev`?
-- [ ] Have you successfully ran available tests with `npm run test`?
+- [ ] Have you linted your code locally before submission with `pnpm run lint` and `pnpm run format-write` commands?
+- [ ] Have you successfully run the app with your changes locally with `pnpm run dev`?
+- [ ] Have you successfully ran available tests with `pnpm test`?
 
 > [!IMPORTANT] > **Fill below checklist items to,**
 >
@@ -33,7 +33,7 @@
   - [ ] Paste the artwork to the top of this PR.
   - [ ] Link the artwork to the [readme.md](https://github.com/Sandakan/Nora/tree/master/readme.md) in the project root.
 - [ ] Create and paste the artwork for the installer to the [/build/installer_assets/sidebar.bmp](https://github.com/Sandakan/Nora/tree/master/build/installer_assets/sidebar.bmp) directory.
-- [ ] Update the `version` entry in `package.json` and `package-lock.json` files in the [root](https://github.com/Sandakan/Nora/tree/master/) directory.
+- [ ] Update the `version` entry in `package.json` (and lockfile if it changes) in the [root](https://github.com/Sandakan/Nora/tree/master/) directory.
 - [ ] Manage the changelog of this release
   - [ ] Copy the release notes from this PR and paste them to the [changelog.md](https://github.com/Sandakan/Nora/tree/master/changelog.md) file.
   - [ ] Create a new `versions` entry in [release-notes.json](https://github.com/Sandakan/Nora/tree/master/release-notes.json) file.

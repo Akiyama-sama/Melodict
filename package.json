@@ -3,13 +3,13 @@
   "version": "4.0.0-alpha.5",
   "type": "module",
   "description": "Nora",
+  "packageManager": "pnpm@10.27.0",
   "devEngines": {
-    "packageManager": [
-      {
-        "name": "npm",
-        "version": "^11.6.2"
-      }
-    ]
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^10.27.0",
+      "onFail": "warn"
+    }
   },
   "keywords": [
     "music",
@@ -61,23 +61,16 @@
       "flac"
     ]
   },
-  "overrides": {
-    "tar": "^7.5.13",
-    "phin": "^3.7.1",
-    "esbuild": "^0.28.0",
-    "cross-spawn": "^7.0.6",
-    "jpeg-js": "^0.4.4",
-    "uuid": "^12.0.0"
-  },
   "_comments": {
-    "sharp": "Using WASM build for cross-platform compatibility. Install with: npm install --cpu=wasm32 sharp",
-    "prebuild:wasm": "Creates placeholder directory for Sharp platform compatibility due to package-lock.json references"
+    "overrides": "Dependency overrides live in pnpm-workspace.yaml; pnpm ignores the npm `overrides` field.",
+    "sharp": "Using WASM build for cross-platform compatibility. Install with: pnpm add --cpu=wasm32 sharp",
+    "prebuild:wasm": "Creates placeholder directory for Sharp platform compatibility due to lockfile references"
   },
   "scripts": {
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "check-types": "tsc --noEmit",
-    "husky-test": "npm run format && npm run lint && npm test",
+    "husky-test": "pnpm run format && pnpm run lint && pnpm test",
     "prepare": "husky",
     "format-check": "oxfmt --check",
     "format-write": "oxfmt",
@@ -85,22 +78,22 @@
     "lint": "oxlint .",
     "lint-fix": "oxlint . --fix",
     "lint-save-results": "oxlint -f json > ./lint_results.json",
-    "eslint-inspector": "npx @eslint/config-inspector@latest",
+    "eslint-inspector": "pnpm dlx @eslint/config-inspector@latest",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
     "start": "electron-vite preview",
     "dev": "electron-vite dev --watch --inspect --sourcemap",
     "build": "electron-vite build",
     "prebuild:wasm": "node -e \"const fs = require('fs'); const path = require('path'); const dir = path.join(__dirname, 'node_modules', '@img', 'sharp-darwin-arm64'); if (!fs.existsSync(dir)) { fs.mkdirSync(dir, { recursive: true }); console.log('Created placeholder for Sharp platform compatibility (using WASM build)'); }\"",
     "postinstall": "electron-builder install-app-deps",
-    "build:unpack": "npm run prebuild:wasm && npm run build && electron-builder --dir --publish=never",
-    "build:win": "npm run prebuild:wasm && npm run build && electron-builder --win --publish=never",
-    "build:win-x64": "npm run prebuild:wasm && npm run build && electron-builder --win --x64 --publish=never",
-    "build:mac": "npm run prebuild:wasm && npm run build && electron-builder --mac --publish=never",
-    "build:mac-arm64": "npm run prebuild:wasm && npm run build && electron-builder --mac --arm64 --publish=never",
-    "build:linux": "npm run prebuild:wasm && npm run build && electron-builder --linux --publish=never",
-    "build:flatpak": "npm run build && electron-builder --linux --dir --publish=never",
+    "build:unpack": "pnpm run prebuild:wasm && pnpm run build && electron-builder --dir --publish=never",
+    "build:win": "pnpm run prebuild:wasm && pnpm run build && electron-builder --win --publish=never",
+    "build:win-x64": "pnpm run prebuild:wasm && pnpm run build && electron-builder --win --x64 --publish=never",
+    "build:mac": "pnpm run prebuild:wasm && pnpm run build && electron-builder --mac --publish=never",
+    "build:mac-arm64": "pnpm run prebuild:wasm && pnpm run build && electron-builder --mac --arm64 --publish=never",
+    "build:linux": "pnpm run prebuild:wasm && pnpm run build && electron-builder --linux --publish=never",
+    "build:flatpak": "pnpm run build && electron-builder --linux --dir --publish=never",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
@@ -111,8 +104,8 @@
     "logs": "node ./scripts/colorize-logs.ts --use-env-log-path",
     "renderer:generate-routes": "tsr generate",
     "renderer:watch-routes": "tsr watch",
-    "preversion": "npm test",
-    "version": "npm install && npm run build"
+    "preversion": "pnpm test",
+    "version": "pnpm install && pnpm run build"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.130",
@@ -190,12 +183,5 @@
     "vite": "^8.0.8",
     "vitest": "^4.1.2",
     "yoctocolors": "^2.1.2"
-  },
-  "allowScripts": {
-    "electron": true,
-    "electron-winstaller": true,
-    "esbuild": true,
-    "sharp": true,
-    "github:devsnek/node-register-scheme#e7cc9a63a1f512565da44cb57316d9fb10750e17": true
   }
 }

@@ -10,7 +10,7 @@ This document covers known development setup issues and their solutions when wor
 
 #### Symptom
 
-When running `npm run dev` or `npm start`, the dev server fails to start with the following error output:
+When running `pnpm run dev` or `pnpm start`, the dev server fails to start with the following error output:
 
 ```text
 error during start dev server and electron app:
@@ -32,9 +32,9 @@ Error: Electron uninstall
    ```
 3. Alternatively, rebuild or force-reinstall Electron:
    ```bash
-   npm rebuild electron
+   pnpm rebuild electron
    ```
    or
    ```bash
-   npm install electron@latest --force
+   pnpm add -D electron@latest
    ```

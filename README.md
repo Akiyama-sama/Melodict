@@ -120,13 +120,13 @@ cd Nora
 Install dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 Launch in development mode
 
 ```bash
-npm start
+pnpm start
 ```
 
 > [!TIP]

@@ -1,0 +1,17 @@
+# pnpm-only settings. `overrides` and `allowScripts` in package.json are npm fields; pnpm ignores
+# both, so the dependency overrides and build-script approvals live here instead.
+overrides:
+  tar: ^7.5.13
+  phin: ^3.7.1
+  esbuild: ^0.28.0
+  cross-spawn: ^7.0.6
+  jpeg-js: ^0.4.4
+  uuid: ^12.0.0
+
+# Only the packages that ship install scripts in this dependency tree. better-sqlite3 is
+# deliberately absent: the app uses PGlite, and it is only an auto-installed optional peer of
+# drizzle-orm, so it should not be compiled.
+onlyBuiltDependencies:
+  - '@swc/core'
+  - esbuild
+  - register-scheme

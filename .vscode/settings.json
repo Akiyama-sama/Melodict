@@ -53,9 +53,7 @@
     ".erb/dll": true,
     "release/{build,app/dist}": true,
     "node_modules": true,
-    "npm-debug.log.*": true,
     "test/**/__snapshots__": true,
-    "package-lock.json": true,
     "*.{css,sass,scss}.d.ts": true,
     "**/routeTree.gen.ts": true
   },
@@ -86,5 +84,8 @@
   },
   "editor.wordWrap": "off",
   "gutterpreview.imagePreviewMaxWidth": 0,
-  "editor.defaultFormatter": "oxc.oxc-vscode"
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "i18n-ally.localesPaths": [
+    "src/renderer/src/assets/locales"
+  ]
 }
