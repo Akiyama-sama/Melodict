@@ -3,7 +3,6 @@ import type {
   LyricsAnalysisErrorCode,
   LyricsAnalysisLine,
   LyricsAnalysisLineEvent,
-  LyricsAnalysisProviderConfigSummary,
   LyricsAnalysisProviderTestResult,
   LyricsAnalysisRequest,
   LyricsAnalysisSessionStatus,
@@ -450,8 +449,11 @@ declare global {
   type LyricsAnalysisSessionStatus = import('@common/lyricsAnalysis').LyricsAnalysisSessionStatus;
   type LyricsAnalysisError = import('@common/lyricsAnalysis').LyricsAnalysisError;
   type LyricsAnalysisErrorCode = import('@common/lyricsAnalysis').LyricsAnalysisErrorCode;
-  type LyricsAnalysisProviderConfigSummary =
-    import('@common/lyricsAnalysis').LyricsAnalysisProviderConfigSummary;
+  type LyricsAnalysisProviderProfile = import('@common/lyricsAnalysis').LyricsAnalysisProviderProfile;
+  type LyricsAnalysisProviderProfilesState =
+    import('@common/lyricsAnalysis').LyricsAnalysisProviderProfilesState;
+  type LyricsAnalysisProviderProfileInput =
+    import('@common/lyricsAnalysis').LyricsAnalysisProviderProfileInput;
   type LyricsAnalysisProviderTestResult =
     import('@common/lyricsAnalysis').LyricsAnalysisProviderTestResult;
 

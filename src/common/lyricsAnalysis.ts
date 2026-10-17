@@ -104,10 +104,32 @@ export interface LyricsAnalysisProviderConfig {
   apiKey?: string;
 }
 
-export interface LyricsAnalysisProviderConfigSummary {
+/** One saved provider, safe to hand to the renderer: the key itself never leaves the main process. */
+export interface LyricsAnalysisProviderProfile {
+  id: string;
+  name: string;
   baseURL: string;
   modelId: string;
   hasApiKey: boolean;
+  /** Masked tail for display, e.g. `••••ab12`. */
+  apiKeyHint?: string;
+  isActive: boolean;
+}
+
+export interface LyricsAnalysisProviderProfilesState {
+  profiles: LyricsAnalysisProviderProfile[];
+  activeProfileId?: string;
+}
+
+export interface LyricsAnalysisProviderProfileInput {
+  /** Present when editing an existing profile. */
+  id?: string;
+  /** Falls back to a name derived from the base URL. */
+  name?: string;
+  baseURL: string;
+  modelId: string;
+  /** `undefined` keeps the stored key, an empty string clears it. */
+  apiKey?: string;
 }
 
 export interface LyricsAnalysisProviderTestResult {

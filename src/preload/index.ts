@@ -218,15 +218,23 @@ const lyricsAnalysis = {
   removeSnapshotListener: (
     callback: (event: unknown, snapshot: LyricsAnalysisSnapshot) => void
   ) => ipcRenderer.removeListener('app/lyricsAnalysis/snapshot', callback),
-  getProviderConfig: (): Promise<LyricsAnalysisProviderConfigSummary> =>
-    ipcRenderer.invoke('app/lyricsAnalysis/getProviderConfig'),
-  saveProviderConfig: (input: {
-    baseURL: string;
-    modelId: string;
-    apiKey?: string;
-  }): Promise<LyricsAnalysisProviderConfigSummary> =>
-    ipcRenderer.invoke('app/lyricsAnalysis/saveProviderConfig', input),
+  getProviderProfiles: (): Promise<LyricsAnalysisProviderProfilesState> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/getProviderProfiles'),
+  saveProviderProfile: (
+    input: LyricsAnalysisProviderProfileInput
+  ): Promise<LyricsAnalysisProviderProfilesState> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/saveProviderProfile', input),
+  setActiveProviderProfile: (profileId: string): Promise<LyricsAnalysisProviderProfilesState> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/setActiveProviderProfile', profileId),
+  deleteProviderProfile: (profileId: string): Promise<LyricsAnalysisProviderProfilesState> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/deleteProviderProfile', profileId),
+  /** Reveals the decrypted key only when the user asks to show or copy it. */
+  revealProviderApiKey: (profileId: string): Promise<string | undefined> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/revealProviderApiKey', profileId),
+  copyProviderApiKey: (profileId: string): Promise<boolean> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/copyProviderApiKey', profileId),
   testProvider: (input?: {
+    profileId?: string;
     baseURL?: string;
     modelId?: string;
     apiKey?: string;

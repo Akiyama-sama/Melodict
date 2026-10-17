@@ -1,30 +1,57 @@
+import crypto from 'crypto';
 import { app, safeStorage } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
 
+import type { LyricsAnalysisProviderProfileInput } from '../../common/lyricsAnalysis';
 import logger from '../logger';
 
-const CONFIG_FILE_NAME = 'lyrics-analysis-provider.json';
+const CONFIG_FILE_NAME = 'lyrics-analysis-providers.json';
 
-interface StoredProviderConfigFile {
-  baseURL?: string;
-  modelId?: string;
+interface StoredProfileFile {
+  id: string;
+  name: string;
+  baseURL: string;
+  modelId: string;
   /** base64 of `safeStorage.encryptString(apiKey)` when OS encryption is available. */
   apiKeyEncrypted?: string;
   /** Only used when OS encryption is unavailable (e.g. minimal Linux environments). */
   apiKeyPlain?: string;
 }
 
-export interface StoredProviderConfig {
+interface StoredProfilesFile {
+  version: 2;
+  activeProfileId?: string;
+  profiles: StoredProfileFile[];
+}
+
+export interface StoredProviderProfile {
+  id: string;
+  name: string;
   baseURL: string;
   modelId: string;
+  apiKeyHint?: string;
+  hasApiKey: boolean;
+}
+
+export interface StoredProviderProfileWithKey extends StoredProviderProfile {
   apiKey?: string;
 }
+
+// A factory, not a shared constant: callers mutate the returned state (push/remove profiles), and a
+// shared empty object would silently leak profiles from one "no config yet" read into the next.
+const createEmptyState = (): StoredProfilesFile => ({ version: 2, profiles: [] });
 
 export const getLyricsAnalysisConfigPath = () =>
   path.join(app.getPath('userData'), CONFIG_FILE_NAME);
 
-const encryptApiKey = (apiKey: string): Pick<StoredProviderConfigFile, 'apiKeyEncrypted' | 'apiKeyPlain'> => {
+/** Pre-profile releases stored a single provider in this file; it is migrated on first read. */
+const getLegacyConfigPath = () =>
+  path.join(app.getPath('userData'), 'lyrics-analysis-provider.json');
+
+const encryptApiKey = (
+  apiKey: string
+): Pick<StoredProfileFile, 'apiKeyEncrypted' | 'apiKeyPlain'> => {
   if (apiKey.length === 0) return {};
 
   try {
@@ -40,7 +67,7 @@ const encryptApiKey = (apiKey: string): Pick<StoredProviderConfigFile, 'apiKeyEn
   return { apiKeyPlain: apiKey };
 };
 
-const decryptApiKey = (stored: StoredProviderConfigFile) => {
+const decryptApiKey = (stored: Pick<StoredProfileFile, 'apiKeyEncrypted' | 'apiKeyPlain'>) => {
   if (stored.apiKeyEncrypted) {
     try {
       return safeStorage.decryptString(Buffer.from(stored.apiKeyEncrypted, 'base64'));
@@ -53,58 +80,243 @@ const decryptApiKey = (stored: StoredProviderConfigFile) => {
   return stored.apiKeyPlain;
 };
 
-const readConfigFile = async (): Promise<StoredProviderConfigFile> => {
+const readJsonFile = async <T>(filePath: string): Promise<T | undefined> => {
   try {
-    const data = await fs.readFile(getLyricsAnalysisConfigPath(), 'utf-8');
-    const parsed = JSON.parse(data) as StoredProviderConfigFile;
-    return parsed && typeof parsed === 'object' ? parsed : {};
+    const data = await fs.readFile(filePath, 'utf-8');
+    const parsed = JSON.parse(data) as T;
+    return parsed && typeof parsed === 'object' ? parsed : undefined;
   } catch (error) {
     // A missing file is the normal first-run case, not an error worth logging loudly.
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      logger.warn('Failed to read the lyrics analysis provider config.', { error });
-    return {};
+      logger.warn('Failed to read the lyrics analysis provider config.', { error, filePath });
+    return undefined;
   }
 };
 
-export const getStoredProviderConfig = async (): Promise<StoredProviderConfig> => {
-  const stored = await readConfigFile();
-
-  return {
-    baseURL: typeof stored.baseURL === 'string' ? stored.baseURL : '',
-    modelId: typeof stored.modelId === 'string' ? stored.modelId : '',
-    apiKey: decryptApiKey(stored)
-  };
-};
-
-export const saveStoredProviderConfig = async (input: {
-  baseURL: string;
-  modelId: string;
-  /** `undefined` keeps the existing key, `''` clears it. */
-  apiKey?: string;
-}) => {
-  const stored = await readConfigFile();
-  const next: StoredProviderConfigFile = {
-    baseURL: input.baseURL.trim(),
-    modelId: input.modelId.trim()
-  };
-
-  if (input.apiKey === undefined) {
-    next.apiKeyEncrypted = stored.apiKeyEncrypted;
-    next.apiKeyPlain = stored.apiKeyPlain;
-  } else {
-    Object.assign(next, encryptApiKey(input.apiKey.trim()));
-  }
-
+const writeState = async (state: StoredProfilesFile) => {
   const configPath = getLyricsAnalysisConfigPath();
   const tempPath = `${configPath}.tmp`;
 
   await fs.mkdir(path.dirname(configPath), { recursive: true });
-  await fs.writeFile(tempPath, JSON.stringify(next, null, 2), { mode: 0o600 });
+  await fs.writeFile(tempPath, JSON.stringify(state, null, 2), { mode: 0o600 });
   await fs.rename(tempPath, configPath);
+};
 
-  logger.debug('Saved lyrics analysis provider config.', {
-    baseURL: next.baseURL,
-    modelId: next.modelId,
-    hasApiKey: Boolean(next.apiKeyEncrypted ?? next.apiKeyPlain)
+const deriveProfileName = (baseURL: string) => {
+  try {
+    const host = new URL(/^[a-z][a-z\d+\-.]*:\/\//i.test(baseURL) ? baseURL : `https://${baseURL}`)
+      .hostname;
+    return host.length > 0 ? host : baseURL;
+  } catch {
+    return baseURL;
+  }
+};
+
+const createProfileId = () => crypto.randomBytes(6).toString('hex');
+
+const maskApiKey = (apiKey?: string) => {
+  const trimmed = apiKey?.trim();
+  if (!trimmed) return undefined;
+  // Enough of the tail to tell two keys apart, never enough to reuse one.
+  return `••••${trimmed.slice(-4)}`;
+};
+
+const isStoredProfile = (value: unknown): value is StoredProfileFile => {
+  if (!value || typeof value !== 'object') return false;
+  const profile = value as Partial<StoredProfileFile>;
+  return (
+    typeof profile.id === 'string' &&
+    typeof profile.baseURL === 'string' &&
+    typeof profile.modelId === 'string'
+  );
+};
+
+const migrateLegacyConfig = async (): Promise<StoredProfilesFile | undefined> => {
+  const legacy = await readJsonFile<{
+    baseURL?: string;
+    modelId?: string;
+    apiKeyEncrypted?: string;
+    apiKeyPlain?: string;
+  }>(getLegacyConfigPath());
+
+  if (!legacy || typeof legacy.baseURL !== 'string') return undefined;
+
+  const profile: StoredProfileFile = {
+    id: createProfileId(),
+    name: deriveProfileName(legacy.baseURL),
+    baseURL: legacy.baseURL,
+    modelId: legacy.modelId ?? '',
+    apiKeyEncrypted: legacy.apiKeyEncrypted,
+    apiKeyPlain: legacy.apiKeyPlain
+  };
+  const state: StoredProfilesFile = {
+    version: 2,
+    activeProfileId: profile.id,
+    profiles: [profile]
+  };
+
+  await writeState(state);
+  logger.debug('Migrated the legacy lyrics analysis provider config to profiles.');
+  return state;
+};
+
+const readState = async (): Promise<StoredProfilesFile> => {
+  const stored = await readJsonFile<Partial<StoredProfilesFile>>(getLyricsAnalysisConfigPath());
+
+  if (!stored) return (await migrateLegacyConfig()) ?? createEmptyState();
+
+  if (!Array.isArray(stored.profiles)) return createEmptyState();
+
+  const profiles = stored.profiles.filter(isStoredProfile).map((profile) => ({
+    ...profile,
+    // Names were optional when the profile was written by an older build.
+    name: typeof profile.name === 'string' && profile.name.trim() ? profile.name : deriveProfileName(profile.baseURL)
+  }));
+
+  return {
+    version: 2,
+    activeProfileId:
+      typeof stored.activeProfileId === 'string' &&
+      profiles.some((profile) => profile.id === stored.activeProfileId)
+        ? stored.activeProfileId
+        : profiles[0]?.id,
+    profiles
+  };
+};
+
+/** Profiles as the renderer is allowed to see them: masked keys, no secrets. */
+export const getStoredProviderProfiles = async () => {
+  const state = await readState();
+
+  return {
+    activeProfileId: state.activeProfileId,
+    profiles: state.profiles.map((profile): StoredProviderProfile => {
+      const apiKey = decryptApiKey(profile);
+      return {
+        id: profile.id,
+        name: profile.name,
+        baseURL: profile.baseURL,
+        modelId: profile.modelId,
+        hasApiKey: Boolean(apiKey?.trim()),
+        apiKeyHint: maskApiKey(apiKey)
+      };
+    })
+  };
+};
+
+/** The active profile with its decrypted key, for the analysis worker. */
+export const getStoredProviderConfig = async (): Promise<{
+  id?: string;
+  name?: string;
+  baseURL: string;
+  modelId: string;
+  apiKey?: string;
+}> => {
+  const state = await readState();
+  const active =
+    state.profiles.find((profile) => profile.id === state.activeProfileId) ?? state.profiles[0];
+
+  if (!active) return { baseURL: '', modelId: '' };
+
+  return {
+    id: active.id,
+    name: active.name,
+    baseURL: active.baseURL,
+    modelId: active.modelId,
+    apiKey: decryptApiKey(active)
+  };
+};
+
+/** One profile by id, with its decrypted key. Used to test a profile that is not active. */
+export const getStoredProviderProfile = async (profileId: string): Promise<StoredProviderProfileWithKey | undefined> => {
+  const state = await readState();
+  const profile = state.profiles.find((entry) => entry.id === profileId);
+  if (!profile) return undefined;
+
+  const apiKey = decryptApiKey(profile);
+  return {
+    id: profile.id,
+    name: profile.name,
+    baseURL: profile.baseURL,
+    modelId: profile.modelId,
+    hasApiKey: Boolean(apiKey?.trim()),
+    apiKeyHint: maskApiKey(apiKey),
+    apiKey
+  };
+};
+
+export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderProfileInput) => {
+  const state = await readState();
+  const baseURL = input.baseURL.trim();
+  const modelId = input.modelId.trim();
+  const name = input.name?.trim() || deriveProfileName(baseURL);
+  const existingIndex = input.id
+    ? state.profiles.findIndex((profile) => profile.id === input.id)
+    : -1;
+
+  if (existingIndex >= 0) {
+    const existing = state.profiles[existingIndex];
+    const next: StoredProfileFile = {
+      id: existing.id,
+      name,
+      baseURL,
+      modelId,
+      apiKeyEncrypted: existing.apiKeyEncrypted,
+      apiKeyPlain: existing.apiKeyPlain
+    };
+
+    if (input.apiKey !== undefined) Object.assign(next, encryptApiKey(input.apiKey.trim()));
+    state.profiles[existingIndex] = next;
+  } else {
+    const profile: StoredProfileFile = {
+      id: createProfileId(),
+      name,
+      baseURL,
+      modelId,
+      ...encryptApiKey(input.apiKey?.trim() ?? '')
+    };
+
+    state.profiles.push(profile);
+    // A newly added profile is what the user wants to use next.
+    state.activeProfileId = profile.id;
+  }
+
+  await writeState(state);
+
+  logger.debug('Saved a lyrics analysis provider profile.', {
+    name,
+    baseURL,
+    modelId,
+    updated: existingIndex >= 0
   });
+
+  return getStoredProviderProfiles();
+};
+
+export const setActiveProviderProfile = async (profileId: string) => {
+  const state = await readState();
+
+  if (!state.profiles.some((profile) => profile.id === profileId))
+    throw new Error(`Unknown lyrics analysis provider profile: ${profileId}`);
+
+  state.activeProfileId = profileId;
+  await writeState(state);
+
+  return getStoredProviderProfiles();
+};
+
+export const deleteProviderProfile = async (profileId: string) => {
+  const state = await readState();
+  const remaining = state.profiles.filter((profile) => profile.id !== profileId);
+
+  if (remaining.length === state.profiles.length)
+    throw new Error(`Unknown lyrics analysis provider profile: ${profileId}`);
+
+  state.profiles = remaining;
+  // Deleting the active profile can never leave the app pointing at a missing entry.
+  if (state.activeProfileId === profileId) state.activeProfileId = remaining[0]?.id;
+
+  await writeState(state);
+
+  return getStoredProviderProfiles();
 };
