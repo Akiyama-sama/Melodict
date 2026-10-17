@@ -21,12 +21,19 @@ import {
   validateAndNormalizeLineAnalysis
 } from '../../common/lyricsAnalysis';
 
+// This module runs inside the lyrics-analysis utility process, which cannot import Electron
+// modules (`app` is not exported there — importing the main logger crashes the worker), so
+// diagnostics go to stderr, which `stdio: 'inherit'` pipes into the main-process console.
+const logWorkerWarning = (message: string, data: Record<string, unknown>) => {
+  console.warn(`[lyrics-analysis] ${message}`, JSON.stringify(data));
+};
+
 const MAX_REPAIR_LINES = 40;
 
 const SYSTEM_PROMPT = [
   'You annotate song lyrics for a language-learning music player.',
   'Return ONLY a JSON object. Do not wrap it in markdown fences and do not add any prose before or after it.',
-  'The JSON must have this shape: {"lines":[{"lineId":"...","translation":"...","tokens":[...]}]}',
+  'The JSON must have this shape: {"elements":[{"lineId":"...","translation":"...","tokens":[...]}]}',
   'Rules:',
   '- Echo back the exact lineId you were given. Never invent lineIds and never rewrite the lyric text.',
   '- Split each line into 1-6 clickable learning tokens: words, particles, set phrases, or inflections worth studying.',
@@ -199,6 +206,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
     const drafts: LyricsAnalysisTransportLine[] = [];
     let emittedAny = false;
+    let textTail = '';
 
     for await (const element of result.elementStream) {
       emittedAny = true;
@@ -214,6 +222,10 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
       }
     }
 
+    for await (const textChunk of result.textStream) {
+      textTail = `${textTail}${textChunk}`.slice(-400);
+    }
+
     // `result.output` is the authoritative pass/fail signal; a partial element stream is not success.
     try {
       await result.output;
@@ -221,6 +233,18 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
       if (signal?.aborted) throw error;
 
       const failure = streamError ?? error;
+      if (NoObjectGeneratedError.isInstance(failure)) {
+        // The raw completion is the only way to see why the model output defied the schema
+        // (markdown fences, truncated JSON, a different shape entirely).
+        logWorkerWarning('Analysis pass generated no parsable elements.', {
+          finishReason: failure.finishReason,
+          usage: failure.usage,
+          responseText: (failure.text ?? '').slice(0, 600),
+          causeMessage:
+            failure.cause instanceof Error ? failure.cause.message : String(failure.cause ?? '')
+        });
+      }
+
       // A provider/network failure before anything streamed is fatal and must reach the caller.
       if (!emittedAny) throw failure;
 
@@ -236,6 +260,25 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     for (const line of input.targetLines) {
       if (finalLines.has(line.lineId)) continue;
       failedIds.set(line.lineId, receivedIds.has(line.lineId) ? 'invalid-analysis' : 'missing-line');
+    }
+
+    if (failedIds.size > 0) {
+      const [finishReason, usage] = await Promise.all([
+        result.finishReason,
+        result.usage
+      ]);
+      logWorkerWarning('Lyrics analysis pass finished with gaps.', {
+        targetLines: input.targetLines.length,
+        parsedElements: drafts.length,
+        failed: failedIds.size,
+        reasons: [...failedIds.values()].reduce((acc, reason) => {
+          acc[reason] = (acc[reason] ?? 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        finishReason,
+        outputTokens: usage.outputTokens,
+        textTail
+      });
     }
 
     return failedIds;

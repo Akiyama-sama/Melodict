@@ -158,18 +158,9 @@ export const lyricsAnalysisTransportSchema = z.object({
         card: z
           .object({
             term: z.string().nullish(),
-            pronunciation: z
-              .object({
-                value: z.string().nullish(),
-                kana: z.string().nullish(),
-                romaji: z.string().nullish(),
-                ipa: z.string().nullish(),
-                us: z.string().nullish(),
-                uk: z.string().nullish(),
-                hangul: z.string().nullish(),
-                romanized: z.string().nullish()
-              })
-              .nullish(),
+            // Models routinely emit a plain string here instead of the structured shape; the
+            // normalizer below reads whichever variant arrived, so accept anything at transport.
+            pronunciation: z.unknown(),
             meaning: z.string().nullish(),
             grammarFunction: z.string().nullish()
           })
@@ -270,7 +261,25 @@ export const validateAndNormalizeLineAnalysis = (input: {
         : inferTokenLanguage(tokenText);
 
     const card = rawToken?.card;
-    const pronunciation = card?.pronunciation;
+    // Models often emit pronunciation as a plain string ("きみ / kimi") instead of the structured
+    // object; keep it as the display value instead of discarding it. The transport schema accepts
+    // unknown, so narrow it manually before reading the structured fields.
+    const rawPronunciation: unknown = card?.pronunciation;
+    const pronunciation =
+      typeof rawPronunciation === 'string'
+        ? { value: rawPronunciation }
+        : (rawPronunciation as
+            | {
+                value?: string;
+                kana?: string;
+                romaji?: string;
+                ipa?: string;
+                us?: string;
+                uk?: string;
+                hangul?: string;
+                romanized?: string;
+              }
+            | undefined);
 
     validated.push({
       tokenId: buildTokenId(lineId, startChar, endChar),
