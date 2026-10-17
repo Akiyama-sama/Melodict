@@ -38,7 +38,7 @@ const LyricsAnalysisLineContent = (props: Props) => {
           <button
             key={token.tokenId}
             type="button"
-            className={`mx-0.5 inline cursor-pointer rounded-sm p-0! text-inherit underline decoration-2 underline-offset-4 transition-[background,text-decoration-color] duration-150 ${getTokenColorClass(
+            className={`inline cursor-pointer rounded-sm p-0! text-inherit underline decoration-2 underline-offset-4 transition-[background,text-decoration-color] duration-150 ${getTokenColorClass(
               token.startChar
             )} ${
               isActive

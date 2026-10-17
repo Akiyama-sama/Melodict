@@ -225,7 +225,7 @@ const LyricLine = (props: LyricProp) => {
         </div>
       )}
       <div
-        className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''}`}
+        className={`whitespace-pre-wrap ${playerType !== 'full' ? 'flex flex-row flex-wrap items-center justify-center' : ''}`}
       >
         {analysis && onTokenClick && typeof lyric === 'string' ? (
           <LyricsAnalysisLineContent

@@ -119,6 +119,7 @@
     "playPause": "播放/暂停 (空格键)",
     "nextSong": "下一首 (Ctrl + 右箭头)",
     "lyrics": "歌词 (Ctrl + L)",
+    "toggleLyricsAnalysis": "切换逐词歌词解析",
     "shuffle": "随机播放 (Ctrl + S)",
     "repeat": "循环播放 (Ctrl + T)",
     "muteUnmute": "静音/取消静音 (Ctrl + M)",

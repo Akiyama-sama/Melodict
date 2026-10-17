@@ -23,11 +23,14 @@ const FullScreenPlayer = () => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  // Lyrics stay visible; the notes button toggles the full lyrics screen instead.
+  // Lyrics stay visible; the notes button toggles between the plain and the token-analyzed view.
   const isLyricsVisible = true;
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
   const [songPos, setSongPos] = useState(0);
-  const [isFullLyricsScreen, setIsFullLyricsScreen] = useState(true);
+  // The fullscreen player only renders the lyrics layout; the view toggle lives on the
+  // analysis mode button now.
+  const [isFullLyricsScreen] = useState(true);
+  const [isAnalysisView, setIsAnalysisView] = useState(true);
   const [selectedToken, setSelectedToken] = useState<{
     token: LyricsAnalysisToken;
     line: LyricsAnalysisLine;
@@ -46,6 +49,11 @@ const FullScreenPlayer = () => {
     else window.api.appControls.allowScreenSleeping();
     return () => window.api.appControls.allowScreenSleeping();
   }, [preferences.allowToPreventScreenSleeping, preferences.removeAnimationsOnBatteryPower]);
+
+  // Leaving the analysis view closes any open token panel with it.
+  useEffect(() => {
+    if (!isAnalysisView) setSelectedToken(undefined);
+  }, [isAnalysisView]);
 
   const imgPath = useMemo(() => {
     const selectedArtist = currentSongData?.artists?.find(
@@ -97,6 +105,7 @@ const FullScreenPlayer = () => {
               isLyricsVisible={isLyricsVisible}
               setIsLyricsAvailable={setIsLyricsAvailable}
               selectedToken={selectedToken}
+              isAnalysisView={isAnalysisView}
               onTokenClick={(token, line) => setSelectedToken({ token, line })}
             />
 
@@ -114,11 +123,11 @@ const FullScreenPlayer = () => {
           )}
         </div>
         <SongControlContainer
-          isFullLyricsScreen={isFullLyricsScreen}
-          setIsFullLyricsScreen={setIsFullLyricsScreen}
           isLyricsVisible={isLyricsVisible}
           isLyricsAvailable={isLyricsAvailable}
           isMouseActive={isMouseActive}
+          isAnalysisView={isAnalysisView}
+          setIsAnalysisView={setIsAnalysisView}
         />
         <SeekBarSlider
           name="full-screen-player-seek-slider"

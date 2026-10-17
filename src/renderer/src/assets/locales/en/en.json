@@ -119,6 +119,7 @@
     "playPause": "Play/Pause (Space)",
     "nextSong": "Next song (Ctrl + Right Arrow)",
     "lyrics": "Lyrics (Ctrl + L)",
+    "toggleLyricsAnalysis": "Toggle word-by-word lyrics analysis",
     "shuffle": "Shuffle (Ctrl + S)",
     "repeat": "Repeat (Ctrl + T)",
     "muteUnmute": "Mute/Unmute (Ctrl + M)",

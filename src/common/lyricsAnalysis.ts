@@ -240,15 +240,32 @@ export const validateAndNormalizeLineAnalysis = (input: {
     if (startChar === undefined || endChar === undefined) continue;
     if (startChar < 0 || endChar <= startChar || endChar > text.length) continue;
 
-    const tokenText = text.slice(startChar, endChar);
+    // Models sometimes stop a token mid-word (e.g. "self-cont" of "self-control"); snap the span
+    // out to full word boundaries so Latin words never get cut apart. Deliberately Latin-only:
+    // extending across CJK characters (all \p{L}) would fuse whole lines into one token.
+    const WORD_CHARS = /[A-Za-z0-9'’-]/;
+    let fixedStart = startChar;
+    let fixedEnd = endChar;
+    while (fixedStart > 0 && WORD_CHARS.test(text[fixedStart - 1] ?? '') && WORD_CHARS.test(text[fixedStart] ?? '')) {
+      fixedStart -= 1;
+    }
+    while (fixedEnd < text.length && WORD_CHARS.test(text[fixedEnd] ?? '') && WORD_CHARS.test(text[fixedEnd - 1] ?? '')) {
+      fixedEnd += 1;
+    }
+
+    // Trim whitespace the model swept into the span so underlines never cover stray spaces.
+    while (fixedStart < fixedEnd && /\s/.test(text[fixedStart] ?? '')) fixedStart += 1;
+    while (fixedEnd > fixedStart && /\s/.test(text[fixedEnd - 1] ?? '')) fixedEnd -= 1;
+
+    const tokenText = text.slice(fixedStart, fixedEnd);
     if (tokenText.trim().length === 0) continue;
 
-    const spanKey = `${startChar}-${endChar}`;
+    const spanKey = `${fixedStart}-${fixedEnd}`;
     if (seenSpans.has(spanKey)) continue;
 
     // Reject overlaps: keep whichever token was emitted first for the overlapping region.
     const overlaps = validated.some(
-      (token) => startChar < token.endChar && endChar > token.startChar
+      (token) => fixedStart < token.endChar && fixedEnd > token.startChar
     );
     if (overlaps) continue;
 
@@ -282,10 +299,10 @@ export const validateAndNormalizeLineAnalysis = (input: {
             | undefined);
 
     validated.push({
-      tokenId: buildTokenId(lineId, startChar, endChar),
+      tokenId: buildTokenId(lineId, fixedStart, fixedEnd),
       text: tokenText,
-      startChar,
-      endChar,
+      startChar: fixedStart,
+      endChar: fixedEnd,
       language,
       card: {
         term: asTrimmedString(card?.term) ?? tokenText,
