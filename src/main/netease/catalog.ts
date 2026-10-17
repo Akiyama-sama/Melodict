@@ -20,6 +20,8 @@ interface NeteaseSongLike {
   id?: number;
   name?: string;
   duration?: number;
+  /** `song_detail` (v3 payload) reports the duration in milliseconds as `dt`. */
+  dt?: number;
   fee?: number;
   /** First element of freeTrialInfo marks a trial fragment (its play duration in ms). */
   freeTrialInfo?: { start?: number; end?: number } | unknown[] | null;
@@ -90,7 +92,7 @@ export const normalizeNeteaseSongSummary = (song: NeteaseSongLike): NeteaseSongS
       .map((artist) => ({ artistId: artist.id, name: artist.name ?? '' })),
     album: albumSource ? { albumId: albumSource.id ?? 0, name: albumSource.name ?? '' } : undefined,
     cover: albumSource?.picUrl ?? song.picUrl ?? '',
-    duration: (song.duration ?? 0) / 1000,
+    duration: ((song.dt ?? song.duration) ?? 0) / 1000,
     isVip: song.fee === 1 || song.fee === 4,
     hasTrial: isTrialInfo(song.freeTrialInfo),
     playable: true

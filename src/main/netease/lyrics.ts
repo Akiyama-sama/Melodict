@@ -55,7 +55,39 @@ const getLyricBody = async (neteaseId: number): Promise<NeteaseLyricBody> => {
 };
 
 const YRC_LINE_REGEX = /^\[(?<start>\d+),(?<end>\d+)\](?<payload>.*)$/;
-const YRC_WORD_REGEX = /[(](?<start>\d+),(?<end>\d+),\d+[)](?<word>[^()]*)/g;
+const YRC_WORD_REGEX = /[(](?<start>\d+),(?<duration>\d+),\d+[)](?<word>[^()]*)/g;
+
+/**
+ * `lyric_new` returns the `lrc` field as JSON karaoke lines — `{"t":<ms>,"c":[{"tx":..},..]}` —
+ * instead of bracketed LRC for most songs. Flattens each line into plain synced LRC
+ * (`[mm:ss.mmm]tx1 tx2…`), dropping non-text entries (embedded artist links etc.). Returns the
+ * input untouched when it does not start with a JSON line.
+ */
+export const convertJsonLrcToLrc = (lrcLyric: string): string => {
+  const trimmed = lrcLyric.trim();
+  if (!trimmed.startsWith('{')) return lrcLyric;
+
+  const lines: string[] = [];
+  for (const rawLine of trimmed.split('\n')) {
+    const line = rawLine.trim();
+    if (!line.startsWith('{')) continue;
+
+    try {
+      const parsed = JSON.parse(line) as { t?: number; c?: { tx?: string }[] };
+      const text = (parsed.c ?? [])
+        .map((chunk) => chunk.tx ?? '')
+        .join('')
+        .trim();
+      const lineMs = parsed.t;
+      if (text.length === 0 || lineMs === undefined || !Number.isFinite(lineMs)) continue;
+      lines.push(`[${millisecondsToLrcTime(lineMs)}]${text}`);
+    } catch {
+      // Not a JSON karaoke line; keep the parser from dying on stray content.
+    }
+  }
+
+  return lines.join('\n');
+};
 
 /** Converts NetEase yrc milliseconds into `mm:ss.mmm` LRC timestamps. */
 export const millisecondsToLrcTime = (ms: number) => {
@@ -90,8 +122,11 @@ export const convertYrcToEnhancedLrc = (yrcLyric: string): string => {
     while ((wordMatch = YRC_WORD_REGEX.exec(payload)) !== null) {
       const word = wordMatch.groups?.word ?? '';
       if (word.length > 0) {
-        const wordEndMs = Number.parseInt(wordMatch.groups?.end ?? '0', 10);
-        words.push(`${word}<${millisecondsToLrcTime(wordEndMs)}>`);
+        // YRC word tuples are `(absoluteStartMs, durationMs, 0)`; the enhanced-LRC word tag wants
+        // the end time, so add the duration to the start.
+        const wordStartMs = Number.parseInt(wordMatch.groups?.start ?? '0', 10);
+        const wordDurationMs = Number.parseInt(wordMatch.groups?.duration ?? '0', 10);
+        words.push(`${word}<${millisecondsToLrcTime(wordStartMs + wordDurationMs)}>`);
       }
     }
 
@@ -126,7 +161,7 @@ export const getNeteaseLyrics = async (neteaseId: number): Promise<SongLyrics | 
   const isEnhanced = Boolean(body.yrc?.lyric?.trim());
   const baseLrc = body.yrc?.lyric?.trim()
     ? convertYrcToEnhancedLrc(body.yrc.lyric)
-    : (body.lrc?.lyric ?? '');
+    : convertJsonLrcToLrc(body.lrc?.lyric ?? '');
 
   if (!baseLrc.trim()) return undefined;
 
