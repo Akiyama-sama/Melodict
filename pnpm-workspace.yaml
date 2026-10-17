@@ -8,10 +8,11 @@ overrides:
   jpeg-js: ^0.4.4
   uuid: ^12.0.0
 
-# Only the packages that ship install scripts in this dependency tree. better-sqlite3 is
-# deliberately absent: the app uses PGlite, and it is only an auto-installed optional peer of
-# drizzle-orm, so it should not be compiled.
+# Packages whose install scripts are allowed to run. better-sqlite3 is deliberately absent: the app
+# uses PGlite, and it is only an auto-installed optional peer of drizzle-orm, so it must not compile.
+# electron-winstaller copies the vendored 7-Zip binary that `electron-builder --win` packages with.
 onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
+  - electron-winstaller
   - register-scheme
