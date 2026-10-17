@@ -162,7 +162,7 @@ export default function App() {
   useEffect(() => {
     const handleSongLoaded = (songData: AudioPlayerData) => {
       resetErrorCount();
-      recordListeningData(songData.songId, songData.duration, false, true);
+      recordListeningData(songData.songId, songData.duration, false, songData.isKnownSource);
     };
 
     player.on('songLoaded', handleSongLoaded);

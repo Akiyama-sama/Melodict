@@ -72,6 +72,7 @@ import {
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import { registerLyricsAnalysisIpc } from './lyricsAnalysis/ipc';
+import { registerNeteaseIpc } from './netease/ipc';
 import {
   allowScreenSleeping,
   changePlayerType,
@@ -128,6 +129,7 @@ import { compare } from './utils/safeStorage';
  */
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   registerLyricsAnalysisIpc();
+  registerNeteaseIpc();
 
   if (mainWindow) {
     ipcMain.on('app/close', () => app.quit());

@@ -483,7 +483,29 @@
     "emailContact": "or contact me through my email.",
     "loveNora": "Made with <span>❤</span> by <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
     "sandakanGithubProfile": "Sandakan's Github profile",
-    "beautifulSriLanka": "Beautiful Sri Lanka"
+    "beautifulSriLanka": "Beautiful Sri Lanka",
+    "netease": {
+      "title": "NetEase Cloud Music",
+      "accountDescription": "Log in with a NetEase Cloud Music account to search, stream and get lyrics for its whole catalog without adding local files.",
+      "notLoggedIn": "Not logged in.",
+      "scanQrToLogin": "Log in with QR code",
+      "scanQrTitle": "Scan with the NetEase Cloud Music app",
+      "qrImageAlt": "NetEase login QR code",
+      "qrLoading": "Creating the QR code…",
+      "qrWaiting": "Waiting for a scan…",
+      "qrScanned": "Scanned. Confirm the login on your phone.",
+      "qrExpired": "The QR code expired. Generate a new one.",
+      "qrError": "Something went wrong. Check your connection and try again.",
+      "qrRefresh": "Refresh the code",
+      "qrClose": "Close",
+      "loginSucceeded": "Logged in to NetEase Cloud Music.",
+      "logOut": "Log out",
+      "loggedOut": "Logged out of NetEase Cloud Music.",
+      "logoutFailed": "Could not log out. Try again.",
+      "vipAccount": "VIP account",
+      "qualityDescription": "Stream quality for songs played from NetEase.",
+      "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. Trial (30 s) fragments are played for VIP songs on free accounts."
+    }
   },
   "artistInfoPage": {
     "likeArtist": "Like {{name}}",

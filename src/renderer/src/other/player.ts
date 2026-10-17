@@ -1,8 +1,10 @@
 import type { Subscription } from '@tanstack/react-store';
 
+import { tryDecodeNeteaseSongId } from '@common/netease';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import { equalizerBandHertzData } from './equalizerData';
+import { buildNeteasePlayerSongData } from './neteasePlayback';
 import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
@@ -191,8 +193,21 @@ class AudioPlayer {
 
     try {
       if (typeof songIdOrData === 'number') {
-        // Fetch song data if ID provided (may throw if file not found)
-        songData = await window.api.audioLibraryControls.getSong(songIdOrData);
+        // Negative ids are NetEase sentinels; synthesize their player data from the API.
+        const neteaseId = tryDecodeNeteaseSongId(songIdOrData);
+        if (neteaseId !== null) {
+          songData = await buildNeteasePlayerSongData(neteaseId);
+        } else {
+          // Fetch song data if ID provided (may throw if file not found)
+          songData = await window.api.audioLibraryControls.getSong(songIdOrData);
+        }
+      } else if (
+        typeof songIdOrData.songId === 'number' &&
+        songIdOrData.path === '' &&
+        tryDecodeNeteaseSongId(songIdOrData.songId) !== null
+      ) {
+        // A bare summary was passed through: resolve its stream path now.
+        songData = await buildNeteasePlayerSongData(tryDecodeNeteaseSongId(songIdOrData.songId)!);
       } else {
         // Use provided song data
         songData = songIdOrData;
@@ -262,6 +277,11 @@ class AudioPlayer {
       throw error; // Re-throw for caller to handle
     }
   }
+
+  /**
+   * Loads and optionally plays a song by ID. NetEase sentinel ids are resolved by `loadSong`; the
+   * library path handles everything else.
+   */
 
   /** Cleans up resources and event listeners. Should be called when player is no longer needed. */
   destroy() {
@@ -478,8 +498,12 @@ class AudioPlayer {
     try {
       console.log('[AudioPlayer.playSongById]', { songId, autoPlay });
 
-      // Fetch song data once
-      const songData = await window.api.audioLibraryControls.getSong(songId);
+      // Fetch song data once. NetEase sentinel ids resolve inside loadSong; pass them straight
+      // through instead of asking the library (which cannot answer for foreign ids).
+      const isNeteaseSong = tryDecodeNeteaseSongId(songId) !== null;
+      const songData = isNeteaseSong
+        ? await buildNeteasePlayerSongData(tryDecodeNeteaseSongId(songId)!)
+        : await window.api.audioLibraryControls.getSong(songId);
 
       // Load song with store updates
       await this.loadSong(songData, { autoPlay, updateStore: true });

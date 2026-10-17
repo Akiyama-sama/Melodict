@@ -13,6 +13,7 @@ import EqualizerSettings from './Settings/EqualizerSettings';
 import LanguageSettings from './Settings/LanguageSettings';
 import LyricsAnalysisSettings from './Settings/LyricsAnalysisSettings';
 import LyricsSettings from './Settings/LyricsSettings';
+import NeteaseSettings from './Settings/NeteaseSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
 import PreferencesSettings from './Settings/PreferencesSettings';
 import StartupSettings from './Settings/StartupSettings';
@@ -39,6 +40,9 @@ const SettingsPage = () => {
 
           {/* ? ACCOUNTS SETTINGS */}
           <AccountsSettings />
+
+          {/* ? NETEASE CLOUD MUSIC SETTINGS */}
+          <NeteaseSettings />
 
           {/* ? LYRICS SETTINGS */}
           <LyricsSettings />

@@ -483,7 +483,29 @@
     "emailContact": "或通过我的电子邮件联系我。",
     "loveNora": "由 <Hyperlink>Sandakan Nipunajith</Hyperlink> 用 <span>❤</span> 精心制作。",
     "sandakanGithubProfile": "Sandakan 的 Github 主页",
-    "beautifulSriLanka": "美丽的斯里兰卡"
+    "beautifulSriLanka": "美丽的斯里兰卡",
+    "netease": {
+      "title": "网易云音乐",
+      "accountDescription": "登录网易云音乐账号后，无需再添加本地文件，即可直接搜索、播放整个曲库并享受歌词解析。",
+      "notLoggedIn": "未登录。",
+      "scanQrToLogin": "扫码登录",
+      "scanQrTitle": "用网易云音乐 App 扫码",
+      "qrImageAlt": "网易云登录二维码",
+      "qrLoading": "正在生成二维码…",
+      "qrWaiting": "等待扫码…",
+      "qrScanned": "已扫码，请在手机上确认登录。",
+      "qrExpired": "二维码已过期，请重新生成。",
+      "qrError": "出了点问题，请检查网络后重试。",
+      "qrRefresh": "刷新二维码",
+      "qrClose": "关闭",
+      "loginSucceeded": "网易云音乐登录成功。",
+      "logOut": "退出登录",
+      "loggedOut": "已退出网易云音乐。",
+      "logoutFailed": "退出失败，请重试。",
+      "vipAccount": "VIP 账号",
+      "qualityDescription": "播放网易云音乐歌曲时使用的音质。",
+      "qualityHint": "「standard」所有账号都可用；更高音质可能需要 VIP 会员。普通账号播放 VIP 歌曲时会播放 30 秒试听片段。"
+    }
   },
   "artistInfoPage": {
     "likeArtist": "喜欢 {{name}}",
