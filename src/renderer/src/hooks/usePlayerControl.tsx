@@ -72,14 +72,18 @@ export function usePlayerControl(
 
   const toggleSongPlayback = useCallback(
     (startPlay?: boolean) => {
+      // Button passes its click event as the first argument, so only honor real booleans.
+      // Otherwise `forcePlay` would be a truthy event object and playback could never pause.
+      const forcePlay = typeof startPlay === 'boolean' ? startPlay : undefined;
+
       if (store.state.currentSongData?.songId) {
         // Use AudioPlayer's togglePlayback if available
         if (audioPlayer) {
-          return audioPlayer.togglePlayback(startPlay).catch((err) => managePlaybackErrors(err));
+          return audioPlayer.togglePlayback(forcePlay).catch((err) => managePlaybackErrors(err));
         }
 
         // Fallback to direct audio element control
-        if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
+        if (typeof forcePlay !== 'boolean' || forcePlay === player.paused) {
           if (player.readyState > 0) {
             if (player.paused) {
               return player
