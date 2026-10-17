@@ -287,7 +287,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
   const firstPassFailures = await streamPass({
     prompt: buildUserPrompt({ uiLanguage, songTitle, songArtists, lines }),
     targetLines: lines,
-    maxOutputTokens: Math.min(16000, 600 + lines.length * 260)
+    maxOutputTokens: Math.min(32000, 1000 + lines.length * 500)
   });
 
   if (firstPassFailures.size > 0 && !signal?.aborted) {
@@ -302,7 +302,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
       await streamPass({
         prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: repairTargets }),
         targetLines: repairTargets,
-        maxOutputTokens: Math.min(8000, 400 + repairTargets.length * 260)
+        maxOutputTokens: Math.min(16000, 600 + repairTargets.length * 500)
       });
     } catch (error) {
       // A failed repair pass must not discard the lines that already succeeded.

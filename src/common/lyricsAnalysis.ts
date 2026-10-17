@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-export const LYRICS_ANALYSIS_SCHEMA_VERSION = '1';
+// Bumped to '2' when the normalizer gained word-boundary snapping + whitespace trimming: cached
+// artifacts from v1 carry misaligned token spans that would render clipped words.
+export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
 export const LYRICS_ANALYSIS_PROMPT_VERSION = '1';
 export const LYRICS_ANALYSIS_DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
