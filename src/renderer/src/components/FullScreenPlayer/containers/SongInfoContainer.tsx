@@ -62,14 +62,15 @@ const SongInfoContainer = (props: Props) => {
         isOverlay
           ? // Floats over the top third of the (relative) lyrics column only, so the analysis panel
             // stays clear. The lyrics scroll underneath and the gradient keeps text legible.
-            'absolute top-0 left-0 z-10 h-[34%] w-full justify-center overflow-hidden bg-linear-to-b from-black/85 via-black/60 to-transparent px-10 pt-10 pb-12'
+            'absolute top-0 left-0 z-10 h-[34%] w-full justify-center overflow-hidden bg-linear-to-b from-black/85 via-black/60 to-transparent pt-10 pb-12'
           : 'lg:ml-4 lg:w-full px-[10%]'
       }`}
     >
       <div
         className={
           isOverlay
-            ? 'flex flex-row items-center gap-6'
+            ? // Same centered column as the lyrics block, so the cover lines up with the lyric text.
+              'mx-auto flex w-full max-w-[52rem] flex-row items-center gap-6'
             : 'grid auto-rows-min grid-cols-[20rem] items-center justify-center'
         }
       >
