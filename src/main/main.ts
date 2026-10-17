@@ -267,11 +267,6 @@ const createWindow = async () => {
   // });
 };
 
-if (IS_DEVELOPMENT) {
-  // TEMP: CDP endpoint for automated verification; remove before merge.
-  app.commandLine.appendSwitch('remote-debugging-port', '9333');
-}
-
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'nora',
