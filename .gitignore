@@ -9,3 +9,5 @@ coverage/
 *.m3u
 .npmrc
 .github/plans/
+tsconfig.node.tsbuildinfo
+tsconfig.web.tsbuildinfo
