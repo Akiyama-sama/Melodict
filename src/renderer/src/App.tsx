@@ -18,6 +18,7 @@ import { useDynamicTheme } from './hooks/useDynamicTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useListeningData } from './hooks/useListeningData';
 import { useMediaSession } from './hooks/useMediaSession';
+import useMouseBackButtonNavigation from './hooks/useMouseBackButtonNavigation';
 import { useMultiSelection } from './hooks/useMultiSelection';
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
@@ -125,6 +126,10 @@ export default function App() {
   // ? INITIALIZE DATA SYNC
   // Data sync hook handles IPC data update events and query cache invalidation
   useDataSync();
+
+  // ? INITIALIZE MOUSE BACK BUTTON NAVIGATION
+  // Mouse back button hook navigates to the previous page when the mouse's side button is pressed
+  useMouseBackButtonNavigation();
 
   // ? INITIALIZE PLAYBACK ERRORS
   // Playback errors hook handles error management and retry logic
