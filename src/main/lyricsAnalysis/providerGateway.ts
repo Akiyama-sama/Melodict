@@ -284,11 +284,22 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     return failedIds;
   };
 
-  const firstPassFailures = await streamPass({
-    prompt: buildUserPrompt({ uiLanguage, songTitle, songArtists, lines }),
-    targetLines: lines,
-    maxOutputTokens: Math.min(32000, 1000 + lines.length * 500)
-  });
+  // Gateways cap max_tokens per request well below what a whole song needs (a dense CJK analysis
+  // runs ~200 output tokens per line), and they clamp silently — the run just ends with
+  // finishReason "length" mid-array. Chunk the first pass so every batch fits comfortably.
+  const ANALYSIS_BATCH_SIZE = 8;
+  const firstPassFailures = new Map<string, string>();
+  for (let offset = 0; offset < lines.length; offset += ANALYSIS_BATCH_SIZE) {
+    if (signal?.aborted) break;
+
+    const batch = lines.slice(offset, offset + ANALYSIS_BATCH_SIZE);
+    const batchFailures = await streamPass({
+      prompt: buildUserPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
+      targetLines: batch,
+      maxOutputTokens: 1000 + batch.length * 500
+    });
+    for (const [lineId, reason] of batchFailures) firstPassFailures.set(lineId, reason);
+  }
 
   if (firstPassFailures.size > 0 && !signal?.aborted) {
     const repairTargets = lines
@@ -299,11 +310,16 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     options.onRepairStarted?.(repairTargets.map((line) => line.lineId));
 
     try {
-      await streamPass({
-        prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: repairTargets }),
-        targetLines: repairTargets,
-        maxOutputTokens: Math.min(16000, 600 + repairTargets.length * 500)
-      });
+      for (let offset = 0; offset < repairTargets.length; offset += ANALYSIS_BATCH_SIZE) {
+        if (signal?.aborted) break;
+
+        const batch = repairTargets.slice(offset, offset + ANALYSIS_BATCH_SIZE);
+        await streamPass({
+          prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
+          targetLines: batch,
+          maxOutputTokens: 600 + batch.length * 500
+        });
+      }
     } catch (error) {
       // A failed repair pass must not discard the lines that already succeeded.
       if (signal?.aborted) throw error;
