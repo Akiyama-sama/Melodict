@@ -1,4 +1,6 @@
-import { Store } from '@tanstack/store';
+// Imported through `react-store`, which re-exports it: `@tanstack/store` is only a transitive
+// dependency, and pnpm's isolated node_modules layout would not resolve it directly.
+import { Store } from '@tanstack/react-store';
 import { cloneDeep } from 'es-toolkit/object';
 
 import {

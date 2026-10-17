@@ -1,4 +1,6 @@
-import { Store } from '@tanstack/store';
+// `react-store` re-exports `Store`; see the note in `store/store.ts` for why we do not import
+// `@tanstack/store` directly.
+import { Store } from '@tanstack/react-store';
 
 import type { LyricsAnalysisErrorCode } from '@common/lyricsAnalysis';
 
