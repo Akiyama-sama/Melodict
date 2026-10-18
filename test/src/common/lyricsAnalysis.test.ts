@@ -87,3 +87,67 @@ describe('splitLineIntoTokens', () => {
     expect(segments.filter((segment) => !segment.token).map((s) => s.text)).toContain(' ');
   });
 });
+
+describe('surface-text span re-anchoring', () => {
+  const line = '変わっていけるのは　自分自身だけ';
+
+  test('re-anchors a miscounted CJK span to where the surface text actually occurs', () => {
+    // Model claims offsets 8..13 for "自分自身" — the real position is 10..14; the
+    // surface text is what counts.
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({
+        tokens: [{ startChar: 8, endChar: 13, text: '自分自身', card: { term: '自分自身' } }]
+      }),
+      text: line
+    });
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    const token = outcome.line.tokens[0];
+    expect(token?.text).toBe('自分自身');
+    expect(token?.startChar).toBe(10);
+    expect(token?.endChar).toBe(14);
+  });
+
+  test('picks the occurrence closest to the claimed offsets when the text is ambiguous', () => {
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({
+        tokens: [{ startChar: 4, endChar: 6, text: '夢', card: { term: '夢' } }]
+      }),
+      text: '夢ならばどれほどよかったでしょう 未だにあなたのことを夢にみる'
+    });
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    // "夢" occurs at 0 and 25; claimed 4 is nearer 0.
+    expect(outcome.line.tokens[0]?.startChar).toBe(0);
+  });
+
+  test('keeps the model span when the surface text does not appear in the line', () => {
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({
+        tokens: [{ startChar: 0, endChar: 2, text: ' nonexistent ', card: { term: 'x' } }]
+      }),
+      text: '変わっていける'
+    });
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    // Hallucinated text falls back to offsets; whitespace trimming still applies.
+    const token = outcome.line.tokens[0];
+    expect(token?.startChar).toBe(0);
+    expect(token?.endChar).toBe(2);
+  });
+
+  test('still re-anchors when offsets are out of range but the text is found', () => {
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({
+        tokens: [{ startChar: 3, endChar: 30, text: '自分自身', card: { term: '自分自身' } }]
+      }),
+      text: line
+    });
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    const token = outcome.line.tokens[0];
+    expect(token?.text).toBe('自分自身');
+    expect(token?.startChar).toBe(10);
+  });
+});
+

@@ -167,6 +167,10 @@ export const lyricsAnalysisTransportSchema = z.object({
       z.object({
         startChar: z.number().nullish(),
         endChar: z.number().nullish(),
+        // The surface form the model thinks this token is. Offsets are routinely miscounted on
+        // CJK lines; this text is far more reliable, so validation re-anchors the span to where
+        // the text actually occurs in the line. Zod strips unknown keys, so it must be declared.
+        text: z.string().nullish(),
         language: z.string().nullish(),
         card: z
           .object({
@@ -249,10 +253,39 @@ export const validateAndNormalizeLineAnalysis = (input: {
   const validated: LyricsAnalysisToken[] = [];
 
   for (const rawToken of rawTokens) {
-    const startChar = asInteger(rawToken?.startChar);
-    const endChar = asInteger(rawToken?.endChar);
+    const claimedStart = asInteger(rawToken?.startChar);
+    const claimedEnd = asInteger(rawToken?.endChar);
 
-    if (startChar === undefined || endChar === undefined) continue;
+    if (claimedStart === undefined || claimedEnd === undefined) continue;
+    let startChar = claimedStart;
+    let endChar = claimedEnd;
+
+    // Weak models routinely miscount code-unit offsets on CJK lines while reporting the token's
+    // surface text correctly — badly enough that the claimed span may even fall outside the
+    // line. When that text appears verbatim in the line, re-anchor the span to its real
+    // position: a unique occurrence wins outright, otherwise the occurrence closest to the
+    // model's own offsets does. This repairs whole-line drift without trusting the counts.
+    const rawTokenText = asTrimmedString(rawToken?.text);
+    if (rawTokenText && !rawTokenText.includes('　')) {
+      const first = text.indexOf(rawTokenText);
+      if (first >= 0) {
+        let anchor = first;
+        if (text.indexOf(rawTokenText, first + 1) >= 0) {
+          // Ambiguous text: pick the occurrence minimizing distance to the claimed offsets.
+          let bestDistance = Number.POSITIVE_INFINITY;
+          for (let at = text.indexOf(rawTokenText); at >= 0; at = text.indexOf(rawTokenText, at + 1)) {
+            const distance = Math.abs(at - claimedStart);
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              anchor = at;
+            }
+          }
+        }
+        startChar = anchor;
+        endChar = anchor + rawTokenText.length;
+      }
+    }
+
     if (startChar < 0 || endChar <= startChar || endChar > text.length) continue;
 
     // Models sometimes stop a token mid-word (e.g. "self-cont" of "self-control"); snap the span
