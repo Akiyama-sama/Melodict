@@ -1,0 +1,145 @@
+{
+  "songTitle": "Lemon",
+  "songArtists": ["米津玄師"],
+  "source": "Human transcription (native-speaker-level annotation, same rubric as dont-say-lazy PDF): 12 representative lines transcribed per the original lyric line breaks; tokens = words/particles/set phrases, kana reading + wapuro romaji, dictionary form, closed POS labels, in-context Simplified-Chinese gloss, whole-line translation. Created 2026-10-18 and locked thereafter (never fed to prompts, never edited during iteration).",
+  "lines": [
+    {
+      "text": "夢ならばどれほどよかったでしょう",
+      "translation": "如果是一场梦该有多好",
+      "tokens": [
+        { "text": "夢", "kana": "ゆめ", "romaji": "yu me", "term": "夢", "pos": "名詞", "meaning": "梦" },
+        { "text": "ならば", "kana": "ならば", "romaji": "na ra ba", "term": "だ", "pos": "助動詞", "meaning": "如果是……的话（なら【假定形】+ば）", "inflection": "仮定形" },
+        { "text": "どれほど", "kana": "どれほど", "romaji": "do re ho do", "term": "どれほど", "pos": "副詞", "meaning": "多么、多少" },
+        { "text": "よかった", "kata": "よかった", "kana": "よかった", "romaji": "yo ka tta", "term": "よい", "pos": "形容詞", "meaning": "该多好（过去式表虚拟）", "inflection": "過去形" }
+      ]
+    },
+    {
+      "text": "未だにあなたのことを夢にみる",
+      "translation": "至今仍梦到你",
+      "tokens": [
+        { "text": "未だに", "kana": "いまだに", "romaji": "i ma da ni", "term": "未だに", "pos": "副詞", "meaning": "至今还" },
+        { "text": "あなた", "kana": "あなた", "romaji": "a na ta", "term": "あなた", "pos": "代名詞", "meaning": "你" },
+        { "text": "の", "kana": "の", "romaji": "no", "term": "の", "pos": "助詞", "meaning": "所属/内容（のこと）" },
+        { "text": "こと", "kana": "こと", "romaji": "ko to", "term": "こと", "pos": "名詞", "meaning": "事情（抽象化）" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "提示宾语" },
+        { "text": "夢に", "kana": "ゆめに", "romaji": "yu me ni", "term": "夢", "pos": "名詞", "meaning": "在梦里（に表着落点）", "inflection": "に" },
+        { "text": "みる", "kana": "みる", "romaji": "mi ru", "term": "見る", "pos": "動詞", "meaning": "看/梦见", "inflection": "辞書形" }
+      ]
+    },
+    {
+      "text": "忘れた物を取りに帰るように",
+      "translation": "就像回家取回忘掉的东西一样",
+      "tokens": [
+        { "text": "忘れた", "kana": "わすれた", "romaji": "wa su re ta", "term": "忘れる", "pos": "動詞", "meaning": "忘记了的", "inflection": "過去形" },
+        { "text": "物", "kana": "もの", "romaji": "mo no", "term": "物", "pos": "名詞", "meaning": "东西" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "提示宾语" },
+        { "text": "取りに", "kana": "とりに", "romaji": "to ri ni", "term": "取る", "pos": "動詞", "meaning": "去取（に表目的）", "inflection": "連用形+に" },
+        { "text": "帰る", "kana": "かえる", "romaji": "ka e ru", "term": "帰る", "pos": "動詞", "meaning": "回去", "inflection": "辞書形" },
+        { "text": "ように", "kana": "ように", "romaji": "yo u ni", "term": "ようだ", "pos": "助動詞", "meaning": "像……一样（比喻）", "inflection": "ように" }
+      ]
+    },
+    {
+      "text": "古びた思い出の埃を払う",
+      "translation": "掸去陈旧回忆上的尘埃",
+      "tokens": [
+        { "text": "古びた", "kana": "ふるびた", "romaji": "fu ru bi ta", "term": "古びる", "pos": "動詞", "meaning": "变旧了的", "inflection": "過去形" },
+        { "text": "思い出", "kana": "おもいで", "romaji": "o mo i de", "term": "思い出", "pos": "名詞", "meaning": "回忆" },
+        { "text": "の", "kana": "の", "romaji": "no", "term": "の", "pos": "助詞", "meaning": "所属" },
+        { "text": "埃", "kana": "ほこり", "romaji": "ho ko ri", "term": "埃", "pos": "名詞", "meaning": "灰尘" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "提示宾语" },
+        { "text": "払う", "kana": "はらう", "romaji": "ha ra u", "term": "払う", "pos": "動詞", "meaning": "掸、拂", "inflection": "辞書形" }
+      ]
+    },
+    {
+      "text": "戻らない幸せがあることを",
+      "translation": "（终于明白）存在一去不返的幸福这件事",
+      "tokens": [
+        { "text": "戻らない", "kana": "もどらない", "romaji": "mo do ra na i", "term": "戻る", "pos": "動詞", "meaning": "回不去的", "inflection": "否定形" },
+        { "text": "幸せ", "kana": "しあわせ", "romaji": "shi a wa se", "term": "幸せ", "pos": "名詞", "meaning": "幸福" },
+        { "text": "が", "kana": "が", "romaji": "ga", "term": "が", "pos": "助詞", "meaning": "提示主语" },
+        { "text": "ある", "kana": "ある", "romaji": "a ru", "term": "ある", "pos": "動詞", "meaning": "存在", "inflection": "辞書形" },
+        { "text": "こと", "kana": "こと", "romaji": "ko to", "term": "こと", "pos": "名詞", "meaning": "这件事（名词化）" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞,助詞", "meaning": "提示宾语" }
+      ]
+    },
+    {
+      "text": "最後にあなたが教えてくれた",
+      "translation": "是你最后教给我的",
+      "tokens": [
+        { "text": "最後に", "kana": "さいごに", "romaji": "sa i go ni", "term": "最後", "pos": "名詞", "meaning": "最后（に表时点）", "inflection": "に" },
+        { "text": "あなた", "kana": "あなた", "romaji": "a na ta", "term": "あなた", "pos": "代名詞", "meaning": "你" },
+        { "text": "が", "kana": "が", "romaji": "ga", "term": "が", "pos": "助詞", "meaning": "提示主语" },
+        { "text": "教えて", "kana": "おしえて", "romaji": "o shi e te", "term": "教える", "pos": "動詞", "meaning": "告诉、教（て形接补助）", "inflection": "て形" },
+        { "text": "くれた", "kana": "くれた", "romaji": "ku re ta", "term": "くれる", "pos": "動詞", "meaning": "（为我）给予（授受表现）", "inflection": "過去形" }
+      ]
+    },
+    {
+      "text": "言えずに隠してた昏い過去も",
+      "translation": "连同无法说出口而一直藏着的昏暗过去",
+      "tokens": [
+        { "text": "言えずに", "kana": "いえずに", "romaji": "i e zu ni", "term": "言える", "pos": "動詞", "meaning": "没能说出口（ずに=不…而）", "inflection": "未然形+ずに" },
+        { "text": "隠してた", "kana": "かくしてた", "romaji": "ka ku shi te ta", "term": "隠す", "pos": "動詞", "meaning": "一直藏着（ていた口語缩约）", "inflection": "ていた" },
+        { "text": "昏い", "kana": "くらい", "romaji": "ku ra i", "term": "昏い", "pos": "形容詞", "meaning": "昏暗的" },
+        { "text": "過去", "kana": "かこ", "romaji": "ka ko", "term": "過去", "pos": "名詞", "meaning": "过去" },
+        { "text": "も", "kana": "も", "romaji": "mo", "term": "も", "pos": "助詞", "meaning": "也、连同" }
+      ]
+    },
+    {
+      "text": "あなたがいなきゃ永遠に昏いまま",
+      "translation": "如果没有你，就永远昏暗下去",
+      "tokens": [
+        { "text": "あなた", "kana": "あなた", "romaji": "a na ta", "term": "あなた", "pos": "代名詞", "meaning": "你" },
+        { "text": "が", "kana": "が", "romaji": "ga", "term": "が", "pos": "助詞", "meaning": "提示主语" },
+        { "text": "いなきゃ", "kana": "いなきゃ", "romaji": "i na kya", "term": "いる", "pos": "動詞", "meaning": "不在的话（なければならない口语缩约=なければ）", "inflection": "未然形+なければ" },
+        { "text": "永遠に", "kana": "えいえんに", "romaji": "e i e n ni", "term": "永遠", "pos": "名詞", "meaning": "永远（に表程度/期间）", "inflection": "に" },
+        { "text": "昏い", "kana": "くらい", "romaji": "ku ra i", "term": "昏い", "pos": "形容詞", "meaning": "昏暗的" },
+        { "text": "まま", "kana": "まま", "romaji": "ma ma", "term": "まま", "pos": "名詞", "meaning": "保持原样" }
+      ]
+    },
+    {
+      "text": "きっともうこれ以上 傷つくことなど",
+      "translation": "一定已经不会再受更多的伤了",
+      "tokens": [
+        { "text": "きっと", "kana": "きっと", "romaji": "ki tto", "term": "きっと", "pos": "副詞", "meaning": "一定" },
+        { "text": "もう", "kana": "もう", "romaji": "mo u", "term": "もう", "pos": "副詞", "meaning": "已经" },
+        { "text": "これ以上", "kana": "これいじょう", "romaji": "ko re i jo u", "term": "これ以上", "pos": "名詞", "meaning": "再、比这更多" },
+        { "text": "傷つく", "kana": "きずつく", "romaji": "ki zu tsu ku", "term": "傷つく", "pos": "動詞", "meaning": "受伤", "inflection": "辞書形" },
+        { "text": "こと", "kana": "こと", "romaji": "ko to", "term": "こと", "pos": "名詞", "meaning": "（名词化）" },
+        { "text": "など", "kana": "など", "romaji": "na do", "term": "など", "pos": "助詞", "meaning": "之类（轻视/举例）" }
+      ]
+    },
+    {
+      "text": "ありはしないとわかっている",
+      "translation": "我明白那是不存在的",
+      "tokens": [
+        { "text": "あり", "kana": "あり", "romaji": "a ri", "term": "ある", "pos": "動詞", "meaning": "存在（ありはしない=加强否定）", "inflection": "連用形" },
+        { "text": "は", "kana": "は", "romaji": "wa", "term": "は", "pos": "助詞", "meaning": "主题标记（強調否定）" },
+        { "text": "しない", "kana": "しない", "romaji": "shi na i", "term": "する", "pos": "動詞", "meaning": "不做（与ある构成強調否定句型）", "inflection": "否定形" },
+        { "text": "と", "kana": "と", "romaji": "to", "term": "と", "pos": "助詞", "meaning": "引用内容" },
+        { "text": "わかって", "kana": "わかって", "romaji": "wa ka tte", "term": "わかる", "pos": "動詞", "meaning": "明白（て形+いる表持续）", "inflection": "て形" },
+        { "text": "いる", "kana": "いる", "romaji": "i ru", "term": "いる", "pos": "助動詞", "meaning": "（ている表持续状态）", "inflection": "補助動詞" }
+      ]
+    },
+    {
+      "text": "あの日の悲しみさえ",
+      "translation": "连那天的悲伤也",
+      "tokens": [
+        { "text": "あの", "kana": "あの", "romaji": "a no", "term": "あの", "pos": "連体詞", "meaning": "那（远称）" },
+        { "text": "日", "kana": "ひ", "romaji": "hi", "term": "日", "pos": "名詞", "meaning": "日子" },
+        { "text": "の", "kana": "の", "romaji": "no", "term": "の", "pos": "助詞", "meaning": "所属" },
+        { "text": "悲しみ", "kana": "かなしみ", "romaji": "ka na shi mi", "term": "悲しみ", "pos": "名詞", "meaning": "悲伤" },
+        { "text": "さえ", "kana": "さえ", "romaji": "sa e", "term": "さえ", "pos": "助詞", "meaning": "连……都" }
+      ]
+    },
+    {
+      "text": "苦いレモンの匂い",
+      "translation": "苦涩柠檬的气味",
+      "tokens": [
+        { "text": "苦い", "kana": "にがい", "romaji": "ni ga i", "term": "苦い", "pos": "形容詞", "meaning": "苦的" },
+        { "text": "レモン", "kana": "れもん", "romaji": "re mo n", "term": "レモン", "pos": "名詞", "meaning": "柠檬" },
+        { "text": "の", "kana": "の", "romaji": "no", "term": "の", "pos": "助詞", "meaning": "所属" },
+        { "text": "匂い", "kana": "におい", "romaji": "ni o i", "term": "匂い", "pos": "名詞", "meaning": "气味" }
+      ]
+    }
+  ]
+}

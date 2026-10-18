@@ -1,0 +1,601 @@
+{
+  "songTitle": "紅蓮華",
+  "songArtists": [
+    "LiSA"
+  ],
+  "source": "Human transcription (native-speaker-level annotation, same rubric as dont-say-lazy PDF): 12 representative lines transcribed per the original lyric line breaks; tokens = words/particles/set phrases, kana reading + wapuro romaji, dictionary form, closed POS labels, in-context Simplified-Chinese gloss, whole-line translation. Created 2026-10-18 and locked thereafter (never fed to prompts, never edited during iteration). REVISED 2026-10-18: removed two phantom lines ('全体 (All of us) 誰かのせいで引き摺る心に鞭打って', 'この汚れきった心で闘う') that are NOT in the official lyrics (verified against NCM lrc/yrc, Uta-Net, Genius — transcription mishearing); replaced with '水面下で絡まる善悪' and '逸材の華より　挑み続け咲いた一輪が美しい' from the official lyric. Lock renews from this revision.",
+  "lines": [
+    {
+      "text": "強くなれる理由を知った",
+      "translation": "知道了能够变强的理由",
+      "tokens": [
+        {
+          "text": "強く",
+          "kana": "つよく",
+          "romaji": "tsu yo ku",
+          "term": "強い",
+          "pos": "形容詞",
+          "meaning": "强（く形接なる）",
+          "inflection": "連用形"
+        },
+        {
+          "text": "なれる",
+          "kana": "なれる",
+          "romaji": "na re ru",
+          "term": "なる",
+          "pos": "動詞",
+          "meaning": "变得（可能形=能变得）",
+          "inflection": "可能形"
+        },
+        {
+          "text": "理由",
+          "kana": "りゆう",
+          "romaji": "ri yu u",
+          "term": "理由",
+          "pos": "名詞",
+          "meaning": "理由"
+        },
+        {
+          "text": "を",
+          "kana": "を",
+          "romaji": "wo",
+          "term": "を",
+          "pos": "助詞",
+          "meaning": "提示宾语"
+        },
+        {
+          "text": "知った",
+          "kana": "しった",
+          "romaji": "shi tta",
+          "term": "知る",
+          "pos": "動詞",
+          "meaning": "知道了",
+          "inflection": "過去形"
+        }
+      ]
+    },
+    {
+      "text": "僕を連れて　進め",
+      "translation": "带着我前进吧",
+      "tokens": [
+        {
+          "text": "僕",
+          "kana": "ぼく",
+          "romaji": "bo ku",
+          "term": "僕",
+          "pos": "代名詞",
+          "meaning": "我（男性自称）"
+        },
+        {
+          "text": "を",
+          "kana": "を",
+          "romaji": "wo",
+          "term": "を",
+          "pos": "助詞",
+          "meaning": "提示宾语"
+        },
+        {
+          "text": "連れて",
+          "kana": "つれて",
+          "romaji": "tsu re te",
+          "term": "連れる",
+          "pos": "動詞",
+          "meaning": "带上、带着",
+          "inflection": "て形"
+        },
+        {
+          "text": "進め",
+          "kana": "すすめ",
+          "romaji": "su su me",
+          "term": "進む",
+          "pos": "動詞",
+          "meaning": "前进吧（命令形）",
+          "inflection": "命令形"
+        }
+      ]
+    },
+    {
+      "text": "泥だらけの走馬灯に酔う",
+      "translation": "醉于沾满泥泞的走马灯",
+      "tokens": [
+        {
+          "text": "泥",
+          "kana": "どろ",
+          "romaji": "do ro",
+          "term": "泥",
+          "pos": "名詞",
+          "meaning": "泥"
+        },
+        {
+          "text": "だらけ",
+          "kana": "だらけ",
+          "romaji": "da ra ke",
+          "term": "だらけ",
+          "pos": "接尾語",
+          "meaning": "沾满……（满是）"
+        },
+        {
+          "text": "の",
+          "kana": "の",
+          "romaji": "no",
+          "term": "の",
+          "pos": "助詞",
+          "meaning": "所属"
+        },
+        {
+          "text": "走馬灯",
+          "kana": "そうまとう",
+          "romaji": "so u ma to u",
+          "term": "走馬灯",
+          "pos": "名詞",
+          "meaning": "走马灯（走马灯般闪回）"
+        },
+        {
+          "text": "に",
+          "kana": "に",
+          "romaji": "ni",
+          "term": "に",
+          "pos": "助詞",
+          "meaning": "醉于（に表对象）"
+        },
+        {
+          "text": "酔う",
+          "kana": "よう",
+          "romaji": "yo u",
+          "term": "酔う",
+          "pos": "動詞",
+          "meaning": "醉",
+          "inflection": "辞書形"
+        }
+      ]
+    },
+    {
+      "text": "強張る心　震える手は",
+      "translation": "僵硬的心、颤抖的手",
+      "tokens": [
+        {
+          "text": "強張る",
+          "kana": "こわばる",
+          "romaji": "ko wa ba ru",
+          "term": "強張る",
+          "pos": "動詞",
+          "meaning": "僵硬的",
+          "inflection": "連体形"
+        },
+        {
+          "text": "心",
+          "kana": "こころ",
+          "romaji": "ko ko ro",
+          "term": "心",
+          "pos": "名詞",
+          "meaning": "心"
+        },
+        {
+          "text": "震える",
+          "kana": "ふるえる",
+          "romaji": "fu ru e ru",
+          "term": "震える",
+          "pos": "動詞",
+          "meaning": "颤抖的",
+          "inflection": "連体形"
+        },
+        {
+          "text": "手",
+          "kana": "て",
+          "romaji": "te",
+          "term": "手",
+          "pos": "名詞",
+          "meaning": "手"
+        },
+        {
+          "text": "は",
+          "kana": "は",
+          "romaji": "wa",
+          "term": "は",
+          "pos": "助詞",
+          "meaning": "提示主题"
+        }
+      ]
+    },
+    {
+      "text": "掴みたいものがある",
+      "translation": "有想要抓住的东西",
+      "tokens": [
+        {
+          "text": "掴みたい",
+          "kana": "つかみたい",
+          "romaji": "tsu ka mi ta i",
+          "term": "掴む",
+          "pos": "動詞",
+          "meaning": "想抓住（たい表愿望）",
+          "inflection": "たい形"
+        },
+        {
+          "text": "もの",
+          "kana": "もの",
+          "romaji": "mo no",
+          "term": "もの",
+          "pos": "名詞",
+          "meaning": "东西（抽象）"
+        },
+        {
+          "text": "が",
+          "kana": "が",
+          "romaji": "ga",
+          "term": "が",
+          "pos": "助詞",
+          "meaning": "提示主语"
+        },
+        {
+          "text": "ある",
+          "kana": "ある",
+          "romaji": "a ru",
+          "term": "ある",
+          "pos": "動詞",
+          "meaning": "存在"
+        }
+      ]
+    },
+    {
+      "text": "それだけさ",
+      "translation": "仅此而已",
+      "tokens": [
+        {
+          "text": "それ",
+          "kana": "それ",
+          "romaji": "so re",
+          "term": "それ",
+          "pos": "代名詞",
+          "meaning": "那"
+        },
+        {
+          "text": "だけ",
+          "kana": "だけ",
+          "romaji": "da ke",
+          "term": "だけ",
+          "pos": "助詞",
+          "meaning": "只有"
+        },
+        {
+          "text": "さ",
+          "kana": "さ",
+          "romaji": "sa",
+          "term": "さ",
+          "pos": "助詞",
+          "meaning": "啊（口语终助词，断定语气）"
+        }
+      ]
+    },
+    {
+      "text": "夜の匂いに (I'll spend all thirty nights)",
+      "translation": "向着夜的气息（我会度过这全部三十个夜晚）",
+      "tokens": [
+        {
+          "text": "夜",
+          "kana": "よる",
+          "romaji": "yo ru",
+          "term": "夜",
+          "pos": "名詞",
+          "meaning": "夜"
+        },
+        {
+          "text": "の",
+          "kana": "の",
+          "romaji": "no",
+          "term": "の",
+          "pos": "助詞",
+          "meaning": "所属"
+        },
+        {
+          "text": "匂い",
+          "kana": "におい",
+          "romaji": "ni o i",
+          "term": "匂い",
+          "pos": "名詞",
+          "meaning": "气息、气味"
+        },
+        {
+          "text": "に",
+          "kana": "に",
+          "romaji": "ni",
+          "term": "に",
+          "pos": "助詞",
+          "meaning": "向、对着"
+        },
+        {
+          "text": "(I'll spend all thirty nights)",
+          "kana": "",
+          "romaji": "",
+          "term": "",
+          "pos": "感動詞",
+          "meaning": "英文插入句"
+        }
+      ]
+    },
+    {
+      "text": "空睨んでも (Staring into the sky)",
+      "translation": "就算瞪着天空（凝视天空）",
+      "tokens": [
+        {
+          "text": "空",
+          "kana": "そら",
+          "romaji": "so ra",
+          "term": "空",
+          "pos": "名詞",
+          "meaning": "天空"
+        },
+        {
+          "text": "睨んで",
+          "kana": "にらんで",
+          "romaji": "ni ra n de",
+          "term": "睨む",
+          "pos": "動詞",
+          "meaning": "瞪视",
+          "inflection": "て形"
+        },
+        {
+          "text": "も",
+          "kana": "も",
+          "romaji": "mo",
+          "term": "も",
+          "pos": "助詞",
+          "meaning": "就算……也"
+        },
+        {
+          "text": "(Staring into the sky)",
+          "kana": "",
+          "romaji": "",
+          "term": "",
+          "pos": "感動詞",
+          "meaning": "英文插入句"
+        }
+      ]
+    },
+    {
+      "text": "変わっていけるのは　自分自身だけ",
+      "translation": "能够改变的只有自己自身",
+      "tokens": [
+        {
+          "text": "変わって",
+          "kana": "かわって",
+          "romaji": "ka wa tte",
+          "term": "変わる",
+          "pos": "動詞",
+          "meaning": "改变（て形接いける）",
+          "inflection": "て形"
+        },
+        {
+          "text": "いける",
+          "kana": "いける",
+          "romaji": "i ke ru",
+          "term": "行く",
+          "pos": "動詞",
+          "meaning": "能够持续变化（て行く的可能形）",
+          "inflection": "可能形"
+        },
+        {
+          "text": "の",
+          "kana": "の",
+          "romaji": "no",
+          "term": "の",
+          "pos": "名詞",
+          "meaning": "（形式名词，のは=……的东西）"
+        },
+        {
+          "text": "は",
+          "kana": "は",
+          "romaji": "wa",
+          "term": "は",
+          "pos": "助詞",
+          "meaning": "主题标记"
+        },
+        {
+          "text": "自分自身",
+          "kana": "じぶんじしん",
+          "romaji": "ji bu n ji shi n",
+          "term": "自分自身",
+          "pos": "代名詞",
+          "meaning": "自己本身"
+        },
+        {
+          "text": "だけ",
+          "kana": "だけ",
+          "romaji": "da ke",
+          "term": "だけ",
+          "pos": "助詞",
+          "meaning": "只有"
+        }
+      ]
+    },
+    {
+      "text": "どうしたって消せない夢も　止まれない今も",
+      "translation": "无论怎样都抹不去的梦、停不下来的现在也",
+      "tokens": [
+        {
+          "text": "どうしたって",
+          "kana": "どうしたって",
+          "romaji": "do u shi ta tte",
+          "term": "どうしたって",
+          "pos": "副詞",
+          "meaning": "无论怎么做也"
+        },
+        {
+          "text": "消せない",
+          "kana": "けせない",
+          "romaji": "ke se na i",
+          "term": "消す",
+          "pos": "動詞",
+          "meaning": "抹不去的（可能形否定）",
+          "inflection": "可能形+否定"
+        },
+        {
+          "text": "夢",
+          "kana": "ゆめ",
+          "romaji": "yu me",
+          "term": "夢",
+          "pos": "名詞",
+          "meaning": "梦"
+        },
+        {
+          "text": "も",
+          "kana": "も",
+          "romaji": "mo",
+          "term": "も",
+          "pos": "助詞",
+          "meaning": "也"
+        },
+        {
+          "text": "止まれない",
+          "kana": "とまれない",
+          "romaji": "to ma re na i",
+          "term": "止まる",
+          "pos": "動詞",
+          "meaning": "停不下来的（可能形否定）",
+          "inflection": "可能形+否定"
+        },
+        {
+          "text": "今",
+          "kana": "いま",
+          "romaji": "i ma",
+          "term": "今",
+          "pos": "名詞",
+          "meaning": "现在"
+        },
+        {
+          "text": "も",
+          "kana": "も",
+          "romaji": "mo",
+          "term": "も",
+          "pos": "助詞",
+          "meaning": "也"
+        }
+      ]
+    },
+    {
+      "text": "水面下で絡まる善悪",
+      "translation": "在水面之下纠缠不清的善与恶",
+      "tokens": [
+        {
+          "text": "水面下",
+          "kana": "すいめんか",
+          "romaji": "su i me n ka",
+          "term": "水面下",
+          "pos": "名詞",
+          "meaning": "水面之下（比喻暗处）"
+        },
+        {
+          "text": "で",
+          "kana": "で",
+          "romaji": "de",
+          "term": "で",
+          "pos": "助詞",
+          "meaning": "在（场所）"
+        },
+        {
+          "text": "絡まる",
+          "kana": "からまる",
+          "romaji": "ka ra ma ru",
+          "term": "絡まる",
+          "pos": "動詞",
+          "meaning": "纠缠在一起的",
+          "inflection": "連体形"
+        },
+        {
+          "text": "善悪",
+          "kana": "ぜんあく",
+          "romaji": "ze n a ku",
+          "term": "善悪",
+          "pos": "名詞",
+          "meaning": "善与恶"
+        }
+      ]
+    },
+    {
+      "text": "逸材の華より",
+      "translation": "比起被称作英才的花朵",
+      "tokens": [
+        {
+          "text": "逸材",
+          "kana": "いざい",
+          "romaji": "i za i",
+          "term": "逸材",
+          "pos": "名詞",
+          "meaning": "杰出人才（比喻出众之物）"
+        },
+        {
+          "text": "の",
+          "kana": "の",
+          "romaji": "no",
+          "term": "の",
+          "pos": "助詞",
+          "meaning": "的（所属）"
+        },
+        {
+          "text": "華",
+          "kana": "はな",
+          "romaji": "ha na",
+          "term": "華",
+          "pos": "名詞",
+          "meaning": "花（雅语）"
+        },
+        {
+          "text": "より",
+          "kana": "より",
+          "romaji": "yo ri",
+          "term": "より",
+          "pos": "助詞",
+          "meaning": "比起（比较基准）"
+        }
+      ]
+    },
+    {
+      "text": "挑み続け咲いた一輪が美しい",
+      "translation": "不断挑战而绽放的一朵更为美丽",
+      "tokens": [
+        {
+          "text": "挑み続け",
+          "kana": "いどみつづけ",
+          "romaji": "i do mi tsu zu ke",
+          "term": "挑む",
+          "pos": "動詞",
+          "meaning": "不断挑战的",
+          "inflection": "連用形＋続く"
+        },
+        {
+          "text": "咲いた",
+          "kana": "さいた",
+          "romaji": "sa i ta",
+          "term": "咲く",
+          "pos": "動詞",
+          "meaning": "绽放了的",
+          "inflection": "過去形"
+        },
+        {
+          "text": "一輪",
+          "kana": "いちりん",
+          "romaji": "i chi ri n",
+          "term": "一輪",
+          "pos": "名詞",
+          "meaning": "一朵（花）"
+        },
+        {
+          "text": "が",
+          "kana": "が",
+          "romaji": "ga",
+          "term": "が",
+          "pos": "助詞",
+          "meaning": "（主语标记）"
+        },
+        {
+          "text": "美しい",
+          "kana": "うつくしい",
+          "romaji": "u tsu ku shi i",
+          "term": "美しい",
+          "pos": "形容詞",
+          "meaning": "美丽的",
+          "inflection": "辞書形"
+        }
+      ]
+    }
+  ]
+}

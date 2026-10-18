@@ -173,7 +173,9 @@ export const lyricsAnalysisTransportSchema = z.object({
             term: z.string().nullish(),
             // Models routinely emit a plain string here instead of the structured shape; the
             // normalizer below reads whichever variant arrived, so accept anything at transport.
-            pronunciation: z.unknown(),
+            // `.nullish()` is required: bare z.unknown() makes the KEY mandatory in Zod 4, and a
+            // missing pronunciation (metadata lines, proper nouns) then nukes the whole element.
+            pronunciation: z.unknown().nullish(),
             meaning: z.string().nullish(),
             grammarFunction: z.string().nullish()
           })

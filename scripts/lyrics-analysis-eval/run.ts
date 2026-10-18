@@ -3,12 +3,12 @@
  * run.ts — one-command evaluation loop used by the user-level `lyrics-eval` skill.
  *
  * Pipeline: lyrics file → production analysis pipeline (analyze.ts logic, in-process) →
- * N qwen graders (score.ts logic, in-process) → summary.json + self-contained report.html.
+ * qwen grader (score.ts logic, in-process) → summary.json + self-contained report.html.
  * A cached analysis for the same fingerprint is reused unless --refresh is passed.
  *
  * Usage:
  *   tsx scripts/lyrics-analysis-eval/run.ts --lyrics <file.lrc> --gold <gold.json> \
- *     [--title …] [--artist …] [--graders 3] [--refresh] [--dir <runDir>] \
+ *     [--title …] [--artist …] [--graders 1] [--refresh] [--dir <runDir>] \
  *     [--base-url … --model … --api-key …] [--grader-model …]
  */
 
@@ -54,7 +54,7 @@ const parseArgs = (argv: string[]) => {
   const lyricsPath = get('--lyrics');
   const goldPath = get('--gold');
   if (!lyricsPath || !goldPath) {
-    console.error('Usage: tsx scripts/lyrics-analysis-eval/run.ts --lyrics <file.lrc> --gold <gold.json> [--romalrc <file.lrc>] [--title …] [--artist …] [--graders 3] [--refresh] [--dir …] [--base-url … --model … --api-key …] [--grader-model …]');
+    console.error('Usage: tsx scripts/lyrics-analysis-eval/run.ts --lyrics <file.lrc> --gold <gold.json> [--romalrc <file.lrc>] [--title …] [--artist …] [--graders 1] [--refresh] [--dir …] [--base-url … --model … --api-key …] [--grader-model …]');
     process.exit(1);
   }
   return {
@@ -63,7 +63,7 @@ const parseArgs = (argv: string[]) => {
     romalrcPath: get('--romalrc'),
     title: get('--title') ?? path.basename(lyricsPath, path.extname(lyricsPath)),
     artists: (get('--artist') ?? '').split(',').map((a) => a.trim()).filter(Boolean),
-    graders: Number(get('--graders') ?? 3),
+    graders: Number(get('--graders') ?? 1),
     refresh: argv.includes('--refresh'),
     dir: get('--dir'),
     baseURL: get('--base-url') ?? process.env.LYRICS_ANALYSIS_BASE_URL,

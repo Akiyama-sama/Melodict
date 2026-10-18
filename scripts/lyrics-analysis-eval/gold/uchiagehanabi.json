@@ -1,0 +1,129 @@
+{
+  "songTitle": "打上花火",
+  "songArtists": ["DAOKO", "米津玄師"],
+  "source": "Human transcription (native-speaker-level annotation, same rubric as dont-say-lazy PDF): 12 representative lines transcribed per the original lyric line breaks; tokens = words/particles/set phrases, kana reading + wapuro romaji, dictionary form, closed POS labels, in-context Simplified-Chinese gloss, whole-line translation. Created 2026-10-18 and locked thereafter (never fed to prompts, never edited during iteration).",
+  "lines": [
+    {
+      "text": "あの日見渡した渚を",
+      "translation": "那天眺望过的海滩",
+      "tokens": [
+        { "text": "あの", "kana": "あの", "romaji": "a no", "term": "あの", "pos": "連体詞", "meaning": "那（远称）" },
+        { "text": "日", "kana": "ひ", "romaji": "hi", "term": "日", "pos": "名詞", "meaning": "那天" },
+        { "text": "見渡した", "kana": "みわたした", "romaji": "mi wa ta shi ta", "term": "見渡す", "pos": "動詞", "meaning": "眺望遍、放眼望去", "inflection": "過去形" },
+        { "text": "渚", "kana": "なぎさ", "romaji": "na gi sa", "term": "渚", "pos": "名詞", "meaning": "海滩、水边" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "提示宾语" }
+      ]
+    },
+    {
+      "text": "今も思い出すんだ",
+      "translation": "现在还会想起来啊",
+      "tokens": [
+        { "text": "今も", "kana": "いまも", "romaji": "i ma mo", "term": "今", "pos": "名詞", "meaning": "现在也", "inflection": "も" },
+        { "text": "思い出す", "kana": "おもいだす", "romaji": "o mo i da su", "term": "思い出す", "pos": "動詞", "meaning": "想起", "inflection": "辞書形" },
+        { "text": "んだ", "kana": "んだ", "romaji": "n da", "term": "のだ", "pos": "助動詞", "meaning": "のです的口语缩约，表说明/感叹", "inflection": "のだ" }
+      ]
+    },
+    {
+      "text": "砂の上に刻んだ言葉",
+      "translation": "刻在沙地上的话语",
+      "tokens": [
+        { "text": "砂", "kana": "すな", "romaji": "su na", "term": "砂", "pos": "名詞", "meaning": "沙子" },
+        { "text": "の", "kana": "の", "romaji": "no", "term": "の", "pos": "助詞", "meaning": "所属" },
+        { "text": "上に", "kana": "うえに", "romaji": "u e ni", "term": "上", "pos": "名詞", "meaning": "在……上面", "inflection": "に" },
+        { "text": "刻んだ", "kana": "きざんだ", "romaji": "ki za n da", "term": "刻む", "pos": "動詞", "meaning": "刻下", "inflection": "過去形" },
+        { "text": "言葉", "kana": "ことば", "romaji": "ko to ba", "term": "言葉", "pos": "名詞", "meaning": "话语" }
+      ]
+    },
+    {
+      "text": "君の後ろ姿",
+      "translation": "你的背影",
+      "tokens": [
+        { "text": "君", "kana": "きみ", "romaji": "ki mi", "term": "君", "pos": "代名詞", "meaning": "你" },
+        { "text": "の", "kana": "の", "romaji": "no", "term": "の", "pos": "助詞", "meaning": "所属" },
+        { "text": "後ろ姿", "kana": "うしろすがた", "romaji": "u shi ro su ga ta", "term": "後ろ姿", "pos": "名詞", "meaning": "背影" }
+      ]
+    },
+    {
+      "text": "寄り返す波が",
+      "translation": "涌上又退去的波浪",
+      "tokens": [
+        { "text": "寄り返す", "kana": "よりかえす", "romaji": "yo ri ka e su", "term": "寄り返す", "pos": "動詞", "meaning": "(浪)涌上来又退回去", "inflection": "辞書形" },
+        { "text": "波", "kana": "なみ", "romaji": "na mi", "term": "波", "pos": "名詞", "meaning": "波浪" },
+        { "text": "が", "kana": "が", "romaji": "ga", "term": "が", "pos": "助詞", "meaning": "提示主语" }
+      ]
+    },
+    {
+      "text": "足元をよぎり何かを攫う",
+      "translation": "从脚边掠过，带走些什么",
+      "tokens": [
+        { "text": "足元", "kana": "あしもと", "romaji": "a shi mo to", "term": "足元", "pos": "名詞", "meaning": "脚边" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "经过的场所（移动动词路径）" },
+        { "text": "よぎり", "kana": "よぎり", "romaji": "yo gi ri", "term": "よぎる", "pos": "動詞", "meaning": "掠过", "inflection": "連用形" },
+        { "text": "何か", "kana": "なにか", "romaji": "na ni ka", "term": "何か", "pos": "代名詞", "meaning": "什么东西" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "提示宾语" },
+        { "text": "攫う", "kana": "さらう", "romaji": "sa ra u", "term": "攫う", "pos": "動詞", "meaning": "夺走、掠走", "inflection": "辞書形" }
+      ]
+    },
+    {
+      "text": "夕凪の中",
+      "translation": "在傍晚的风平浪静之中",
+      "tokens": [
+        { "text": "夕凪", "kana": "ゆうなぎ", "romaji": "yu u na gi", "term": "夕凪", "pos": "名詞", "meaning": "傍晚无风（海上傍晚平静）" },
+        { "text": "の", "kana": "の", "romaji": "no", "term": "の", "pos": "助詞", "meaning": "所属" },
+        { "text": "中", "kana": "なか", "romaji": "na ka", "term": "中", "pos": "名詞", "meaning": "之中" }
+      ]
+    },
+    {
+      "text": "日暮れだけが通り過ぎて行く",
+      "translation": "只有黄昏匆匆流逝而过",
+      "tokens": [
+        { "text": "日暮れ", "kana": "ひぐれ", "romaji": "hi gu re", "term": "日暮れ", "pos": "名詞", "meaning": "黄昏、日暮" },
+        { "text": "だけ", "kana": "だけ", "romaji": "da ke", "term": "だけ", "pos": "助詞", "meaning": "只有" },
+        { "text": "が", "kana": "が", "romaji": "ga", "term": "が", "pos": "助詞", "meaning": "提示主语" },
+        { "text": "通り過ぎて", "kana": "とおりすぎて", "romaji": "to o ri su gi te", "term": "通り過ぎる", "pos": "動詞", "meaning": "走过、经过而去", "inflection": "て形" },
+        { "text": "行く", "kana": "いく", "romaji": "i ku", "term": "行く", "pos": "動詞", "meaning": "（て行く表变化的推移）", "inflection": "補助動詞" }
+      ]
+    },
+    {
+      "text": "パッと光って咲いた",
+      "translation": "砰地发光绽放开",
+      "tokens": [
+        { "text": "パッと", "kana": "ぱっと", "romaji": "pa tto", "term": "パッと", "pos": "副詞", "meaning": "猛地、一下子（拟态词）" },
+        { "text": "光って", "kana": "ひかって", "romaji": "hi ka tte", "term": "光る", "pos": "動詞", "meaning": "发光", "inflection": "て形" },
+        { "text": "咲いた", "kana": "さいた", "romaji": "sa i ta", "term": "咲く", "pos": "動詞", "meaning": "绽放", "inflection": "過去形" }
+      ]
+    },
+    {
+      "text": "花火を見ていた",
+      "translation": "（我们）注视着那烟花",
+      "tokens": [
+        { "text": "花火", "kana": "はなび", "romaji": "ha na bi", "term": "花火", "pos": "名詞", "meaning": "烟花" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "提示宾语" },
+        { "text": "見て", "kana": "みて", "romaji": "mi te", "term": "見る", "pos": "動詞", "meaning": "看（て形+いた表持续）", "inflection": "て形" },
+        { "text": "いた", "kana": "いた", "romaji": "i ta", "term": "いる", "pos": "助動詞", "meaning": "（ていた过去进行）", "inflection": "補助動詞" }
+      ]
+    },
+    {
+      "text": "きっとまだ 終わらない夏が",
+      "translation": "一定还没有结束的夏天",
+      "tokens": [
+        { "text": "きっと", "kana": "きっと", "romaji": "ki tto", "term": "きっと", "pos": "副詞", "meaning": "一定" },
+        { "text": "まだ", "kana": "まだ", "romaji": "ma da", "term": "まだ", "pos": "副詞", "meaning": "还" },
+        { "text": "終わらない", "kana": "おわらない", "romaji": "o wa ra na i", "term": "終わる", "pos": "動詞", "meaning": "不结束的", "inflection": "否定形" },
+        { "text": "夏", "kana": "なつ", "romaji": "na tsu", "term": "夏", "pos": "名詞", "meaning": "夏天" },
+        { "text": "が", "kana": "が", "romaji": "ga", "term": "が", "pos": "助詞", "meaning": "提示主语" }
+      ]
+    },
+    {
+      "text": "曖昧な心を 解かして繋いだ",
+      "translation": "把暧昧不清的心融化并连结起来",
+      "tokens": [
+        { "text": "曖昧な", "kana": "あいまいな", "romaji": "a i ma i na", "term": "曖昧", "pos": "形容動詞", "meaning": "暧昧不清的", "inflection": "連体形" },
+        { "text": "心", "kana": "こころ", "romaji": "ko ko ro", "term": "心", "pos": "名詞", "meaning": "心" },
+        { "text": "を", "kana": "を", "romaji": "wo", "term": "を", "pos": "助詞", "meaning": "提示宾语" },
+        { "text": "解かして", "kana": "とかして", "romaji": "to ka shi te", "term": "解かす", "pos": "動詞", "meaning": "融化、解开", "inflection": "て形" },
+        { "text": "繋いだ", "kana": "つないだ", "romaji": "tsu na i da", "term": "繋ぐ", "pos": "動詞", "meaning": "连结起来", "inflection": "過去形" }
+      ]
+    }
+  ]
+}
