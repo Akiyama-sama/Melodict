@@ -31,7 +31,7 @@ const logWorkerWarning = (message: string, data: Record<string, unknown>) => {
 
 const MAX_REPAIR_LINES = 40;
 
-const SYSTEM_PROMPT = [
+const SYSTEM_PROMPT_TEMPLATE = [
   'You annotate song lyrics for a language-learning music player.',
   'Return ONLY a JSON object. Do not wrap it in markdown fences and do not add any prose before or after it.',
   'The JSON must have this shape: {"elements":[{"lineId":"...","translation":"...","tokens":[...]}]}',
@@ -43,8 +43,34 @@ const SYSTEM_PROMPT = [
   '- Include card.term (dictionary form) and card.pronunciation when useful: kana/romaji for Japanese, ipa/us/uk for English, hangul/romanized for Korean, pinyin for Chinese.',
   '- Set language to one of: en, ja, ko, zh, unknown.',
   '- translation is the natural meaning of the whole line.',
-  '- Cover every line you are given, in the given order.'
+  '- Cover every line you are given, in the given order.',
+  // Language discipline: without an explicit per-request instruction, models drift between
+  // output languages mid-song (first lines English, later lines Chinese) because nothing in the
+  // prompt pins the gloss language to the user's UI language.
+  'OUTPUT LANGUAGE (critical): every value the user reads — card.meaning, card.grammarFunction, and translation — MUST be written in %OUTPUT_LANGUAGE%. Never switch languages between elements: the first element and the last element use the same language. Do not mix languages within one JSON object.',
+  'The only exceptions are quoted source-language words inside a meaning (e.g. the lyric word itself) and the pronunciation fields, which stay in their script.'
 ].join('\n');
+
+const OUTPUT_LANGUAGE_BY_UI_LANGUAGE: Record<string, string> = {
+  zh: 'Simplified Chinese (简体中文)',
+  'zh-CN': 'Simplified Chinese (简体中文)',
+  'zh-TW': 'Traditional Chinese (繁體中文)',
+  en: 'English',
+  ja: 'Japanese (日本語)',
+  ko: 'Korean (한국어)'
+};
+
+const getOutputLanguageDirective = (uiLanguage: string) => {
+  const normalized = (uiLanguage || 'en').toLowerCase();
+  return (
+    OUTPUT_LANGUAGE_BY_UI_LANGUAGE[normalized] ??
+    OUTPUT_LANGUAGE_BY_UI_LANGUAGE[normalized.split('-')[0] ?? ''] ??
+    `English (the UI language code was ${uiLanguage}; default to English)`
+  );
+};
+
+const buildSystemPrompt = (uiLanguage: string) =>
+  SYSTEM_PROMPT_TEMPLATE.replace('%OUTPUT_LANGUAGE%', getOutputLanguageDirective(uiLanguage));
 
 const buildUserPrompt = (input: {
   uiLanguage: string;
@@ -55,6 +81,7 @@ const buildUserPrompt = (input: {
   JSON.stringify(
     {
       uiLanguage: input.uiLanguage,
+      outputLanguageRequirement: `All human-readable fields (meaning, grammarFunction, translation) must be in ${getOutputLanguageDirective(input.uiLanguage)}, consistently for every element.`,
       songTitle: input.songTitle,
       songArtists: input.songArtists,
       lines: input.lines
@@ -72,6 +99,7 @@ const buildRepairPrompt = (input: {
   JSON.stringify(
     {
       uiLanguage: input.uiLanguage,
+      outputLanguageRequirement: `All human-readable fields (meaning, grammarFunction, translation) must be in ${getOutputLanguageDirective(input.uiLanguage)}, consistently for every element.`,
       songTitle: input.songTitle,
       songArtists: input.songArtists,
       task: 'A previous pass failed on these lines. Return corrected analysis for exactly these lineIds only.',
@@ -205,7 +233,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
     const result = streamText({
       model,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(uiLanguage),
       prompt: input.prompt,
       temperature: 0,
       maxOutputTokens: input.maxOutputTokens,

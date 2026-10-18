@@ -3,7 +3,9 @@ import { z } from 'zod';
 // Bumped to '2' when the normalizer gained word-boundary snapping + whitespace trimming: cached
 // artifacts from v1 carry misaligned token spans that would render clipped words.
 export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
-export const LYRICS_ANALYSIS_PROMPT_VERSION = '1';
+// Bumped to '2' with the output-language directive: cached artifacts from v1 may mix output
+// languages mid-song (the model drifted because the prompt never pinned the gloss language).
+export const LYRICS_ANALYSIS_PROMPT_VERSION = '2';
 export const LYRICS_ANALYSIS_DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
 export type LyricsAnalysisLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'unknown';

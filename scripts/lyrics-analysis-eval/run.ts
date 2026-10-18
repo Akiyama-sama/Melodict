@@ -144,7 +144,7 @@ const main = async () => {
     lines,
     uiLanguage: 'zh-CN',
     modelId,
-    promptVersion: '1',
+    promptVersion: '2',
     schemaVersion: '2'
   });
   const cachePath = path.join(runDir, 'analysis.json');
@@ -431,4 +431,13 @@ table.tokens.gold th { color: #b98a2e; }
   console.log(JSON.stringify({ overallMean, categoryMeans, runDir, reportPath: path.join(runDir, 'report.html') }, null, 2));
 };
 
-void main();
+void main().catch((error) => {
+  const message = error instanceof Error ? error.message : String(error);
+  const isLengthTruncation = message.includes('NoObjectGeneratedError') || String(error).includes("'length'");
+  console.error(
+    isLengthTruncation
+      ? '[run] the gateway truncated a batch (finishReason=length). Re-run; if it recurs, lower ANALYSIS_BATCH_SIZE in src/main/lyricsAnalysis/providerGateway.ts.'
+      : `[run] failed: ${message}`
+  );
+  process.exit(1);
+});
