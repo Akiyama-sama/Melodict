@@ -4,7 +4,7 @@ import {
   LYRICS_ANALYSIS_DEFAULT_MODEL_ID,
   LYRICS_ANALYSIS_PROMPT_VERSION,
   LYRICS_ANALYSIS_SCHEMA_VERSION,
-  getLineTokenCoverage,
+  type LyricsAnalysisError,
   type LyricsAnalysisInputLine,
   type LyricsAnalysisLine,
   type LyricsAnalysisRequest,
@@ -16,8 +16,7 @@ import { analyzeLyricsInWorker } from './analysisWorkerClient';
 import {
   buildLyricsAnalysisFingerprint,
   mergeLyricsAnalysisCache,
-  readLyricsAnalysisPartialCache,
-  writeLyricsAnalysisCache
+  readLyricsAnalysisPartialCache
 } from './cacheRepository';
 import { getStoredProviderConfig } from './providerConfigRepository';
 import {
@@ -294,10 +293,10 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     await flushPromise;
     if (!isCurrent()) return activeSession;
 
-    const mapped =
+    const mapped: LyricsAnalysisError =
       error && typeof error === 'object' && 'code' in error && 'message' in error
-        ? (error as LyricsAnalysisSnapshot['error'])
-        : { code: 'unknown' as const, message: String(error) };
+        ? (error as LyricsAnalysisError)
+        : { code: 'unknown', message: String(error) };
 
     // The flush(es) above already persisted every line that landed, so this run's work survives.
     emitSessionEndTelemetry({

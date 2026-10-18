@@ -7,7 +7,13 @@ vi.mock('../../../../src/main/netease/client', () => ({ callNeteaseForBody: vi.f
 vi.mock('../../../../src/main/netease/session', () => ({ readNeteaseSession: vi.fn() }));
 vi.mock('../../../../src/common/parseLyrics', () => ({ default: vi.fn() }));
 
-import { convertJsonLrcToLrc, convertYrcToEnhancedLrc, millisecondsToLrcTime } from '../../../../src/main/netease/lyrics';
+import {
+  attachRomanizedText,
+  convertJsonLrcToLrc,
+  convertYrcToEnhancedLrc,
+  millisecondsToLrcTime,
+  parseRomanizedLines
+} from '../../../../src/main/netease/lyrics';
 
 describe('millisecondsToLrcTime', () => {
   test('formats milliseconds as mm:ss.mmm', () => {
@@ -66,5 +72,56 @@ describe('convertYrcToEnhancedLrc', () => {
 
   test('keeps lines without word payload as plain synced lines', () => {
     expect(convertYrcToEnhancedLrc('[1000,2000]纯文本行')).toBe('[00:01.000]纯文本行');
+  });
+});
+
+describe('parseRomanizedLines', () => {
+  test('extracts timestamped text and skips metadata lines', () => {
+    const entries = parseRomanizedLines(
+      ['[by:Contributor]', '[00:12.345]shi kka ri shita hatten no kuukan', '[01:02.5]kimi to no kiseki'].join('\n')
+    );
+    expect(entries).toEqual([
+      { atMs: 12345, text: 'shi kka ri shita hatten no kuukan' },
+      { atMs: 62500, text: 'kimi to no kiseki' }
+    ]);
+  });
+});
+
+describe('attachRomanizedText', () => {
+  const buildLyrics = (lines: Array<{ start?: number; text: string }>): SongLyrics =>
+    ({
+      lyrics: {
+        parsedLyrics: lines.map((line) => ({
+          originalText: line.text,
+          translatedTexts: [],
+          isEnhancedSynced: false,
+          ...(line.start !== undefined ? { start: line.start } : {})
+        })),
+        isRomanized: false
+      }
+    }) as unknown as SongLyrics;
+
+  test('attaches the nearest romaji entry within the match window and flags isRomanized', () => {
+    const lyrics = buildLyrics([
+      { start: 12.35, text: 'しっかりした花弁の空気' },
+      { start: 16.0, text: '開いた隙間の novalis' }
+    ]);
+    attachRomanizedText(
+      lyrics,
+      ['[00:12.30]shi kka ri shita hanben no kuuki', '[00:16.00]hiraita sukima no novalis'].join('\n')
+    );
+    expect(lyrics.lyrics.parsedLyrics[0]?.romanizedText).toBe('shi kka ri shita hanben no kuuki');
+    expect(lyrics.lyrics.parsedLyrics[1]?.romanizedText).toBe('hiraita sukima no novalis');
+    expect(lyrics.lyrics.isRomanized).toBe(true);
+  });
+
+  test('skips Latin-script lines and lines without a nearby romaji entry', () => {
+    const lyrics = buildLyrics([
+      { start: 4.0, text: "Don't say lazy" },
+      { start: 8.0, text: 'かきくけこ' }
+    ]);
+    attachRomanizedText(lyrics, ['[00:08.00]kakikukeko'].join('\n'));
+    expect(lyrics.lyrics.parsedLyrics[0]?.romanizedText).toBeUndefined();
+    expect(lyrics.lyrics.parsedLyrics[1]?.romanizedText).toBe('kakikukeko');
   });
 });

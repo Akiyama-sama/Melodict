@@ -3,9 +3,10 @@ import { z } from 'zod';
 // Bumped to '2' when the normalizer gained word-boundary snapping + whitespace trimming: cached
 // artifacts from v1 carry misaligned token spans that would render clipped words.
 export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
-// Bumped to '2' with the output-language directive: cached artifacts from v1 may mix output
-// languages mid-song (the model drifted because the prompt never pinned the gloss language).
-export const LYRICS_ANALYSIS_PROMPT_VERSION = '2';
+// Bumped to '3' with the language-profile directive and the romanized-reference rule: cached
+// artifacts from v2 were produced without per-language guidance and without the human romaji
+// reference, so their tokenization/pronunciation quality no longer matches what the prompt asks for.
+export const LYRICS_ANALYSIS_PROMPT_VERSION = '3';
 export const LYRICS_ANALYSIS_DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
 export type LyricsAnalysisLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'unknown';
@@ -52,6 +53,12 @@ export interface LyricsAnalysisLine {
 export interface LyricsAnalysisInputLine {
   lineId: string;
   text: string;
+  /**
+   * Human-authored romanization of this line (e.g. NetEase `romalrc`), when the source provides
+   * one. The prompt treats it as pronunciation ground truth and aligns token boundaries to it;
+   * lines without a reference are analyzed from the model's own knowledge.
+   */
+  romanizedText?: string;
 }
 
 export type LyricsAnalysisSessionStatus =

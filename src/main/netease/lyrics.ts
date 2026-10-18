@@ -155,6 +155,75 @@ const joinTranslationWithTiming = (baseLyric: string, translationLyric: string):
   return `${baseLyric}\n${translationLyric.trim()}`;
 };
 
+const ROMALRC_LINE_REGEX = /^\[(?<min>\d+):(?<sec>\d+)(?:[.:](?<ms>\d{1,3}))?\](?<text>.*)$/;
+
+/** Extracts timestamped romanized lines from a NetEase `romalrc`/`yromalrc` payload. */
+export const parseRomanizedLines = (romalrcLyric: string): Array<{ atMs: number; text: string }> => {
+  const entries: Array<{ atMs: number; text: string }> = [];
+
+  for (const rawLine of romalrcLyric.split('\n')) {
+    const match = ROMALRC_LINE_REGEX.exec(rawLine.trim());
+    ROMALRC_LINE_REGEX.lastIndex = 0;
+    if (!match?.groups) continue;
+
+    const text = match.groups.text.trim();
+    // Skip metadata lines that slipped past the timestamp shape ([by:…], [re:…], …).
+    if (text.length === 0 || /^\[[a-z]+:/.test(text)) continue;
+
+    const minutes = Number.parseInt(match.groups.min, 10);
+    const seconds = Number.parseInt(match.groups.sec, 10);
+    if (!Number.isFinite(minutes) || !Number.isFinite(seconds)) continue;
+    const ms = Number.parseInt((match.groups.ms ?? '0').padEnd(3, '0'), 10);
+
+    entries.push({ atMs: minutes * 60000 + seconds * 1000 + ms, text });
+  }
+
+  return entries;
+};
+
+const hasNonLatinText = (text: string) => /[^ -~]/.test(text);
+
+/**
+ * Attaches the human romanization (NetEase `romalrc`, written by contributing users) onto the
+ * parsed lyric lines by timestamp. Filled lines also flip `isRomanized` so the renderer's
+ * auto-convert (kuroshiro/romaja machine conversion) never overwrites the human data.
+ */
+export const attachRomanizedText = (lyrics: SongLyrics, romalrcLyric: string): void => {
+  const entries = parseRomanizedLines(romalrcLyric);
+  if (entries.length === 0) return;
+
+  // Contributors re-sync romalrc by hand, so timestamps can drift a few tens of ms from the main
+  // lyrics; match to the nearest entry within a small window instead of requiring equality.
+  const MATCH_WINDOW_MS = 300;
+
+  let matched = 0;
+  for (const line of lyrics.lyrics.parsedLyrics) {
+    if (line.start === undefined) continue;
+
+    const plainText =
+      typeof line.originalText === 'string'
+        ? line.originalText
+        : line.originalText.map((word) => word.text).join('');
+    // Romanizing a line that is already Latin script only duplicates it in the UI.
+    if (!hasNonLatinText(plainText)) continue;
+
+    const atMs = line.start * 1000;
+    let best: { entry: (typeof entries)[number]; delta: number } | undefined;
+    for (const entry of entries) {
+      const delta = Math.abs(entry.atMs - atMs);
+      if (delta > MATCH_WINDOW_MS) continue;
+      if (!best || delta < best.delta) best = { entry, delta };
+    }
+
+    if (best) {
+      line.romanizedText = best.entry.text;
+      matched += 1;
+    }
+  }
+
+  if (matched > 0) lyrics.lyrics.isRomanized = true;
+};
+
 export const getNeteaseLyrics = async (neteaseId: number): Promise<SongLyrics | undefined> => {
   // Lyrics are immutable per song, so a cached entry short-circuits the network entirely and
   // feeds the analysis pipeline the exact same parsed lines it fingerprints on.
@@ -187,6 +256,11 @@ export const getNeteaseLyrics = async (neteaseId: number): Promise<SongLyrics | 
     lyrics: parseLyrics(withTranslation),
     isOfflineLyricsAvailable: false
   };
+
+  // Human romanization rides along on the same fetch; it feeds both the romanized lyric display
+  // and the analysis prompt (pronunciation ground truth for token alignment).
+  const romalrc = body.yromalrc?.lyric?.trim() || body.romalrc?.lyric?.trim() || '';
+  if (romalrc) attachRomanizedText(lyrics, romalrc);
 
   // Write-through: persist the parsed result so later opens (and the analysis pipeline, which
   // fingerprints on these exact lines) resolve without a network round-trip.

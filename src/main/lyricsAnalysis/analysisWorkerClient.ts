@@ -98,11 +98,18 @@ const getWorker = () => {
 const nextRequestId = () => `req-${++requestCounter}`;
 
 type WorkerMessage =
-  | { type: 'line'; requestId: string; line: LyricsAnalysisLine }
+  | { type: 'line'; requestId: string; line: LyricsAnalysisLine; source: 'first' | 'repair' }
   | { type: 'repairing'; requestId: string; failedLineIds: string[] }
-  | { type: 'done'; requestId: string; lines: LyricsAnalysisLine[]; failedLineIds: string[] }
+  | {
+      type: 'done';
+      requestId: string;
+      lines: LyricsAnalysisLine[];
+      failedLineIds: string[];
+      passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+    }
   | { type: 'error'; requestId: string; error: LyricsAnalysisError }
-  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult };
+  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult }
+  | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };
 
 export const analyzeLyricsInWorker = (input: {
   config: LyricsAnalysisProviderConfig;

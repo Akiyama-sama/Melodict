@@ -64,7 +64,7 @@ export const emitLineResultTelemetry = (input: {
     tokenCount: input.line.tokens.length,
     droppedTokenCount: input.line.droppedTokenCount ?? 0,
     coverage: getLineTokenCoverage(input.line.text, input.line.tokens),
-    status: input.line.status === 'degraded' ? 'degraded' : 'ready'
+    status: input.line.status === 'degraded' ? ('degraded' as const) : ('ready' as const)
   };
   void appendLyricsAnalysisTelemetryEvent(event);
 };

@@ -54,12 +54,13 @@ const parseArgs = (argv: string[]) => {
   const lyricsPath = get('--lyrics');
   const goldPath = get('--gold');
   if (!lyricsPath || !goldPath) {
-    console.error('Usage: tsx scripts/lyrics-analysis-eval/run.ts --lyrics <file.lrc> --gold <gold.json> [--title …] [--artist …] [--graders 3] [--refresh] [--dir …] [--base-url … --model … --api-key …] [--grader-model …]');
+    console.error('Usage: tsx scripts/lyrics-analysis-eval/run.ts --lyrics <file.lrc> --gold <gold.json> [--romalrc <file.lrc>] [--title …] [--artist …] [--graders 3] [--refresh] [--dir …] [--base-url … --model … --api-key …] [--grader-model …]');
     process.exit(1);
   }
   return {
     lyricsPath,
     goldPath,
+    romalrcPath: get('--romalrc'),
     title: get('--title') ?? path.basename(lyricsPath, path.extname(lyricsPath)),
     artists: (get('--artist') ?? '').split(',').map((a) => a.trim()).filter(Boolean),
     graders: Number(get('--graders') ?? 3),
@@ -72,12 +73,30 @@ const parseArgs = (argv: string[]) => {
   };
 };
 
-const parseLrcLines = async (filePath: string) => {
+const LRC_TIMESTAMP_REGEX = /^\s*\[(?<min>\d+):(?<sec>\d+)(?:[.:](?<ms>\d{1,3}))?\]\s*/;
+const LRC_METADATA_LINE_REGEX = /^\[[a-z]+:/;
+
+/** Content lines of an LRC file, keeping each line's timestamp when it has one. */
+const parseLrcFile = async (filePath: string) => {
   const raw = await fs.readFile(filePath, 'utf-8');
-  return raw
-    .split('\n')
-    .map((line) => line.replace(/^\s*\[(\d+):(\d+)([.:]\d+)?\]\s*/, '').trim())
-    .filter((line) => line.length > 0 && !/^\[[a-z]+:/.test(line));
+  const entries: Array<{ atMs: number | undefined; text: string }> = [];
+
+  for (const line of raw.split('\n')) {
+    const match = LRC_TIMESTAMP_REGEX.exec(line);
+    const text = line.replace(LRC_TIMESTAMP_REGEX, '').trim();
+    if (text.length === 0 || LRC_METADATA_LINE_REGEX.test(text)) continue;
+
+    if (match?.groups) {
+      const minutes = Number.parseInt(match.groups.min, 10);
+      const seconds = Number.parseInt(match.groups.sec, 10);
+      const ms = Number.parseInt((match.groups.ms ?? '0').padEnd(3, '0'), 10);
+      entries.push({ atMs: minutes * 60000 + seconds * 1000 + ms, text });
+    } else {
+      entries.push({ atMs: undefined, text });
+    }
+  }
+
+  return entries;
 };
 
 const readStoredCredentials = async () => {
@@ -133,10 +152,36 @@ const main = async () => {
     );
   await fs.mkdir(runDir, { recursive: true });
 
-  const lines = (await parseLrcLines(args.lyricsPath)).map((text, index) => ({
-    lineId: `line-${index}`,
-    text
-  }));
+  const lyricEntries = await parseLrcFile(args.lyricsPath);
+  const romalrcEntries = args.romalrcPath ? await parseLrcFile(args.romalrcPath) : [];
+
+  /**
+   * Aligns the human romanization onto the analysis lines by timestamp (the same nearest-match
+   * window as the app's `attachRomanizedText`). Both files must be timestamped; a plain-text
+   * lyrics file simply gets no reference.
+   */
+  const MATCH_WINDOW_MS = 300;
+  const findRomanized = (index: number) => {
+    const lyricEntry = lyricEntries[index];
+    if (lyricEntry?.atMs === undefined) return undefined;
+
+    let best: { delta: number; text: string } | undefined;
+    for (const entry of romalrcEntries) {
+      const delta = Math.abs(entry.atMs - lyricEntry.atMs);
+      if (delta > MATCH_WINDOW_MS) continue;
+      if (!best || delta < best.delta) best = { delta, text: entry.text };
+    }
+    return best?.text;
+  };
+
+  const lines = lyricEntries.map((entry, index) => {
+    const romanizedText = findRomanized(index);
+    return {
+      lineId: `line-${index}`,
+      text: entry.text,
+      ...(romanizedText ? { romanizedText } : {})
+    };
+  });
   const gold = JSON.parse(await fs.readFile(args.goldPath, 'utf-8')) as GoldStandard;
 
   // ---- Stage 1: analysis (cached unless --refresh) ------------------------------------------
@@ -144,7 +189,7 @@ const main = async () => {
     lines,
     uiLanguage: 'zh-CN',
     modelId,
-    promptVersion: '2',
+    promptVersion: '3',
     schemaVersion: '2'
   });
   const cachePath = path.join(runDir, 'analysis.json');
@@ -258,7 +303,8 @@ const main = async () => {
           term: token.card?.term ?? token.term,
           meaning: token.card?.meaning ?? token.meaning,
           grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
-          pronunciation: token.pronunciation
+          // Pronunciation lives on card.pronunciation in the pipeline's token shape.
+          pronunciation: token.card?.pronunciation ?? token.pronunciation
         }))
       };
 
@@ -382,18 +428,22 @@ const main = async () => {
       const match = goldToProduced.get(normalize(goldLine.text));
       const produced = match?.produced;
       const overlapPct = match ? Math.round(match.overlap * 100) : 0;
-      const producedView = (produced?.tokens ?? []).map((token) => ({
-        text: token.text,
-        term: token.card?.term ?? token.term,
-        meaning: token.card?.meaning ?? token.meaning,
-        grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
-        pronunciation: token.pronunciation
-          ? Object.entries(token.pronunciation)
-              .filter(([, value]) => value && value !== token.text)
-              .map(([k, v]) => `${k}:${v}`)
-              .join(' · ') || '—'
-          : '—'
-      }));
+      const producedView = (produced?.tokens ?? []).map((token) => {
+        // Pronunciation lives on card.pronunciation in the pipeline's token shape.
+        const pronunciation = token.card?.pronunciation ?? token.pronunciation;
+        return {
+          text: token.text,
+          term: token.card?.term ?? token.term,
+          meaning: token.card?.meaning ?? token.meaning,
+          grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
+          pronunciation: pronunciation
+            ? Object.entries(pronunciation)
+                .filter(([, value]) => value && value !== token.text)
+                .map(([k, v]) => `${k}:${v}`)
+                .join(' · ') || '—'
+            : '—'
+        };
+      });
       const goldView = goldLine.tokens.map((token) => ({
         text: token.text,
         term: token.term ?? token.kana,

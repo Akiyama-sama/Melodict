@@ -21,6 +21,7 @@ import {
   validateAndNormalizeLineAnalysis
 } from '../../common/lyricsAnalysis';
 import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
+import { buildLanguageDirective } from '../../common/lyricsLanguageProfiles';
 
 // This module runs inside the lyrics-analysis utility process, which cannot import Electron
 // modules (`app` is not exported there — importing the main logger crashes the worker), so
@@ -48,7 +49,12 @@ const SYSTEM_PROMPT_TEMPLATE = [
   // output languages mid-song (first lines English, later lines Chinese) because nothing in the
   // prompt pins the gloss language to the user's UI language.
   'OUTPUT LANGUAGE (critical): every value the user reads — card.meaning, card.grammarFunction, and translation — MUST be written in %OUTPUT_LANGUAGE%. Never switch languages between elements: the first element and the last element use the same language. Do not mix languages within one JSON object.',
-  'The only exceptions are quoted source-language words inside a meaning (e.g. the lyric word itself) and the pronunciation fields, which stay in their script.'
+  'The only exceptions are quoted source-language words inside a meaning (e.g. the lyric word itself) and the pronunciation fields, which stay in their script.',
+  // Human romanization reference: when the source provides one, it outranks the model's own
+  // romanization knowledge — copy it verbatim instead of re-deriving. Token granularity stays
+  // word/particle level; the reference must never be read as a per-syllable tokenization cue
+  // (observed: the model started emitting one token per mora and produced single-token lines).
+  'ROMANIZED REFERENCE: some lines carry a "romanizedText" field — a HUMAN-AUTHORED romanization of that exact line. Use it as the ground truth for pronunciation: for each of your tokens, copy the matching segment(s) of the reference into card.pronunciation (keep the author\'s spacing). Do NOT change token granularity to match it — keep your normal word/particle-level tokens (1-6 per line); the reference is pronounced syllable-by-syllable but your tokens are not.'
 ].join('\n');
 
 const OUTPUT_LANGUAGE_BY_UI_LANGUAGE: Record<string, string> = {
@@ -69,8 +75,11 @@ const getOutputLanguageDirective = (uiLanguage: string) => {
   );
 };
 
-const buildSystemPrompt = (uiLanguage: string) =>
-  SYSTEM_PROMPT_TEMPLATE.replace('%OUTPUT_LANGUAGE%', getOutputLanguageDirective(uiLanguage));
+const buildSystemPrompt = (uiLanguage: string, languageDirective?: string) =>
+  SYSTEM_PROMPT_TEMPLATE.replace(
+    '%OUTPUT_LANGUAGE%',
+    getOutputLanguageDirective(uiLanguage)
+  ) + (languageDirective ? `\n\n${languageDirective}` : '');
 
 const buildUserPrompt = (input: {
   uiLanguage: string;
@@ -180,6 +189,29 @@ export const mapProviderError = (error: unknown): LyricsAnalysisError => {
   };
 };
 
+/**
+ * Best-effort recovery when the model wrapped the whole `{"elements":[...]}` envelope in a
+ * markdown code fence: the element stream yields nothing, but the raw completion text is intact.
+ * Strips the fence and parses the envelope; returns null when there is nothing to salvage.
+ */
+const salvageFencedEnvelope = (failure: unknown): LyricsAnalysisTransportLine[] | null => {
+  const text = NoObjectGeneratedError.isInstance(failure) ? (failure.text ?? '') : '';
+  const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text)?.[1] ?? text;
+  if (!fenced.includes('"elements"')) return null;
+
+  try {
+    const parsed: unknown = JSON.parse(fenced.trim());
+    const elements = (parsed as { elements?: unknown }).elements;
+    if (!Array.isArray(elements)) return null;
+    return elements.filter(
+      (element): element is LyricsAnalysisTransportLine =>
+        typeof element === 'object' && element !== null && 'lineId' in element
+    );
+  } catch {
+    return null;
+  }
+};
+
 export interface AnalyzeLyricsOptions {
   config: LyricsAnalysisProviderConfig;
   uiLanguage: string;
@@ -210,6 +242,9 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
   const { config, uiLanguage, songTitle, songArtists, lines, signal, onLine } = options;
   const textByLineId = new Map(lines.map((line) => [line.lineId, line.text]));
   const model = createModel(config);
+  // The per-language rules cover the whole song's script mix, so they belong in the system
+  // prompt once — not in each batch's user JSON, where they read as row data.
+  const languageDirective = buildLanguageDirective(lines);
 
   const finalLines = new Map<string, LyricsAnalysisLine>();
 
@@ -233,7 +268,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
     const result = streamText({
       model,
-      system: buildSystemPrompt(uiLanguage),
+      system: buildSystemPrompt(uiLanguage, languageDirective),
       prompt: input.prompt,
       temperature: 0,
       maxOutputTokens: input.maxOutputTokens,
@@ -308,7 +343,29 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
         });
       }
 
-      // A provider/network failure before anything streamed is fatal and must reach the caller.
+      // Markdown-fence salvage: some models wrap the whole envelope in ```json fences, which the
+      // element stream cannot parse at all (zero elements even though the completion is complete).
+      // Strip the fences and parse the envelope leniently, then run the same validation the
+      // streamed elements would have gone through.
+      if (!emittedAny) {
+        const salvaged = salvageFencedEnvelope(failure);
+        if (salvaged) {
+          for (const draft of salvaged) {
+            const lineId = typeof draft.lineId === 'string' ? draft.lineId.trim() : '';
+            const text = textByLineId.get(lineId);
+            if (!text) continue;
+            drafts.push(draft);
+            const outcome = validateAndNormalizeLineAnalysis({ draft, text });
+            if (outcome.kind === 'ok') {
+              const line = { ...outcome.line, droppedTokenCount: outcome.droppedTokenCount };
+              finalLines.set(lineId, line);
+              onLine(line, input.passKind);
+            }
+          }
+        }
+      }
+
+      // A provider/network failure before anything streamed (or salvaged) is fatal.
       if (!emittedAny) throw failure;
 
       // Config-level failures will fail every pass, so surface them instead of repairing.
@@ -381,10 +438,11 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     options.onPassCompleted(event);
   };
 
-  // Gateways cap max_tokens per request well below what a whole song needs (a dense CJK analysis
-  // runs ~200 output tokens per line), and they clamp silently — the run just ends with
-  // finishReason "length" mid-array. Chunk the first pass so every batch fits comfortably.
-  const ANALYSIS_BATCH_SIZE = 8;
+  // Gateways cap max_tokens per request (this one clamps at 5000 completion tokens) and clamp
+  // silently — the run just ends with finishReason "length" mid-array. Since the language
+  // profiles demand full pronunciation on every token (kana+romaji / IPA), a dense line runs
+  // ~1000 output tokens, so keep batches small enough that the worst case fits under the cap.
+  const ANALYSIS_BATCH_SIZE = 4;
   const sessionId = options.sessionId ?? '';
   const firstPassFailures = new Map<string, string>();
   let firstPassBatchIndex = 0;
