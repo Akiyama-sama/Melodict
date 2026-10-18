@@ -20,6 +20,7 @@ import {
   type LyricsAnalysisTransportLine,
   validateAndNormalizeLineAnalysis
 } from '../../common/lyricsAnalysis';
+import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
 
 // This module runs inside the lyrics-analysis utility process, which cannot import Electron
 // modules (`app` is not exported there — importing the main logger crashes the worker), so
@@ -157,9 +158,19 @@ export interface AnalyzeLyricsOptions {
   songTitle: string;
   songArtists: string[];
   lines: LyricsAnalysisInputLine[];
+  /** Telemetry correlation id stamped onto every pass event of this run. */
+  sessionId?: string;
   signal?: AbortSignal;
-  onLine: (line: LyricsAnalysisLine) => void;
+  onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
   onRepairStarted?: (failedLineIds: string[]) => void;
+  /** Fired after every batch (first or repair) with its timing/token/loss metrics. */
+  onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
+}
+
+/** Final aggregate for telemetry: token totals across every pass of a run. */
+export interface AnalyzeLyricsPassStats {
+  outputTokens: number | undefined;
+  inputTokens: number | undefined;
 }
 
 /**
@@ -174,11 +185,20 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
   const finalLines = new Map<string, LyricsAnalysisLine>();
 
+  // Aggregate across every pass (first + repair) for the session-end telemetry event.
+  const totalOutputTokens: number[] = [];
+  const totalInputTokens: number[] = [];
+
   const streamPass = async (input: {
     prompt: string;
     targetLines: LyricsAnalysisInputLine[];
     maxOutputTokens: number;
+    passKind: 'first' | 'repair';
   }) => {
+    const passStartedAt = Date.now();
+    let finishReason: string | undefined;
+    let passOutputTokens: number | undefined;
+    let passInputTokens: number | undefined;
     // `result.output` only surfaces `NoOutputGeneratedError`, which hides the real provider failure
     // (e.g. a 401). The stream error callback is where the status-bearing APICallError shows up.
     let streamError: unknown;
@@ -217,13 +237,28 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
       const outcome = validateAndNormalizeLineAnalysis({ draft: element, text });
       if (outcome.kind === 'ok') {
-        finalLines.set(lineId, outcome.line);
-        onLine(outcome.line);
+        const line = { ...outcome.line, droppedTokenCount: outcome.droppedTokenCount };
+        finalLines.set(lineId, line);
+        onLine(line, input.passKind);
       }
     }
 
     for await (const textChunk of result.textStream) {
       textTail = `${textTail}${textChunk}`.slice(-400);
+    }
+
+    try {
+      const [passFinishReason, passUsage] = await Promise.all([
+        result.finishReason,
+        result.usage
+      ]);
+      finishReason = passFinishReason ?? undefined;
+      passOutputTokens = passUsage?.outputTokens ?? undefined;
+      passInputTokens = passUsage?.inputTokens ?? undefined;
+      if (typeof passOutputTokens === 'number') totalOutputTokens.push(passOutputTokens);
+      if (typeof passInputTokens === 'number') totalInputTokens.push(passInputTokens);
+    } catch {
+      // usage is best-effort; a rejected output promise is handled below.
     }
 
     // `result.output` is the authoritative pass/fail signal; a partial element stream is not success.
@@ -281,24 +316,75 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
       });
     }
 
-    return failedIds;
+    return { failedIds, passStartedAt, finishReason, passOutputTokens, passInputTokens };
+  };
+
+  const emitPassTelemetry = (input: {
+    sessionId: string;
+    batchIndex: number;
+    passKind: 'first' | 'repair';
+    targetLines: number;
+    okLines: number;
+    failedLines: number;
+    passStartedAt: number;
+    finishReason: string | undefined;
+    outputTokens: number | undefined;
+    inputTokens: number | undefined;
+    repairedLines?: number;
+  }) => {
+    if (!options.onPassCompleted) return;
+
+    const event: AnalysisPassTelemetryEvent = {
+      v: 1,
+      sessionId: input.sessionId,
+      ts: Date.now(),
+      kind: 'analysis-pass',
+      batchIndex: input.batchIndex,
+      passKind: input.passKind,
+      targetLines: input.targetLines,
+      okLines: input.okLines,
+      failedLines: input.failedLines,
+      durationMs: Date.now() - input.passStartedAt,
+      finishReason: input.finishReason ?? null,
+      outputTokens: input.outputTokens ?? null,
+      inputTokens: input.inputTokens ?? null,
+      ...(input.repairedLines !== undefined ? { repairedLines: input.repairedLines } : {})
+    };
+    options.onPassCompleted(event);
   };
 
   // Gateways cap max_tokens per request well below what a whole song needs (a dense CJK analysis
   // runs ~200 output tokens per line), and they clamp silently — the run just ends with
   // finishReason "length" mid-array. Chunk the first pass so every batch fits comfortably.
   const ANALYSIS_BATCH_SIZE = 8;
+  const sessionId = options.sessionId ?? '';
   const firstPassFailures = new Map<string, string>();
+  let firstPassBatchIndex = 0;
+
   for (let offset = 0; offset < lines.length; offset += ANALYSIS_BATCH_SIZE) {
     if (signal?.aborted) break;
 
     const batch = lines.slice(offset, offset + ANALYSIS_BATCH_SIZE);
-    const batchFailures = await streamPass({
+    const pass = await streamPass({
       prompt: buildUserPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
       targetLines: batch,
-      maxOutputTokens: 1000 + batch.length * 500
+      maxOutputTokens: 1000 + batch.length * 500,
+      passKind: 'first'
     });
-    for (const [lineId, reason] of batchFailures) firstPassFailures.set(lineId, reason);
+    emitPassTelemetry({
+      sessionId,
+      batchIndex: firstPassBatchIndex,
+      passKind: 'first',
+      targetLines: batch.length,
+      okLines: batch.length - pass.failedIds.size,
+      failedLines: pass.failedIds.size,
+      passStartedAt: pass.passStartedAt,
+      finishReason: pass.finishReason,
+      outputTokens: pass.passOutputTokens,
+      inputTokens: pass.passInputTokens
+    });
+    for (const [lineId, reason] of pass.failedIds) firstPassFailures.set(lineId, reason);
+    firstPassBatchIndex += 1;
   }
 
   if (firstPassFailures.size > 0 && !signal?.aborted) {
@@ -309,16 +395,35 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
     options.onRepairStarted?.(repairTargets.map((line) => line.lineId));
 
+    let repairedLines = 0;
+    let repairBatchIndex = 0;
+
     try {
       for (let offset = 0; offset < repairTargets.length; offset += ANALYSIS_BATCH_SIZE) {
         if (signal?.aborted) break;
 
         const batch = repairTargets.slice(offset, offset + ANALYSIS_BATCH_SIZE);
-        await streamPass({
+        const pass = await streamPass({
           prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
           targetLines: batch,
-          maxOutputTokens: 600 + batch.length * 500
+          maxOutputTokens: 600 + batch.length * 500,
+          passKind: 'repair'
         });
+        repairedLines += batch.length - pass.failedIds.size;
+        emitPassTelemetry({
+          sessionId,
+          batchIndex: repairBatchIndex,
+          passKind: 'repair',
+          targetLines: batch.length,
+          okLines: batch.length - pass.failedIds.size,
+          failedLines: pass.failedIds.size,
+          passStartedAt: pass.passStartedAt,
+          finishReason: pass.finishReason,
+          outputTokens: pass.passOutputTokens,
+          inputTokens: pass.passInputTokens,
+          repairedLines
+        });
+        repairBatchIndex += 1;
       }
     } catch (error) {
       // A failed repair pass must not discard the lines that already succeeded.
@@ -332,7 +437,11 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
       .filter((line): line is LyricsAnalysisLine => line !== undefined),
     failedLineIds: lines
       .filter((line) => !finalLines.has(line.lineId))
-      .map((line) => line.lineId)
+      .map((line) => line.lineId),
+    passStats: {
+      outputTokens: totalOutputTokens.length > 0 ? totalOutputTokens.reduce((a, b) => a + b, 0) : undefined,
+      inputTokens: totalInputTokens.length > 0 ? totalInputTokens.reduce((a, b) => a + b, 0) : undefined
+    }
   };
 };
 

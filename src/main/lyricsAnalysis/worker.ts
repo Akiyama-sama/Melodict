@@ -5,6 +5,7 @@ import type {
   LyricsAnalysisProviderConfig,
   LyricsAnalysisProviderTestResult
 } from '../../common/lyricsAnalysis';
+import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
 import { analyzeLyrics, mapProviderError, testLyricsAnalysisProvider } from './providerGateway';
 
 type WorkerRequest =
@@ -16,6 +17,7 @@ type WorkerRequest =
       songTitle: string;
       songArtists: string[];
       lines: LyricsAnalysisInputLine[];
+      sessionId?: string;
     }
   | {
       type: 'test';
@@ -25,11 +27,18 @@ type WorkerRequest =
   | { type: 'cancel'; requestId: string };
 
 type WorkerResponse =
-  | { type: 'line'; requestId: string; line: LyricsAnalysisLine }
+  | { type: 'line'; requestId: string; line: LyricsAnalysisLine; source: 'first' | 'repair' }
   | { type: 'repairing'; requestId: string; failedLineIds: string[] }
-  | { type: 'done'; requestId: string; lines: LyricsAnalysisLine[]; failedLineIds: string[] }
+  | {
+      type: 'done';
+      requestId: string;
+      lines: LyricsAnalysisLine[];
+      failedLineIds: string[];
+      passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+    }
   | { type: 'error'; requestId: string; error: LyricsAnalysisError }
-  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult };
+  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult }
+  | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };
 
 const port = process.parentPort;
 const abortControllers = new Map<string, AbortController>();
@@ -49,17 +58,21 @@ const runAnalysis = async (
       songTitle: request.songTitle,
       songArtists: request.songArtists,
       lines: request.lines,
+      sessionId: request.sessionId,
       signal: controller.signal,
-      onLine: (line) => post({ type: 'line', requestId: request.requestId, line }),
+      onLine: (line, source) =>
+        post({ type: 'line', requestId: request.requestId, line, source }),
       onRepairStarted: (failedLineIds) =>
-        post({ type: 'repairing', requestId: request.requestId, failedLineIds })
+        post({ type: 'repairing', requestId: request.requestId, failedLineIds }),
+      onPassCompleted: (pass) => post({ type: 'pass', requestId: request.requestId, pass })
     });
 
     post({
       type: 'done',
       requestId: request.requestId,
       lines: outcome.lines,
-      failedLineIds: outcome.failedLineIds
+      failedLineIds: outcome.failedLineIds,
+      passStats: outcome.passStats
     });
   } catch (error) {
     if (controller.signal.aborted) return;

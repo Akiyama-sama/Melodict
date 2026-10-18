@@ -72,6 +72,7 @@ import {
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import { registerLyricsAnalysisIpc } from './lyricsAnalysis/ipc';
+import { pruneLyricsAnalysisTelemetry } from './lyricsAnalysis/telemetryRepository';
 import { registerNeteaseIpc } from './netease/ipc';
 import {
   allowScreenSleeping,
@@ -130,6 +131,9 @@ import { compare } from './utils/safeStorage';
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   registerLyricsAnalysisIpc();
   registerNeteaseIpc();
+
+  // Opportunistic housekeeping: drop telemetry shards older than the retention window.
+  void pruneLyricsAnalysisTelemetry().catch(() => undefined);
 
   if (mainWindow) {
     ipcMain.on('app/close', () => app.quit());

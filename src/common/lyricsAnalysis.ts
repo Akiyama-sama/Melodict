@@ -43,6 +43,8 @@ export interface LyricsAnalysisLine {
   translation?: string;
   tokens: LyricsAnalysisToken[];
   status: LyricsAnalysisLineStatus;
+  /** Telemetry input: raw tokens the model emitted that validation dropped. */
+  droppedTokenCount?: number;
 }
 
 export interface LyricsAnalysisInputLine {
@@ -212,7 +214,7 @@ export const getFallbackMeaning = (lineText: string, tokenText: string) =>
 export const getFallbackGrammarFunction = () => '歌词中的表达成分';
 
 export type LineValidationOutcome =
-  | { kind: 'ok'; line: LyricsAnalysisLine }
+  | { kind: 'ok'; line: LyricsAnalysisLine; droppedTokenCount: number }
   | { kind: 'failed'; lineId: string; reason: string };
 
 /**
@@ -338,7 +340,9 @@ export const validateAndNormalizeLineAnalysis = (input: {
       translation: asTrimmedString(draft.translation),
       tokens: validated,
       status: validated.length < rawTokens.length ? 'degraded' : 'ready'
-    }
+    },
+    // Telemetry input: how many raw tokens validation rejected for this line.
+    droppedTokenCount: rawTokens.length - validated.length
   };
 };
 
@@ -360,4 +364,29 @@ export const splitLineIntoTokens = (
   if (cursor < text.length) segments.push({ text: text.slice(cursor) });
 
   return segments;
+};
+
+/**
+ * Share of the line's non-whitespace characters covered by accepted token spans (0..1). Used by
+ * telemetry as the cheapest proxy for analysis quality: a low value means the model skipped or
+ * dropped chunks of the line.
+ */
+export const getLineTokenCoverage = (text: string, tokens: LyricsAnalysisToken[]): number => {
+  let relevantCount = 0;
+  let coveredCount = 0;
+
+  const isCovered = new Set<number>();
+  for (const token of tokens) {
+    for (let index = Math.max(0, token.startChar); index < Math.min(text.length, token.endChar); index += 1)
+      isCovered.add(index);
+  }
+
+  for (let index = 0; index < text.length; index += 1) {
+    if (/\s/.test(text[index] ?? '')) continue;
+    relevantCount += 1;
+    if (isCovered.has(index)) coveredCount += 1;
+  }
+
+  if (relevantCount === 0) return 1;
+  return Math.round((coveredCount / relevantCount) * 1000) / 1000;
 };
