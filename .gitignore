@@ -11,3 +11,4 @@ coverage/
 .github/plans/
 tsconfig.node.tsbuildinfo
 tsconfig.web.tsbuildinfo
+eval-runs/
