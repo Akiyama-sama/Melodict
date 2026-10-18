@@ -25,14 +25,6 @@ const Sidebar = memo(() => {
           isActive: true
         },
         {
-          to: '/main-player/search',
-          id: 'Search',
-          parentClassName: 'search',
-          icon: 'search',
-          content: t('sideBar.search'),
-          isActive: false
-        },
-        {
           to: '/main-player/songs',
           id: 'Songs',
           parentClassName: 'songs',
