@@ -109,3 +109,27 @@ describe('salvageEnvelopeElements', () => {
     expect(parse(text)).toEqual(['line-0', 'line-0']);
   });
 });
+
+describe('salvageEnvelopeElements — unescaped quotes inside string values', () => {
+  const make = (text: string) => makeFailure(text);
+
+  test('escapes an unescaped quote inside a value and recovers the element', () => {
+    // Real corruption: `"grammarFunction":"作定语修饰"こと"，表示…"` — the inner half-width
+    // quotes sever the JSON string for the strict parser.
+    const text =
+      '{"elements":[{"lineId":"line-0","tokens":[{"startChar":0,"endChar":3,' +
+      '"card":{"grammarFunction":"作定语修饰"こと"，表示受伤害"}}]}]}';
+    const elements = salvageEnvelopeElements(make(text)) ?? [];
+    expect(elements.map((e) => e.lineId)).toEqual(['line-0']);
+    expect((elements[0]?.tokens?.[0]?.card?.grammarFunction as string) ?? '').toContain('こと');
+  });
+
+  test('still closes a genuine string before a real structural follower', () => {
+    const text =
+      '{"elements":[{"lineId":"line-0","translation":"夜の匂い","tokens":[]},{"lineId":"line-1","tokens":[]}]}';
+    expect((salvageEnvelopeElements(make(text)) ?? []).map((e) => e.lineId)).toEqual([
+      'line-0',
+      'line-1'
+    ]);
+  });
+});

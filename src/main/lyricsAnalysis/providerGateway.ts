@@ -230,10 +230,32 @@ export const salvageEnvelopeElements = (failure: unknown): LyricsAnalysisTranspo
     for (let index = 0; index < chunk.length; index += 1) {
       const char = chunk[index];
       if (inString) {
+        if (escaped) {
+          escaped = false;
+          out += char;
+          continue;
+        }
+        if (char === '\\') {
+          escaped = true;
+          out += char;
+          continue;
+        }
+        if (char === '"') {
+          // A genuine close can only be followed by `,` `}` `]` `:` (possibly after whitespace);
+          // anything else means the model wrote an unescaped quote inside the value — keep it
+          // as literal content instead of letting it sever the string.
+          let look = index + 1;
+          while (look < chunk.length && /\s/.test(chunk[look] ?? '')) look += 1;
+          const next = chunk[look] ?? '';
+          if (next === ',' || next === '}' || next === ']' || next === ':' || next === '') {
+            inString = false;
+            out += char;
+          } else {
+            out += '\\"';
+          }
+          continue;
+        }
         out += char;
-        if (escaped) escaped = false;
-        else if (char === '\\') escaped = true;
-        else if (char === '"') inString = false;
         continue;
       }
       if (char === '"') {
