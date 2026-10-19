@@ -280,10 +280,22 @@ export const getNeteaseUserPlaylists = async (userId: number): Promise<NeteasePl
   return playlists.map((playlist) => normalizeNeteasePlaylistSummary(playlist));
 };
 
+/**
+ * Liked song ids ordered newest-like first. `likelist` returns ids in no particular order
+ * (the package labels it 无序 and takes only `uid`), so read the auto-created "liked music"
+ * playlist instead — the first playlist the user owns in `user_playlist` — whose `trackIds`
+ * follow like time, newest first.
+ */
 export const getNeteaseLikedSongIds = async (userId: number): Promise<number[]> => {
-  const body = await callCatalog('likelist', { uid: userId }, true);
-  const ids = Array.isArray(body.ids) ? (body.ids as unknown[]) : [];
-  return ids.filter((id): id is number => typeof id === 'number' && id > 0);
+  const playlists = await getNeteaseUserPlaylists(userId);
+  const likedPlaylist = playlists.find((playlist) => playlist.userId === userId);
+  if (!likedPlaylist) return [];
+
+  const body = await callNeteaseForBody('playlist_detail', { id: likedPlaylist.playlistId });
+  const playlistRaw = (body.playlist ?? {}) as { trackIds?: { id: number }[] };
+  return (playlistRaw.trackIds ?? [])
+    .map((trackId) => trackId.id)
+    .filter((id) => typeof id === 'number' && id > 0);
 };
 
 export const likeUnlikeNeteaseSong = async (
