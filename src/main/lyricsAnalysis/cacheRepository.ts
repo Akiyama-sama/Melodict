@@ -69,6 +69,48 @@ export const readLyricsAnalysisCache = async (
   }
 };
 
+/**
+ * Like `readLyricsAnalysisCache` but tolerates an artifact with zero lines — a run that crashed
+ * before its first incremental flush. Partial artifacts still matter: whatever lines they hold can
+ * hydrate the UI instantly and cut the next run's LLM workload.
+ */
+export const readLyricsAnalysisPartialCache = async (
+  fingerprint: string
+): Promise<LyricsAnalysisCacheArtifact | undefined> => {
+  try {
+    const raw = await fs.readFile(getArtifactPath(fingerprint), 'utf-8');
+    const artifact = JSON.parse(raw) as LyricsAnalysisCacheArtifact;
+
+    if (artifact?.fingerprint !== fingerprint || !Array.isArray(artifact.lines)) return undefined;
+
+    return artifact;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
+      logger.warn('Failed to read the partial lyrics analysis cache entry.', { error, fingerprint });
+    return undefined;
+  }
+};
+
+/**
+ * Merges `incoming` lines into whatever is already on disk for this fingerprint and writes the
+ * union atomically. Line ids already present are overwritten (later, repaired analyses win);
+ * ids not present stay. This is what makes mid-run flushes and resume runs accumulate safely.
+ */
+export const mergeLyricsAnalysisCache = async (artifact: LyricsAnalysisCacheArtifact) => {
+  const existing = await readLyricsAnalysisPartialCache(artifact.fingerprint);
+  const mergedLines = new Map((existing?.lines ?? []).map((line) => [line.lineId, line]));
+  for (const line of artifact.lines) mergedLines.set(line.lineId, line);
+
+  const merged: LyricsAnalysisCacheArtifact = {
+    ...artifact,
+    lines: [...mergedLines.values()],
+    generatedAt: Date.now()
+  };
+
+  await writeLyricsAnalysisCache(merged);
+  return merged;
+};
+
 export const writeLyricsAnalysisCache = async (
   artifact: LyricsAnalysisCacheArtifact
 ): Promise<void> => {

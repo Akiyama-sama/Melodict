@@ -275,6 +275,54 @@ const lyrics = {
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)
 };
 
+// $ NETEASE CLOUD MUSIC
+const neteaseControls = {
+  startQrLogin: (): Promise<{ key: string; qrImgUrl: string }> =>
+    ipcRenderer.invoke('app/netease/startQrLogin'),
+  checkQrLogin: (key: string): Promise<NeteaseQrPollResult> =>
+    ipcRenderer.invoke('app/netease/checkQrLogin', key),
+  getMe: (): Promise<NeteaseSessionProfile | undefined> =>
+    ipcRenderer.invoke('app/netease/getMe'),
+  refreshSession: (): Promise<void> => ipcRenderer.invoke('app/netease/refreshSession'),
+  logOut: (): Promise<void> => ipcRenderer.invoke('app/netease/logOut'),
+
+  search: (keywords: string, type: NeteaseSearchTypes): Promise<NeteaseApiSearchResult> =>
+    ipcRenderer.invoke('app/netease/search', keywords, type),
+  getPlaylist: (
+    playlistId: string
+  ): Promise<{ playlist: NeteasePlaylistSummary; songs: NeteaseSongSummary[] }> =>
+    ipcRenderer.invoke('app/netease/getPlaylist', playlistId),
+  getAlbum: (
+    albumId: string | number
+  ): Promise<{ album: NeteaseAlbumSummary; songs: NeteaseSongSummary[] }> =>
+    ipcRenderer.invoke('app/netease/getAlbum', albumId),
+  getArtist: (
+    artistId: string | number
+  ): Promise<{ artist: NeteaseArtistSummary; hotSongs: NeteaseSongSummary[] }> =>
+    ipcRenderer.invoke('app/netease/getArtist', artistId),
+  getSongSummary: (neteaseId: number): Promise<NeteaseSongSummary | undefined> =>
+    ipcRenderer.invoke('app/netease/getSongSummary', neteaseId),
+  getSongSummaries: (neteaseIds: number[]): Promise<NeteaseSongSummary[]> =>
+    ipcRenderer.invoke('app/netease/getSongSummaries', neteaseIds),
+  getStream: (neteaseId: number, quality: NeteaseQualityTypes): Promise<NeteaseStreamInfo | undefined> =>
+    ipcRenderer.invoke('app/netease/getStream', neteaseId, quality),
+  getSongPalette: (neteaseId: number, coverUrl?: string): Promise<PaletteData | undefined> =>
+    ipcRenderer.invoke('app/netease/getSongPalette', neteaseId, coverUrl),
+
+  getUserPlaylists: (userId: number): Promise<NeteasePlaylistSummary[]> =>
+    ipcRenderer.invoke('app/netease/getUserPlaylists', userId),
+  getLikedSongIds: (userId: number): Promise<number[]> =>
+    ipcRenderer.invoke('app/netease/getLikedSongIds', userId),
+  likeUnlikeSong: (neteaseId: number, isLike: boolean): Promise<boolean> =>
+    ipcRenderer.invoke('app/netease/likeUnlikeSong', neteaseId, isLike),
+
+  getRecommendations: (): Promise<NeteaseSongSummary[]> =>
+    ipcRenderer.invoke('app/netease/getRecommendations'),
+  getPersonalizedPlaylists: (): Promise<NeteasePlaylistSummary[]> =>
+    ipcRenderer.invoke('app/netease/getPersonalizedPlaylists'),
+  getToplists: (): Promise<NeteasePlaylistSummary[]> => ipcRenderer.invoke('app/netease/getToplists')
+};
+
 // $ APP MESSAGES
 const messages = {
   getMessageFromMain: (
@@ -650,6 +698,7 @@ export const api = {
   search,
   lyrics,
   lyricsAnalysis,
+  neteaseControls,
   messages,
   dataUpdates,
   songUpdates,

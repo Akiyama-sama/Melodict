@@ -110,6 +110,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.130",
     "@electric-sql/pglite": "^0.5.1",
+    "NeteaseCloudMusicApi": "^4.32.0",
     "@electric-sql/pglite-tools": "^0.4.1",
     "@electron-toolkit/preload": "^3.0.2",
     "@headlessui/react": "^2.2.9",

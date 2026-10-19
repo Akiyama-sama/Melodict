@@ -40,6 +40,7 @@ import { closeAllAbortControllers, saveAbortController } from './fs/controlAbort
 import { handleFileProtocol } from './handleFileProtocol';
 import { initializeIPC } from './ipc';
 import logger from './logger';
+import { revalidateNeteaseSession } from './netease/auth';
 import { clearTempArtworkFolder } from './other/artworks';
 import { clearDiscordRpcActivity } from './other/discordRPC';
 import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
@@ -382,6 +383,7 @@ app
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
       initializeIPC(mainWindow, abortController.signal);
+      void revalidateNeteaseSession();
       flushScrobbleQueue();
       checkForUpdates();
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /

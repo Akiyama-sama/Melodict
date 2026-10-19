@@ -7,14 +7,20 @@ import type {
   LyricsAnalysisProviderConfig,
   LyricsAnalysisProviderTestResult
 } from '../../common/lyricsAnalysis';
+import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
 import logger from '../logger';
 import workerModulePath from './worker?modulePath';
 
 interface PendingAnalysis {
-  resolve: (value: { lines: LyricsAnalysisLine[]; failedLineIds: string[] }) => void;
+  resolve: (value: {
+    lines: LyricsAnalysisLine[];
+    failedLineIds: string[];
+    passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+  }) => void;
   reject: (error: LyricsAnalysisError) => void;
-  onLine: (line: LyricsAnalysisLine) => void;
+  onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
   onRepairing?: (failedLineIds: string[]) => void;
+  onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
 }
 
 const pendingAnalyses = new Map<string, PendingAnalysis>();
@@ -41,13 +47,20 @@ const createWorker = () => {
 
     switch (message.type) {
       case 'line':
-        pending.onLine(message.line);
+        pending.onLine(message.line, message.source);
         break;
       case 'repairing':
         pending.onRepairing?.(message.failedLineIds);
         break;
+      case 'pass':
+        pending.onPassCompleted?.(message.pass);
+        break;
       case 'done':
-        pending.resolve({ lines: message.lines, failedLineIds: message.failedLineIds });
+        pending.resolve({
+          lines: message.lines,
+          failedLineIds: message.failedLineIds,
+          passStats: message.passStats
+        });
         pendingAnalyses.delete(message.requestId);
         break;
       case 'error':
@@ -85,11 +98,18 @@ const getWorker = () => {
 const nextRequestId = () => `req-${++requestCounter}`;
 
 type WorkerMessage =
-  | { type: 'line'; requestId: string; line: LyricsAnalysisLine }
+  | { type: 'line'; requestId: string; line: LyricsAnalysisLine; source: 'first' | 'repair' }
   | { type: 'repairing'; requestId: string; failedLineIds: string[] }
-  | { type: 'done'; requestId: string; lines: LyricsAnalysisLine[]; failedLineIds: string[] }
+  | {
+      type: 'done';
+      requestId: string;
+      lines: LyricsAnalysisLine[];
+      failedLineIds: string[];
+      passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+    }
   | { type: 'error'; requestId: string; error: LyricsAnalysisError }
-  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult };
+  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult }
+  | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };
 
 export const analyzeLyricsInWorker = (input: {
   config: LyricsAnalysisProviderConfig;
@@ -97,17 +117,24 @@ export const analyzeLyricsInWorker = (input: {
   songTitle: string;
   songArtists: string[];
   lines: LyricsAnalysisInputLine[];
-  onLine: (line: LyricsAnalysisLine) => void;
+  sessionId?: string;
+  onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
   onRepairing?: (failedLineIds: string[]) => void;
+  onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
 }) =>
-  new Promise<{ lines: LyricsAnalysisLine[]; failedLineIds: string[] }>((resolve, reject) => {
+  new Promise<{
+    lines: LyricsAnalysisLine[];
+    failedLineIds: string[];
+    passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+  }>((resolve, reject) => {
     const requestId = nextRequestId();
 
     pendingAnalyses.set(requestId, {
       resolve,
       reject,
       onLine: input.onLine,
-      onRepairing: input.onRepairing
+      onRepairing: input.onRepairing,
+      onPassCompleted: input.onPassCompleted
     });
 
     getWorker().postMessage({
@@ -117,7 +144,8 @@ export const analyzeLyricsInWorker = (input: {
       uiLanguage: input.uiLanguage,
       songTitle: input.songTitle,
       songArtists: input.songArtists,
-      lines: input.lines
+      lines: input.lines,
+      sessionId: input.sessionId
     });
   });
 

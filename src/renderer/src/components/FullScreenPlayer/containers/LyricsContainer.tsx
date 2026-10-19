@@ -16,6 +16,8 @@ type Props = {
   isLyricsVisible: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
   selectedToken?: { token: LyricsAnalysisToken; line: LyricsAnalysisLine };
+  /** When false, lyric lines render as plain text even where analysis is available. */
+  isAnalysisView?: boolean;
   onTokenClick: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 };
 
@@ -23,7 +25,7 @@ const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isLyricsVisible, setIsLyricsAvailable, selectedToken, onTokenClick } = props;
+  const { isLyricsVisible, setIsLyricsAvailable, selectedToken, isAnalysisView = true, onTokenClick } = props;
   const isPanelOpen = Boolean(selectedToken);
   const { t } = useTranslation();
 
@@ -108,10 +110,11 @@ const LyricsContainer = (props: Props) => {
               syncedLyrics={{ start, end }}
               translatedLyricLines={lyric.translatedTexts}
               convertedLyric={lyric.romanizedText}
-              analysis={analysis}
+              analysis={isAnalysisView ? analysis : undefined}
               activeTokenId={
                 selectedToken?.line.lineId === lineId ? selectedToken.token.tokenId : undefined
               }
+              palette={currentSongData.paletteData}
               onTokenClick={onTokenClick}
             />
           );
@@ -150,7 +153,7 @@ const LyricsContainer = (props: Props) => {
       }
     }
     return [];
-  }, [lyrics, linesById, onTokenClick, selectedToken]);
+  }, [isAnalysisView, lyrics, linesById, onTokenClick, selectedToken, currentSongData.paletteData]);
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {

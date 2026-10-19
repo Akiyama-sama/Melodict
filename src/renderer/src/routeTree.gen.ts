@@ -33,6 +33,13 @@ import { Route as MainPlayerSettingsIndexRouteImport } from './routes/main-playe
 import { Route as MainPlayerSongsIndexRouteImport } from './routes/main-player/songs/index'
 import { Route as MainPlayerSongsSongIdRouteImport } from './routes/main-player/songs/$songId'
 import { Route as MainPlayerLyricsEditorSongIdRouteImport } from './routes/main-player/lyrics/editor/$songId'
+import { Route as MainPlayerNeteaseAlbumsAlbumIdRouteImport } from './routes/main-player/netease/albums/$albumId'
+import { Route as MainPlayerNeteaseArtistsArtistIdRouteImport } from './routes/main-player/netease/artists/$artistId'
+import { Route as MainPlayerNeteaseLikedIndexRouteImport } from './routes/main-player/netease/liked/index'
+import { Route as MainPlayerNeteasePlaylistsIndexRouteImport } from './routes/main-player/netease/playlists/index'
+import { Route as MainPlayerNeteasePlaylistsPlaylistIdRouteImport } from './routes/main-player/netease/playlists/$playlistId'
+import { Route as MainPlayerNeteaseSearchIndexRouteImport } from './routes/main-player/netease/search/index'
+import { Route as MainPlayerNeteaseToplistsIndexRouteImport } from './routes/main-player/netease/toplists/index'
 import { Route as MainPlayerSearchAllIndexRouteImport } from './routes/main-player/search/all/index'
 import { Route as MainPlayerSongsSongIdEditRouteImport } from './routes/main-player/songs/$songId.edit'
 
@@ -163,6 +170,48 @@ const MainPlayerLyricsEditorSongIdRoute =
     path: '/lyrics/editor/$songId',
     getParentRoute: () => MainPlayerRouteRoute,
   } as any)
+const MainPlayerNeteaseAlbumsAlbumIdRoute =
+  MainPlayerNeteaseAlbumsAlbumIdRouteImport.update({
+    id: '/netease/albums/$albumId',
+    path: '/netease/albums/$albumId',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+const MainPlayerNeteaseArtistsArtistIdRoute =
+  MainPlayerNeteaseArtistsArtistIdRouteImport.update({
+    id: '/netease/artists/$artistId',
+    path: '/netease/artists/$artistId',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+const MainPlayerNeteaseLikedIndexRoute =
+  MainPlayerNeteaseLikedIndexRouteImport.update({
+    id: '/netease/liked/',
+    path: '/netease/liked/',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+const MainPlayerNeteasePlaylistsIndexRoute =
+  MainPlayerNeteasePlaylistsIndexRouteImport.update({
+    id: '/netease/playlists/',
+    path: '/netease/playlists/',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+const MainPlayerNeteasePlaylistsPlaylistIdRoute =
+  MainPlayerNeteasePlaylistsPlaylistIdRouteImport.update({
+    id: '/netease/playlists/$playlistId',
+    path: '/netease/playlists/$playlistId',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+const MainPlayerNeteaseSearchIndexRoute =
+  MainPlayerNeteaseSearchIndexRouteImport.update({
+    id: '/netease/search/',
+    path: '/netease/search/',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+const MainPlayerNeteaseToplistsIndexRoute =
+  MainPlayerNeteaseToplistsIndexRouteImport.update({
+    id: '/netease/toplists/',
+    path: '/netease/toplists/',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
 const MainPlayerSearchAllIndexRoute =
   MainPlayerSearchAllIndexRouteImport.update({
     id: '/search/all/',
@@ -201,7 +250,14 @@ export interface FileRoutesByFullPath {
   '/main-player/settings/': typeof MainPlayerSettingsIndexRoute
   '/main-player/songs/': typeof MainPlayerSongsIndexRoute
   '/main-player/lyrics/editor/$songId': typeof MainPlayerLyricsEditorSongIdRoute
+  '/main-player/netease/albums/$albumId': typeof MainPlayerNeteaseAlbumsAlbumIdRoute
+  '/main-player/netease/artists/$artistId': typeof MainPlayerNeteaseArtistsArtistIdRoute
+  '/main-player/netease/playlists/$playlistId': typeof MainPlayerNeteasePlaylistsPlaylistIdRoute
   '/main-player/songs/$songId/edit': typeof MainPlayerSongsSongIdEditRoute
+  '/main-player/netease/liked/': typeof MainPlayerNeteaseLikedIndexRoute
+  '/main-player/netease/playlists/': typeof MainPlayerNeteasePlaylistsIndexRoute
+  '/main-player/netease/search/': typeof MainPlayerNeteaseSearchIndexRoute
+  '/main-player/netease/toplists/': typeof MainPlayerNeteaseToplistsIndexRoute
   '/main-player/search/all/': typeof MainPlayerSearchAllIndexRoute
 }
 export interface FileRoutesByTo {
@@ -229,7 +285,14 @@ export interface FileRoutesByTo {
   '/main-player/settings': typeof MainPlayerSettingsIndexRoute
   '/main-player/songs': typeof MainPlayerSongsIndexRoute
   '/main-player/lyrics/editor/$songId': typeof MainPlayerLyricsEditorSongIdRoute
+  '/main-player/netease/albums/$albumId': typeof MainPlayerNeteaseAlbumsAlbumIdRoute
+  '/main-player/netease/artists/$artistId': typeof MainPlayerNeteaseArtistsArtistIdRoute
+  '/main-player/netease/playlists/$playlistId': typeof MainPlayerNeteasePlaylistsPlaylistIdRoute
   '/main-player/songs/$songId/edit': typeof MainPlayerSongsSongIdEditRoute
+  '/main-player/netease/liked': typeof MainPlayerNeteaseLikedIndexRoute
+  '/main-player/netease/playlists': typeof MainPlayerNeteasePlaylistsIndexRoute
+  '/main-player/netease/search': typeof MainPlayerNeteaseSearchIndexRoute
+  '/main-player/netease/toplists': typeof MainPlayerNeteaseToplistsIndexRoute
   '/main-player/search/all': typeof MainPlayerSearchAllIndexRoute
 }
 export interface FileRoutesById {
@@ -258,7 +321,14 @@ export interface FileRoutesById {
   '/main-player/settings/': typeof MainPlayerSettingsIndexRoute
   '/main-player/songs/': typeof MainPlayerSongsIndexRoute
   '/main-player/lyrics/editor/$songId': typeof MainPlayerLyricsEditorSongIdRoute
+  '/main-player/netease/albums/$albumId': typeof MainPlayerNeteaseAlbumsAlbumIdRoute
+  '/main-player/netease/artists/$artistId': typeof MainPlayerNeteaseArtistsArtistIdRoute
+  '/main-player/netease/playlists/$playlistId': typeof MainPlayerNeteasePlaylistsPlaylistIdRoute
   '/main-player/songs/$songId/edit': typeof MainPlayerSongsSongIdEditRoute
+  '/main-player/netease/liked/': typeof MainPlayerNeteaseLikedIndexRoute
+  '/main-player/netease/playlists/': typeof MainPlayerNeteasePlaylistsIndexRoute
+  '/main-player/netease/search/': typeof MainPlayerNeteaseSearchIndexRoute
+  '/main-player/netease/toplists/': typeof MainPlayerNeteaseToplistsIndexRoute
   '/main-player/search/all/': typeof MainPlayerSearchAllIndexRoute
 }
 export interface FileRouteTypes {
@@ -288,7 +358,14 @@ export interface FileRouteTypes {
     | '/main-player/settings/'
     | '/main-player/songs/'
     | '/main-player/lyrics/editor/$songId'
+    | '/main-player/netease/albums/$albumId'
+    | '/main-player/netease/artists/$artistId'
+    | '/main-player/netease/playlists/$playlistId'
     | '/main-player/songs/$songId/edit'
+    | '/main-player/netease/liked/'
+    | '/main-player/netease/playlists/'
+    | '/main-player/netease/search/'
+    | '/main-player/netease/toplists/'
     | '/main-player/search/all/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -316,7 +393,14 @@ export interface FileRouteTypes {
     | '/main-player/settings'
     | '/main-player/songs'
     | '/main-player/lyrics/editor/$songId'
+    | '/main-player/netease/albums/$albumId'
+    | '/main-player/netease/artists/$artistId'
+    | '/main-player/netease/playlists/$playlistId'
     | '/main-player/songs/$songId/edit'
+    | '/main-player/netease/liked'
+    | '/main-player/netease/playlists'
+    | '/main-player/netease/search'
+    | '/main-player/netease/toplists'
     | '/main-player/search/all'
   id:
     | '__root__'
@@ -344,7 +428,14 @@ export interface FileRouteTypes {
     | '/main-player/settings/'
     | '/main-player/songs/'
     | '/main-player/lyrics/editor/$songId'
+    | '/main-player/netease/albums/$albumId'
+    | '/main-player/netease/artists/$artistId'
+    | '/main-player/netease/playlists/$playlistId'
     | '/main-player/songs/$songId/edit'
+    | '/main-player/netease/liked/'
+    | '/main-player/netease/playlists/'
+    | '/main-player/netease/search/'
+    | '/main-player/netease/toplists/'
     | '/main-player/search/all/'
   fileRoutesById: FileRoutesById
 }
@@ -525,6 +616,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainPlayerLyricsEditorSongIdRouteImport
       parentRoute: typeof MainPlayerRouteRoute
     }
+    '/main-player/netease/albums/$albumId': {
+      id: '/main-player/netease/albums/$albumId'
+      path: '/netease/albums/$albumId'
+      fullPath: '/main-player/netease/albums/$albumId'
+      preLoaderRoute: typeof MainPlayerNeteaseAlbumsAlbumIdRouteImport
+      parentRoute: typeof MainPlayerRouteRoute
+    }
+    '/main-player/netease/artists/$artistId': {
+      id: '/main-player/netease/artists/$artistId'
+      path: '/netease/artists/$artistId'
+      fullPath: '/main-player/netease/artists/$artistId'
+      preLoaderRoute: typeof MainPlayerNeteaseArtistsArtistIdRouteImport
+      parentRoute: typeof MainPlayerRouteRoute
+    }
+    '/main-player/netease/liked/': {
+      id: '/main-player/netease/liked/'
+      path: '/netease/liked'
+      fullPath: '/main-player/netease/liked/'
+      preLoaderRoute: typeof MainPlayerNeteaseLikedIndexRouteImport
+      parentRoute: typeof MainPlayerRouteRoute
+    }
+    '/main-player/netease/playlists/': {
+      id: '/main-player/netease/playlists/'
+      path: '/netease/playlists'
+      fullPath: '/main-player/netease/playlists/'
+      preLoaderRoute: typeof MainPlayerNeteasePlaylistsIndexRouteImport
+      parentRoute: typeof MainPlayerRouteRoute
+    }
+    '/main-player/netease/playlists/$playlistId': {
+      id: '/main-player/netease/playlists/$playlistId'
+      path: '/netease/playlists/$playlistId'
+      fullPath: '/main-player/netease/playlists/$playlistId'
+      preLoaderRoute: typeof MainPlayerNeteasePlaylistsPlaylistIdRouteImport
+      parentRoute: typeof MainPlayerRouteRoute
+    }
+    '/main-player/netease/search/': {
+      id: '/main-player/netease/search/'
+      path: '/netease/search'
+      fullPath: '/main-player/netease/search/'
+      preLoaderRoute: typeof MainPlayerNeteaseSearchIndexRouteImport
+      parentRoute: typeof MainPlayerRouteRoute
+    }
+    '/main-player/netease/toplists/': {
+      id: '/main-player/netease/toplists/'
+      path: '/netease/toplists'
+      fullPath: '/main-player/netease/toplists/'
+      preLoaderRoute: typeof MainPlayerNeteaseToplistsIndexRouteImport
+      parentRoute: typeof MainPlayerRouteRoute
+    }
     '/main-player/search/all/': {
       id: '/main-player/search/all/'
       path: '/search/all'
@@ -576,6 +716,13 @@ interface MainPlayerRouteRouteChildren {
   MainPlayerSettingsIndexRoute: typeof MainPlayerSettingsIndexRoute
   MainPlayerSongsIndexRoute: typeof MainPlayerSongsIndexRoute
   MainPlayerLyricsEditorSongIdRoute: typeof MainPlayerLyricsEditorSongIdRoute
+  MainPlayerNeteaseAlbumsAlbumIdRoute: typeof MainPlayerNeteaseAlbumsAlbumIdRoute
+  MainPlayerNeteaseArtistsArtistIdRoute: typeof MainPlayerNeteaseArtistsArtistIdRoute
+  MainPlayerNeteasePlaylistsPlaylistIdRoute: typeof MainPlayerNeteasePlaylistsPlaylistIdRoute
+  MainPlayerNeteaseLikedIndexRoute: typeof MainPlayerNeteaseLikedIndexRoute
+  MainPlayerNeteasePlaylistsIndexRoute: typeof MainPlayerNeteasePlaylistsIndexRoute
+  MainPlayerNeteaseSearchIndexRoute: typeof MainPlayerNeteaseSearchIndexRoute
+  MainPlayerNeteaseToplistsIndexRoute: typeof MainPlayerNeteaseToplistsIndexRoute
   MainPlayerSearchAllIndexRoute: typeof MainPlayerSearchAllIndexRoute
 }
 
@@ -600,6 +747,14 @@ const MainPlayerRouteRouteChildren: MainPlayerRouteRouteChildren = {
   MainPlayerSettingsIndexRoute: MainPlayerSettingsIndexRoute,
   MainPlayerSongsIndexRoute: MainPlayerSongsIndexRoute,
   MainPlayerLyricsEditorSongIdRoute: MainPlayerLyricsEditorSongIdRoute,
+  MainPlayerNeteaseAlbumsAlbumIdRoute: MainPlayerNeteaseAlbumsAlbumIdRoute,
+  MainPlayerNeteaseArtistsArtistIdRoute: MainPlayerNeteaseArtistsArtistIdRoute,
+  MainPlayerNeteasePlaylistsPlaylistIdRoute:
+    MainPlayerNeteasePlaylistsPlaylistIdRoute,
+  MainPlayerNeteaseLikedIndexRoute: MainPlayerNeteaseLikedIndexRoute,
+  MainPlayerNeteasePlaylistsIndexRoute: MainPlayerNeteasePlaylistsIndexRoute,
+  MainPlayerNeteaseSearchIndexRoute: MainPlayerNeteaseSearchIndexRoute,
+  MainPlayerNeteaseToplistsIndexRoute: MainPlayerNeteaseToplistsIndexRoute,
   MainPlayerSearchAllIndexRoute: MainPlayerSearchAllIndexRoute,
 }
 

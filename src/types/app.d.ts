@@ -457,6 +457,28 @@ declare global {
   type LyricsAnalysisProviderTestResult =
     import('@common/lyricsAnalysis').LyricsAnalysisProviderTestResult;
 
+  // ? NETEASE CLOUD MUSIC — shapes live in src/common/netease.ts (and NeteaseStreamInfo in
+  // src/main/netease/catalog.ts, re-exported for the preload surface).
+  type NeteaseQualityTypes = import('@common/netease').NeteaseQualityTypes;
+  type NeteaseSongSummary = import('@common/netease').NeteaseSongSummary;
+  type NeteasePlaylistSummary = import('@common/netease').NeteasePlaylistSummary;
+  type NeteaseAlbumSummary = import('@common/netease').NeteaseAlbumSummary;
+  type NeteaseArtistSummary = import('@common/netease').NeteaseArtistSummary;
+  type NeteaseSearchTypes = import('@common/netease').NeteaseSearchTypes;
+  type NeteaseSearchResult = import('@common/netease').NeteaseSearchResult;
+  type NeteaseSessionProfile = import('@common/netease').NeteaseSessionProfile;
+  type NeteaseLoginQrState = import('@common/netease').NeteaseLoginQrState;
+  type NeteaseQrLoginStatus = import('@common/netease').NeteaseQrLoginStatus;
+  type NeteaseQrPollResult = import('@main/netease/auth').NeteaseQrPollResult;
+  type NeteaseApiSearchResult = {
+    key: string;
+    songs: NeteaseSongSummary[];
+    albums: NeteaseAlbumSummary[];
+    artists: NeteaseArtistSummary[];
+    playlists: NeteasePlaylistSummary[];
+  };
+  type NeteaseStreamInfo = import('@main/netease/catalog').NeteaseStreamInfo;
+
   interface UserSettings {
     language: string;
     isDarkMode: boolean;
@@ -560,6 +582,7 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
+    neteaseSongQuality: NeteaseQualityTypes;
   }
 
   interface CurrentSong {
@@ -1213,6 +1236,7 @@ declare global {
     | 'userData/recentSearches'
     | 'userData/sortingStates'
     | 'settings/preferences'
+    | 'userData/neteaseSession'
     | 'blacklist'
     | 'blacklist/songBlacklist'
     | 'blacklist/folderBlacklist';

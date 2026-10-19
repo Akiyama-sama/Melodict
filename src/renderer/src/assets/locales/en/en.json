@@ -68,6 +68,7 @@
     "unselectAll": "Unselect all",
     "showAll": "Show all",
     "cancel": "Cancel",
+    "clearSearch": "Clear search",
     "search": "Search",
     "help": "Help",
     "copy": "Copy",
@@ -119,6 +120,7 @@
     "playPause": "Play/Pause (Space)",
     "nextSong": "Next song (Ctrl + Right Arrow)",
     "lyrics": "Lyrics (Ctrl + L)",
+    "toggleLyricsAnalysis": "Toggle word-by-word lyrics analysis",
     "shuffle": "Shuffle (Ctrl + S)",
     "repeat": "Repeat (Ctrl + T)",
     "muteUnmute": "Mute/Unmute (Ctrl + M)",
@@ -223,7 +225,8 @@
     "playingNow": "Playing now",
     "blacklisted": "Blacklisted",
     "likedThisSong": "You liked this song",
-    "dislikedThisSong": "You didn't like this song"
+    "dislikedThisSong": "You didn't like this song",
+    "goToArtist": "Go to artist"
   },
   "artist": {
     "playAllSongs": "Play all songs",
@@ -277,7 +280,10 @@
     "openFavoritesWithAllTimeMostListenedSortOption": "Opens 'Favorites' playlist with 'AllTimeMostListened' sort option",
     "noSongsAvailable": "No songs available",
     "stayCalm": "Stay calm",
-    "favoritesAndRecaps": "Favorites and Recaps"
+    "favoritesAndRecaps": "Favorites and Recaps",
+    "neteaseDailyRecommendations": "NetEase Daily Recommendations",
+    "neteasePersonalizedPlaylists": "Recommended Playlists from NetEase",
+    "openNeteaseSearch": "Search NetEase Cloud Music"
   },
   "searchPage": {
     "addFolder": "Add folder",
@@ -484,7 +490,30 @@
     "emailContact": "or contact me through my email.",
     "loveNora": "Made with <span>❤</span> by <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
     "sandakanGithubProfile": "Sandakan's Github profile",
-    "beautifulSriLanka": "Beautiful Sri Lanka"
+    "beautifulSriLanka": "Beautiful Sri Lanka",
+    "netease": {
+      "navLabel": "NetEase",
+      "title": "NetEase Cloud Music",
+      "accountDescription": "Log in with a NetEase Cloud Music account to search, stream and get lyrics for its whole catalog without adding local files.",
+      "notLoggedIn": "Not logged in.",
+      "scanQrToLogin": "Log in with QR code",
+      "scanQrTitle": "Scan with the NetEase Cloud Music app",
+      "qrImageAlt": "NetEase login QR code",
+      "qrLoading": "Creating the QR code…",
+      "qrWaiting": "Waiting for a scan…",
+      "qrScanned": "Scanned. Confirm the login on your phone.",
+      "qrExpired": "The QR code expired. Generate a new one.",
+      "qrError": "Something went wrong. Check your connection and try again.",
+      "qrRefresh": "Refresh the code",
+      "qrClose": "Close",
+      "loginSucceeded": "Logged in to NetEase Cloud Music.",
+      "logOut": "Log out",
+      "loggedOut": "Logged out of NetEase Cloud Music.",
+      "logoutFailed": "Could not log out. Try again.",
+      "vipAccount": "VIP account",
+      "qualityDescription": "Stream quality for songs played from NetEase.",
+      "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. Trial (30 s) fragments are played for VIP songs on free accounts."
+    }
   },
   "artistInfoPage": {
     "likeArtist": "Like {{name}}",
@@ -675,7 +704,10 @@
   },
   "sideBar": {
     "home": "Home",
-    "search": "Search"
+    "search": "Search",
+    "neteaseMyPlaylists": "My NetEase Playlists",
+    "neteaseLiked": "Liked Songs (NetEase)",
+    "neteaseToplists": "Toplists (NetEase)"
   },
   "renamePlaylistPrompt": {
     "renamePlaylistWithName": "Rename `{{name}}` playlist",
@@ -1111,5 +1143,26 @@
       "unsavedHint": "Save your edits before leaving. Switching providers changes what is used right away.",
       "modelMissing": "No model ID"
     }
+  },
+  "netease": {
+    "sectionName": "NetEase Cloud Music",
+    "searchTitle": "Search NetEase Cloud Music",
+    "searchPlaceholder": "Search songs, albums, artists and playlists on NetEase…",
+    "searchStartHint": "Type above to search the NetEase catalog.",
+    "noSearchResults": "No results found",
+    "noSearchResultsHint": "Try different keywords or another search filter.",
+    "trialBadge": "Trial",
+    "likeSong": "Add to NetEase likes",
+    "unlikeSong": "Remove from NetEase likes",
+    "myPlaylists": "My NetEase Playlists",
+    "likedSongs": "Liked Songs",
+    "toplists": "Toplists",
+    "noPlaylists": "No playlists found on your NetEase account.",
+    "noLikedSongs": "Songs you like on NetEase will appear here.",
+    "notLoggedInSectionTitle": "NetEase account not connected",
+    "notLoggedInSectionDescription": "Log in from the settings to browse your NetEase playlists, liked songs and recommendations.",
+    "goToLogin": "Open settings to log in",
+    "addedToNeteaseLikes": "Added `{{title}}` to your NetEase likes.",
+    "removedFromNeteaseLikes": "Removed `{{title}}` from your NetEase likes."
   }
 }

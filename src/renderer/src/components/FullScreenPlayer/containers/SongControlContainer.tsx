@@ -8,11 +8,11 @@ import Button from '../../Button';
 import VolumeSlider from '../../VolumeSlider';
 
 type Props = {
-  isFullLyricsScreen: boolean;
   isLyricsVisible: boolean;
   isLyricsAvailable: boolean;
   isMouseActive: boolean;
-  setIsFullLyricsScreen: (callback: (state: boolean) => boolean) => void;
+  isAnalysisView: boolean;
+  setIsAnalysisView: (callback: (state: boolean) => boolean) => void;
 };
 
 const SongControlContainer = (props: Props) => {
@@ -31,11 +31,11 @@ const SongControlContainer = (props: Props) => {
   const { t } = useTranslation();
 
   const {
-    isFullLyricsScreen,
     isLyricsVisible,
     isLyricsAvailable,
     isMouseActive,
-    setIsFullLyricsScreen
+    isAnalysisView,
+    setIsAnalysisView
   } = props;
 
   const handleSkipForwardClickWithParams = useCallback(
@@ -99,12 +99,12 @@ const SongControlContainer = (props: Props) => {
         />
         <Button
           className={`lyrics-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] after:absolute after:h-1 focus-visible:outline! ${
-            !isFullLyricsScreen && 'text-dark-background-color-3! after:opacity-100'
+            isAnalysisView && 'text-dark-background-color-3! after:opacity-100'
           }`}
           iconClassName="text-2xl!"
-          clickHandler={() => setIsFullLyricsScreen((prevState) => !prevState)}
-          iconName="notes"
-          tooltipLabel={t('player.lyrics')}
+          clickHandler={() => setIsAnalysisView((prevState) => !prevState)}
+          iconName="segment"
+          tooltipLabel={t('player.toggleLyricsAnalysis')}
           removeFocusOnClick
         />
         <div className="volume-controls-container relative inline-flex items-center">

@@ -24,7 +24,11 @@ const toInputLines = (lyrics?: SongLyrics | null) => {
   return lyrics.lyrics.parsedLyrics
     .map((line: LyricLine, index: number) => ({
       lineId: `line-${index}`,
-      text: getRawLyricLineText(line)
+      text: getRawLyricLineText(line),
+      // Human romanization (e.g. NetEase romalrc) rides along as pronunciation ground truth.
+      ...(typeof line.romanizedText === 'string' && line.romanizedText.trim().length > 0
+        ? { romanizedText: line.romanizedText.trim() }
+        : {})
     }))
     .filter((line) => line.text.trim().length > 0);
 };

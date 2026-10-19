@@ -8,6 +8,8 @@ import './i18n';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
+import { initializeStore } from './store/store';
+
 // Create a new router instance
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +82,10 @@ router.subscribe('onRendered', () => {
 
   return window.api.windowControls.changePlayerType('normal');
 });
+
+// Runs once the whole module graph has been evaluated: repairs/migrates the persisted
+// local storage, hydrates the store with it and starts persisting later state changes.
+initializeStore();
 
 root.render(
   <StrictMode>

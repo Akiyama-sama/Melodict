@@ -1,0 +1,170 @@
+{
+  "songTitle": "Blank Space",
+  "songArtists": ["Taylor Swift"],
+  "source": "Human transcription (native-speaker-level annotation, same rubric as dont-say-lazy PDF): 14 representative lines transcribed per the original lyric line breaks; tokens = words/contractions/set phrases, IPA (US) pronunciation + dictionary form + closed POS labels + in-context Simplified-Chinese gloss, whole-line translation. Created 2026-10-19 and locked thereafter (never fed to prompts, never edited during iteration).",
+  "lines": [
+    {
+      "text": "Nice to meet you, where you been?",
+      "translation": "很高兴认识你，你去哪儿了？",
+      "tokens": [
+        { "text": "Nice to meet you", "ipa": "naɪs tə mit ju", "term": "nice to meet you", "pos": "phrase", "meaning": "初次见面的寒暄：很高兴认识你" },
+        { "text": "where", "ipa": "wɛr", "term": "where", "pos": "adverb", "meaning": "哪里（问地点）" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "been", "ipa": "bɪn", "term": "be", "pos": "verb", "meaning": "去过、待过（be 的过去分词，口语里省略 have）" }
+      ]
+    },
+    {
+      "text": "I could show you incredible things",
+      "translation": "我能让你见识到不可思议的东西",
+      "tokens": [
+        { "text": "I", "ipa": "aɪ", "term": "I", "pos": "pronoun", "meaning": "我" },
+        { "text": "could", "ipa": "kʊd", "term": "can", "pos": "auxiliary", "meaning": "能够（can 的过去式，此处表委婉的可能性）" },
+        { "text": "show", "ipa": "ʃoʊ", "term": "show", "pos": "verb", "meaning": "展示、让……看" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你（间接宾语）" },
+        { "text": "incredible", "ipa": "ɪnˈkrɛdəbəl", "term": "incredible", "pos": "adjective", "meaning": "难以置信的、极好的" },
+        { "text": "things", "ipa": "θɪŋz", "term": "thing", "pos": "noun", "meaning": "事物、事情" }
+      ]
+    },
+    {
+      "text": "Magic, madness, heaven, sin",
+      "translation": "魔法、疯狂、天堂、罪孽",
+      "tokens": [
+        { "text": "Magic", "ipa": "ˈmædʒɪk", "term": "magic", "pos": "noun", "meaning": "魔法、魔力" },
+        { "text": "madness", "ipa": "ˈmædnəs", "term": "madness", "pos": "noun", "meaning": "疯狂" },
+        { "text": "heaven", "ipa": "ˈhɛvən", "term": "heaven", "pos": "noun", "meaning": "天堂" },
+        { "text": "sin", "ipa": "sɪn", "term": "sin", "pos": "noun", "meaning": "罪孽" }
+      ]
+    },
+    {
+      "text": "You look like my next mistake",
+      "translation": "你看起来就像我下一个错误",
+      "tokens": [
+        { "text": "You", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "look", "ipa": "lʊk", "term": "look", "pos": "verb", "meaning": "看起来（系动词）" },
+        { "text": "like", "ipa": "laɪk", "term": "like", "pos": "preposition", "meaning": "像、如同" },
+        { "text": "my", "ipa": "maɪ", "term": "my", "pos": "pronoun", "meaning": "我的" },
+        { "text": "next", "ipa": "nɛkst", "term": "next", "pos": "adjective", "meaning": "下一个" },
+        { "text": "mistake", "ipa": "mɪˈsteɪk", "term": "mistake", "pos": "noun", "meaning": "错误" }
+      ]
+    },
+    {
+      "text": "Love's a game, wanna play?",
+      "translation": "爱情是一场游戏，想玩吗？",
+      "tokens": [
+        { "text": "Love's", "ipa": "lʌvz", "term": "love", "pos": "noun", "meaning": "爱情（love is 的缩写）" },
+        { "text": "a", "ipa": "ə", "term": "a", "pos": "article", "meaning": "一个（不定冠词）" },
+        { "text": "game", "ipa": "ɡeɪm", "term": "game", "pos": "noun", "meaning": "游戏" },
+        { "text": "wanna", "ipa": "ˈwɑnə", "term": "want to", "pos": "phrase", "meaning": "想要（want to 的口语缩略）" },
+        { "text": "play", "ipa": "pleɪ", "term": "play", "pos": "verb", "meaning": "玩" }
+      ]
+    },
+    {
+      "text": "I can read you like a magazine",
+      "translation": "我能像读杂志一样看透你",
+      "tokens": [
+        { "text": "I", "ipa": "aɪ", "term": "I", "pos": "pronoun", "meaning": "我" },
+        { "text": "can", "ipa": "kæn", "term": "can", "pos": "auxiliary", "meaning": "能够" },
+        { "text": "read", "ipa": "rid", "term": "read", "pos": "verb", "meaning": "读懂、看透" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "like", "ipa": "laɪk", "term": "like", "pos": "preposition", "meaning": "像、如同" },
+        { "text": "a", "ipa": "ə", "term": "a", "pos": "article", "meaning": "一本（不定冠词）" },
+        { "text": "magazine", "ipa": "ˈmæɡəzin", "term": "magazine", "pos": "noun", "meaning": "杂志" }
+      ]
+    },
+    {
+      "text": "Ain't it funny? Rumors fly",
+      "translation": "是不是很可笑？流言满天飞",
+      "tokens": [
+        { "text": "Ain't", "ipa": "eɪnt", "term": "is not", "pos": "auxiliary", "meaning": "不是（is not 的口语缩略）" },
+        { "text": "it", "ipa": "ɪt", "term": "it", "pos": "pronoun", "meaning": "这（形式主语）" },
+        { "text": "funny", "ipa": "ˈfʌni", "term": "funny", "pos": "adjective", "meaning": "可笑的、滑稽的" },
+        { "text": "Rumors", "ipa": "ˈrumərz", "term": "rumor", "pos": "noun", "meaning": "流言、传闻" },
+        { "text": "fly", "ipa": "flaɪ", "term": "fly", "pos": "verb", "meaning": "飞、传播（此处指流言四散）" }
+      ]
+    },
+    {
+      "text": "I'm dyin' to see how this one ends",
+      "translation": "我迫不及待想看看这一段会怎么收场",
+      "tokens": [
+        { "text": "I'm", "ipa": "aɪm", "term": "I am", "pos": "pronoun", "meaning": "我是（I am 的缩写）" },
+        { "text": "dyin'", "ipa": "ˈdaɪɪn", "term": "die", "pos": "verb", "meaning": "渴望得要命（dying to = 极想）" },
+        { "text": "to see", "ipa": "tə si", "term": "see", "pos": "verb", "meaning": "看见、看看（不定式）" },
+        { "text": "how", "ipa": "haʊ", "term": "how", "pos": "adverb", "meaning": "如何、怎样" },
+        { "text": "this one", "ipa": "ðɪs wʌn", "term": "this one", "pos": "pronoun", "meaning": "这一个（指这段关系）" },
+        { "text": "ends", "ipa": "ɛndz", "term": "end", "pos": "verb", "meaning": "结束、收场" }
+      ]
+    },
+    {
+      "text": "Grab your passport and my hand",
+      "translation": "拿上你的护照，牵起我的手",
+      "tokens": [
+        { "text": "Grab", "ipa": "ɡræb", "term": "grab", "pos": "verb", "meaning": "抓住、拿上（祈使句）" },
+        { "text": "your", "ipa": "jʊr", "term": "your", "pos": "pronoun", "meaning": "你的" },
+        { "text": "passport", "ipa": "ˈpæspɔrt", "term": "passport", "pos": "noun", "meaning": "护照" },
+        { "text": "and", "ipa": "ænd", "term": "and", "pos": "conjunction", "meaning": "和" },
+        { "text": "my", "ipa": "maɪ", "term": "my", "pos": "pronoun", "meaning": "我的" },
+        { "text": "hand", "ipa": "hænd", "term": "hand", "pos": "noun", "meaning": "手" }
+      ]
+    },
+    {
+      "text": "So it's gonna be forever",
+      "translation": "所以这会是一辈子的事",
+      "tokens": [
+        { "text": "So", "ipa": "soʊ", "term": "so", "pos": "conjunction", "meaning": "所以" },
+        { "text": "it's", "ipa": "ɪts", "term": "it is", "pos": "pronoun", "meaning": "它将会（it is 的缩写）" },
+        { "text": "gonna", "ipa": "ˈɡɔnə", "term": "going to", "pos": "phrase", "meaning": "将会（going to 的口语缩略）" },
+        { "text": "be", "ipa": "bi", "term": "be", "pos": "verb", "meaning": "是、成为" },
+        { "text": "forever", "ipa": "fərˈɛvər", "term": "forever", "pos": "adverb", "meaning": "永远、一辈子" }
+      ]
+    },
+    {
+      "text": "Or it's gonna go down in flames",
+      "translation": "要么就轰轰烈烈地毁掉",
+      "tokens": [
+        { "text": "Or", "ipa": "ɔr", "term": "or", "pos": "conjunction", "meaning": "或者、要么" },
+        { "text": "it's", "ipa": "ɪts", "term": "it is", "pos": "pronoun", "meaning": "它将会（it is 的缩写）" },
+        { "text": "gonna", "ipa": "ˈɡɔnə", "term": "going to", "pos": "phrase", "meaning": "将会（going to 的口语缩略）" },
+        { "text": "go down", "ipa": "ɡoʊ daʊn", "term": "go down", "pos": "phrase", "meaning": "倒下、失败（go down in flames = 惨败）" },
+        { "text": "in", "ipa": "ɪn", "term": "in", "pos": "preposition", "meaning": "在……之中" },
+        { "text": "flames", "ipa": "fleɪmz", "term": "flame", "pos": "noun", "meaning": "火焰（复数）" }
+      ]
+    },
+    {
+      "text": "If the high was worth the pain",
+      "translation": "如果那份快感值得这些痛苦",
+      "tokens": [
+        { "text": "If", "ipa": "ɪf", "term": "if", "pos": "conjunction", "meaning": "如果" },
+        { "text": "the", "ipa": "ðə", "term": "the", "pos": "article", "meaning": "定冠词，特指那次的" },
+        { "text": "high", "ipa": "haɪ", "term": "high", "pos": "noun", "meaning": "快感、兴奋状态（毒品引申义）" },
+        { "text": "was", "ipa": "wʌz", "term": "be", "pos": "verb", "meaning": "是（be 的过去式）" },
+        { "text": "worth", "ipa": "wɜrθ", "term": "worth", "pos": "adjective", "meaning": "值得的" },
+        { "text": "the", "ipa": "ðə", "term": "the", "pos": "article", "meaning": "定冠词" },
+        { "text": "pain", "ipa": "peɪn", "term": "pain", "pos": "noun", "meaning": "痛苦" }
+      ]
+    },
+    {
+      "text": "Got a long list of ex-lovers",
+      "translation": "有一长串前任名单",
+      "tokens": [
+        { "text": "Got", "ipa": "ɡɑt", "term": "get", "pos": "verb", "meaning": "有（have got 的口语省略形式）" },
+        { "text": "a", "ipa": "ə", "term": "a", "pos": "article", "meaning": "一（不定冠词）" },
+        { "text": "long", "ipa": "lɔŋ", "term": "long", "pos": "adjective", "meaning": "长的" },
+        { "text": "list", "ipa": "lɪst", "term": "list", "pos": "noun", "meaning": "名单、清单" },
+        { "text": "of", "ipa": "əv", "term": "of", "pos": "preposition", "meaning": "……的" },
+        { "text": "ex-lovers", "ipa": "ˈɛksˌlʌvərz", "term": "ex-lover", "pos": "noun", "meaning": "前任恋人（复数，连字符复合词）" }
+      ]
+    },
+    {
+      "text": "'Cause we're young and we're reckless",
+      "translation": "因为我们年轻又无所顾忌",
+      "tokens": [
+        { "text": "'Cause", "ipa": "kɔz", "term": "because", "pos": "conjunction", "meaning": "因为（because 的口语缩略）" },
+        { "text": "we're", "ipa": "wɪr", "term": "we are", "pos": "pronoun", "meaning": "我们是（we are 的缩写）" },
+        { "text": "young", "ipa": "jʌŋ", "term": "young", "pos": "adjective", "meaning": "年轻的" },
+        { "text": "and", "ipa": "ænd", "term": "and", "pos": "conjunction", "meaning": "并且" },
+        { "text": "we're", "ipa": "wɪr", "term": "we are", "pos": "pronoun", "meaning": "我们是（we are 的缩写）" },
+        { "text": "reckless", "ipa": "ˈrɛkləs", "term": "reckless", "pos": "adjective", "meaning": "无所顾忌的、鲁莽的" }
+      ]
+    }
+  ]
+}

@@ -6,14 +6,35 @@ import { cloneDeep } from 'es-toolkit/object';
 import {
   type AppReducer,
   type AppReducerStateActions,
-  DEFAULT_REDUCER_DATA,
+  createDefaultReducerData,
   reducer as appReducer
 } from '../other/appReducer';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../other/localStorageTemplate';
+import addMissingPropsToAnObject from '../utils/addMissingPropsToAnObject';
 import storage from '../utils/localStorage';
 // import hasDataChanged from '../utils/hasDataChanged';
 
-storage.checkLocalStorage();
-export const store = new Store(DEFAULT_REDUCER_DATA);
+/**
+ * `utils/localStorage` imports this module, so the module body must not touch its bindings
+ * while the graph is still evaluating — a top-level call here used to throw "Cannot access
+ * 'storage' before initialization" whenever the cycle was entered through `utils/localStorage`
+ * first. The persisted value is therefore read inline (with missing properties filled from the
+ * template so the initial state is complete), and the check + post-check sync are exported for
+ * `index.tsx` to run once every module has finished loading.
+ */
+const readPersistedLocalStorage = (): LocalStorage => {
+  try {
+    const persistedData = window.localStorage.getItem('localStorage');
+    if (persistedData) {
+      return addMissingPropsToAnObject(LOCAL_STORAGE_DEFAULT_TEMPLATE, JSON.parse(persistedData));
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return LOCAL_STORAGE_DEFAULT_TEMPLATE;
+};
+
+export const store = new Store(createDefaultReducerData(readPersistedLocalStorage()));
 
 type StoreSubscriptionState =
   | AppReducer
@@ -40,27 +61,37 @@ export const reducer = () => {
   return { state: store.state, dispatch };
 };
 
-dispatch({
-  type: 'UPDATE_LOCAL_STORAGE',
-  data: storage.getLocalStorage()
-});
+/**
+ * Runs the storage check (repair/migration), syncs the repaired value into the store and
+ * persists every later state change. Called from `index.tsx` — after the whole module graph
+ * has been evaluated — instead of at module scope, so this module never touches `storage`
+ * bindings while the `store <-> utils/localStorage` cycle is still initializing.
+ */
+export const initializeStore = () => {
+  storage.checkLocalStorage();
 
-store.subscribe((state) => {
-  const currentState = getCurrentStoreState(state as StoreSubscriptionState);
+  dispatch({
+    type: 'UPDATE_LOCAL_STORAGE',
+    data: storage.getLocalStorage()
+  });
 
-  if (!currentState?.localStorage) {
-    return;
-  }
+  store.subscribe((state) => {
+    const currentState = getCurrentStoreState(state as StoreSubscriptionState);
 
-  storage.setLocalStorage(currentState.localStorage);
+    if (!currentState?.localStorage) {
+      return;
+    }
 
-  // const modified = hasDataChanged(state.prevVal, state.currentVal);
-  // const onlyModified = Object.groupBy(
-  //   Object.entries(modified),
-  //   ([, value]) => `${value.isModified}`
-  // );
+    storage.setLocalStorage(currentState.localStorage);
 
-  if (window.api.properties.isInDevelopment) {
-    console.debug('store state changed:', cloneDeep(currentState));
-  }
-});
+    // const modified = hasDataChanged(state.prevVal, state.currentVal);
+    // const onlyModified = Object.groupBy(
+    //   Object.entries(modified),
+    //   ([, value]) => `${value.isModified}`
+    // );
+
+    if (window.api.properties.isInDevelopment) {
+      console.debug('store state changed:', cloneDeep(currentState));
+    }
+  });
+};

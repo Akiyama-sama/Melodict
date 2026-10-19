@@ -48,8 +48,11 @@ class ListeningDataSession {
     );
 
     this.nowPlayingIntervalId = setTimeout(() => {
-      window.api.audioLibraryControls.sendNowPlayingSongDataToLastFM(this.songId);
-      console.warn('Now playing song data will be sent to LastFM if enabled.');
+      // External streams (e.g. NetEase) are not library songs; Last.fm has no listening record.
+      if (this.isKnownSource) {
+        window.api.audioLibraryControls.sendNowPlayingSongDataToLastFM(this.songId);
+        console.warn('Now playing song data will be sent to LastFM if enabled.');
+      }
     }, 2500);
 
     console.warn(
@@ -84,7 +87,8 @@ class ListeningDataSession {
       if (this.isScrobbling && !this.passedScrobblingRange && this.seconds > scrobblingRange) {
         this.passedScrobblingRange = true;
         console.warn(`${this.songId} will be added to scrobble list if enabled.`);
-        window.api.audioLibraryControls.scrobbleSong(this.songId, this.startTime.getTime() / 1000);
+        if (this.isKnownSource)
+          window.api.audioLibraryControls.scrobbleSong(this.songId, this.startTime.getTime() / 1000);
       }
       if (!this.isPaused) {
         this.seconds += 1;
@@ -94,7 +98,9 @@ class ListeningDataSession {
 
   stopRecording(isSongEnded = false) {
     try {
-      if (this.passedSkipRange) {
+      // External streams have no library row behind them: writes would violate play_events'
+      // foreign key, so only locally-registered songs persist listening data.
+      if (this.passedSkipRange && this.isKnownSource) {
         const playbackPercentage = this.seconds / this.duration;
 
         window.api.audioLibraryControls.updateSongListeningData(
@@ -127,7 +133,8 @@ class ListeningDataSession {
   }
 
   set addSeekPosition(seekPosition: number) {
-    window.api.audioLibraryControls.updateSongListeningData(this.songId, 'SEEK', seekPosition);
+    if (this.isKnownSource)
+      window.api.audioLibraryControls.updateSongListeningData(this.songId, 'SEEK', seekPosition);
 
     const seekRange = 5;
     for (const seek of this.seeks) {

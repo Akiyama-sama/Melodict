@@ -6,6 +6,7 @@ import { albumQuery } from '../queries/albums';
 import { artistQuery } from '../queries/aritsts';
 import { genreQuery } from '../queries/genres';
 import { homeQuery } from '../queries/home';
+import { neteaseQuery } from '../queries/netease';
 import { playlistQuery } from '../queries/playlists';
 import { searchQuery } from '../queries/search';
 import { songQuery } from '../queries/songs';
@@ -135,6 +136,11 @@ export function useDataSync(): void {
           if (dataEvent.dataType === 'userData/recentSearches') {
             queryClient.invalidateQueries({ queryKey: searchQuery.recentResults.queryKey });
           }
+        }
+
+        // NetEase logins and logouts broadcast a dedicated session event.
+        if (dataEvent.dataType === 'userData/neteaseSession') {
+          queryClient.invalidateQueries({ queryKey: neteaseQuery._def });
         }
       }
     };

@@ -14,6 +14,10 @@ const updateSongListeningData = async (
   dataType: ListeningDataEvents,
   value: number
 ) => {
+  // Negative ids are NetEase sentinels, not library rows; play_events.songId references songs.id
+  // (a positive serial), so recording them at all would break the foreign key.
+  if (songId < 0) return;
+
   try {
     logger.debug(`Requested to update listening data.`, { songId, dataType, value });
 

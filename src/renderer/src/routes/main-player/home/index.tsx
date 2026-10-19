@@ -1,6 +1,7 @@
 import { SpecialPlaylists } from '@common/playlists.enum';
 import roundTo from '@common/roundTo';
 import Button from '@renderer/components/Button';
+import HomeSearchBar from '@renderer/components/HomePage/HomeSearchBar';
 import MostLovedArtists from '@renderer/components/HomePage/MostLovedArtists';
 import MostLovedSongs from '@renderer/components/HomePage/MostLovedSongs';
 import RecentlyAddedSongs from '@renderer/components/HomePage/RecentlyAddedSongs';
@@ -8,16 +9,19 @@ import RecentlyPlayedArtists from '@renderer/components/HomePage/RecentlyPlayedA
 import RecentlyPlayedSongs from '@renderer/components/HomePage/RecentlyPlayedSongs';
 import SpecialPlaylistCard from '@renderer/components/HomePage/SpecialPlaylistCard';
 import MainContainer from '@renderer/components/MainContainer';
+import NeteaseRecommendations from '@renderer/components/Netease/NeteaseRecommendations';
 import SecondaryContainer from '@renderer/components/SecondaryContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
+import { useNeteaseSession } from '@renderer/hooks/useNeteaseSession';
 import { queryClient } from '@renderer/index';
 import { artistQuery } from '@renderer/queries/aritsts';
 import { homeQuery } from '@renderer/queries/home';
+import { neteaseQuery } from '@renderer/queries/netease';
 import { songQuery } from '@renderer/queries/songs';
 import storage from '@renderer/utils/localStorage';
 // import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -55,6 +59,8 @@ function HomePage() {
     useContext(AppUpdateContext);
   const { t } = useTranslation();
 
+  const { isLoggedIn: isNeteaseLoggedIn } = useNeteaseSession();
+
   const {
     data: { data: latestSongs }
   } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
@@ -67,6 +73,17 @@ function HomePage() {
   const {
     data: { data: mostLovedArtists }
   } = useSuspenseQuery(artistQuery.all({ sortType: 'aToZ', start: 0, end: 30 }));
+
+  // NetEase sections appear only with a logged-in account; both queries stay disabled otherwise.
+  const { data: neteaseRecommendations = [] } = useQuery({
+    ...neteaseQuery.recommendations,
+    enabled: isNeteaseLoggedIn,
+    staleTime: 10 * 60_000
+  });
+  const { data: neteasePersonalizedPlaylists = [] } = useQuery({
+    ...neteaseQuery.personalized,
+    staleTime: 60 * 60_000
+  });
 
   const SONG_CARD_MIN_WIDTH = 280;
   const ARTIST_WIDTH = 175;
@@ -297,6 +314,7 @@ function HomePage() {
       ref={recentlyAddedSongsContainerRef}
     >
       <>
+        <HomeSearchBar />
         <SecondaryContainer className="appear-from-bottom mt-4 h-fit max-h-full w-full pb-4 pl-8">
           <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between text-2xl font-medium">
             {t('homePage.favoritesAndRecaps')}
@@ -318,6 +336,11 @@ function HomePage() {
         </SecondaryContainer>
         {recentlyAddedSongsContainerRef.current && (
           <>
+            <NeteaseRecommendations
+              recommendations={isNeteaseLoggedIn ? neteaseRecommendations : []}
+              personalizedPlaylists={neteasePersonalizedPlaylists}
+              noOfVisibleSongCards={noOfRecentlyAddedSongCards}
+            />
             {latestSongs[0] !== null && (
               <RecentlyAddedSongs
                 latestSongs={latestSongs}

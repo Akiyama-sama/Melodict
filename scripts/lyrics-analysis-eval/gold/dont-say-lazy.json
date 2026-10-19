@@ -1,0 +1,384 @@
+{
+  "songTitle": "Don't say \"You are lazy\" (K-ON! TV anime opening, part B)",
+  "songArtists": ["Oh! Great! Kingdom (K-ON! cast)"],
+  "source": "don't say lazy_Sheet1(1).pdf — human-annotated study sheet (romaji / kana / dictionary form / POS / in-context gloss per token, whole-line translation at the bottom of each block)",
+  "note": "Transcribed page-by-page from the PDF. Token order follows the PDF left-to-right cells; text fields are the PDF's own wording (Chinese glosses kept verbatim). Lines matching the synced lyrics from the NetEase cache (neteaseId 2050142839) are keyed by their position in that LRC export.",
+  "lines": [
+    {
+      "text": "だから たまに そう 惚れる",
+      "translation": "所以就偶尔会",
+      "tokens": [
+        { "text": "だから", "romaji": "da ka ra", "kana": "だから", "term": "だから", "pos": "接续词", "meaning": "所以" },
+        { "text": "たまに", "romaji": "ta ma ni", "kana": "たまに", "term": "たまに", "pos": "副词", "meaning": "偶尔" },
+        { "text": "そう", "romaji": "sō", "kana": "そう", "term": "そう", "pos": "副词指示词", "meaning": "那样" },
+        { "text": "惚れる", "romaji": "ho re ru", "kana": "ほれる", "term": "惚れる", "pos": "动词", "meaning": "恋爱" }
+      ]
+    },
+    {
+      "text": "休憩 ちゅう なんです",
+      "translation": "稍微休息一下",
+      "tokens": [
+        { "text": "休憩", "romaji": "kyū kei shi", "kana": "きゅうけい", "term": "休憩", "pos": "动词「休憩する」て形(去)", "meaning": "休息" },
+        { "text": "ちゅう", "romaji": "cha u", "kana": "ちゅう", "term": "ちゅう", "pos": "句型「Ｖて+ちう」口语", "meaning": "非本意的行为" },
+        { "text": "なんです", "romaji": "n de su", "kana": "んです", "term": "んです", "pos": "句型「〜のだ」敬体口语", "meaning": "表强调" }
+      ]
+    },
+    {
+      "text": "この目で しっかり 見定めて",
+      "translation": "用这双眼睛好好看清",
+      "tokens": [
+        { "text": "この", "romaji": "ko no", "kana": "この", "term": "この", "pos": "连体指示词", "meaning": "这个" },
+        { "text": "目", "romaji": "me", "kana": "め", "term": "目", "pos": "名词", "meaning": "眼睛" },
+        { "text": "で", "romaji": "de", "kana": "で", "term": "で", "pos": "助词", "meaning": "用" },
+        { "text": "しっかり", "romaji": "shi kka ri", "kana": "しっかり", "term": "しっかり", "pos": "副词", "meaning": "好好地" },
+        { "text": "見定めて", "romaji": "mi sa da me te", "kana": "みさだめて", "term": "見定めて", "pos": "动词「見定める」て形", "meaning": "看清" }
+      ]
+    },
+    {
+      "text": "ゆくさき 地図上 マークして",
+      "translation": "将目的地在地图上标记出来",
+      "tokens": [
+        { "text": "ゆくさき", "romaji": "yu ku sa ki", "kana": "ゆくさき", "term": "行き先", "pos": "名词", "meaning": "目的地" },
+        { "text": "地図上", "romaji": "chi zu jō", "kana": "ちずじょう", "term": "地図上", "pos": "名词", "meaning": "地图上" },
+        { "text": "マークして", "romaji": "mā ku shi te", "kana": "マークして", "term": "マークして", "pos": "动词「マークする」て形", "meaning": "做标记" }
+      ]
+    },
+    {
+      "text": "近道 あれば それが 王道",
+      "translation": "如果有近道就是王道",
+      "tokens": [
+        { "text": "近道", "romaji": "chi ka mi chi", "kana": "ちかみち", "term": "近道", "pos": "名词", "meaning": "近路" },
+        { "text": "あれば", "romaji": "a re ba", "kana": "あれば", "term": "あれば", "pos": "动词「ある」假定形", "meaning": "如果有" },
+        { "text": "それ", "romaji": "so re", "kana": "それ", "term": "それ", "pos": "名词指示词", "meaning": "那" },
+        { "text": "が", "romaji": "ga", "kana": "が", "term": "が", "pos": "助词", "meaning": "提示主语" },
+        { "text": "王道", "romaji": "ō dō", "kana": "おうどう", "term": "王道", "pos": "名词", "meaning": "王道" }
+      ]
+    },
+    {
+      "text": "はしょれる つばさも あれば しょうとう",
+      "translation": "如果有可收起的翅膀那就更好了",
+      "tokens": [
+        { "text": "はしょれる", "romaji": "ha sho re ru", "kana": "はしょれる", "term": "はしょれる", "pos": "动词「はしょる」可能形", "meaning": "能折起来" },
+        { "text": "つばさ", "romaji": "tsu ba sa", "kana": "つばさ", "term": "翼", "pos": "名词", "meaning": "翅膀" },
+        { "text": "も", "romaji": "mo", "kana": "も", "term": "も", "pos": "助词", "meaning": "也" },
+        { "text": "あれば", "romaji": "a re ba", "kana": "あれば", "term": "あれば", "pos": "动词「ある」假定形", "meaning": "如果有" },
+        { "text": "しょうとう", "romaji": "jō tō", "kana": "じょうとう", "term": "上等", "pos": "形容动词", "meaning": "最好了" }
+      ]
+    },
+    {
+      "text": "ヤバ 爪 われた",
+      "translation": "糟糕，指甲裂开",
+      "tokens": [
+        { "text": "ヤバ", "romaji": "ya ba", "kana": "ヤバ", "term": "ヤバ", "pos": "形容动词口语", "meaning": "糟糕" },
+        { "text": "爪", "romaji": "tsu me", "kana": "つめ", "term": "爪", "pos": "名词", "meaning": "指甲" },
+        { "text": "われた", "romaji": "wa re ta", "kana": "われた", "term": "割れた", "pos": "动词「割れる」た形", "meaning": "裂开" }
+      ]
+    },
+    {
+      "text": "グルー で ほしゅうした",
+      "translation": "用胶水修补好",
+      "tokens": [
+        { "text": "グルー", "romaji": "gu rū", "kana": "グルー", "term": "グルー", "pos": "名词", "meaning": "胶水" },
+        { "text": "で", "romaji": "de", "kana": "で", "term": "で", "pos": "助词", "meaning": "用" },
+        { "text": "ほしゅうした", "romaji": "ho shū shi ta", "kana": "ほしゅうした", "term": "補修した", "pos": "动词「補修する」た形", "meaning": "修补" }
+      ]
+    },
+    {
+      "text": "それだけで なんか たっせいかん",
+      "translation": "仅仅这样不知怎就有种成就感",
+      "tokens": [
+        { "text": "それ", "romaji": "so re", "kana": "それ", "term": "それ", "pos": "名词指示词", "meaning": "那" },
+        { "text": "だけで", "romaji": "da ke de", "kana": "だけで", "term": "だけで", "pos": "助词", "meaning": "仅仅…就" },
+        { "text": "なんか", "romaji": "nan ka", "kana": "なんか", "term": "なんか", "pos": "副词", "meaning": "总觉得" },
+        { "text": "たっせいかん", "romaji": "ta s sei kan", "kana": "たっせいかん", "term": "達成感", "pos": "名词", "meaning": "成就感" }
+      ]
+    },
+    {
+      "text": "大事なの は(wa) 自分",
+      "translation": "重要的是要疼爱自己",
+      "tokens": [
+        { "text": "大事なの", "romaji": "da i ji na", "kana": "だいじな", "term": "大事なの", "pos": "形容动词连体形", "meaning": "重要的" },
+        { "text": "の", "romaji": "no", "kana": "の", "term": "の", "pos": "形式名词", "meaning": "名词化" },
+        { "text": "は(wa)", "romaji": "wa(ha)", "kana": "は", "term": "は", "pos": "助词", "meaning": "提示主语" },
+        { "text": "自分", "romaji": "ji bun", "kana": "じぶん", "term": "自分", "pos": "名词", "meaning": "自己" }
+      ]
+    },
+    {
+      "text": "かわいがる こと",
+      "translation": "疼爱自己",
+      "tokens": [
+        { "text": "かわいがる", "romaji": "ka wa i ga ru", "kana": "かわいがる", "term": "かわいがる", "pos": "动词字典形", "meaning": "疼爱" },
+        { "text": "こと", "romaji": "ko to", "kana": "こと", "term": "こと", "pos": "形式名词", "meaning": "…的事情" }
+      ]
+    },
+    {
+      "text": "自分 を(w0) 愛しなきゃ",
+      "translation": "如果不爱自己",
+      "tokens": [
+        { "text": "自分", "romaji": "ji bun", "kana": "じぶん", "term": "自分", "pos": "名词", "meaning": "自己" },
+        { "text": "を(w0)", "romaji": "o(wo)", "kana": "を", "term": "を", "pos": "助词", "meaning": "提示宾语" },
+        { "text": "愛しなきゃ", "romaji": "a i sa na kya", "kana": "愛しなきゃ", "term": "愛しなきゃ", "pos": "动词「愛する」ない形(形?)形口语", "meaning": "不爱" }
+      ]
+    },
+    {
+      "text": "ひと も 愛せない",
+      "translation": "也无法爱别人",
+      "tokens": [
+        { "text": "ひと", "romaji": "hi to", "kana": "ひと", "term": "他人", "pos": "名词", "meaning": "他人" },
+        { "text": "も", "romaji": "mo", "kana": "も", "term": "も", "pos": "助词", "meaning": "也" },
+        { "text": "愛せない", "romaji": "a i se na i", "kana": "愛せない", "term": "愛せない", "pos": "动词「愛す」可能形ない形", "meaning": "不能爱" }
+      ]
+    },
+    {
+      "text": "Please don't say \"You are lazy\"",
+      "translation": "Please don't say \"You are lazy\"",
+      "tokens": [
+        { "text": "Please", "romaji": "[pli:z]", "kana": "Please", "pos": "感叹词", "meaning": "请" },
+        { "text": "don't", "romaji": "[dəvnt]", "kana": "do not缩写", "pos": "助动词", "meaning": "不要" },
+        { "text": "say", "romaji": "[sei]", "kana": "say", "pos": "动词", "meaning": "说" },
+        { "text": "\"You", "romaji": "[ju:]", "kana": "You", "pos": "代词", "meaning": "你" },
+        { "text": "are", "romaji": "[a:(r)]", "kana": "are", "pos": "be动词", "meaning": "是" },
+        { "text": "lazy\"", "romaji": "[lezi]", "kana": "lazy", "pos": "形容词", "meaning": "懒惰的" }
+      ]
+    },
+    {
+      "text": "だって 本当は(wa) crazy",
+      "translation": "因为其实真的已经很 crazy",
+      "tokens": [
+        { "text": "だって", "romaji": "da t te", "kana": "だって", "term": "だって", "pos": "接续词", "meaning": "引出理由" },
+        { "text": "本当は", "romaji": "hon tō", "kana": "ほんとう", "term": "本当", "pos": "名词", "meaning": "真实" },
+        { "text": "は(wa)", "romaji": "wa(ha)", "kana": "は", "term": "は", "pos": "助词", "meaning": "提示主语" },
+        { "text": "crazy", "romaji": "[kreizi]", "kana": "crazy", "pos": "形容词", "meaning": "疯狂的" }
+      ]
+    },
+    {
+      "text": "白鳥 たち(wa) そう",
+      "translation": "天鹅们也是这样",
+      "tokens": [
+        { "text": "白鳥", "romaji": "haku chō", "kana": "はくちょう", "term": "白鳥", "pos": "名词", "meaning": "天鹅" },
+        { "text": "たち", "romaji": "ta chi", "kana": "たち", "term": "たち", "pos": "接尾词", "meaning": "们" },
+        { "text": "は(wa)", "romaji": "wa(ha)", "kana": "は", "term": "は", "pos": "助词", "meaning": "提示主语" },
+        { "text": "そう", "romaji": "sō", "kana": "そう", "term": "そう", "pos": "副词指示词", "meaning": "那样" }
+      ]
+    },
+    {
+      "text": "见えない ところ に",
+      "translation": "在看不见的地方",
+      "tokens": [
+        { "text": "见えない", "romaji": "mi e na i", "kana": "見えない", "term": "見えない", "pos": "动词「見える」ない形", "meaning": "看不见" },
+        { "text": "ところ", "romaji": "to ko", "kana": "ところ", "term": "ところ", "pos": "名词", "meaning": "地方" },
+        { "text": "に", "romaji": "ni", "kana": "に", "term": "に", "pos": "助词", "meaning": "存在地" }
+      ]
+    },
+    {
+      "text": "ピック かくす んです",
+      "translation": "藏着锋利的爪子",
+      "tokens": [
+        { "text": "ピック", "romaji": "pi kku", "kana": "ピック", "term": "ピック", "pos": "名词", "meaning": "尖锐工具(爪子)" },
+        { "text": "かくす", "romaji": "ka ku su", "kana": "隠す", "term": "隠す", "pos": "动词字典形", "meaning": "藏起" },
+        { "text": "んです", "romaji": "n de su", "kana": "んです", "term": "んです", "pos": "句型「〜のだ」敬体口语", "meaning": "表强调" }
+      ]
+    },
+    {
+      "text": "想像 に 一生懸命な い",
+      "translation": "拼命想象",
+      "tokens": [
+        { "text": "想像", "romaji": "sō zō", "kana": "そうぞう", "term": "想像", "pos": "名词", "meaning": "想象" },
+        { "text": "に", "romaji": "ni", "kana": "に", "term": "に", "pos": "助词", "meaning": "表对象" },
+        { "text": "一生懸命な", "romaji": "i s shō kem mei", "kana": "いっしょうけんめい", "term": "一生懸命", "pos": "形容动词", "meaning": "拼命地" }
+      ]
+    },
+    {
+      "text": "現実 は(wa) ぜったいぜつめい",
+      "translation": "现实却四面楚歌",
+      "tokens": [
+        { "text": "現実", "romaji": "gen ji tsu", "kana": "げんじつ", "term": "現実", "pos": "名词", "meaning": "现实" },
+        { "text": "は(wa)", "romaji": "wa(ha)", "kana": "は", "term": "は", "pos": "助词", "meaning": "提示主语" },
+        { "text": "ぜったいぜつめい", "romaji": "ze t ta i ze tsu mei", "kana": "ぜったいぜつめい", "term": "絶体絶命", "pos": "名词", "meaning": "绝境" }
+      ]
+    },
+    {
+      "text": "発展途中 だ し",
+      "translation": "反正还在发展中",
+      "tokens": [
+        { "text": "発展途中", "romaji": "ha t ten to chū", "kana": "はってんとちゅう", "term": "発展途中", "pos": "名词", "meaning": "发展中" },
+        { "text": "だ", "romaji": "da", "kana": "だ", "term": "だ", "pos": "助动词", "meaning": "是" },
+        { "text": "し", "romaji": "shi", "kana": "し", "term": "し", "pos": "助词", "meaning": "表举例" }
+      ]
+    },
+    {
+      "text": "だから 意外に",
+      "translation": "所以会冷不防地",
+      "tokens": [
+        { "text": "だから", "romaji": "da ka ra", "kana": "だから", "term": "だから", "pos": "接续词", "meaning": "所以" },
+        { "text": "意外に", "romaji": "i ga i ni", "kana": "いがいに", "term": "意外に", "pos": "副词", "meaning": "意外地" }
+      ]
+    },
+    {
+      "text": "ピッチ はずれる んです",
+      "translation": "也会走一两个音",
+      "tokens": [
+        { "text": "ピッチ", "romaji": "pi tchi", "kana": "ピッチ", "term": "ピッチ", "pos": "名词", "meaning": "音高" },
+        { "text": "はずれる", "romaji": "ha zu re ru", "kana": "はずれる", "term": "外れる", "pos": "动词字典形", "meaning": "偏离" },
+        { "text": "んです", "romaji": "n de su", "kana": "んです", "term": "んです", "pos": "句型「〜のだ」敬体口语", "meaning": "表强调" }
+      ]
+    },
+    {
+      "text": "その め に うつらない だけ だって",
+      "translation": "只是没被看到而已，因为",
+      "tokens": [
+        { "text": "その", "romaji": "so no", "kana": "その", "term": "その", "pos": "连体词", "meaning": "那个" },
+        { "text": "め", "romaji": "me", "kana": "目", "term": "目", "pos": "名词", "meaning": "眼睛" },
+        { "text": "に", "romaji": "ni", "kana": "に", "term": "に", "pos": "助词", "meaning": "着落点" },
+        { "text": "うつらない", "romaji": "u tsu ra na i", "kana": "映らない", "term": "映らない", "pos": "动词「映る」ない形", "meaning": "映不出来" },
+        { "text": "だけ", "romaji": "da ke", "kana": "だけ", "term": "だけ", "pos": "助词", "meaning": "只" },
+        { "text": "だって", "romaji": "da t te", "kana": "だって", "term": "だって", "pos": "接续词", "meaning": "引出理由" }
+      ]
+    },
+    {
+      "text": "柔軟に 随机应变",
+      "translation": "灵活应用，随机应变",
+      "tokens": [
+        { "text": "柔軟に", "romaji": "jū nan ni", "kana": "じゅうなんに", "term": "柔軟に", "pos": "形容动词应用形", "meaning": "灵活地" },
+        { "text": "随机应变", "romaji": "rin ki ō hen", "kana": "臨機応変", "term": "臨機応変", "pos": "名词", "meaning": "随机应变" }
+      ]
+    },
+    {
+      "text": "七変化 が 勝ち",
+      "translation": "千变万化才能胜",
+      "tokens": [
+        { "text": "七変化", "romaji": "shi chi hen ge", "kana": "しちへんげ", "term": "七変化", "pos": "名词", "meaning": "舞蹈变化(雾)变化" },
+        { "text": "が", "romaji": "ga", "kana": "が", "term": "が", "pos": "助词", "meaning": "提示主语" },
+        { "text": "勝ち", "romaji": "ka chi", "kana": "勝ち", "term": "勝ち", "pos": "动词「勝つ」连用形", "meaning": "胜利" }
+      ]
+    },
+    {
+      "text": "ここの という とき",
+      "translation": "只有在关键时刻",
+      "tokens": [
+        { "text": "ここの", "romaji": "ko ko zo", "kana": "ここの", "term": "ここの", "pos": "名词", "meaning": "关键时刻" },
+        { "text": "という", "romaji": "to iū", "kana": "という", "term": "という", "pos": "助词", "meaning": "这样的" },
+        { "text": "とき", "romaji": "to ki", "kana": "とき", "term": "とき", "pos": "名词", "meaning": "时候" }
+      ]
+    },
+    {
+      "text": "美 を(wa) みせる んです",
+      "translation": "将会美丽展现出来",
+      "tokens": [
+        { "text": "美", "romaji": "bi", "kana": "び", "term": "美", "pos": "名词", "meaning": "美" },
+        { "text": "を(wa)", "romaji": "o(wo)", "kana": "を", "term": "を", "pos": "助词", "meaning": "提示宾语" },
+        { "text": "みせる", "romaji": "mi se ru", "kana": "見せる", "term": "見せる", "pos": "动词字典形", "meaning": "展示" },
+        { "text": "んです", "romaji": "n de su", "kana": "んです", "term": "んです", "pos": "句型「〜のだ」敬体口语", "meaning": "表强调" }
+      ]
+    },
+    {
+      "text": "五臓六肺 満身 辛しん",
+      "translation": "五脏六腑，全身奋进",
+      "tokens": [
+        { "text": "五臓六肺", "romaji": "go zō ro ppu", "kana": "ごぞうろっぷ", "term": "五臓六肺", "pos": "名词", "meaning": "五脏六腑" },
+        { "text": "満身", "romaji": "man shin", "kana": "まんしん", "term": "満身", "pos": "名词", "meaning": "全身" },
+        { "text": "辛しん", "romaji": "ma i shin", "kana": "まいしん", "term": "邁進", "pos": "名词", "meaning": "迈进" }
+      ]
+    },
+    {
+      "text": "願望 は(wa) そう身 れいじん",
+      "translation": "愿望是瘦身成为丽人",
+      "tokens": [
+        { "text": "願望", "romaji": "gam bō", "kana": "がんぼう", "term": "願望", "pos": "名词", "meaning": "愿望" },
+        { "text": "は(wa)", "romaji": "wa(ha)", "kana": "は", "term": "は", "pos": "助词", "meaning": "提示主语" },
+        { "text": "そう身", "romaji": "sō shin", "kana": "そうしん", "term": "瘦身", "pos": "名词", "meaning": "瘦身" },
+        { "text": "れいじん", "romaji": "rei jin", "kana": "れいじん", "term": "麗人", "pos": "名词", "meaning": "丽人" }
+      ]
+    },
+    {
+      "text": "誘惑 多発 だ し",
+      "translation": "但是诱惑太多……",
+      "tokens": [
+        { "text": "誘惑", "romaji": "yū wa ku", "kana": "ゆうわく", "term": "誘惑", "pos": "名词", "meaning": "诱惑" },
+        { "text": "多発", "romaji": "ta ha tsu", "kana": "たはつ", "term": "多発", "pos": "名词", "meaning": "多发" },
+        { "text": "だ", "romaji": "da", "kana": "だ", "term": "だ", "pos": "助动词", "meaning": "是" },
+        { "text": "し", "romaji": "shi", "kana": "し", "term": "し", "pos": "助词", "meaning": "表列举" }
+      ]
+    },
+    {
+      "text": "だから やけに",
+      "translation": "所以意志总是",
+      "tokens": [
+        { "text": "だから", "romaji": "da ka ra", "kana": "だから", "term": "だから", "pos": "接续词", "meaning": "所以" },
+        { "text": "やけに", "romaji": "ya ke ni", "kana": "やけに", "term": "やけに", "pos": "副词", "meaning": "过分地" }
+      ]
+    },
+    {
+      "text": "意思 崩け ちゅう なんです",
+      "translation": "很容易就被击垮呀",
+      "tokens": [
+        { "text": "意思", "romaji": "i shi", "kana": "いし", "term": "意思", "pos": "名词", "meaning": "意志" },
+        { "text": "崩け", "romaji": "ku da ke", "kana": "崩け", "term": "崩け", "pos": "动词「砕ける」て形(去)", "meaning": "被打碎" },
+        { "text": "ちゅう", "romaji": "cha u", "kana": "ちゅう", "term": "ちゅう", "pos": "句型「Ｖて+ちう」口语", "meaning": "表遗憾语气" },
+        { "text": "なんです", "romaji": "n de su", "kana": "んです", "term": "んです", "pos": "句型「〜のだ」敬体口语", "meaning": "表强调" }
+      ]
+    },
+    {
+      "text": "ヤバ まさか 赤点(Red Point)",
+      "translation": "糟糕，难道要不及格了!?",
+      "tokens": [
+        { "text": "ヤバ", "romaji": "ya ba", "kana": "ヤバ", "term": "ヤバ", "pos": "形容动词口语", "meaning": "糟糕" },
+        { "text": "まさか", "romaji": "ma sa ka", "kana": "まさか", "term": "まさか", "pos": "副词", "meaning": "没想到" },
+        { "text": "赤点(Red Point)", "romaji": "[red] [point]", "kana": "赤点(Red Point)", "term": "赤点(Red Point)", "pos": "名词", "meaning": "不及格分数" }
+      ]
+    },
+    {
+      "text": "いや ギリクリア",
+      "translation": "不，勉强通过了!",
+      "tokens": [
+        { "text": "いや", "romaji": "i ya", "kana": "いや", "term": "いや", "pos": "感叹词", "meaning": "不" },
+        { "text": "ギリクリア", "romaji": "gi ri ku ri a", "kana": "ギリクリア", "term": "ギリクリア", "pos": "名词", "meaning": "勉强通过" }
+      ]
+    },
+    {
+      "text": "それだけで なんて 全能感",
+      "translation": "仅仅这样就有种全能感",
+      "tokens": [
+        { "text": "それ", "romaji": "so re", "kana": "それ", "term": "それ", "pos": "名词指示词", "meaning": "那" },
+        { "text": "だけで", "romaji": "da ke de", "kana": "だけで", "term": "だけで", "pos": "助词", "meaning": "仅仅…就" },
+        { "text": "なんて", "romaji": "nan te", "kana": "なんて", "term": "なんて", "pos": "副词", "meaning": "多么" },
+        { "text": "全能感", "romaji": "zen nō kan", "kana": "ぜんのうかん", "term": "全能感", "pos": "名词", "meaning": "全能感" }
+      ]
+    },
+    {
+      "text": "大事なの は(wa) 自分 認め",
+      "translation": "重要的就是要认可自己",
+      "tokens": [
+        { "text": "大事なの", "romaji": "da i ji na", "kana": "だいじな", "term": "大事なの", "pos": "形容动词连体形", "meaning": "重要的" },
+        { "text": "の", "romaji": "no", "kana": "の", "term": "の", "pos": "形式名词", "meaning": "名词化" },
+        { "text": "は(wa)", "romaji": "wa(ha)", "kana": "は", "term": "は", "pos": "助词", "meaning": "提示主语" },
+        { "text": "自分", "romaji": "ji bun", "kana": "じぶん", "term": "自分", "pos": "名词", "meaning": "自己" },
+        { "text": "認め", "romaji": "mi to me te", "kana": "認めて", "term": "認めて", "pos": "动词「認める」て形", "meaning": "承认" }
+      ]
+    },
+    {
+      "text": "ゆるさなきゃ",
+      "translation": "如果连自己都不原谅",
+      "tokens": [
+        { "text": "ゆるさなきゃ", "romaji": "yu ru sa na kya", "kana": "許さなきゃ", "term": "許さなきゃ", "pos": "动词「許す」ない形(形?)形口语", "meaning": "不原谅" }
+      ]
+    },
+    {
+      "text": "ひと も 許せない",
+      "translation": "也就更不能原谅他人了",
+      "tokens": [
+        { "text": "ひと", "romaji": "hi to", "kana": "ひと", "term": "他人", "pos": "名词", "meaning": "他人" },
+        { "text": "も", "romaji": "mo", "kana": "も", "term": "も", "pos": "助词", "meaning": "也" },
+        { "text": "許せない", "romaji": "yu ru se na i", "kana": "許せない", "term": "許せない", "pos": "动词「許す」可能形ない形", "meaning": "不能原谅" }
+      ]
+    },
+    {
+      "text": "バタあしする んです",
+      "translation": "奋力划动着脚掌",
+      "tokens": [
+        { "text": "バタあしする", "romaji": "ba ta a shi su ru", "kana": "バタ足する", "term": "バタ足する", "pos": "动词字典形", "meaning": "用脚划水" },
+        { "text": "んです", "romaji": "n de su", "kana": "んです", "term": "んです", "pos": "句型「〜のだ」敬体口语", "meaning": "表强调" }
+      ]
+    }
+  ]
+}

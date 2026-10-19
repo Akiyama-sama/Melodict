@@ -25,14 +25,6 @@ const Sidebar = memo(() => {
           isActive: true
         },
         {
-          to: '/main-player/search',
-          id: 'Search',
-          parentClassName: 'search',
-          icon: 'search',
-          content: t('sideBar.search'),
-          isActive: false
-        },
-        {
           to: '/main-player/songs',
           id: 'Songs',
           parentClassName: 'songs',
@@ -78,6 +70,30 @@ const Sidebar = memo(() => {
           parentClassName: 'genres',
           icon: 'track_changes',
           content: t('common.genre_other'),
+          isActive: false
+        },
+        {
+          to: '/main-player/netease/playlists',
+          id: 'NeteaseMyPlaylists',
+          parentClassName: 'netease-my-playlists',
+          icon: 'public',
+          content: t('sideBar.neteaseMyPlaylists'),
+          isActive: false
+        },
+        {
+          to: '/main-player/netease/liked',
+          id: 'NeteaseLiked',
+          parentClassName: 'netease-liked',
+          icon: 'favorite',
+          content: t('sideBar.neteaseLiked'),
+          isActive: false
+        },
+        {
+          to: '/main-player/netease/toplists',
+          id: 'NeteaseToplists',
+          parentClassName: 'netease-toplists',
+          icon: 'leaderboard',
+          content: t('sideBar.neteaseToplists'),
           isActive: false
         },
         {

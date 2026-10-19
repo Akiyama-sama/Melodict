@@ -1,7 +1,9 @@
+import { tryDecodeNeteaseSongId } from '@common/netease';
 import PlayerQueue from '@renderer/other/playerQueue';
 import { useEffect } from 'react';
 
 import type AudioPlayer from '../other/player';
+import { buildNeteasePlayerSongData } from '../other/neteasePlayback';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 
@@ -210,7 +212,12 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       const nextSongId = playerQueue.nextSongId;
       if (nextSongId) {
         try {
-          const songData = await window.api.audioLibraryControls.getSong(nextSongId);
+          // NetEase sentinels must not hit the songs DB (the negative id overflows its integer
+          // column); resolve their player data from the NetEase API instead.
+          const neteaseId = tryDecodeNeteaseSongId(nextSongId);
+          const songData = neteaseId
+            ? await buildNeteasePlayerSongData(neteaseId)
+            : await window.api.audioLibraryControls.getSong(nextSongId);
           if (songData) changeUpNextSongData(songData);
         } catch (err) {
           console.error('Failed to fetch up next song:', err);

@@ -6,9 +6,11 @@ import NoSongsImage from '@renderer/assets/images/svg/Sun_Monochromatic.svg';
 import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
+import NeteaseSongRow from '@renderer/components/Netease/NeteaseSongRow';
 import Song from '@renderer/components/SongsPage/Song';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { useNeteaseQueueRows } from '@renderer/hooks/useNeteaseQueueRows';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { queryClient } from '@renderer/index';
 import { queueQuery } from '@renderer/queries/queue';
@@ -63,10 +65,14 @@ function RouteComponent() {
   const { t } = useTranslation();
   const { scrollTopOffset } = Route.useSearch();
 
-  const { data: queuedSongs } = useQuery({
+  const { data: localQueuedSongs } = useQuery({
     ...songQuery.queue(currentQueue),
     enabled: currentQueue.length > 0
   });
+
+  // Local rows and NetEase sentinel rows merged in queue order; undefined while local data loads.
+  const queueRows = useNeteaseQueueRows(currentQueue, localQueuedSongs);
+  const queuedSongs = queueRows;
 
   // const previousQueueRef = useRef<string[]>([]);
   const { data: queueInfo } = useQuery({
@@ -135,7 +141,11 @@ function RouteComponent() {
   //   };
   // }, [fetchAllSongsData]);
 
-  const selectAllHandler = useSelectAllHandler(queuedSongs || [], 'songs', 'songId');
+  const selectAllHandler = useSelectAllHandler(
+    (queuedSongs ?? []).map((row) => (row.kind === 'local' ? row.song : row.summary)) as SongData[],
+    'songs',
+    'songId'
+  );
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return undefined;
@@ -176,8 +186,12 @@ function RouteComponent() {
 
   const queueDuration = useMemo(
     () =>
-      calculateTimeFromSeconds(queuedSongs?.reduce((prev, current) => prev + current.duration, 0))
-        .timeString,
+      calculateTimeFromSeconds(
+        queuedSongs?.reduce(
+          (prev, current) => prev + (current.kind === 'local' ? current.song.duration : current.summary.duration),
+          0
+        )
+      ).timeString,
     [queuedSongs]
   );
 
@@ -186,7 +200,10 @@ function RouteComponent() {
       calculateTimeFromSeconds(
         queuedSongs
           ?.slice(queue.position ?? 0)
-          .reduce((prev, current) => prev + current.duration, 0)
+          .reduce(
+            (prev, current) => prev + (current.kind === 'local' ? current.song.duration : current.summary.duration),
+            0
+          )
       ).timeString,
     [queue.position, queuedSongs]
   );
@@ -334,7 +351,32 @@ function RouteComponent() {
                     droppableId="droppable"
                     mode="virtual"
                     renderClone={(provided, _, rubric) => {
-                      const data = queuedSongs[rubric.source.index];
+                      const row = queuedSongs[rubric.source.index];
+                      const rowSongId =
+                        row.kind === 'local' ? row.song.songId : row.summary.songId;
+                      const removeFromQueueItem: ContextMenuItem = {
+                        label: t('common.removeFromQueue'),
+                        iconName: 'remove_circle_outline',
+                        handlerFunction: () => {
+                          updateQueueData(
+                            undefined,
+                            currentQueue.filter((id) => id !== rowSongId)
+                          );
+                          toggleMultipleSelections(false);
+                        }
+                      };
+                      if (row.kind === 'netease')
+                        return (
+                          <NeteaseSongRow
+                            provided={provided}
+                            key={row.summary.songId}
+                            index={rubric.source.index}
+                            ref={provided.innerRef}
+                            summary={row.summary}
+                            additionalContextMenuItems={[removeFromQueueItem]}
+                          />
+                        );
+                      const data = row.song;
                       return (
                         <Song
                           provided={provided}
@@ -371,12 +413,14 @@ function RouteComponent() {
                             </div>
                           )
                         }}
-                        itemContent={(index, song) => {
+                        itemContent={(index, row) => {
                           return (
                             <Draggable
-                              draggableId={String(song.songId)}
+                              draggableId={String(
+                                row.kind === 'local' ? row.song.songId : row.summary.songId
+                              )}
                               index={index}
-                              key={song.songId}
+                              key={row.kind === 'local' ? row.song.songId : row.summary.songId}
                             >
                               {(provided) => {
                                 const { multipleSelections: songIds } = multipleSelectionsData;
@@ -384,36 +428,51 @@ function RouteComponent() {
                                   multipleSelectionsData.selectionType === 'songs' &&
                                   multipleSelectionsData.multipleSelections.length !== 1;
 
+                                const songId =
+                                  row.kind === 'local' ? row.song.songId : row.summary.songId;
+
+                                const removeFromQueueItem: ContextMenuItem = {
+                                  label: t('common.removeFromQueue'),
+                                  iconName: 'remove_circle_outline',
+                                  handlerFunction: () => {
+                                    updateQueueData(
+                                      undefined,
+                                      currentQueue.filter((id) =>
+                                        isMultipleSelectionsEnabled
+                                          ? !songIds.includes(id)
+                                          : id !== songId
+                                      )
+                                    );
+                                    toggleMultipleSelections(false);
+                                  }
+                                };
+
+                                if (row.kind === 'netease')
+                                  return (
+                                    <NeteaseSongRow
+                                      provided={provided}
+                                      key={`${row.summary.songId}-${index}`}
+                                      index={index}
+                                      ref={provided.innerRef}
+                                      summary={row.summary}
+                                      additionalContextMenuItems={[removeFromQueueItem]}
+                                    />
+                                  );
+
                                 return (
                                   <Song
                                     provided={provided}
-                                    key={`${song.songId}-${index}`}
+                                    key={`${songId}-${index}`}
                                     isDraggable
                                     index={index}
                                     ref={provided.innerRef}
                                     isIndexingSongs={preferences?.isSongIndexingEnabled}
-                                    {...song}
+                                    {...row.song}
                                     trackNo={undefined}
                                     selectAllHandler={selectAllHandler}
                                     // no need for onPlayClick because the component is in the currentQueuePage
                                     // onPlayClick={handleSongPlayBtnClick}
-                                    additionalContextMenuItems={[
-                                      {
-                                        label: t('common.removeFromQueue'),
-                                        iconName: 'remove_circle_outline',
-                                        handlerFunction: () => {
-                                          updateQueueData(
-                                            undefined,
-                                            currentQueue.filter((id) =>
-                                              isMultipleSelectionsEnabled
-                                                ? !songIds.includes(id)
-                                                : id !== song.songId
-                                            )
-                                          );
-                                          toggleMultipleSelections(false);
-                                        }
-                                      }
-                                    ]}
+                                    additionalContextMenuItems={[removeFromQueueItem]}
                                   />
                                 );
                               }}
