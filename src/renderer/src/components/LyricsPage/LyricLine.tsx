@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import type { LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { getSpacedLyricLineText } from '../../other/lyricsAnalysisUtils';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
 import LyricsAnalysisLineContent from './LyricsAnalysisLineContent';
 import LyricsProgressBar from './LyricsProgressBar';
@@ -102,12 +103,13 @@ const LyricLine = (props: LyricProp) => {
   const lyricStringLinePrimary = lyricString;
   const lyricStringLineSecondary = translatedLyricString;
   // Enhanced (YRC) lines carry their text as a word array; the token view needs that text as a
-  // plain string to split into token spans. It is the same string the analysis was built from
-  // (getRawLyricLineText joins the words without separators), so token offsets line up exactly.
+  // plain string to split into token spans. It is the same spaced string the analysis was built
+  // from (getSpacedLyricLineText), so token offsets line up exactly — an unspaced join here would
+  // shift every span past the first space.
   const isTokenizedLine = Boolean(analysis && onTokenClick && typeof lyric === 'string');
   const tokenizedEnhancedText =
     analysis && onTokenClick && typeof lyric !== 'string'
-      ? lyric.map((word) => word.text).join('')
+      ? getSpacedLyricLineText(lyric)
       : undefined;
   const lyricStringLineTertiary = isTokenizedLine || tokenizedEnhancedText !== undefined
     ? undefined

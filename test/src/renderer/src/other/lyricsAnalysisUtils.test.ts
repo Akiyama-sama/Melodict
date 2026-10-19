@@ -1,9 +1,17 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  getSpacedLyricLineText,
   getTokenColor,
   getTokenColorPalette
 } from '../../../../../src/renderer/src/other/lyricsAnalysisUtils';
+
+const word = (text: string): SyncedLyricsLineWord => ({
+  text,
+  start: 0,
+  end: 1,
+  unparsedText: text
+});
 
 const swatch = (hsl: [number, number, number]): NodeVibrantPaletteSwatch => ({
   hsl,
@@ -34,6 +42,43 @@ const hueDistance = (a: string, b: string) => {
   const d = Math.abs(parse(a).h - parse(b).h);
   return Math.min(d, 1 - d);
 };
+
+describe('getSpacedLyricLineText', () => {
+  // The real-world failure this guards against: NetEase YRC (ENHANCED_SYNCED) words joined without
+  // separators left the model no way to see word boundaries, and every line of Till I Die came
+  // back as one whole-line token. This exact line is the song's first line.
+  test('joins an English YRC word array with spaces (the analysis input contract)', () => {
+    const line: LyricLine = {
+      originalText: [
+        word('I'),
+        word('have'),
+        word('to'),
+        word('go'),
+        word('somewhere'),
+        word('I'),
+        word('saw')
+      ],
+      translatedTexts: [],
+      isEnhancedSynced: true
+    };
+
+    expect(getSpacedLyricLineText(line.originalText)).toBe('I have to go somewhere I saw');
+  });
+
+  test('returns string lines untouched', () => {
+    expect(getSpacedLyricLineText('I have to go')).toBe('I have to go');
+  });
+
+  test('collapses whitespace already present in word payloads instead of doubling it', () => {
+    expect(getSpacedLyricLineText([word('I '), word(' have')])).toBe('I have');
+  });
+
+  test('keeps CJK YRC words space-joined (boundaries stay explicit for the model)', () => {
+    expect(getSpacedLyricLineText([word('夜'), word('に'), word('駆ける')])).toBe(
+      '夜 に 駆ける'
+    );
+  });
+});
 
 describe('getTokenColorPalette', () => {
   test('derives colours from the song palette and lifts every swatch to readable lightness', () => {

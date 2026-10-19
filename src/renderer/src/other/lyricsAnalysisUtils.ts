@@ -1,11 +1,27 @@
 import { DEFAULT_SONG_PALETTE } from '../../../common/defaultSongPalette';
 import { formatHsl, manageBrightness } from './themePalette';
 
-/** Mirrors `getRawLyricLineText` in the main process: enhanced lines are joined back into text. */
-export const getRawLyricLineText = (line: LyricLine) => {
-  if (typeof line.originalText === 'string') return line.originalText;
+/**
+ * Joins a lyric line — plain text or an enhanced (YRC) word array — back into the line's spaced
+ * text. `LyricLine.tsx` renders YRC words as separate spans with `mr-2` spacing, so a space between
+ * words is how the line reads everywhere else; the unspaced `IhavetogosomewhereIsaw` fed to the LLM
+ * left it no way to recover word boundaries and collapsed the whole line into one token.
+ *
+ * This is the single source for BOTH the analysis input (`useLyricsAnalysis`) and the token view's
+ * display text (`LyricLine`): token startChar/endChar offsets are validated against the analysis
+ * text and then sliced against the display text (splitLineIntoTokens), so the two strings MUST be
+ * identical or the spans misalign. Whitespace is collapsed so stray padding inside word payloads
+ * (some sources carry spaces in `word.text`) cannot double up. CJK YRC words join with spaces too —
+ * harmless for the model, which aligns better with boundaries made explicit.
+ */
+export const getSpacedLyricLineText = (originalText: string | SyncedLyricsLineWord[]) => {
+  if (typeof originalText === 'string') return originalText;
 
-  return line.originalText.map((word) => word.text).join('');
+  return originalText
+    .map((word) => word.text)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 export const getLineIdForIndex = (index: number) => `line-${index}`;

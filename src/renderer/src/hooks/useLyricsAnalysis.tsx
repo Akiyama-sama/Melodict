@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
-import { getRawLyricLineText } from '../other/lyricsAnalysisUtils';
+import { getSpacedLyricLineText } from '../other/lyricsAnalysisUtils';
 import {
   IDLE_LYRICS_ANALYSIS_STATUS,
   deriveLyricsAnalysisUiStatus,
@@ -18,13 +18,17 @@ type UseLyricsAnalysisOptions = {
   isEnabled?: boolean;
 };
 
-const toInputLines = (lyrics?: SongLyrics | null) => {
+/** Exported for tests: the exact analysis input the hook builds from parsed lyrics. */
+export const toInputLines = (lyrics?: SongLyrics | null) => {
   if (!lyrics?.lyrics.isSynced) return [];
 
   return lyrics.lyrics.parsedLyrics
     .map((line: LyricLine, index: number) => ({
       lineId: `line-${index}`,
-      text: getRawLyricLineText(line),
+      // Spaced: an unspaced join gives the model no word boundaries ("IhavetogosomewhereIsaw") and
+      // it then emits the whole line as a single token. Must stay byte-identical to the token
+      // view's display text — see getSpacedLyricLineText.
+      text: getSpacedLyricLineText(line.originalText),
       // Human romanization (e.g. NetEase romalrc) rides along as pronunciation ground truth.
       ...(typeof line.romanizedText === 'string' && line.romanizedText.trim().length > 0
         ? { romanizedText: line.romanizedText.trim() }
