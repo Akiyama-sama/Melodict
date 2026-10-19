@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 import { app, safeStorage } from 'electron';
-import fs from 'fs/promises';
 import path from 'path';
 
 import type { LyricsAnalysisProviderProfileInput } from '../../common/lyricsAnalysis';
 import logger from '../logger';
+import { readJsonFileOrNull, writeJsonFileAtomic } from './fsJson';
 
 const CONFIG_FILE_NAME = 'lyrics-analysis-providers.json';
 
@@ -81,25 +81,18 @@ const decryptApiKey = (stored: Pick<StoredProfileFile, 'apiKeyEncrypted' | 'apiK
 };
 
 const readJsonFile = async <T>(filePath: string): Promise<T | undefined> => {
-  try {
-    const data = await fs.readFile(filePath, 'utf-8');
-    const parsed = JSON.parse(data) as T;
-    return parsed && typeof parsed === 'object' ? parsed : undefined;
-  } catch (error) {
-    // A missing file is the normal first-run case, not an error worth logging loudly.
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      logger.warn('Failed to read the lyrics analysis provider config.', { error, filePath });
-    return undefined;
-  }
+  // ENOENT — the normal first-run case — already reads as undefined without noise inside
+  // readJsonFileOrNull; only unexpected failures are logged.
+  const parsed = await readJsonFileOrNull<T>(filePath, (error) =>
+    logger.warn('Failed to read the lyrics analysis provider config.', { error, filePath })
+  );
+  return parsed && typeof parsed === 'object' ? parsed : undefined;
 };
 
 const writeState = async (state: StoredProfilesFile) => {
-  const configPath = getLyricsAnalysisConfigPath();
-  const tempPath = `${configPath}.tmp`;
-
-  await fs.mkdir(path.dirname(configPath), { recursive: true });
-  await fs.writeFile(tempPath, JSON.stringify(state, null, 2), { mode: 0o600 });
-  await fs.rename(tempPath, configPath);
+  // Failures propagate: provider settings actions surface a write error to the user, so unlike the
+  // caches this write has no swallow-and-cleanup wrapper of its own.
+  await writeJsonFileAtomic(getLyricsAnalysisConfigPath(), state, { spacing: 2, mode: 0o600 });
 };
 
 const deriveProfileName = (baseURL: string) => {
