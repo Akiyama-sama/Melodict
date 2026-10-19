@@ -139,6 +139,4 @@ export interface LyricsAnalysisTelemetrySession {
   firstLineEmitted: boolean;
   passCount: number;
   outputTokens: number | undefined;
-  okLines: number;
-  failedLineIds: Set<string>;
 }

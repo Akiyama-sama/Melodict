@@ -85,16 +85,15 @@ export const emitSessionEndTelemetry = (input: {
   session: LyricsAnalysisTelemetrySession;
   finishedAt: number;
   outcome: 'ready' | 'partial' | 'error';
-  /** Unanalyzed lines left after the final tally; the emitter's own count covers error paths. */
-  failedLines?: number;
+  /** Lines of the request that never landed, exact on every path. */
+  failedLines: number;
   errorCode?: string;
   passStats?: { outputTokens: number | undefined };
 }) => {
-  // The ready/partial path passes the exact tally; on the error path failedLineIds already holds
-  // every line that never landed (initialized with all ids, removed as lines arrive). Derived
-  // okLines stays exact even when the model emits duplicate elements for the same line.
-  const failedLines = input.failedLines ?? input.session.failedLineIds.size;
-  const okLines = Math.max(0, input.session.totalLines - input.session.preCachedLines - failedLines) + input.session.preCachedLines;
+  const failedLines = input.failedLines;
+  const okLines =
+    Math.max(0, input.session.totalLines - input.session.preCachedLines - failedLines) +
+    input.session.preCachedLines;
 
   const event: SessionEndTelemetryEvent = {
     ...eventBase(input.session),

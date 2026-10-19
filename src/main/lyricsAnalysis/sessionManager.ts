@@ -76,6 +76,24 @@ const buildLinesWithStatuses = (input: {
 
 const isAnalyzed = (line: LyricsAnalysisLine) => line.tokens.length > 0;
 
+/**
+ * Lines of this request the run has NOT landed yet, derived from the landed-lines map instead of
+ * being maintained as a second mutable tally next to it. Every streamed key is always a request
+ * lineId (hydrated pre-cached lines, landed siblings, and worker lines alike are request lines or
+ * their same-text siblings), so the derivation below is exactly the tally the deleted
+ * `failedLineIds` set used to hold.
+ */
+const deriveUnlandedLineIds = (input: {
+  requestLines: LyricsAnalysisInputLine[];
+  landedByLineId: Map<string, LyricsAnalysisLine>;
+}): Set<string> => {
+  const unlanded = new Set<string>();
+  for (const line of input.requestLines) {
+    if (!input.landedByLineId.has(line.lineId)) unlanded.add(line.lineId);
+  }
+  return unlanded;
+};
+
 const buildTelemetrySession = (input: {
   sessionId: string;
   startedAt: number;
@@ -93,9 +111,7 @@ const buildTelemetrySession = (input: {
   requestedLines: input.requestedLines ?? input.request.lines.length - input.preCachedLines,
   passCount: 0,
   outputTokens: undefined,
-  okLines: 0,
-  firstLineEmitted: false,
-  failedLineIds: new Set(input.request.lines.map((line) => line.lineId))
+  firstLineEmitted: false
 });
 
 export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisRequest) => {
@@ -246,8 +262,6 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     preCachedLines: preCachedLines.length,
     requestedLines: dedupedResumeLines.length
   });
-  // Only the resume lines are up for grabs this run; pre-cached lines start out accounted for.
-  for (const line of preCachedLines) telemetrySession.failedLineIds.delete(line.lineId);
   emitSessionStartTelemetry(telemetrySession);
 
   emitSnapshot({
@@ -301,8 +315,6 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
 
     for (const landed of landedLines) {
       streamedLines.set(landed.lineId, landed);
-      telemetrySession.okLines += 1;
-      telemetrySession.failedLineIds.delete(landed.lineId);
       // One event per landed line, siblings included: telemetry consumers count per-line coverage.
       emitLineResultTelemetry({ session: telemetrySession, line: landed, source: input.source });
     }
@@ -377,10 +389,15 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       flushIfDue(true);
       await flushPromise;
       // Still close this run's telemetry so evaluation data stays complete.
+      const unlandedCount = deriveUnlandedLineIds({
+        requestLines: request.lines,
+        landedByLineId: streamedLines
+      }).size;
       emitSessionEndTelemetry({
         session: telemetrySession,
         finishedAt: Date.now(),
-        outcome: telemetrySession.failedLineIds.size === 0 ? 'ready' : 'partial'
+        outcome: unlandedCount === 0 ? 'ready' : 'partial',
+        failedLines: unlandedCount
       });
       return activeSession;
     }
@@ -427,7 +444,11 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       session: telemetrySession,
       finishedAt: Date.now(),
       outcome: 'error',
-      errorCode: mapped.code
+      errorCode: mapped.code,
+      failedLines: deriveUnlandedLineIds({
+        requestLines: request.lines,
+        landedByLineId: streamedLines
+      }).size
     });
 
     const snapshot: LyricsAnalysisSnapshot = {
