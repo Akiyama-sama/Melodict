@@ -1,0 +1,154 @@
+{
+  "songTitle": "Someone Like You",
+  "songArtists": ["Adele"],
+  "source": "Human transcription (native-speaker-level annotation, same rubric as dont-say-lazy PDF): 13 representative lines transcribed per the original lyric line breaks; tokens = words/contractions/set phrases, IPA (US) pronunciation + dictionary form + closed POS labels + in-context Simplified-Chinese gloss, whole-line translation. Created 2026-10-19 and locked thereafter (never fed to prompts, never edited during iteration).",
+  "lines": [
+    {
+      "text": "That you are settled down",
+      "translation": "听说你安定下来了",
+      "tokens": [
+        { "text": "That", "ipa": "ðæt", "term": "that", "pos": "conjunction", "meaning": "引导宾语从句（听说……）" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "are", "ipa": "ɑr", "term": "be", "pos": "verb", "meaning": "是（be 的现在式）" },
+        { "text": "settled down", "ipa": "ˈsɛtəld daʊn", "term": "settle down", "pos": "phrase", "meaning": "安定下来、成家（短语动词）" }
+      ]
+    },
+    {
+      "text": "That you found a girl",
+      "translation": "听说你找到了一个女孩",
+      "tokens": [
+        { "text": "That", "ipa": "ðæt", "term": "that", "pos": "conjunction", "meaning": "引导宾语从句" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "found", "ipa": "faʊnd", "term": "find", "pos": "verb", "meaning": "找到了（find 的过去式）" },
+        { "text": "a", "ipa": "ə", "term": "a", "pos": "article", "meaning": "一个（不定冠词）" },
+        { "text": "girl", "ipa": "ɡɜrl", "term": "girl", "pos": "noun", "meaning": "女孩" }
+      ]
+    },
+    {
+      "text": "And you are married now",
+      "translation": "而你现在已经结婚了",
+      "tokens": [
+        { "text": "And", "ipa": "ænd", "term": "and", "pos": "conjunction", "meaning": "而、并且" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "are", "ipa": "ɑr", "term": "be", "pos": "verb", "meaning": "是（be 的现在式）" },
+        { "text": "married", "ipa": "ˈmærid", "term": "married", "pos": "adjective", "meaning": "已婚的" },
+        { "text": "now", "ipa": "naʊ", "term": "now", "pos": "adverb", "meaning": "现在" }
+      ]
+    },
+    {
+      "text": "That your dreams came true",
+      "translation": "听说你的梦想成真了",
+      "tokens": [
+        { "text": "That", "ipa": "ðæt", "term": "that", "pos": "conjunction", "meaning": "引导宾语从句" },
+        { "text": "your", "ipa": "jʊr", "term": "your", "pos": "pronoun", "meaning": "你的" },
+        { "text": "dreams", "ipa": "drimz", "term": "dream", "pos": "noun", "meaning": "梦想（复数）" },
+        { "text": "came true", "ipa": "keɪm tru", "term": "come true", "pos": "phrase", "meaning": "成真（固定搭配）" }
+      ]
+    },
+    {
+      "text": "Guess she gave you things",
+      "translation": "我猜她给了你一些东西",
+      "tokens": [
+        { "text": "Guess", "ipa": "ɡɛs", "term": "guess", "pos": "verb", "meaning": "猜想、我猜（口语独立用法）" },
+        { "text": "she", "ipa": "ʃi", "term": "she", "pos": "pronoun", "meaning": "她" },
+        { "text": "gave", "ipa": "ɡeɪv", "term": "give", "pos": "verb", "meaning": "给了（give 的过去式）" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你（间接宾语）" },
+        { "text": "things", "ipa": "θɪŋz", "term": "thing", "pos": "noun", "meaning": "东西（复数）" }
+      ]
+    },
+    {
+      "text": "I didn't give to you",
+      "translation": "而我却没有给过你",
+      "tokens": [
+        { "text": "I", "ipa": "aɪ", "term": "I", "pos": "pronoun", "meaning": "我" },
+        { "text": "didn't", "ipa": "ˈdɪdənt", "term": "do not", "pos": "auxiliary", "meaning": "没有（did not 的缩写，构成否定）" },
+        { "text": "give", "ipa": "ɡɪv", "term": "give", "pos": "verb", "meaning": "给" },
+        { "text": "to", "ipa": "tu", "term": "to", "pos": "preposition", "meaning": "给、向（引出对象）" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" }
+      ]
+    },
+    {
+      "text": "Ain't like you to hold back",
+      "translation": "不像你会退缩的样子",
+      "tokens": [
+        { "text": "Ain't", "ipa": "eɪnt", "term": "is not", "pos": "auxiliary", "meaning": "不是（is not 的口语缩略）" },
+        { "text": "like", "ipa": "laɪk", "term": "like", "pos": "preposition", "meaning": "像（……的样子）" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "to", "ipa": "tə", "term": "to", "pos": "preposition", "meaning": "（不定式标记）" },
+        { "text": "hold back", "ipa": "hoʊld bæk", "term": "hold back", "pos": "phrase", "meaning": "退缩、克制（短语动词）" }
+      ]
+    },
+    {
+      "text": "Or hide from the light",
+      "translation": "或者躲开光亮",
+      "tokens": [
+        { "text": "Or", "ipa": "ɔr", "term": "or", "pos": "conjunction", "meaning": "或者" },
+        { "text": "hide", "ipa": "haɪd", "term": "hide", "pos": "verb", "meaning": "躲藏" },
+        { "text": "from", "ipa": "frʌm", "term": "from", "pos": "preposition", "meaning": "从……（躲开）" },
+        { "text": "the", "ipa": "ðə", "term": "the", "pos": "article", "meaning": "定冠词" },
+        { "text": "light", "ipa": "laɪt", "term": "light", "pos": "noun", "meaning": "光、光亮" }
+      ]
+    },
+    {
+      "text": "I hate to turn up out of the blue uninvited",
+      "translation": "我讨厌这样不请自来地突然出现",
+      "tokens": [
+        { "text": "I", "ipa": "aɪ", "term": "I", "pos": "pronoun", "meaning": "我" },
+        { "text": "hate", "ipa": "heɪt", "term": "hate", "pos": "verb", "meaning": "讨厌、不愿" },
+        { "text": "to turn up", "ipa": "tə tɜrn ʌp", "term": "turn up", "pos": "phrase", "meaning": "出现、露面（短语动词）" },
+        { "text": "out of the blue", "ipa": "aʊt əv ðə blu", "term": "out of the blue", "pos": "phrase", "meaning": "突然地、出乎意料地（习语）" },
+        { "text": "uninvited", "ipa": "ˌʌnɪnˈvaɪtɪd", "term": "uninvited", "pos": "adjective", "meaning": "未被邀请的" }
+      ]
+    },
+    {
+      "text": "But I couldn't stay away I couldn't fight it",
+      "translation": "但我没法远离，也没法抗拒",
+      "tokens": [
+        { "text": "But", "ipa": "bʌt", "term": "but", "pos": "conjunction", "meaning": "但是" },
+        { "text": "I", "ipa": "aɪ", "term": "I", "pos": "pronoun", "meaning": "我" },
+        { "text": "couldn't", "ipa": "ˈkʊdənt", "term": "can not", "pos": "auxiliary", "meaning": "不能（could not 的缩写）" },
+        { "text": "stay away", "ipa": "steɪ əˈweɪ", "term": "stay away", "pos": "phrase", "meaning": "远离、保持距离（短语动词）" },
+        { "text": "I", "ipa": "aɪ", "term": "I", "pos": "pronoun", "meaning": "我" },
+        { "text": "couldn't", "ipa": "ˈkʊdənt", "term": "can not", "pos": "auxiliary", "meaning": "不能（could not 的缩写）" },
+        { "text": "fight", "ipa": "faɪt", "term": "fight", "pos": "verb", "meaning": "抗拒、抵抗" },
+        { "text": "it", "ipa": "ɪt", "term": "it", "pos": "pronoun", "meaning": "它（指这种情感）" }
+      ]
+    },
+    {
+      "text": "That for me, it isn't over",
+      "translation": "而对我来说，这一切还没结束",
+      "tokens": [
+        { "text": "That", "ipa": "ðæt", "term": "that", "pos": "conjunction", "meaning": "引导从句" },
+        { "text": "for", "ipa": "fɔr", "term": "for", "pos": "preposition", "meaning": "对……而言" },
+        { "text": "me", "ipa": "mi", "term": "I", "pos": "pronoun", "meaning": "我（宾格）" },
+        { "text": "it", "ipa": "ɪt", "term": "it", "pos": "pronoun", "meaning": "它（指这段感情）" },
+        { "text": "isn't", "ipa": "ˈɪzənt", "term": "be not", "pos": "auxiliary", "meaning": "不是（is not 的缩写）" },
+        { "text": "over", "ipa": "ˈoʊvər", "term": "over", "pos": "adjective", "meaning": "结束的、完了的" }
+      ]
+    },
+    {
+      "text": "I'll find someone like you",
+      "translation": "我会找到一个像你一样的人",
+      "tokens": [
+        { "text": "I'll", "ipa": "aɪl", "term": "I will", "pos": "pronoun", "meaning": "我将（I will 的缩写）" },
+        { "text": "find", "ipa": "faɪnd", "term": "find", "pos": "verb", "meaning": "找到" },
+        { "text": "someone", "ipa": "ˈsʌmwʌn", "term": "someone", "pos": "pronoun", "meaning": "某人、某个人" },
+        { "text": "like", "ipa": "laɪk", "term": "like", "pos": "preposition", "meaning": "像" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" }
+      ]
+    },
+    {
+      "text": "I wish nothing but the best for you too",
+      "translation": "我只愿你一切都好",
+      "tokens": [
+        { "text": "I", "ipa": "aɪ", "term": "I", "pos": "pronoun", "meaning": "我" },
+        { "text": "wish", "ipa": "wɪʃ", "term": "wish", "pos": "verb", "meaning": "祝愿、希望" },
+        { "text": "nothing but", "ipa": "ˈnʌθɪŋ bʌt", "term": "nothing but", "pos": "phrase", "meaning": "只、仅仅（习语）" },
+        { "text": "the best", "ipa": "ðə bɛst", "term": "the best", "pos": "noun", "meaning": "最好的（事物）" },
+        { "text": "for", "ipa": "fɔr", "term": "for", "pos": "preposition", "meaning": "给、为" },
+        { "text": "you", "ipa": "ju", "term": "you", "pos": "pronoun", "meaning": "你" },
+        { "text": "too", "ipa": "tu", "term": "too", "pos": "adverb", "meaning": "也" }
+      ]
+    }
+  ]
+}

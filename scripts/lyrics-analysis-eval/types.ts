@@ -62,6 +62,12 @@ export interface GoldToken {
   text: string;
   romaji?: string;
   kana?: string;
+  /** IPA (US) for English tokens; the equivalent of kana/romaji for Japanese. */
+  ipa?: string;
+  /** Pinyin for Chinese tokens. */
+  pinyin?: string;
+  /** Revised Romanization for Korean tokens. */
+  romanized?: string;
   /** Dictionary form; the PDF color-codes it (e.g. 飛り切って for ふりきって). */
   term?: string;
   /** Part of speech from the PDF (名詞/助詞/動詞/形容詞/副詞/句型...). */

@@ -107,10 +107,16 @@ const buildGraderPrompt = (input: {
     translation: input.goldLine.translation,
     tokens: input.goldLine.tokens.map((token) => ({
       text: token.text,
-      term: token.term ?? token.kana,
+      term: token.term ?? token.kana ?? token.ipa,
       meaning: token.meaning,
       grammarFunction: token.pos,
-      pronunciation: { kana: token.kana, romaji: token.romaji }
+      pronunciation: {
+        kana: token.kana,
+        romaji: token.romaji,
+        ipa: token.ipa,
+        pinyin: token.pinyin,
+        romanized: token.romanized
+      }
     }))
   });
   const produced = formatLine(input.producedLine);

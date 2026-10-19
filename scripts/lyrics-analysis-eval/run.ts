@@ -21,6 +21,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { z } from 'zod';
 
+import { LYRICS_ANALYSIS_PROMPT_VERSION, findUncoveredLineWords } from '../../src/common/lyricsAnalysis';
 import { analyzeLyrics } from '../../src/main/lyricsAnalysis/providerGateway';
 import { EVAL_CATEGORIES, type CategoryScore, type EvalAnalysisResult, type EvalCategory, type EvalLine, type GoldStandard, type GraderVerdict } from './types';
 
@@ -38,7 +39,7 @@ const graderVerdictSchema = z.object({
 
 const CATEGORY_LABELS: Record<EvalCategory, string> = {
   tokenization: '分词（tokenization）— 词元切分边界是否与金标准一致（该分的分、该合的合，句型/惯用成块）',
-  pronunciation: '注音（pronunciation）— 假名/罗马音/音标是否正确',
+  pronunciation: '注音（pronunciation）— 假名/罗马音/音标(IPA)/拼音/罗马字是否正确（按语言取对应字段）',
   termAccuracy: '词典形（term）— card.term 是否为正确的词典形/原型',
   meaningAccuracy: '语境义（meaning）— 是否为该语境下的意思而非词典义堆砌',
   grammarFunction: '语法功能（grammarFunction）— 是否说明该词在句中的角色',
@@ -74,7 +75,10 @@ const parseArgs = (argv: string[]) => {
 };
 
 const LRC_TIMESTAMP_REGEX = /^\s*\[(?<min>\d+):(?<sec>\d+)(?:[.:](?<ms>\d{1,3}))?\]\s*/;
-const LRC_METADATA_LINE_REGEX = /^\[[a-z]+:/;
+// `[ar:…]`-style tags and NetEase's JSON credit lines ({"t":0,"c":[{"tx":"作词: "}…]}) are metadata,
+// not lyrics. Without the second pattern those JSON blobs reach the analyzer as lyric lines and
+// get "analyzed" as gibberish, wasting a batch and polluting alignment.
+const LRC_METADATA_LINE_REGEX = /^(?:\[[a-z]+:|\{"t":)/i;
 
 /** Content lines of an LRC file, keeping each line's timestamp when it has one. */
 const parseLrcFile = async (filePath: string) => {
@@ -189,7 +193,7 @@ const main = async () => {
     lines,
     uiLanguage: 'zh-CN',
     modelId,
-    promptVersion: '3',
+    promptVersion: LYRICS_ANALYSIS_PROMPT_VERSION,
     schemaVersion: '2'
   });
   const cachePath = path.join(runDir, 'analysis.json');
@@ -248,26 +252,53 @@ const main = async () => {
   /**
    * The PDF's teaching units cut lines differently from any streaming lyrics source (e.g. the PDF
    * has 「だから たまに そう 惚れる」 where the LRC has 「だからたまに休憩しちゃうんです」), so exact text
-   * matching pairs almost nothing. Align by character overlap instead: each gold line takes the
-   * produced line with the highest normalized character-intersection ratio (≥0.5 to accept).
+   * matching pairs almost nothing. Align by overlap instead: each gold line takes the produced line
+   * with the highest overlap (≥ threshold to accept).
+   *
+   * The overlap metric is language-dependent. Character-set overlap works for CJK (lines share few
+   * characters, so an unrelated line scores near zero) but is useless for Latin script: any two
+   * English lines share most of the alphabet, so unrelated lines score >0.5 and the alignment
+   * happily pairs the wrong line. Latin lines therefore align on whole-word overlap, which is
+   * discriminative for English and still tolerates punctuation/contraction differences.
    */
   const normalize = (text: string) => text.replace(/[\s　()（）""]/g, '').replace(/は\(wa\)/g, 'は');
+  const LATIN_LINE = /^[\x20-\x7E\s]*$/;
+  const words = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/[’']/g, "'")
+      .split(/[^a-z0-9']+/)
+      .filter((word) => word.length > 0);
+
   const producedCandidates = analysis.lines.map((line) => ({
     line,
     norm: normalize(line.text),
-    chars: new Set(normalize(line.text))
+    chars: new Set(normalize(line.text)),
+    words: new Set(words(line.text))
   }));
 
   const alignGoldToProduced = (goldLine: GoldLine): { line: EvalLine; overlap: number } | undefined => {
+    const latinGold = LATIN_LINE.test(goldLine.text);
     const goldChars = new Set(normalize(goldLine.text));
+    const goldWords = new Set(words(goldLine.text));
     let best: { line: EvalLine; overlap: number } | undefined;
     for (const candidate of producedCandidates) {
-      let hits = 0;
-      for (const char of goldChars) if (candidate.chars.has(char)) hits += 1;
-      const overlap = hits / Math.max(1, goldChars.size);
+      let overlap: number;
+      if (latinGold) {
+        let hits = 0;
+        for (const word of goldWords) if (candidate.words.has(word)) hits += 1;
+        overlap = hits / Math.max(1, goldWords.size);
+      } else {
+        let hits = 0;
+        for (const char of goldChars) if (candidate.chars.has(char)) hits += 1;
+        overlap = hits / Math.max(1, goldChars.size);
+      }
       if (!best || overlap > best.overlap) best = { line: candidate.line, overlap };
     }
-    return best && best.overlap >= 0.5 ? best : undefined;
+    // Latin alignment demands most of the words to match: the word-overlap metric is
+    // discriminative enough that a lower threshold would admit paraphrase pairs.
+    const threshold = latinGold ? 0.6 : 0.5;
+    return best && best.overlap >= threshold ? best : undefined;
   };
 
   const verdicts: GraderVerdict[] = [];
@@ -289,10 +320,19 @@ const main = async () => {
         translation: goldLine.translation,
         tokens: goldLine.tokens.map((token) => ({
           text: token.text,
-          term: token.term ?? token.kana,
+          term: token.term ?? token.kana ?? token.ipa,
           meaning: token.meaning,
           grammarFunction: token.pos,
-          pronunciation: { kana: token.kana, romaji: token.romaji }
+          // Carry every pronunciation script the gold may carry: kana/romaji for Japanese, ipa
+          // for English, pinyin for Chinese, romanized for Korean. A Japanese-only view made the
+          // pronunciation dimension ungradable for every other language (always 0).
+          pronunciation: {
+            kana: token.kana,
+            romaji: token.romaji,
+            ipa: token.ipa,
+            pinyin: token.pinyin,
+            romanized: token.romanized
+          }
         }))
       };
       const producedView = {
@@ -446,16 +486,43 @@ const main = async () => {
       });
       const goldView = goldLine.tokens.map((token) => ({
         text: token.text,
-        term: token.term ?? token.kana,
+        term: token.term ?? token.kana ?? token.ipa,
         meaning: token.meaning,
         grammarFunction: token.pos,
-        pronunciation: [token.kana, token.romaji].filter(Boolean).join(' · ')
+        pronunciation: [token.kana, token.romaji, token.ipa, token.pinyin, token.romanized]
+          .filter(Boolean)
+          .join(' · ')
       }));
       return `<div class="line-block ${produced ? '' : 'unmatched'}"><h3>${escapeHtml(goldLine.text)} <span class="badge">${produced ? `对齐 ${overlapPct}%` : '未对齐'}</span></h3><div class="pair"><div class="col"><div class="coltitle">系统输出${produced ? ` (${escapeHtml(produced.text)}) · 翻译: ${escapeHtml(produced.translation ?? '—')}` : '（无匹配行）'}</div>${produced ? renderTokens(producedView, 'produced') : '<p class="muted">管线未输出与该教学单元对齐的行。</p>'}</div><div class="col"><div class="coltitle gold">金标准 · 翻译: ${escapeHtml(goldLine.translation ?? '—')}</div>${renderTokens(goldView, 'gold')}</div></div></div>`;
     })
     .join('\n');
 
-  const summaryCards = `<div class="cards"><div class="card"><div class="big">${overallMean}</div><div class="cap">综合分 /100（${verdicts.length}×${escapeHtml(args.graderModelId)} 平均）</div></div><div class="card">${EVAL_CATEGORIES.map((category) => `<div class="catrow"><span>${category}</span><b>${categoryMeans[category]}</b></div>`).join('')}</div><div class="card"><div class="big">${analysis.lines.length}</div><div class="cap">已析行 / 共 ${lines.length} 行</div></div></div>`;
+  // Coverage is scored separately from the LLM rubric: an annotation that silently stops before
+  // the line's last word still looks fluent to a grader reading the token list, so the missing
+  // word has to be counted mechanically.
+  const coverage = (() => {
+    let linesChecked = 0;
+    let linesWithGap = 0;
+    const gaps: Array<{ text: string; missing: string[] }> = [];
+    for (const line of analysis.lines) {
+      if (line.tokens.length === 0) continue;
+      linesChecked += 1;
+      const missing = findUncoveredLineWords(line.text, line.tokens as never);
+      if (missing.length === 0) continue;
+      linesWithGap += 1;
+      gaps.push({ text: line.text, missing });
+    }
+    return { linesChecked, linesWithGap, gaps };
+  })();
+
+  const summaryCards = `<div class="cards"><div class="card"><div class="big">${overallMean}</div><div class="cap">综合分 /100（${verdicts.length}×${escapeHtml(args.graderModelId)} 平均）</div></div><div class="card">${EVAL_CATEGORIES.map((category) => `<div class="catrow"><span>${category}</span><b>${categoryMeans[category]}</b></div>`).join('')}</div><div class="card"><div class="big">${analysis.lines.length}</div><div class="cap">已析行 / 共 ${lines.length} 行</div></div><div class="card"><div class="big">${coverage.linesWithGap}</div><div class="cap">覆盖不全的行 / 已析 ${coverage.linesChecked} 行</div></div></div>${
+    coverage.linesWithGap > 0
+      ? `<details class="coverage"><summary>覆盖不全明细（${coverage.linesWithGap} 行）</summary><ul>${coverage.gaps
+          .slice(0, 60)
+          .map((gap) => `<li>${escapeHtml(gap.text)} — 缺 ${escapeHtml(gap.missing.join('、'))}</li>`)
+          .join('')}</ul></details>`
+      : ''
+  }`;
 
   const telemetryNote = analysis.passes
     ? `<p class="muted">管线批次 ${analysis.passes.length} · 输出 tokens ${analysis.passes.reduce((sum, pass) => sum + (pass.outputTokens ?? 0), 0)} · 数据源 ${analysisSource}</p>`
@@ -473,6 +540,7 @@ table.tokens.gold th { color: #b98a2e; }
 .cards { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; } .card { border: 1px solid #d9d4c8; border-radius: 8px; padding: .8rem 1.2rem; min-width: 12rem; }
 .big { font-size: 2rem; font-weight: 700; } .cap { font-size: .72rem; color: #888; } .catrow { display: flex; justify-content: space-between; font-size: .78rem; gap: 1rem; }
 .muted { color: #888; font-size: .78rem; }
+.coverage { font-size: .78rem; margin: .4rem 0 1rem; } .coverage li { margin: .1rem 0; }
 </style></head><body><h1>歌词解析评测 — ${escapeHtml(analysis.songTitle)}</h1>${telemetryNote}${summaryCards}<h2>逐行对照</h2>${lineBlocks}</body></html>`;
 
   await fs.writeFile(path.join(runDir, 'report.html'), html, 'utf-8');

@@ -59,9 +59,14 @@ const JA_PROFILE: LyricsLanguageProfile = {
 const EN_PROFILE: LyricsLanguageProfile = {
   label: 'English',
   pronunciationRule:
-    "card.pronunciation.ipa = the IPA of the token (us variant). Contractions keep their apostrophe (don't → /doʊnt/).",
-  tokenizationRule:
-    "One token per content word; keep contractions and hyphenated compounds whole (don't, self-control). Auxiliaries attach to their verb only when they form one meaning unit (gonna), otherwise stand alone. Articles (a/the) may stand alone as tokens worth studying.",
+    'card.pronunciation.ipa = the token\'s IPA in the US variety only: use ɑ/oʊ/ɚ/ɝ and flap-free r-colored vowels, never the British-only ɒ/əʊ/ɜː (gonna → /ˈɡɑnə/, not /ˈɡɒnə/; forever → /fərˈɛvər/). Contractions keep their apostrophe (don\'t → /doʊnt/). For a multi-word token give the IPA of the whole phrase.',
+  tokenizationRule: [
+    'One token per word. Default boundary = every space-separated word is its own token; only the rules below may join words.',
+    'Never join: determiner + noun (the pain, a long list), adjective + noun, subject + predicate (we are reckless), preposition + pronoun (for me), or a word with its conjunction/adverb neighbour (you too).',
+    'Join ONLY when the joined string is a lexical unit whose meaning is not derivable from its parts: phrasal verbs (go down, turn up, settle down, hold back), inseparable idioms (out of the blue, nothing but, came true), greetings (nice to meet you), and fused spellings (gonna, wanna, gotta).',
+    'A phrasal verb stays whole across its particle: turn up is ONE token, never "to turn" + "up", and never "up out of the blue" — the particle belongs to its verb, the idiom starts fresh.',
+    'Keep contractions and hyphenated compounds whole (don\'t, ex-lovers).'
+  ].join(' '),
   posVocabulary: [
     'noun',
     'verb',
@@ -72,9 +77,16 @@ const EN_PROFILE: LyricsLanguageProfile = {
     'conjunction',
     'auxiliary',
     'interjection',
-    'article'
+    'article',
+    'phrase'
   ],
-  grammarExamples: ['be + past participle → passive voice', 'to + verb → infinitive of purpose']
+  grammarExamples: [
+    'be + past participle → passive voice',
+    'to + verb → infinitive of purpose',
+    'card.term for ANY verb/auxiliary form is the dictionary form: finite forms → base (was/were/been/is/are → be; could → can; gave → give), and every negative contraction → its expanded base (didn\'t → do not, isn\'t → be not, ain\'t → be not, couldn\'t → can not). Never echo the inflected or contracted surface as card.term.',
+    'phrasal verb → the phrase itself as card.term (go down → go down)',
+    'grammarFunction → start with the POS label itself (noun/verb/adjective/adverb/pronoun/preposition/conjunction/auxiliary/interjection/article/phrase), then the role (e.g. "verb, past tense predicate")'
+  ]
 };
 
 const KO_PROFILE: LyricsLanguageProfile = {
@@ -229,7 +241,7 @@ export const buildLanguageDirective = (lines: Array<{ text: string }>): string =
     return [
       `${profile.label} lines (${share} in this batch):`,
       `- Pronunciation: ${profile.pronunciationRule}`,
-      `- Tokenization: ${profile.tokenizationRule}.${posLine}${grammarLine}`
+      `- Tokenization: ${profile.tokenizationRule.replace(/\.\s*$/, '')}.${posLine}${grammarLine}`
     ].join('\n');
   });
 
