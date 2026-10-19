@@ -164,7 +164,7 @@ const LyricsContainer = (props: Props) => {
           source={source}
           copyright={lyrics.lyrics.copyright}
           link={link}
-          className="items-start! text-left!"
+          className="items-start! text-left! mt-4!"
         />
       );
     }
@@ -180,12 +180,18 @@ const LyricsContainer = (props: Props) => {
         <>
           {isPanelOpen ? (
             // With the analysis panel open the lyrics column no longer sits beside the cover, so
-            // center the block in the remaining space. The lines themselves stay left-aligned.
-            <div className="mx-auto w-full max-w-[52rem]">{lyricsComponents}</div>
+            // center the block in the remaining space. The lines themselves stay left-aligned, and
+            // the source line lives inside the same wrapper so it aligns with the lyric text.
+            <div className="mx-auto w-full max-w-[52rem]">
+              {lyricsComponents}
+              {lyricsSource}
+            </div>
           ) : (
-            lyricsComponents
+            <>
+              {lyricsComponents}
+              {lyricsSource}
+            </>
           )}
-          {lyricsSource}
         </>
       )}
       {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
