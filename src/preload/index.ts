@@ -402,40 +402,9 @@ const settings = {
   saveUserSettings: (settings: Partial<UserSettings>): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', settings),
 
-  updateDiscordRpcState: (enableDiscordRpc: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      enableDiscordRPC: enableDiscordRpc
-    }),
-  updateSongScrobblingToLastFMState: (enableScrobbling: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendSongScrobblingDataToLastFM: enableScrobbling
-    }),
-  updateSongFavoritesToLastFMState: (enableFavorites: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendSongFavoritesDataToLastFM: enableFavorites
-    }),
-  updateNowPlayingSongDataToLastFMState: (enableNowPlaying: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendNowPlayingSongDataToLastFM: enableNowPlaying
-    }),
-  updateSaveLyricsInLrcFilesForSupportedSongs: (enableSave: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      saveLyricsInLrcFilesForSupportedSongs: enableSave
-    }),
-  updateCustomLrcFilesSaveLocation: (location: string): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      customLrcFilesSaveLocation: location
-    }),
-  updateOpenWindowAsHiddenOnSystemStart: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      openWindowAsHiddenOnSystemStart: enable
-    }),
-  updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
+  // Separate channel on purpose: it also toggles the tray menu build in the main process.
   updateTraySingleClickBehavior: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/updateTraySingleClickBehavior', enable),
-  updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { saveVerboseLogs: enable })
+    ipcRenderer.invoke('app/updateTraySingleClickBehavior', enable)
 };
 
 // $ FOLDER DATA
