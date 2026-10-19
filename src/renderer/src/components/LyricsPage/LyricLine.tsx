@@ -4,8 +4,8 @@ import { SYNCED_LYRICS_REGEX } from '@common/isLyricsSynced';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import roundTo from '../../../../common/roundTo';
 import type { LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
+import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import LyricsAnalysisLineContent from '../FullScreenPlayer/analysis/LyricsAnalysisLineContent';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
@@ -26,7 +26,6 @@ interface LyricProp {
   palette?: NodeVibrantPalette;
   onTokenClick?: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 }
-
 
 // const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 
@@ -163,11 +162,14 @@ const LyricLine = (props: LyricProp) => {
   }, [isInRange, convertedLyric]);
 
   // The original lyric is always the primary (large) line; the translation renders above it in a
-  // smaller size. When no translation exists, romanization takes the secondary slot instead.
+  // smaller size, and the romanization renders below it (same styling as the translation) —
+  // NetEase songs supply both, so the romanization no longer needs to fall back to the
+  // translation's slot. Once the line has been tokenized, the per-token romanizations under each
+  // token replace the whole-line romanization, so it is dropped for analysed lines.
   const lyricStringLinePrimary = lyricString;
-  let lyricStringLineSecondary;
-  if (translatedLyricString) lyricStringLineSecondary = translatedLyricString;
-  else lyricStringLineSecondary = convertedLyricString;
+  const lyricStringLineSecondary = translatedLyricString;
+  const isTokenizedLine = Boolean(analysis && onTokenClick && typeof lyric === 'string');
+  const lyricStringLineTertiary = isTokenizedLine ? undefined : convertedLyricString;
 
   return (
     <div
@@ -244,6 +246,13 @@ const LyricLine = (props: LyricProp) => {
           lyricStringLinePrimary
         )}
       </div>
+      {lyricStringLineTertiary && (
+        <div
+          className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
+        >
+          {lyricStringLineTertiary}
+        </div>
+      )}
       {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );

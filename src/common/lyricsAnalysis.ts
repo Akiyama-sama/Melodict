@@ -9,7 +9,9 @@ export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
 // Bumped to '4' requiring per-token surface text and whole-line word coverage: cache keys must
 // change because the prompt now asks for a field some models never emitted, and coverage drives
 // re-ask behavior, so older cached lines cannot be compared with newer ones.
-export const LYRICS_ANALYSIS_PROMPT_VERSION = '4';
+// Bumped to '5' adding the per-token pinyin field: cached artifacts from v4 predate the field and
+// render without per-token pinyin until re-analyzed.
+export const LYRICS_ANALYSIS_PROMPT_VERSION = '5';
 export const LYRICS_ANALYSIS_DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
 export type LyricsAnalysisLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'unknown';
@@ -23,6 +25,8 @@ export interface LyricsAnalysisPronunciation {
   uk?: string;
   hangul?: string;
   romanized?: string;
+  /** Word-level pinyin with tone marks (Chinese tokens). */
+  pinyin?: string;
 }
 
 export interface LyricsAnalysisCard {
@@ -157,9 +161,9 @@ export interface LyricsAnalysisProviderTestResult {
 }
 
 /**
- * Schema attached to `Output.array` in the worker. It is intentionally lenient: every token field is
- * optional, so a semantically broken token survives transport and reaches app-side validation,
- * where we know *why* it failed. A strict schema here would make the SDK silently drop the whole
+ * Schema attached to `Output.array` in the worker. It is intentionally lenient: every token field
+ * is optional, so a semantically broken token survives transport and reaches app-side validation,
+ * where we know _why_ it failed. A strict schema here would make the SDK silently drop the whole
  * element and leave us with only "line missing".
  */
 export const lyricsAnalysisTransportSchema = z.object({
@@ -238,9 +242,9 @@ const PARENTHETICAL_PAIRS: Array<[string, string]> = [
 
 /**
  * Marks characters inside bracketed asides. Backing vocals, translations and stage directions
- * (「パッと花火が（パッと花火が）」, 「夜の匂いに (I'll spend all thirty nights)」) are echoes: models
- * routinely leave them untokenized and that is a defensible reading, so they must not count as
- * missing content when coverage is measured.
+ * (「パッと花火が（パッと花火が）」, 「夜の匂いに (I'll spend all thirty nights)」) are echoes: models routinely leave
+ * them untokenized and that is a defensible reading, so they must not count as missing content when
+ * coverage is measured.
  */
 const markParenthetical = (text: string): boolean[] => {
   const mask = new Array<boolean>(text.length).fill(false);
@@ -263,8 +267,8 @@ const markParenthetical = (text: string): boolean[] => {
 };
 
 /**
- * The word atoms a line's tokens must cover. A token covers an atom when their spans intersect,
- * so a merged phrase token ("settled down") covers both of its words. Punctuation and parenthetical
+ * The word atoms a line's tokens must cover. A token covers an atom when their spans intersect, so
+ * a merged phrase token ("settled down") covers both of its words. Punctuation and parenthetical
  * echoes are not atoms. Used to detect lines the model annotated only partially — the failure mode
  * is invisible otherwise, because a line whose last word was never emitted still validates cleanly
  * and reports status "ready".
@@ -366,7 +370,11 @@ export const validateAndNormalizeLineAnalysis = (input: {
         if (text.indexOf(rawTokenText, first + 1) >= 0) {
           // Ambiguous text: pick the occurrence minimizing distance to the claimed offsets.
           let bestDistance = Number.POSITIVE_INFINITY;
-          for (let at = text.indexOf(rawTokenText); at >= 0; at = text.indexOf(rawTokenText, at + 1)) {
+          for (
+            let at = text.indexOf(rawTokenText);
+            at >= 0;
+            at = text.indexOf(rawTokenText, at + 1)
+          ) {
             const distance = Math.abs(at - claimedStart);
             if (distance < bestDistance) {
               bestDistance = distance;
@@ -390,10 +398,18 @@ export const validateAndNormalizeLineAnalysis = (input: {
     const WORD_CHARS = /[A-Za-z0-9'’-]/;
     let fixedStart = startChar;
     let fixedEnd = endChar;
-    while (fixedStart > 0 && WORD_CHARS.test(text[fixedStart - 1] ?? '') && WORD_CHARS.test(text[fixedStart] ?? '')) {
+    while (
+      fixedStart > 0 &&
+      WORD_CHARS.test(text[fixedStart - 1] ?? '') &&
+      WORD_CHARS.test(text[fixedStart] ?? '')
+    ) {
       fixedStart -= 1;
     }
-    while (fixedEnd < text.length && WORD_CHARS.test(text[fixedEnd] ?? '') && WORD_CHARS.test(text[fixedEnd - 1] ?? '')) {
+    while (
+      fixedEnd < text.length &&
+      WORD_CHARS.test(text[fixedEnd] ?? '') &&
+      WORD_CHARS.test(text[fixedEnd - 1] ?? '')
+    ) {
       fixedEnd += 1;
     }
 
@@ -426,9 +442,7 @@ export const validateAndNormalizeLineAnalysis = (input: {
 
     const rawLanguage = asTrimmedString(rawToken?.language) as LyricsAnalysisLanguage | undefined;
     const language =
-      rawLanguage && LANGUAGES.includes(rawLanguage)
-        ? rawLanguage
-        : inferTokenLanguage(tokenText);
+      rawLanguage && LANGUAGES.includes(rawLanguage) ? rawLanguage : inferTokenLanguage(tokenText);
 
     const card = rawToken?.card;
     // Models often emit pronunciation as a plain string ("きみ / kimi") instead of the structured
@@ -448,6 +462,7 @@ export const validateAndNormalizeLineAnalysis = (input: {
                 uk?: string;
                 hangul?: string;
                 romanized?: string;
+                pinyin?: string;
               }
             | undefined);
 
@@ -467,12 +482,11 @@ export const validateAndNormalizeLineAnalysis = (input: {
           us: asTrimmedString(pronunciation?.us),
           uk: asTrimmedString(pronunciation?.uk),
           hangul: asTrimmedString(pronunciation?.hangul),
-          romanized: asTrimmedString(pronunciation?.romanized)
+          romanized: asTrimmedString(pronunciation?.romanized),
+          pinyin: asTrimmedString(pronunciation?.pinyin)
         },
-        meaning:
-          asTrimmedString(card?.meaning) ?? getFallbackMeaning(text, tokenText),
-        grammarFunction:
-          asTrimmedString(card?.grammarFunction) ?? getFallbackGrammarFunction()
+        meaning: asTrimmedString(card?.meaning) ?? getFallbackMeaning(text, tokenText),
+        grammarFunction: asTrimmedString(card?.grammarFunction) ?? getFallbackGrammarFunction()
       }
     });
   }
@@ -493,7 +507,8 @@ export const validateAndNormalizeLineAnalysis = (input: {
       text,
       translation: asTrimmedString(draft.translation),
       tokens: validated,
-      status: validated.length < rawTokens.length || uncoveredWords.length > 0 ? 'degraded' : 'ready'
+      status:
+        validated.length < rawTokens.length || uncoveredWords.length > 0 ? 'degraded' : 'ready'
     },
     // Telemetry input: how many raw tokens validation rejected for this line.
     droppedTokenCount: rawTokens.length - validated.length,
@@ -532,7 +547,11 @@ export const getLineTokenCoverage = (text: string, tokens: LyricsAnalysisToken[]
 
   const isCovered = new Set<number>();
   for (const token of tokens) {
-    for (let index = Math.max(0, token.startChar); index < Math.min(text.length, token.endChar); index += 1)
+    for (
+      let index = Math.max(0, token.startChar);
+      index < Math.min(text.length, token.endChar);
+      index += 1
+    )
       isCovered.add(index);
   }
 
