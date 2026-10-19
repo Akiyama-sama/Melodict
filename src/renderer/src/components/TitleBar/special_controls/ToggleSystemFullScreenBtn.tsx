@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
+import { TITLEBAR_ICON_BTN_BASE } from '../../FullScreenPlayer/uiToggles';
 
 /**
  * Toggles the OS-level fullscreen of the whole app window (the entire desktop workspace). The icon
@@ -35,7 +36,7 @@ const ToggleSystemFullScreenBtn = () => {
 
   return (
     <Button
-      className={`system-full-screen-btn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-font-color-highlight !mr-1 flex cursor-pointer items-center justify-center rounded-md !border-0 bg-transparent !px-3 !py-1 text-center text-xl outline-offset-1 transition-[color,background] ease-in-out focus-visible:!outline dark:bg-transparent ${
+      className={`system-full-screen-btn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-font-color-highlight !mr-1 ${TITLEBAR_ICON_BTN_BASE}${
         isWindowFullScreen && 'text-font-color-highlight!'
       }`}
       clickHandler={() => window.api.windowControls.toggleFullScreenApp()}

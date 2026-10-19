@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
-import { TOGGLE_ACTIVE_BAR } from '../../FullScreenPlayer/uiToggles';
+import { TITLEBAR_ICON_BTN_BASE, TOGGLE_ACTIVE_BAR } from '../../FullScreenPlayer/uiToggles';
 
 type Props = { isOpen: boolean; onToggle: () => void };
 
@@ -15,7 +15,7 @@ const ToggleLyricsAnalysisPanelBtn = ({ isOpen, onToggle }: Props) => {
 
   return (
     <Button
-      className={`close-lyrics-analysis-panel-btn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-font-color-highlight !mr-1 relative flex cursor-pointer items-center justify-center rounded-md !border-0 bg-transparent !px-3 !py-1 text-center text-xl outline-offset-1 transition-[color,background] ease-in-out focus-visible:!outline dark:bg-transparent after:absolute after:bottom-0 after:left-1/2 after:h-1 after:w-1/2 after:-translate-x-1/2 after:rounded-full after:bg-dark-background-color-3 after:opacity-0 after:content-[''] after:transition-opacity ${
+      className={`close-lyrics-analysis-panel-btn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-font-color-highlight !mr-1 relative ${TITLEBAR_ICON_BTN_BASE}after:absolute after:bottom-0 after:left-1/2 after:h-1 after:w-1/2 after:-translate-x-1/2 after:rounded-full after:bg-dark-background-color-3 after:opacity-0 after:content-[''] after:transition-opacity ${
         isOpen && TOGGLE_ACTIVE_BAR
       }`}
       clickHandler={onToggle}
