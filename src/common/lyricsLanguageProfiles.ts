@@ -8,8 +8,16 @@ import type { LyricsAnalysisLanguage } from './lyricsAnalysis';
  * the lyric lines and the matching profiles' guidance is injected into the prompt. A song mixing
  * Japanese and English lines gets both profiles — generalization is per language, not per song.
  *
- * Adding a language = adding one entry to LYRICS_LANGUAGE_PROFILES plus one script test in
- * SCRIPT_TESTS. Nothing else in the pipeline needs touching.
+ * Adding a language touches, in practice:
+ *  - LYRICS_LANGUAGE_PROFILES + one script test in SCRIPT_TESTS (this file);
+ *  - the LyricsAnalysisLanguage union, the LANGUAGES list, and inferTokenLanguage's coverage in
+ *    lyricsAnalysis.ts (a new script family also needs a SCRIPT_TESTS/FAMILY_TO_LANGUAGE entry
+ *    here — inferTokenLanguage reuses them);
+ *  - the SYSTEM_PROMPT_TEMPLATE prose in main/lyricsAnalysis/analysisPrompts.ts, which hardcodes
+ *    the pronunciation field names per language ("kana/romaji for Japanese, ipa/us/uk for
+ *    English, …") — guard test src/common/lyricsAnalysisPromptGuard.test.ts fails if a new
+ *    profile's pronunciation fields never appear there;
+ *  - tests pinning the directive text.
  */
 
 export interface LyricsLanguageProfile {
