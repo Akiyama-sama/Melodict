@@ -1,29 +1,25 @@
-import { formatHsl, manageBrightness, manageSaturation } from '../../../other/themePalette';
+import { deriveThemeColors } from '../../../other/themePalette';
 
 type Props = { palette: PaletteData };
 
 const DynamicThemeSettings = (props: Props) => {
   const { palette } = props;
 
-  const highLightVibrant = formatHsl(manageBrightness(palette.LightVibrant?.hsl || [0, 0, 0]));
-  const mediumLightVibrant = formatHsl(
-    manageBrightness(palette.LightVibrant?.hsl || [0, 0, 0], { min: 0.75 })
-  );
-  const darkLightVibrant = formatHsl(
-    manageSaturation(
-      manageBrightness(palette.LightVibrant?.hsl || [0, 0, 0], {
-        max: 0.2,
-        min: 0.2
-      }),
-      { max: 0.05, min: 0.05 }
-    )
-  );
-  const highVibrant = formatHsl(
-    manageBrightness(palette.Vibrant?.hsl || [0, 0, 0], { min: 0.7 })
-  );
+  const fallbackSwatch: NodeVibrantPaletteSwatch = { hsl: [0, 0, 0], hex: '', population: 0 };
 
-  const lightVibrant = formatHsl(palette.LightVibrant?.hsl || [0, 0, 0]);
-  const darkVibrant = formatHsl(palette.DarkVibrant?.hsl || [0, 0, 0]);
+  const {
+    highLightVibrant,
+    mediumLightVibrant,
+    darkLightVibrant,
+    highVibrant,
+    lightVibrant,
+    darkVibrant
+  } = deriveThemeColors({
+    ...palette,
+    LightVibrant: { ...fallbackSwatch, ...palette.LightVibrant, hsl: palette.LightVibrant?.hsl || [0, 0, 0] },
+    Vibrant: { ...fallbackSwatch, ...palette.Vibrant, hsl: palette.Vibrant?.hsl || [0, 0, 0] },
+    DarkVibrant: { ...fallbackSwatch, ...palette.DarkVibrant, hsl: palette.DarkVibrant?.hsl || [0, 0, 0] }
+  });
 
   return (
     <div className="mt-8 flex flex-col gap-6">

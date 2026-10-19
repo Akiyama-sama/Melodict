@@ -3,7 +3,7 @@ import { useStore } from '@tanstack/react-store';
 import { useCallback, useEffect } from 'react';
 
 import { resolveNeteaseSongPalette } from '../other/neteasePlayback';
-import { formatHsl, manageBrightness, manageSaturation } from '../other/themePalette';
+import { deriveThemeColors } from '../other/themePalette';
 import { settingsQuery } from '../queries/settings';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -62,40 +62,19 @@ export interface UseDynamicThemeReturn {
  */
 export function useDynamicTheme(): UseDynamicThemeReturn {
   const setDynamicThemesFromSongPalette = useCallback((palette?: NodeVibrantPalette) => {
-    const generateColor = formatHsl;
-
     const root = document.getElementById('root');
     if (root) {
       if (palette) {
-        if (
-          palette?.LightVibrant &&
-          palette?.DarkVibrant &&
-          palette?.LightMuted &&
-          palette?.DarkMuted &&
-          palette?.Vibrant &&
-          palette?.Muted
-        ) {
-          const highLightVibrant = generateColor(manageBrightness(palette.LightVibrant.hsl));
-          const mediumLightVibrant = generateColor(
-            manageBrightness(palette.LightVibrant.hsl, { min: 0.75 })
-          );
-          const darkLightVibrant = generateColor(
-            manageSaturation(
-              manageBrightness(palette.LightVibrant.hsl, {
-                max: 0.2,
-                min: 0.2
-              }),
-              { max: 0.05, min: 0.05 }
-            )
-          );
-          const highVibrant = generateColor(manageBrightness(palette.Vibrant.hsl, { min: 0.7 }));
-
-          const lightVibrant = generateColor(palette.LightVibrant.hsl);
-          const darkVibrant = generateColor(palette.DarkVibrant.hsl);
-          // const lightMuted = generateColor(palette.LightMuted.hsl);
-          // const darkMuted = generateColor(palette.DarkMuted.hsl);
-          // const vibrant = generateColor(palette.Vibrant.hsl);
-          // const muted = generateColor(palette.Muted.hsl);
+        const { LightVibrant, DarkVibrant, LightMuted, DarkMuted, Vibrant, Muted } = palette;
+        if (LightVibrant && DarkVibrant && LightMuted && DarkMuted && Vibrant && Muted) {
+          const {
+            highLightVibrant,
+            mediumLightVibrant,
+            darkLightVibrant,
+            highVibrant,
+            lightVibrant,
+            darkVibrant
+          } = deriveThemeColors({ LightVibrant, Vibrant, DarkVibrant });
 
           root.style.setProperty('--side-bar-background', highLightVibrant, 'important');
           root.style.setProperty('--background-color-2', highLightVibrant, 'important');
