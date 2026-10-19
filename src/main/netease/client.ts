@@ -39,7 +39,7 @@ export class NeteaseApiError extends Error {
   }
 }
 
-export const NETWORK_ERROR_MESSAGE = 'NETEASE_NETWORK_ERROR';
+const NETWORK_ERROR_MESSAGE = 'NETEASE_NETWORK_ERROR';
 
 type NeteaseCallOptions = {
   /** Cookie string (joined `k=v; ...`), overriding the default session cookie. */

@@ -414,7 +414,6 @@ declare global {
   type NeteaseSearchResult = import('@common/netease').NeteaseSearchResult;
   type NeteaseSessionProfile = import('@common/netease').NeteaseSessionProfile;
   type NeteaseLoginQrState = import('@common/netease').NeteaseLoginQrState;
-  type NeteaseQrLoginStatus = import('@common/netease').NeteaseQrLoginStatus;
   type NeteaseQrPollResult = import('@main/netease/auth').NeteaseQrPollResult;
   type NeteaseApiSearchResult = {
     key: string;

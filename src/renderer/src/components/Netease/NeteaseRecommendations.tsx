@@ -56,8 +56,8 @@ const NeteaseRecommendations = (props: Props) => {
             }}
             className="songs-container grid grid-rows-2 gap-2 pr-2"
           >
-            {visibleRecommendations.map((song, index) => (
-              <NeteaseSongCard index={index} key={song.songId} summary={song} />
+            {visibleRecommendations.map((song) => (
+              <NeteaseSongCard key={song.songId} summary={song} />
             ))}
           </div>
         </SecondaryContainer>

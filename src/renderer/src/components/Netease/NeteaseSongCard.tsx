@@ -12,7 +12,6 @@ import NavLink from '../NavLink';
 import { useStore } from '@tanstack/react-store';
 
 interface NeteaseSongCardProp {
-  index: number;
   summary: NeteaseSongSummary;
   className?: string;
 }

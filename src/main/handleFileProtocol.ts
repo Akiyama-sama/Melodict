@@ -4,7 +4,7 @@ import { pathToFileURL } from 'url';
 import { net } from 'electron';
 import mime from 'mime';
 
-import { tryGetNeteaseIdFromPath, type NeteaseQualityTypes } from '../common/netease';
+import { getNeteaseQualityFromPath, tryGetNeteaseIdFromPath } from '../common/netease';
 import logger from './logger';
 import { getNeteaseStream } from './netease/catalog';
 
@@ -122,9 +122,7 @@ const handleNeteaseStreamRoute = async (req: GlobalRequest, url: URL) => {
     return new Response('NetEase song route malformed', { status: 400 });
   }
 
-  const levelParam = url.searchParams.get('level');
-  const quality: NeteaseQualityTypes =
-    levelParam === 'exhigh' || levelParam === 'lossless' ? levelParam : 'standard';
+  const quality = getNeteaseQualityFromPath(url.href);
 
   let streamInfo;
   try {

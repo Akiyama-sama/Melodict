@@ -115,13 +115,6 @@ export interface NeteaseSearchResult {
   playlists: NeteasePlaylistSummary[];
 }
 
-export const createEmptyNeteaseSearchResult = (): NeteaseSearchResult => ({
-  songs: [],
-  albums: [],
-  artists: [],
-  playlists: []
-});
-
 export interface NeteaseSessionProfile {
   userId: number;
   nickname: string;
@@ -130,9 +123,3 @@ export interface NeteaseSessionProfile {
 }
 
 export type NeteaseLoginQrState = 'waiting' | 'scanned' | 'confirmed' | 'expired' | 'error';
-
-export interface NeteaseQrLoginStatus {
-  state: NeteaseLoginQrState;
-  qrImgUrl?: string;
-  profile?: NeteaseSessionProfile;
-}
