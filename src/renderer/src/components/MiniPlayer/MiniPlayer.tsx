@@ -1,3 +1,4 @@
+import { isNeteaseSongId } from '@common/netease';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -38,6 +39,10 @@ export default function MiniPlayer(props: MiniPlayerProps) {
   const { t } = useTranslation();
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
+
+  // NetEase songs are "unknown source" for the local library, but their hearts work through the
+  // NetEase API; only genuinely unknown sources (dropped files, random ids) disable the button.
+  const isLikeSupported = currentSongData.isKnownSource || isNeteaseSongId(currentSongData.songId);
 
   const [isLyricsVisible, setIsLyricsVisible] = useState(false);
 
@@ -101,16 +106,14 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             }`}
             iconClassName={`text-xl! ${
               isAFavorite
-                ? 'meterial-icons-round text-dark-background-color-3!'
+                ? 'material-icons-round text-dark-background-color-3!'
                 : 'material-icons-round-outlined'
             }`}
-            isDisabled={!currentSongData.isKnownSource}
+            isDisabled={!isLikeSupported}
             tooltipLabel={
-              currentSongData.isKnownSource
-                ? t('player.likeDislike')
-                : t('player.likeDislikeDisabled')
+              isLikeSupported ? t('player.likeDislike') : t('player.likeDislikeDisabled')
             }
-            clickHandler={() => currentSongData.isKnownSource && toggleIsFavorite(!isAFavorite)}
+            clickHandler={() => isLikeSupported && toggleIsFavorite(!isAFavorite)}
             iconName="favorite"
             removeFocusOnClick
           />

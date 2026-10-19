@@ -32,18 +32,17 @@ import { useQueueManagement } from './hooks/useQueueManagement';
 import { useUpNextPopup } from './hooks/useUpNextPopup';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { useWindowManagement } from './hooks/useWindowManagement';
+import { registerNeteaseLikeNotifier } from './other/neteaseLikes';
 import { initializeQueue } from './other/queueSingleton';
 
 // ? PROMPTS
 const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayableErrorPrompt'));
 
-import NotificationPanel from './components/NotificationPanel/NotificationPanel';
-
-// ? SCREENS
-
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Outlet } from '@tanstack/react-router';
+// ? SCREENS
 
+import NotificationPanel from './components/NotificationPanel/NotificationPanel';
 // ? UTILS
 import { dispatch, store } from './store/store';
 
@@ -97,6 +96,9 @@ export default function App() {
   // ? INITIALIZE NOTIFICATIONS
   // Notifications hook handles adding/updating notifications and IPC messages from main
   const { addNewNotifications, updateNotifications } = useNotifications();
+  // The NetEase likes module raises like/unlike toasts from non-React code paths (the shared
+  // favorite toggle); hand it the panel's add function once it exists.
+  registerNeteaseLikeNotifier((notifications) => addNewNotifications([notifications]));
 
   // ? INITIALIZE DYNAMIC THEME
   // Dynamic theme hook handles theme generation from song palettes and background images
