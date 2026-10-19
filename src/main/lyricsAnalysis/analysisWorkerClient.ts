@@ -162,12 +162,3 @@ export const testLyricsAnalysisProviderInWorker = (config: LyricsAnalysisProvide
       reject(error);
     }
   });
-
-export const cancelLyricsAnalysisRequest = (requestId: string) => {
-  worker?.postMessage({ type: 'cancel', requestId });
-};
-
-export const disposeLyricsAnalysisWorker = () => {
-  worker?.kill();
-  worker = undefined;
-};

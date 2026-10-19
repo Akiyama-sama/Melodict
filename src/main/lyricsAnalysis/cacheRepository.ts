@@ -47,31 +47,9 @@ export const buildLyricsAnalysisFingerprint = (input: {
 const getArtifactPath = (fingerprint: string) =>
   path.join(getLyricsAnalysisCacheDir(), `${fingerprint}.json`);
 
-export const readLyricsAnalysisCache = async (
-  fingerprint: string
-): Promise<LyricsAnalysisCacheArtifact | undefined> => {
-  try {
-    const raw = await fs.readFile(getArtifactPath(fingerprint), 'utf-8');
-    const artifact = JSON.parse(raw) as LyricsAnalysisCacheArtifact;
-
-    if (
-      artifact?.fingerprint !== fingerprint ||
-      !Array.isArray(artifact.lines) ||
-      artifact.lines.length === 0
-    )
-      return undefined;
-
-    return artifact;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      logger.warn('Failed to read the lyrics analysis cache entry.', { error, fingerprint });
-    return undefined;
-  }
-};
-
 /**
- * Like `readLyricsAnalysisCache` but tolerates an artifact with zero lines — a run that crashed
- * before its first incremental flush. Partial artifacts still matter: whatever lines they hold can
+ * Reads the song-level artifact, tolerating an entry with zero lines — a run that crashed before
+ * its first incremental flush. Partial artifacts still matter: whatever lines they hold can
  * hydrate the UI instantly and cut the next run's LLM workload.
  */
 export const readLyricsAnalysisPartialCache = async (

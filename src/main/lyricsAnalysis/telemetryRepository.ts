@@ -3,7 +3,6 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import {
-  LYRICS_ANALYSIS_TELEMETRY_VERSION,
   getTelemetryShardKey,
   lyricsAnalysisTelemetryEventSchema,
   type LyricsAnalysisTelemetryEvent
@@ -74,45 +73,3 @@ export const pruneLyricsAnalysisTelemetry = async (now = Date.now()): Promise<nu
     return 0;
   }
 };
-
-export const readLyricsAnalysisTelemetryShard = async (
-  shardKey: string
-): Promise<LyricsAnalysisTelemetryEvent[]> => {
-  try {
-    const raw = await fs.readFile(getShardPath(shardKey), 'utf-8');
-    const events: LyricsAnalysisTelemetryEvent[] = [];
-
-    for (const line of raw.split('\n')) {
-      const trimmed = line.trim();
-      if (trimmed.length === 0) continue;
-
-      try {
-        events.push(lyricsAnalysisTelemetryEventSchema.parse(JSON.parse(trimmed)));
-      } catch {
-        // A torn tail line (crash mid-write) must not invalidate the rest of the shard.
-      }
-    }
-
-    return events;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
-    logger.warn('Failed to read a lyrics-analysis telemetry shard.', { error });
-    return [];
-  }
-};
-
-export const listLyricsAnalysisTelemetryShards = async (): Promise<string[]> => {
-  try {
-    const entries = await fs.readdir(getLyricsAnalysisTelemetryDir());
-    return entries
-      .filter((entry) => entry.endsWith('.jsonl'))
-      .map((entry) => entry.replace(/\.jsonl$/, ''))
-      .sort();
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
-    logger.warn('Failed to list lyrics-analysis telemetry shards.', { error });
-    return [];
-  }
-};
-
-export const telemetryVersion = LYRICS_ANALYSIS_TELEMETRY_VERSION;
