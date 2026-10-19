@@ -10,7 +10,7 @@ type Props = { isOpen: boolean; onToggle: () => void };
  * open the icon lights up with the same active treatment the bottom control bar uses for toggled
  * buttons (icon colour + a short bar under the button).
  */
-const CloseLyricsAnalysisPanelBtn = ({ isOpen, onToggle }: Props) => {
+const ToggleLyricsAnalysisPanelBtn = ({ isOpen, onToggle }: Props) => {
   const { t } = useTranslation();
 
   return (
@@ -26,4 +26,4 @@ const CloseLyricsAnalysisPanelBtn = ({ isOpen, onToggle }: Props) => {
   );
 };
 
-export default CloseLyricsAnalysisPanelBtn;
+export default ToggleLyricsAnalysisPanelBtn;

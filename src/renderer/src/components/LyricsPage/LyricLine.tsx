@@ -27,8 +27,6 @@ interface LyricProp {
   onTokenClick?: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 }
 
-// const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
-
 const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
   detail: 'scrollingUsingScrollIntoView'
 });
@@ -42,8 +40,6 @@ const getLyricText = (lyrics: string) => {
 };
 
 const LyricLine = (props: LyricProp) => {
-  // const preferences = useStore(store, (state) => state.localStorage.preferences);
-
   const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
   const [isInRange, setIsInRange] = useState(false);
   const { t } = useTranslation();

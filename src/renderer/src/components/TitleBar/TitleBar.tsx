@@ -12,7 +12,7 @@ import NetworkIndicator from './indicators/NetworkIndicator';
 import NewUpdateIndicator from './indicators/NewUpdateIndicator';
 import NavigationControlsContainer from './NavigationControlsContainer';
 import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
-import CloseLyricsAnalysisPanelBtn from './special_controls/CloseLyricsAnalysisPanelBtn';
+import ToggleLyricsAnalysisPanelBtn from './special_controls/ToggleLyricsAnalysisPanelBtn';
 import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
 import ToggleSystemFullScreenBtn from './special_controls/ToggleSystemFullScreenBtn';
 import WindowControlsContainer from './WindowControlsContainer';
@@ -87,7 +87,7 @@ const TitleBar = memo((props: Props) => {
             {!isFullScreenPlayer && window.api.properties.isInDevelopment && <ChangeThemeBtn />}
             {isFullScreenPlayer && (
               <>
-                <CloseLyricsAnalysisPanelBtn
+                <ToggleLyricsAnalysisPanelBtn
                   isOpen={props.isLyricsAnalysisPanelOpen ?? false}
                   onToggle={props.onToggleLyricsAnalysisPanel ?? (() => {})}
                 />

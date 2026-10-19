@@ -13,12 +13,9 @@ import LyricsContainer from './containers/LyricsContainer';
 import SongControlContainer from './containers/SongControlContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
 
-// type Props = {};
-
 const isArtistBackgroundsEnabled = false;
 
 const FullScreenPlayer = () => {
-  // (props: Props)
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
@@ -161,9 +158,7 @@ const FullScreenPlayer = () => {
           id="fullScreenPlayerSeekSlider"
           sliderOpacity={0.25}
           onSeek={(currentPosition) => setSongPos(currentPosition)}
-          className={`full-screen-player-seek-slider bg-background-color-3/25 before:bg-background-color-3 absolute h-fit w-full appearance-none outline-hidden outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:max-w-full before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:outline! ${
-            isChromeVisible && 'peer-hover/songInfoContainer:before:h-3'
-          } ${!isCurrentSongPlaying && '-translate-y-8! scale-x-95!'}`}
+          className={`full-screen-player-seek-slider bg-background-color-3/25 before:bg-background-color-3 absolute h-fit w-full appearance-none outline-hidden outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:max-w-full before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:outline! ${!isCurrentSongPlaying && '-translate-y-8! scale-x-95!'}`}
         />
       </div>
     </div>
