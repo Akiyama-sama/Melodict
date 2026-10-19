@@ -521,3 +521,54 @@ input[type='checkbox']:checked ~ .checkmark .icon {
   backdrop-filter: blur(10px); /* apply the blur */
   pointer-events: none; /* make the overlay click-through */
 }
+
+/* ? LYRICS ANALYSIS TOKENS */
+/* Hover/active highlight for a lyric token. The span's own line box is much taller than the
+   glyphs (Poppins metrics), so a full-box background reads as a smoky block towering over the
+   text; a 0.9em band painted through background-image hugs just the token instead.
+   Painted via background rather than an absolutely-positioned ::after because Chromium
+   mispositions abs-pos pseudos of an inline that fragments at a line wrap — the stray vertical
+   tick that used to appear at the start of the line after a wrapped token. The band reaches
+   0.06em past the span on each side so it never hugs the ink, except where another token sits
+   flush against this one (no whitespace between them, common in CJK lines): those sides are
+   marked .adjacent-left / .adjacent-right by the renderer and clamp the band at the boundary so
+   neighbouring bars stay a hair apart instead of overlapping. */
+.lyrics-analysis-tokens [role='button'] {
+  background-image: linear-gradient(rgb(255 255 255 / 0), rgb(255 255 255 / 0));
+  background-repeat: no-repeat;
+  background-size: calc(100% + 0.12em) 0.9em;
+  background-position: center;
+}
+
+.lyrics-analysis-tokens [role='button'].adjacent-left {
+  background-size: calc(100% + 0.03em) 0.9em;
+  background-position: 0.03em center;
+}
+
+.lyrics-analysis-tokens [role='button'].adjacent-right {
+  background-size: calc(100% + 0.03em) 0.9em;
+  background-position: -0.06em center;
+}
+
+.lyrics-analysis-tokens [role='button'].adjacent-left.adjacent-right {
+  background-size: calc(100% - 0.06em) 0.9em;
+  background-position: 0.03em center;
+}
+
+/* Hover must read plainly on every token: a faint bar alone was being missed (the selected
+   token's stronger always-on bar looked like "the hover effect" by comparison). Brightening the
+   glyphs to white is the loud part — it works on both sung (full-alpha colour) and unsung
+   (20%-alpha) lines and reuses the span's colour transition — while the bar stays the box
+   affordance. Stylesheet !important beats the inline token colour. */
+/* The band is an SVG so its corners can be rounded (background gradients can't): the band is
+   0.9em tall against a 90-unit viewbox height, so rx=15 renders 0.15em vertically — the project's
+   rounded-xl scale. preserveAspectRatio='none' lets the band stretch with the token, which makes
+   the horizontal radius width-dependent but stays subtle (near-circular) for typical tokens. */
+.lyrics-analysis-tokens [role='button']:hover {
+  color: rgb(255 255 255) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 90' preserveAspectRatio='none'%3E%3Crect width='240' height='90' rx='15' fill='white' fill-opacity='0.15'/%3E%3C/svg%3E");
+}
+
+.lyrics-analysis-tokens [role='button'].token-active {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 90' preserveAspectRatio='none'%3E%3Crect width='240' height='90' rx='15' fill='white' fill-opacity='0.25'/%3E%3C/svg%3E");
+}

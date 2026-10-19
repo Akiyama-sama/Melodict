@@ -306,6 +306,8 @@ const neteaseControls = {
     ipcRenderer.invoke('app/netease/getSongSummaries', neteaseIds),
   getStream: (neteaseId: number, quality: NeteaseQualityTypes): Promise<NeteaseStreamInfo | undefined> =>
     ipcRenderer.invoke('app/netease/getStream', neteaseId, quality),
+  getSongPalette: (neteaseId: number, coverUrl?: string): Promise<PaletteData | undefined> =>
+    ipcRenderer.invoke('app/netease/getSongPalette', neteaseId, coverUrl),
 
   getUserPlaylists: (userId: number): Promise<NeteasePlaylistSummary[]> =>
     ipcRenderer.invoke('app/netease/getUserPlaylists', userId),

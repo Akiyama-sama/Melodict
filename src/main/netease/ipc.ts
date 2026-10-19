@@ -27,6 +27,7 @@ import {
 } from './catalog';
 import { NeteaseApiError } from './client';
 import { getNeteaseLyrics } from './lyrics';
+import { getNeteaseSongPalette } from './paletteCache';
 
 /** Normalizes errors thrown inside handlers into renderer-friendly strings. */
 const withNeteaseErrorHandling = async <T>(operation: () => Promise<T>) => {
@@ -132,5 +133,9 @@ export const registerNeteaseIpc = () => {
 
   ipcMain.handle('app/netease/getLyrics', (_, neteaseId: number) =>
     withNeteaseErrorHandling(() => getNeteaseLyrics(neteaseId))
+  );
+
+  ipcMain.handle('app/netease/getSongPalette', (_, neteaseId: number, coverUrl?: string) =>
+    withNeteaseErrorHandling(() => getNeteaseSongPalette(neteaseId, coverUrl))
   );
 };
