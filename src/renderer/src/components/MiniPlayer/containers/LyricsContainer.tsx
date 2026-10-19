@@ -1,10 +1,10 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
-import i18n from '../../../i18n';
+import useSongLyrics from '../../../hooks/useSongLyrics';
 import LyricLine from '../../LyricsPage/LyricLine';
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 
@@ -12,61 +12,14 @@ type Props = { isLyricsVisible: boolean };
 
 const LyricsContainer = (props: Props) => {
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
-  const currentSongData = useStore(store, (state) => state.currentSongData);
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { t } = useTranslation();
 
   const { isLyricsVisible } = props;
 
-  const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
+  const { lyrics } = useSongLyrics({ enabled: isLyricsVisible });
   useSkipLyricsLines(lyrics);
 
-  useEffect(() => {
-    if (isLyricsVisible) {
-      setLyrics(null);
-      window.api.lyrics
-        .getSongLyrics({
-          songTitle: currentSongData.title,
-          songArtists: Array.isArray(currentSongData.artists)
-            ? currentSongData.artists.map((artist) => artist.name)
-            : [],
-          album: currentSongData.album?.name,
-          songPath: currentSongData.path,
-          duration: currentSongData.duration
-        })
-        .then(async (res) => {
-          setLyrics(res);
-
-          if (
-            preferences.autoTranslateLyrics &&
-            !res?.lyrics.isReset &&
-            !res?.lyrics.isTranslated
-          ) {
-            setLyrics(await window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes));
-          }
-          if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
-            if (res?.lyrics.originalLanguage == 'zh')
-              setLyrics(await window.api.lyrics.convertLyricsToPinyin());
-            else if (res?.lyrics.originalLanguage == 'ja')
-              setLyrics(await window.api.lyrics.romanizeLyrics());
-            else if (res?.lyrics.originalLanguage == 'ko')
-              setLyrics(await window.api.lyrics.convertLyricsToRomaja());
-          }
-        })
-        .catch((err) => console.error(err));
-    }
-  }, [
-    currentSongData.album?.name,
-    currentSongData.artists,
-    currentSongData.duration,
-    currentSongData.path,
-    currentSongData.songId,
-    currentSongData.title,
-    preferences.autoTranslateLyrics,
-    preferences.autoConvertLyrics,
-    isLyricsVisible
-  ]);
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
       const { isSynced, parsedLyrics, offset = 0 } = lyrics.lyrics;

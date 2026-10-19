@@ -1,12 +1,12 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { LyricsAnalysisToken } from '../../../../../common/lyricsAnalysis';
 import useLyricsAnalysis from '../../../hooks/useLyricsAnalysis';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
-import i18n from '../../../i18n';
+import useSongLyrics from '../../../hooks/useSongLyrics';
 import { getLineIdForIndex } from '../../../other/lyricsAnalysisUtils';
 import LyricLine from '../../LyricsPage/LyricLine';
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
@@ -27,13 +27,18 @@ type Props = {
 // and selectedToken only changes identity when the selection actually changes.
 const LyricsContainer = memo((props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { setIsLyricsAvailable, selectedToken, isPanelOpen = false, isAnalysisView = true, onTokenClick } =
     props;
   const { t } = useTranslation();
 
-  const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
+  // Reported ahead of the enhancement sequence, exactly where the inline implementation used to
+  // call it; the setter is stable, so this callback never re-triggers the loading effect.
+  const handleLyricsLoaded = useCallback(
+    (res: SongLyrics | undefined) => setIsLyricsAvailable(res?.lyrics?.isSynced ?? false),
+    [setIsLyricsAvailable]
+  );
+  const { lyrics } = useSongLyrics({ onLyricsLoaded: handleLyricsLoaded });
   useSkipLyricsLines(lyrics);
 
   const { linesById } = useLyricsAnalysis({
@@ -44,49 +49,6 @@ const LyricsContainer = memo((props: Props) => {
       : [],
     lyrics
   });
-
-  useEffect(() => {
-    setLyrics(null);
-    window.api.lyrics
-      .getSongLyrics({
-        songTitle: currentSongData.title,
-        songArtists: Array.isArray(currentSongData.artists)
-          ? currentSongData.artists.map((artist) => artist.name)
-          : [],
-        album: currentSongData.album?.name,
-        songPath: currentSongData.path,
-        duration: currentSongData.duration
-      })
-      .then(async (res) => {
-        setIsLyricsAvailable(res?.lyrics?.isSynced ?? false);
-        setLyrics(res);
-
-        if (preferences.autoTranslateLyrics && !res?.lyrics.isReset && !res?.lyrics.isTranslated) {
-          setLyrics(await window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes));
-        }
-        if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
-          if (res?.lyrics.originalLanguage == 'zh')
-            setLyrics(await window.api.lyrics.convertLyricsToPinyin());
-          else if (res?.lyrics.originalLanguage == 'ja')
-            setLyrics(await window.api.lyrics.romanizeLyrics());
-          else if (res?.lyrics.originalLanguage == 'ko')
-            setLyrics(await window.api.lyrics.convertLyricsToRomaja());
-        }
-
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [
-    currentSongData.album?.name,
-    currentSongData.artists,
-    currentSongData.duration,
-    currentSongData.path,
-    currentSongData.songId,
-    currentSongData.title,
-    preferences.autoTranslateLyrics,
-    preferences.autoConvertLyrics,
-    setIsLyricsAvailable
-  ]);
 
   // Only the raw line/token ids of the selection matter to the rendered lines; keying the memo on
   // the primitives (instead of the selectedToken object) keeps unrelated re-renders of the parent
