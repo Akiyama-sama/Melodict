@@ -9,66 +9,13 @@ import type {
 import { encodeNeteaseSongId } from '../../common/netease';
 import logger from '../logger';
 import { callNeteaseForBody, isNeteaseAuthError } from './client';
-
-interface NeteaseArtistLike {
-  id?: number;
-  name?: string;
-}
-
-interface NeteaseSongLike {
-  id?: number;
-  name?: string;
-  duration?: number;
-  /** `song_detail` (v3 payload) reports the duration in milliseconds as `dt`. */
-  dt?: number;
-  fee?: number;
-  /** First element of freeTrialInfo marks a trial fragment (its play duration in ms). */
-  freeTrialInfo?: { start?: number; end?: number } | unknown[] | null;
-  artists?: NeteaseArtistLike[];
-  artist?: NeteaseArtistLike | null;
-  ar?: NeteaseArtistLike | null;
-  album?: NeteaseAlbumLike | null;
-  al?: NeteaseAlbumLike | null;
-  picUrl?: string;
-  alia?: string[];
-}
-
-interface NeteaseAlbumLike {
-  id?: number;
-  name?: string;
-  picUrl?: string;
-  coverImgUrl?: string;
-  artist?: NeteaseArtistLike | null;
-  artists?: NeteaseArtistLike[];
-  size?: number;
-  publishTime?: number;
-  company?: string;
-  description?: string;
-}
-
-interface NeteasePlaylistLike {
-  id?: number;
-  name?: string;
-  coverImgUrl?: string;
-  /** `personalized` entries carry `picUrl` instead of `coverImgUrl`. */
-  picUrl?: string;
-  trackCount?: number;
-  userId?: number;
-  creator?: NeteaseArtistLike | null;
-  description?: string;
-  playCount?: number;
-}
-
-interface NeteaseArtistEntryLike {
-  id?: number;
-  name?: string;
-  img1v1Url?: string;
-  picUrl?: string;
-  alias?: string[];
-  albumSize?: number;
-  musicSize?: number;
-  accountId?: number;
-}
+import type {
+  NeteaseAlbumLike,
+  NeteaseArtistEntryLike,
+  NeteaseArtistLike,
+  NeteasePlaylistLike,
+  NeteaseSongLike
+} from './catalogShapes';
 
 const isTrialInfo = (value: unknown): value is { start?: number; end?: number } =>
   Boolean(value && typeof value === 'object' && ('start' in (value as object) || 'end' in (value as object)));
