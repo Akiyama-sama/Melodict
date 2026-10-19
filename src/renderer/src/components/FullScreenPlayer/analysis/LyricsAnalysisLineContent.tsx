@@ -55,13 +55,20 @@ const LyricsAnalysisLineContent = (props: Props) => {
         const tokenColor = getTokenColor(tokenIndex, tokenColors);
         // Unsung lines keep the 20% dimness the plain lyric colour had; the sung line is full.
         const alpha = isActiveLine ? 1 : 0.2;
+        // Tokens with no whitespace between them (common in CJK lines) would have their
+        // outward-reaching hover bands overlap, so those sides are flagged for the stylesheet.
+        const prevSegment = segments[index - 1];
+        const nextSegment = segments[index + 1];
+        const adjacentClasses = `${index > 0 && !/\s$/.test(prevSegment.text) ? 'adjacent-left ' : ''}${
+          /^\s/.test(nextSegment?.text ?? ' ') ? '' : 'adjacent-right'
+        }`;
 
         return (
           <span
             key={token.tokenId}
             role="button"
             tabIndex={0}
-            className={`inline cursor-pointer transition-[color] duration-150 ${
+            className={`inline cursor-pointer transition-[color] duration-150 ${adjacentClasses} ${
               isActive ? 'token-active text-white!' : tokenColor ? '' : 'text-inherit'
             }`}
             style={isActive || !tokenColor ? undefined : { color: `hsl(${tokenColor} / ${alpha})` }}
