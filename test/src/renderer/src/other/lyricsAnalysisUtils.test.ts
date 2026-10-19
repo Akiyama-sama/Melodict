@@ -69,11 +69,11 @@ describe('getTokenColorPalette', () => {
     for (let i = 1; i < colors.length; i += 1) {
       expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.04);
     }
-    // The spread stays analogous: every hue within ±90° of the palette's own hue, which sits at
-    // the centre of the span (first entry - 0.25).
-    const baseHue = (parse(colors[0]).h + 0.25) % 1;
+    // The spread stays analogous: every hue within ±45° of the palette's own hue, which sits at
+    // the centre of the span (first entry - 0.125).
+    const baseHue = (parse(colors[0]).h + 0.125) % 1;
     for (const color of colors) {
-      expect(hueDistance(color, `${baseHue * 360} 0% 0%`)).toBeLessThanOrEqual(0.25 + 0.01);
+      expect(hueDistance(color, `${baseHue * 360} 0% 0%`)).toBeLessThanOrEqual(0.125 + 0.01);
     }
     // The palette's own lightness/chroma survive the spread.
     const parsed = colors.map(parse);
@@ -89,11 +89,11 @@ describe('getTokenColorPalette', () => {
     for (let i = 1; i < colors.length; i += 1) {
       expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.04);
     }
-    // Anchored on the default palette's blue (~212°), the ±90° span must not reach red/green.
+    // Anchored on the default palette's blue (~212°), the ±45° span must stay in blue/teal.
     for (const color of colors) {
       const h = parse(color).h * 360;
       const dist = Math.min(Math.abs(h - 212), 360 - Math.abs(h - 212));
-      expect(dist).toBeLessThanOrEqual(93);
+      expect(dist).toBeLessThanOrEqual(48);
     }
   });
 

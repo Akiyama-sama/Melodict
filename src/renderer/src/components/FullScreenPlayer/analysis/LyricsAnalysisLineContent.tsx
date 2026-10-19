@@ -61,10 +61,8 @@ const LyricsAnalysisLineContent = (props: Props) => {
             key={token.tokenId}
             role="button"
             tabIndex={0}
-            className={`inline cursor-pointer rounded-sm transition-[background,color] duration-150 ${
-              isActive
-                ? 'bg-white/25! text-white!'
-                : `bg-transparent! hover:bg-white/15! ${tokenColor ? '' : 'text-inherit'}`
+            className={`inline cursor-pointer transition-[color] duration-150 ${
+              isActive ? 'token-active text-white!' : tokenColor ? '' : 'text-inherit'
             }`}
             style={isActive || !tokenColor ? undefined : { color: `hsl(${tokenColor} / ${alpha})` }}
             onClick={(event) => {

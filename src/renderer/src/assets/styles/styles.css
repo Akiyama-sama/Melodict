@@ -521,3 +521,28 @@ input[type='checkbox']:checked ~ .checkmark .icon {
   backdrop-filter: blur(10px); /* apply the blur */
   pointer-events: none; /* make the overlay click-through */
 }
+
+/* ? LYRICS ANALYSIS TOKENS */
+/* Hover/active highlight for a lyric token. The span's own line box is much taller than the
+   glyphs (Poppins metrics), so a full-box background reads as a smoky block towering over the
+   text; a ::after bar capped at 0.9em and centred hugs just the token instead. */
+.lyrics-analysis-tokens [role='button'] {
+  position: relative;
+}
+
+.lyrics-analysis-tokens [role='button']::after {
+  content: '';
+  position: absolute;
+  inset: calc(50% - 0.45em) 0;
+  border-radius: 0.15em;
+  background: transparent;
+  pointer-events: none;
+}
+
+.lyrics-analysis-tokens [role='button']:hover::after {
+  background: rgb(255 255 255 / 0.15);
+}
+
+.lyrics-analysis-tokens [role='button'].token-active::after {
+  background: rgb(255 255 255 / 0.25);
+}

@@ -2,6 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useEffect } from 'react';
 
+import { resolveNeteaseSongPalette } from '../other/neteasePlayback';
 import { formatHsl, manageBrightness, manageSaturation } from '../other/themePalette';
 import { settingsQuery } from '../queries/settings';
 import { dispatch, store } from '../store/store';
@@ -165,6 +166,31 @@ export function useDynamicTheme(): UseDynamicThemeReturn {
   );
 
   const currentSongPaletteData = useStore(store, (state) => state.currentSongData.paletteData);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
+  // NetEase songs carry no palette in their player data (their covers are remote); resolve one
+  // from the main-process cache after playback starts and merge it into the store, so the theme —
+  // and everything derived from it, like the lyrics token colours — behaves exactly like it does
+  // for local songs. Local songs resolve to `undefined` here and are left untouched.
+  useEffect(() => {
+    if (!currentSongData.path || currentSongPaletteData) return undefined;
+
+    let isStale = false;
+    resolveNeteaseSongPalette(currentSongData)
+      .then((palette) => {
+        if (!isStale && palette)
+          dispatch({
+            type: 'CURRENT_SONG_DATA_CHANGE',
+            data: { ...currentSongData, paletteData: palette }
+          });
+        return undefined;
+      })
+      .catch((error) => console.error('Failed to resolve the song palette:', error));
+
+    return () => {
+      isStale = true;
+    };
+  }, [currentSongData, currentSongPaletteData]);
 
   useEffect(() => {
     // Reset styles first

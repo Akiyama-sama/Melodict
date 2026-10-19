@@ -29,12 +29,12 @@ const MAX_SPREAD_LIGHTNESS = 0.85;
 /** Monochrome covers leave hue as the only differentiator; saturation makes the spread visible. */
 const MIN_SPREAD_SATURATION = 0.55;
 /**
- * When a palette collapses into one colour, spread six hues across this span centred on the
- * palette's own hue (±0.25 of the wheel = ±90°, 36° apart). Staying analogous keeps the tokens in
- * the theme's colour family instead of an unrelated rainbow, while the 36° steps still separate
- * neighbouring tokens clearly.
+ * When a palette collapses into one colour, spread hues across this span centred on the palette's
+ * own hue (±0.125 of the wheel = ±45°, 18° apart). A tight analogous span keeps the tokens inside
+ * the theme's colour family — a blue theme yields blues and teals, never purple or green — while
+ * the 18° steps still separate neighbouring tokens clearly.
  */
-const SPREAD_HALF_WIDTH = 0.25;
+const SPREAD_HALF_WIDTH = 0.125;
 const SPREAD_COUNT = 6;
 
 /**

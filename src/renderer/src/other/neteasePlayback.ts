@@ -1,4 +1,4 @@
-import { buildNeteaseSongPath, type NeteaseQualityTypes, type NeteaseSongSummary } from '@common/netease';
+import { buildNeteaseSongPath, tryGetNeteaseIdFromPath, type NeteaseQualityTypes, type NeteaseSongSummary } from '@common/netease';
 
 import storage from '../utils/localStorage';
 
@@ -46,4 +46,22 @@ export const buildNeteasePlayerSongData = async (
   };
 
   return songData;
+};
+
+/**
+ * Fills in `paletteData` for NetEase songs after playback has started. Local songs carry their
+ * artwork palette in the library DB, but NetEase covers are remote and their palettes live in the
+ * main-process disk cache instead — resolving one is a network round-trip on first play, so it
+ * must never block `buildNeteasePlayerSongData`.
+ *
+ * Resolves to `undefined` when the song is not a NetEase stream (nothing to fill) or the palette
+ * could not be produced; callers dispatch the result into the store when it resolves.
+ */
+export const resolveNeteaseSongPalette = async (
+  songData: AudioPlayerData
+): Promise<PaletteData | undefined> => {
+  const neteaseId = tryGetNeteaseIdFromPath(songData.path);
+  if (neteaseId === null) return undefined;
+
+  return window.api.neteaseControls.getSongPalette(neteaseId, songData.artworkPath);
 };
