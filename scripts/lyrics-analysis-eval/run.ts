@@ -20,7 +20,7 @@ import process from 'node:process';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 
-import { LYRICS_ANALYSIS_PROMPT_VERSION, findUncoveredLineWords } from '../../src/common/lyricsAnalysis';
+import { findUncoveredLineWords } from '../../src/common/lyricsAnalysis';
 import { analyzeLyrics } from '../../src/main/lyricsAnalysis/providerGateway';
 import { aggregateCategoryMeans, aggregateOverallMean, aggregatePerCategory } from './lib/aggregate';
 import { readStoredCredentials } from './lib/creds';
