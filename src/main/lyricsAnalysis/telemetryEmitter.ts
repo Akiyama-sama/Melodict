@@ -3,6 +3,7 @@ import {
   type LyricsAnalysisLine
 } from '../../common/lyricsAnalysis';
 import {
+  LYRICS_ANALYSIS_TELEMETRY_VERSION,
   type AnalysisPassTelemetryEvent,
   type LyricsAnalysisTelemetrySession,
   type SessionEndTelemetryEvent,
@@ -16,7 +17,7 @@ import { appendLyricsAnalysisTelemetryEvent } from './telemetryRepository';
  */
 
 const eventBase = (session: LyricsAnalysisTelemetrySession) => ({
-  v: 1 as const,
+  v: LYRICS_ANALYSIS_TELEMETRY_VERSION,
   sessionId: session.sessionId,
   ts: Date.now()
 });

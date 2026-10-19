@@ -22,6 +22,7 @@ import {
   validateAndNormalizeLineAnalysis
 } from '../../common/lyricsAnalysis';
 import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
+import { LYRICS_ANALYSIS_TELEMETRY_VERSION } from '../../common/lyricsAnalysisTelemetry';
 import { buildLanguageDirective } from '../../common/lyricsLanguageProfiles';
 import {
   buildRepairPrompt,
@@ -383,7 +384,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     if (!options.onPassCompleted) return;
 
     const event: AnalysisPassTelemetryEvent = {
-      v: 1,
+      v: LYRICS_ANALYSIS_TELEMETRY_VERSION,
       sessionId: input.sessionId,
       ts: Date.now(),
       kind: 'analysis-pass',
