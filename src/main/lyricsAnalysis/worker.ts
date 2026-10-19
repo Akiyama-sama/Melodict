@@ -1,44 +1,5 @@
-import type {
-  LyricsAnalysisError,
-  LyricsAnalysisInputLine,
-  LyricsAnalysisLine,
-  LyricsAnalysisProviderConfig,
-  LyricsAnalysisProviderTestResult
-} from '../../common/lyricsAnalysis';
-import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
 import { analyzeLyrics, mapProviderError, testLyricsAnalysisProvider } from './providerGateway';
-
-type WorkerRequest =
-  | {
-      type: 'analyze';
-      requestId: string;
-      config: LyricsAnalysisProviderConfig;
-      uiLanguage: string;
-      songTitle: string;
-      songArtists: string[];
-      lines: LyricsAnalysisInputLine[];
-      sessionId?: string;
-    }
-  | {
-      type: 'test';
-      requestId: string;
-      config: LyricsAnalysisProviderConfig;
-    }
-  | { type: 'cancel'; requestId: string };
-
-type WorkerResponse =
-  | { type: 'line'; requestId: string; line: LyricsAnalysisLine; source: 'first' | 'repair' }
-  | { type: 'repairing'; requestId: string; failedLineIds: string[] }
-  | {
-      type: 'done';
-      requestId: string;
-      lines: LyricsAnalysisLine[];
-      failedLineIds: string[];
-      passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
-    }
-  | { type: 'error'; requestId: string; error: LyricsAnalysisError }
-  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult }
-  | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };
+import type { WorkerRequest, WorkerResponse } from './workerProtocol';
 
 const port = process.parentPort;
 const abortControllers = new Map<string, AbortController>();
