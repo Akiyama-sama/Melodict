@@ -27,6 +27,7 @@ export interface AppReducer {
 export type AppReducerStateActions =
   | { type: 'START_PLAY_STATE_CHANGE'; data: unknown }
   | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData }
+  | { type: 'CURRENT_SONG_PALETTE_CHANGE'; data: PaletteData }
   | { type: 'UP_NEXT_SONG_DATA_CHANGE'; data?: AudioPlayerData }
   | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
   | { type: 'PROMPT_MENU_DATA_CHANGE'; data: PromptMenuNavigationHistoryData }
@@ -184,6 +185,14 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
               stoppedPosition: 0
             }
           }
+        }
+      };
+    case 'CURRENT_SONG_PALETTE_CHANGE':
+      return {
+        ...state,
+        currentSongData: {
+          ...state.currentSongData,
+          paletteData: action.data
         }
       };
     case 'UP_NEXT_SONG_DATA_CHANGE':

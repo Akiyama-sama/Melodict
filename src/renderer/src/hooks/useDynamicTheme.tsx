@@ -179,10 +179,7 @@ export function useDynamicTheme(): UseDynamicThemeReturn {
     resolveNeteaseSongPalette(currentSongData)
       .then((palette) => {
         if (!isStale && palette)
-          dispatch({
-            type: 'CURRENT_SONG_DATA_CHANGE',
-            data: { ...currentSongData, paletteData: palette }
-          });
+          dispatch({ type: 'CURRENT_SONG_PALETTE_CHANGE', data: palette });
         return undefined;
       })
       .catch((error) => console.error('Failed to resolve the song palette:', error));
