@@ -27,6 +27,7 @@ interface LyricProp {
   onTokenClick?: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 }
 
+
 // const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 
 const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
@@ -235,7 +236,6 @@ const LyricLine = (props: LyricProp) => {
             text={getLyricText(lyric)}
             analysis={analysis}
             activeTokenId={activeTokenId}
-            isActiveLine={isInRange}
             palette={palette}
             onTokenClick={onTokenClick}
           />

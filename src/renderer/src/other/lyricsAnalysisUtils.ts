@@ -10,14 +10,36 @@ export const getRawLyricLineText = (line: LyricLine) => {
 
 export const getLineIdForIndex = (index: number) => `line-${index}`;
 
+type Hsl = [number, number, number];
+
+/** Distance between two hues on the 0..1 colour wheel. */
+const hueDistance = (a: number, b: number) => {
+  const d = Math.abs(a - b);
+  return Math.min(d, 1 - d);
+};
+
+/** Whether two colours are far enough apart to read as different words at a glance. */
+const isVisuallyDistinct = (a: Hsl, b: Hsl) =>
+  hueDistance(a[0], b[0]) > 0.1 || Math.abs(a[1] - b[1]) > 0.3 || Math.abs(a[2] - b[2]) > 0.12;
+
+const MIN_DISTINCT_COLORS = 2;
+/** Tokens must stay readable on the near-black player background. */
+const MIN_LIGHTNESS = 0.7;
+const MAX_SPREAD_LIGHTNESS = 0.85;
+/** Monochrome covers leave hue as the only differentiator; saturation makes the spread visible. */
+const MIN_SPREAD_SATURATION = 0.55;
+
 /**
  * Token colours come from the song's own dynamic-theme palette instead of a fixed rainbow, so the
  * analysed line belongs to the artwork's colour world like the rest of the player UI.
  *
- * The six Vibrant swatches are sorted by hue to keep neighbouring tokens visually distinct, and
- * every one is raised to at least 70% lightness: the player background is nearly black, and
- * Muted/Dark swatches would otherwise be unreadable. Swatches a cover does not provide fall back
- * to the default song palette, which is what the dynamic theme itself uses.
+ * The six Vibrant swatches are lifted to at least 70% lightness (the player background is nearly
+ * black, and Muted/Dark swatches would otherwise be unreadable), then near-duplicates are dropped
+ * with a perceptual threshold. Covers whose swatches collapse into a single distinguishable
+ * colour — monochrome artwork, or the all-blue default palette used when a song has no palette at
+ * all (e.g. NetEase streams) — get their hues spread evenly around the wheel instead, keeping the
+ * palette's own lightness and chroma: hue is the only axis left that can separate neighbouring
+ * tokens, and tokens that look identical would read as one word.
  */
 export const getTokenColorPalette = (palette?: NodeVibrantPalette) => {
   const fallback = DEFAULT_SONG_PALETTE;
@@ -30,22 +52,35 @@ export const getTokenColorPalette = (palette?: NodeVibrantPalette) => {
     palette?.DarkMuted ?? fallback.DarkMuted
   ];
 
-  const colors = swatches
+  const lifted = swatches
     .filter((swatch): swatch is NodeVibrantPaletteSwatch => Boolean(swatch?.hsl))
-    .map((swatch) => formatHsl(manageBrightness(swatch.hsl, { min: 0.7 })));
+    .map((swatch) => manageBrightness(swatch.hsl, { min: MIN_LIGHTNESS }));
 
-  // Deduplicate: covers with a flat colour scheme often produce identical swatches, and two
-  // adjacent tokens in the same colour would read as one word.
-  return [...new Set(colors)];
+  const distinct: Hsl[] = [];
+  for (const color of lifted) {
+    if (distinct.every((kept) => isVisuallyDistinct(kept, color))) distinct.push(color);
+  }
+
+  if (distinct.length >= MIN_DISTINCT_COLORS) return distinct.map(formatHsl);
+
+  const base: Hsl = distinct[0] ?? lifted[0] ?? [0, MIN_SPREAD_SATURATION, MIN_LIGHTNESS];
+  const [h, s, l] = base;
+  const saturation = Math.max(s, MIN_SPREAD_SATURATION);
+  const lightness = Math.min(Math.max(l, MIN_LIGHTNESS), MAX_SPREAD_LIGHTNESS);
+
+  return Array.from({ length: 6 }, (_, index) =>
+    formatHsl([(h + index / 6) % 1, saturation, lightness])
+  );
 };
 
 /**
- * Stable visual bucket for a token, derived from its span rather than an array index so that
- * re-renders during streaming never reshuffle the colours. Tokens are distinguished by their
- * text colour alone (no underline).
+ * Picks the colour for a token from the palette by its ordinal position within the line, so
+ * consecutive tokens always land on consecutive (therefore different) palette entries — bucketing
+ * by raw `startChar` collided whenever token spans skip characters (0, 3, 6 all mod to the same
+ * slot) and rendered neighbouring tokens in the same colour.
  */
-export const getTokenColor = (startChar: number, palette: string[]) => {
+export const getTokenColor = (tokenIndex: number, palette: string[]) => {
   if (palette.length === 0) return undefined;
 
-  return palette[startChar % palette.length];
+  return palette[tokenIndex % palette.length];
 };
