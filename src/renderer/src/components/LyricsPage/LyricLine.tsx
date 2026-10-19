@@ -168,8 +168,17 @@ const LyricLine = (props: LyricProp) => {
   // token replace the whole-line romanization, so it is dropped for analysed lines.
   const lyricStringLinePrimary = lyricString;
   const lyricStringLineSecondary = translatedLyricString;
+  // Enhanced (YRC) lines carry their text as a word array; the token view needs that text as a
+  // plain string to split into token spans. It is the same string the analysis was built from
+  // (getRawLyricLineText joins the words without separators), so token offsets line up exactly.
   const isTokenizedLine = Boolean(analysis && onTokenClick && typeof lyric === 'string');
-  const lyricStringLineTertiary = isTokenizedLine ? undefined : convertedLyricString;
+  const tokenizedEnhancedText =
+    analysis && onTokenClick && typeof lyric !== 'string'
+      ? lyric.map((word) => word.text).join('')
+      : undefined;
+  const lyricStringLineTertiary = isTokenizedLine || tokenizedEnhancedText !== undefined
+    ? undefined
+    : convertedLyricString;
 
   return (
     <div
@@ -233,9 +242,9 @@ const LyricLine = (props: LyricProp) => {
       <div
         className={`whitespace-pre-wrap ${playerType !== 'full' ? 'flex flex-row flex-wrap items-center justify-center' : ''}`}
       >
-        {analysis && onTokenClick && typeof lyric === 'string' ? (
+        {analysis && onTokenClick ? (
           <LyricsAnalysisLineContent
-            text={getLyricText(lyric)}
+            text={tokenizedEnhancedText ?? getLyricText(lyric as string)}
             analysis={analysis}
             activeTokenId={activeTokenId}
             isActiveLine={isInRange}

@@ -319,16 +319,13 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       void writeLineAnalysisCache({ key, line: input.line });
     }
 
-    if (!isCurrent()) return;
-
-    const snapshot: LyricsAnalysisSnapshot = {
-      songPath: request.songPath,
-      fingerprint,
-      status: 'analyzing',
-      lines: [...streamedLines.values()],
-      updatedAt: Date.now()
-    };
-    activeSession = snapshot;
+    // Persistence and renderer fan-out must NOT be gated on isCurrent(). A superseded session
+    // (the user reopened the fullscreen view or switched songs mid-run, bumping the generation)
+    // still owns the lines its worker streams: skipping the flush silently lost them from the
+    // song artifact (only the line cache survived), and skipping the send left the previous
+    // view frozen — lines landed per telemetry but never appeared until a full re-analyze.
+    // The renderer filters by songPath, so a stale view ignores events for other songs.
+    // activeSession stays owned by the newest generation (set below only when current).
     for (const landed of landedLines) {
       sendToRenderer(LYRICS_ANALYSIS_LINE_CHANNEL, {
         songPath: request.songPath,
@@ -339,6 +336,17 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
 
     // Mid-run persistence: an exit or crash at any moment keeps every line landed so far.
     flushIfDue(false);
+
+    if (!isCurrent()) return;
+
+    const snapshot: LyricsAnalysisSnapshot = {
+      songPath: request.songPath,
+      fingerprint,
+      status: 'analyzing',
+      lines: [...streamedLines.values()],
+      updatedAt: Date.now()
+    };
+    activeSession = snapshot;
   };
 
   try {
@@ -367,8 +375,13 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
 
     await flushPromise;
     if (!isCurrent()) {
-      // Superseded by a newer session: still close this run's telemetry so evaluation data stays
-      // complete (the lines that did land are already persisted by the flush above).
+      // Superseded by a newer session: its lines were still fanned out and flushed on arrival
+      // (see onValidatedLine), but its final forced flush must still run — a superseded run can
+      // hold the last few lines of the song, and skipping this flush is exactly how lines went
+      // missing from the artifact while telemetry claimed the run complete.
+      flushIfDue(true);
+      await flushPromise;
+      // Still close this run's telemetry so evaluation data stays complete.
       emitSessionEndTelemetry({
         session: telemetrySession,
         finishedAt: Date.now(),

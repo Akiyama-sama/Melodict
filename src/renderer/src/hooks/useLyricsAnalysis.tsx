@@ -126,6 +126,18 @@ const useLyricsAnalysis = (options: UseLyricsAnalysisOptions) => {
     window.api.lyricsAnalysis.onLine(handleLineEvent);
     window.api.lyricsAnalysis.onSnapshot(handleSnapshotEvent);
 
+    // A remount (leaving and reopening the fullscreen view) previously reset linesById and then
+    // relied on line events to repopulate — but the running session only streams lines that land
+    // from now on, so everything analysed before the remount stayed hidden until the session
+    // fully finished. Hydrating from the main process's active session (if it is for this song)
+    // restores the already-landed lines immediately, before prepare's own snapshot arrives.
+    window.api.lyricsAnalysis
+      .getSession()
+      .then((session) => {
+        if (isActive && session?.songPath === songKey && session.lines) handleSnapshot(session);
+      })
+      .catch(() => undefined);
+
     window.api.lyricsAnalysis
       .prepareSession({
         songPath: songKey,
