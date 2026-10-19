@@ -114,6 +114,7 @@ const LyricsContainer = (props: Props) => {
               activeTokenId={
                 selectedToken?.line.lineId === lineId ? selectedToken.token.tokenId : undefined
               }
+              palette={currentSongData.paletteData}
               onTokenClick={onTokenClick}
             />
           );
@@ -152,7 +153,7 @@ const LyricsContainer = (props: Props) => {
       }
     }
     return [];
-  }, [lyrics, linesById, onTokenClick, selectedToken]);
+  }, [isAnalysisView, lyrics, linesById, onTokenClick, selectedToken, currentSongData.paletteData]);
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {

@@ -2,35 +2,10 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useEffect } from 'react';
 
+import { formatHsl, manageBrightness, manageSaturation } from '../other/themePalette';
 import { settingsQuery } from '../queries/settings';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
-
-const manageBrightness = (
-  values: [number, number, number],
-  range?: { min?: number; max?: number }
-): [number, number, number] => {
-  const max = range?.max || 1;
-  const min = range?.min || 0.9;
-
-  const [h, s, l] = values;
-
-  const updatedL = l >= min ? (l <= max ? l : max) : min;
-  return [h, s, updatedL];
-};
-
-const manageSaturation = (
-  values: [number, number, number],
-  range?: { min?: number; max?: number }
-): [number, number, number] => {
-  const max = range?.max || 1;
-  const min = range?.min || 0.9;
-
-  const [h, s, l] = values;
-
-  const updatedS = s >= min ? (s <= max ? s : max) : min;
-  return [h, updatedS, l];
-};
 
 const resetStyles = () => {
   const root = document.getElementById('root');
@@ -86,11 +61,7 @@ export interface UseDynamicThemeReturn {
  */
 export function useDynamicTheme(): UseDynamicThemeReturn {
   const setDynamicThemesFromSongPalette = useCallback((palette?: NodeVibrantPalette) => {
-    const generateColor = (values: [number, number, number]) => {
-      const [lh, ls, ll] = values;
-      const color = `${lh * 360} ${ls * 100}% ${ll * 100}%`;
-      return color;
-    };
+    const generateColor = formatHsl;
 
     const root = document.getElementById('root');
     if (root) {

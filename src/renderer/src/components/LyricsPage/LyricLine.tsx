@@ -22,6 +22,8 @@ interface LyricProp {
   /** LLM analysis for this line, when available. Enables clickable learning tokens. */
   analysis?: LyricsAnalysisLine;
   activeTokenId?: string;
+  /** The song's dynamic-theme palette; token colours are derived from its swatches. */
+  palette?: NodeVibrantPalette;
   onTokenClick?: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 }
 
@@ -59,6 +61,7 @@ const LyricLine = (props: LyricProp) => {
     playerType = 'normal',
     analysis,
     activeTokenId,
+    palette,
     onTokenClick
   } = props;
 
@@ -233,6 +236,7 @@ const LyricLine = (props: LyricProp) => {
             analysis={analysis}
             activeTokenId={activeTokenId}
             isActiveLine={isInRange}
+            palette={palette}
             onTokenClick={onTokenClick}
           />
         ) : (

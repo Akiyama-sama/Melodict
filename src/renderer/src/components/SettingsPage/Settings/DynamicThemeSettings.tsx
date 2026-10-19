@@ -1,45 +1,15 @@
+import { formatHsl, manageBrightness, manageSaturation } from '../../../other/themePalette';
+
 type Props = { palette: PaletteData };
-
-const manageBrightness = (
-  values: [number, number, number],
-  range?: { min?: number; max?: number }
-): [number, number, number] => {
-  const max = range?.max || 1;
-  const min = range?.min || 0.9;
-
-  const [h, s, l] = values;
-
-  const updatedL = l >= min ? (l <= max ? l : max) : min;
-  return [h, s, updatedL];
-};
-
-const manageSaturation = (
-  values: [number, number, number],
-  range?: { min?: number; max?: number }
-): [number, number, number] => {
-  const max = range?.max || 1;
-  const min = range?.min || 0.9;
-
-  const [h, s, l] = values;
-
-  const updatedS = s >= min ? (s <= max ? s : max) : min;
-  return [h, updatedS, l];
-};
-
-const generateColor = (values: [number, number, number]) => {
-  const [lh, ls, ll] = values;
-  const color = `${lh * 360} ${ls * 100}% ${ll * 100}%`;
-  return color;
-};
 
 const DynamicThemeSettings = (props: Props) => {
   const { palette } = props;
 
-  const highLightVibrant = generateColor(manageBrightness(palette.LightVibrant?.hsl || [0, 0, 0]));
-  const mediumLightVibrant = generateColor(
+  const highLightVibrant = formatHsl(manageBrightness(palette.LightVibrant?.hsl || [0, 0, 0]));
+  const mediumLightVibrant = formatHsl(
     manageBrightness(palette.LightVibrant?.hsl || [0, 0, 0], { min: 0.75 })
   );
-  const darkLightVibrant = generateColor(
+  const darkLightVibrant = formatHsl(
     manageSaturation(
       manageBrightness(palette.LightVibrant?.hsl || [0, 0, 0], {
         max: 0.2,
@@ -48,12 +18,12 @@ const DynamicThemeSettings = (props: Props) => {
       { max: 0.05, min: 0.05 }
     )
   );
-  const highVibrant = generateColor(
+  const highVibrant = formatHsl(
     manageBrightness(palette.Vibrant?.hsl || [0, 0, 0], { min: 0.7 })
   );
 
-  const lightVibrant = generateColor(palette.LightVibrant?.hsl || [0, 0, 0]);
-  const darkVibrant = generateColor(palette.DarkVibrant?.hsl || [0, 0, 0]);
+  const lightVibrant = formatHsl(palette.LightVibrant?.hsl || [0, 0, 0]);
+  const darkVibrant = formatHsl(palette.DarkVibrant?.hsl || [0, 0, 0]);
 
   return (
     <div className="mt-8 flex flex-col gap-6">

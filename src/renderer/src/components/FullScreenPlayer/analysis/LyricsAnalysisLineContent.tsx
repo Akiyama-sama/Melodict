@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import type { LyricsAnalysisToken } from '../../../../../common/lyricsAnalysis';
 import { splitLineIntoTokens } from '../../../../../common/lyricsAnalysis';
-import { getTokenColorClass } from '../../../other/lyricsAnalysisUtils';
+import { getTokenColor, getTokenColorPalette } from '../../../other/lyricsAnalysisUtils';
 
 type Props = {
   text: string;
@@ -10,6 +10,8 @@ type Props = {
   activeTokenId?: string;
   /** Whether this line is the one currently being sung; token colours only light up there. */
   isActiveLine?: boolean;
+  /** The song's dynamic-theme palette; token colours are derived from its swatches. */
+  palette?: NodeVibrantPalette;
   onTokenClick: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 };
 
@@ -24,12 +26,14 @@ type Props = {
  * so the analysed line keeps the same total width as plain text.
  */
 const LyricsAnalysisLineContent = (props: Props) => {
-  const { text, analysis, activeTokenId, isActiveLine = false, onTokenClick } = props;
+  const { text, analysis, activeTokenId, isActiveLine = false, palette, onTokenClick } = props;
 
   const segments = useMemo(
     () => (analysis ? splitLineIntoTokens(text, analysis.tokens) : [{ text }]),
     [analysis, text]
   );
+
+  const tokenColors = useMemo(() => getTokenColorPalette(palette), [palette]);
 
   // The lyric line is inside a flex container, which drops whitespace-only text nodes. Wrapping
   // the segments in a single inline span keeps the original word spacing between tokens.
@@ -41,6 +45,8 @@ const LyricsAnalysisLineContent = (props: Props) => {
         if (!token) return <span key={`text-${index}`}>{segment.text}</span>;
 
         const isActive = token.tokenId === activeTokenId;
+        // Only the line being sung is coloured; every other line keeps the shared lyric colour.
+        const tokenColor = isActiveLine ? getTokenColor(token.startChar, tokenColors) : undefined;
 
         return (
           <span
@@ -50,10 +56,9 @@ const LyricsAnalysisLineContent = (props: Props) => {
             className={`inline cursor-pointer rounded-sm transition-[background,color] duration-150 ${
               isActive
                 ? 'bg-white/25! text-white!'
-                : `bg-transparent! hover:bg-white/15! ${
-                    isActiveLine ? getTokenColorClass(token.startChar) : 'text-inherit'
-                  }`
+                : `bg-transparent! hover:bg-white/15! ${tokenColor ? '' : 'text-inherit'}`
             }`}
+            style={isActive || !tokenColor ? undefined : { color: `hsl(${tokenColor})` }}
             onClick={(event) => {
               // Clicking a token must not seek the line, which is the default line behaviour.
               event.stopPropagation();
