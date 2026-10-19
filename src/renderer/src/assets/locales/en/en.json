@@ -1064,6 +1064,7 @@
     "panelTitle": "Word details",
     "noTokenSelected": "Click a word in the lyrics to see its details",
     "closePanel": "Close panel",
+    "togglePanel": "Toggle word panel",
     "lineContext": "Line",
     "meaning": "Meaning in this line",
     "grammarFunction": "Grammar",

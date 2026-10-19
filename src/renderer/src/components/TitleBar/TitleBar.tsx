@@ -20,8 +20,10 @@ import WindowControlsContainer from './WindowControlsContainer';
 const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stable';
 
 type Props = {
-  /** Closes the word-analysis panel; wired only on the fullscreen player. */
-  onCloseLyricsAnalysisPanel?: () => void;
+  /** Whether the word-analysis panel is open; wired only on the fullscreen player. */
+  isLyricsAnalysisPanelOpen?: boolean;
+  /** Toggles the word-analysis panel; wired only on the fullscreen player. */
+  onToggleLyricsAnalysisPanel?: () => void;
 };
 
 const TitleBar = memo((props: Props) => {
@@ -85,7 +87,10 @@ const TitleBar = memo((props: Props) => {
             {!isFullScreenPlayer && window.api.properties.isInDevelopment && <ChangeThemeBtn />}
             {isFullScreenPlayer && (
               <>
-                <CloseLyricsAnalysisPanelBtn onClose={props.onCloseLyricsAnalysisPanel ?? (() => {})} />
+                <CloseLyricsAnalysisPanelBtn
+                  isOpen={props.isLyricsAnalysisPanelOpen ?? false}
+                  onToggle={props.onToggleLyricsAnalysisPanel ?? (() => {})}
+                />
                 <ToggleSystemFullScreenBtn />
               </>
             )}

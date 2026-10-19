@@ -1064,6 +1064,7 @@
     "panelTitle": "词语详情",
     "noTokenSelected": "点击歌词中的词语查看详解",
     "closePanel": "关闭侧边栏",
+    "togglePanel": "切换词语面板",
     "lineContext": "所在歌词",
     "meaning": "在本句中的含义",
     "grammarFunction": "语法作用",

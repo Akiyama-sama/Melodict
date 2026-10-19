@@ -31,6 +31,10 @@ const FullScreenPlayer = () => {
   // analysis mode button now.
   const [isFullLyricsScreen] = useState(true);
   const [isAnalysisView, setIsAnalysisView] = useState(true);
+  // The word panel is closed by default; the title-bar menu button toggles it, and clicking a
+  // token opens it too. It stays mounted only while open, so the default lyrics layout is
+  // untouched.
+  const [isAnalysisPanelOpen, setIsAnalysisPanelOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState<{
     token: LyricsAnalysisToken;
     line: LyricsAnalysisLine;
@@ -70,7 +74,10 @@ const FullScreenPlayer = () => {
 
   // Leaving the analysis view closes any open token panel with it.
   useEffect(() => {
-    if (!isAnalysisView) setSelectedToken(undefined);
+    if (!isAnalysisView) {
+      setSelectedToken(undefined);
+      setIsAnalysisPanelOpen(false);
+    }
   }, [isAnalysisView]);
 
   const imgPath = useMemo(() => {
@@ -99,7 +106,13 @@ const FullScreenPlayer = () => {
         />
         {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
       </div>
-      <TitleBar onCloseLyricsAnalysisPanel={() => setSelectedToken(undefined)} />
+      <TitleBar
+        isLyricsAnalysisPanelOpen={isAnalysisPanelOpen}
+        onToggleLyricsAnalysisPanel={() => {
+          setIsAnalysisPanelOpen((prevState) => !prevState);
+          setSelectedToken(undefined);
+        }}
+      />
       <div
         className={`flex min-h-0 max-w-full flex-col justify-end overflow-hidden ${isChromeVisible && 'group/fullScreenPlayer'}`}
         ref={fullScreenPlayerContainerRef}
@@ -107,34 +120,39 @@ const FullScreenPlayer = () => {
         <div
           className={`full-screen-player-main-container absolute inset-0 w-full max-w-full! overflow-hidden ${
             isFullLyricsScreen
-              ? // The analysis panel is always mounted, so the lyrics column always shares the row
-                // with it. The panel caps at 30rem on large windows, but follows a third of the
-                // player width once the window gets tight (min 14rem), so the lyrics never get
-                // squeezed into a sliver on smaller sizes.
-                'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
+              ? isAnalysisPanelOpen
+                ? // The panel caps at 30rem on large windows, but follows a third of the player
+                  // width once the window gets tight (min 14rem), so the lyrics never get
+                  // squeezed into a sliver on smaller sizes.
+                  'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
+                : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
               : 'grid grid-cols-1'
           }`}
         >
-          {/* The panel is always mounted, so the song info always floats over the top third of
-              the lyrics column instead of taking a grid column of its own. */}
-          <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-            <SongInfoContainer songPos={songPos} isOverlay />
+          {/* With the panel open the song info floats over the top third of the lyrics column only,
+              so the lyrics keep their original position and the panel never gets blurred over. */}
+          {isFullLyricsScreen && !isAnalysisPanelOpen && <SongInfoContainer songPos={songPos} />}
 
+          <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
             <LyricsContainer
               isFullLyricsScreen={isFullLyricsScreen}
               isLyricsVisible={isLyricsVisible}
               setIsLyricsAvailable={setIsLyricsAvailable}
               selectedToken={selectedToken}
               isAnalysisView={isAnalysisView}
-              onTokenClick={(token, line) => setSelectedToken({ token, line })}
+              onTokenClick={(token, line) => {
+                setSelectedToken({ token, line });
+                setIsAnalysisPanelOpen(true);
+              }}
             />
+
+            {isFullLyricsScreen && isAnalysisPanelOpen && selectedToken && (
+              <SongInfoContainer songPos={songPos} isOverlay />
+            )}
           </div>
 
-          {isFullLyricsScreen && (
-            <LyricsAnalysisPanel
-              token={selectedToken?.token}
-              line={selectedToken?.line}
-            />
+          {isFullLyricsScreen && isAnalysisPanelOpen && (
+            <LyricsAnalysisPanel token={selectedToken?.token} line={selectedToken?.line} />
           )}
         </div>
         <SongControlContainer
