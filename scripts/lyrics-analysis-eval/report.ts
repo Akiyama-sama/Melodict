@@ -16,12 +16,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
-import type {
-  EvalAnalysisResult,
-  EvalLine,
-  GoldLine,
-  GoldStandard,
-  EvalRunSummary
+import {
+  type EvalAnalysisResult,
+  type EvalLine,
+  type GoldLine,
+  type GoldStandard,
+  type EvalRunSummary,
+  readTokenCard
 } from './types';
 
 import { escapeHtml } from './lib/html';
@@ -52,23 +53,27 @@ interface TokenCell {
 }
 
 const tokenCellsFromAnalysis = (line: EvalLine): TokenCell[] =>
-  line.tokens.map((token) => ({
-    surface: token.text,
-    rows: [
-      { label: '词典形', value: token.card?.term ?? token.term ?? '—' },
-      { label: '语境义', value: token.card?.meaning ?? token.meaning ?? '—' },
-      { label: '语法', value: token.card?.grammarFunction ?? token.grammarFunction ?? '—' },
-      {
-        label: '注音',
-        value: token.pronunciation
-          ? Object.entries(token.pronunciation)
-              .filter(([, value]) => value && value !== token.text)
-              .map(([key, value]) => `${key}: ${value}`)
-              .join(' · ') || '—'
-          : '—'
-      }
-    ]
-  }));
+  line.tokens.map((token) => {
+    const card = readTokenCard(token);
+    return {
+      surface: token.text,
+      rows: [
+        { label: '词典形', value: card.term ?? '—' },
+        { label: '语境义', value: card.meaning ?? '—' },
+        { label: '语法', value: card.grammarFunction ?? '—' },
+        // Reads token.pronunciation flat-only (not card.pronunciation) — kept as-is intentionally.
+        {
+          label: '注音',
+          value: token.pronunciation
+            ? Object.entries(token.pronunciation)
+                .filter(([, value]) => value && value !== token.text)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(' · ') || '—'
+            : '—'
+        }
+      ]
+    };
+  });
 
 const tokenCellsFromGold = (line: GoldLine): TokenCell[] =>
   line.tokens.map((token) => ({

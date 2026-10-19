@@ -28,7 +28,7 @@ import { readStoredCredentials } from './lib/creds';
 import { graderVerdictSchema } from './lib/graderSchema';
 import { escapeHtml } from './lib/html';
 import { parseLrcFile } from './lib/lrc';
-import { EVAL_CATEGORIES, type CategoryScore, type EvalAnalysisResult, type EvalCategory, type EvalLine, type GoldLine, type GoldStandard, type GraderVerdict } from './types';
+import { EVAL_CATEGORIES, readTokenCard, type CategoryScore, type EvalAnalysisResult, type EvalCategory, type EvalLine, type GoldLine, type GoldStandard, type GraderVerdict } from './types';
 
 const CATEGORY_LABELS: Record<EvalCategory, string> = {
   tokenization: '分词（tokenization）— 词元切分边界是否与金标准一致（该分的分、该合的合，句型/惯用成块）',
@@ -275,11 +275,7 @@ const main = async () => {
         translation: produced.translation,
         tokens: produced.tokens.map((token) => ({
           text: token.text,
-          term: token.card?.term ?? token.term,
-          meaning: token.card?.meaning ?? token.meaning,
-          grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
-          // Pronunciation lives on card.pronunciation in the pipeline's token shape.
-          pronunciation: token.card?.pronunciation ?? token.pronunciation
+          ...readTokenCard(token)
         }))
       };
 
@@ -382,15 +378,14 @@ const main = async () => {
       const produced = match?.produced;
       const overlapPct = match ? Math.round(match.overlap * 100) : 0;
       const producedView = (produced?.tokens ?? []).map((token) => {
-        // Pronunciation lives on card.pronunciation in the pipeline's token shape.
-        const pronunciation = token.card?.pronunciation ?? token.pronunciation;
+        const card = readTokenCard(token);
         return {
           text: token.text,
-          term: token.card?.term ?? token.term,
-          meaning: token.card?.meaning ?? token.meaning,
-          grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
-          pronunciation: pronunciation
-            ? Object.entries(pronunciation)
+          term: card.term,
+          meaning: card.meaning,
+          grammarFunction: card.grammarFunction,
+          pronunciation: card.pronunciation
+            ? Object.entries(card.pronunciation)
                 .filter(([, value]) => value && value !== token.text)
                 .map(([k, v]) => `${k}:${v}`)
                 .join(' · ') || '—'
