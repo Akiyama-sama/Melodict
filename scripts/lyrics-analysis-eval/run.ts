@@ -21,6 +21,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 
 import { findUncoveredLineWords } from '../../src/common/lyricsAnalysis';
+import { ROMALRC_MATCH_WINDOW_MS } from '../../src/common/lyricsTiming';
 import { analyzeLyrics } from '../../src/main/lyricsAnalysis/providerGateway';
 import { aggregateCategoryMeans, aggregateOverallMean, aggregatePerCategory } from './lib/aggregate';
 import { readStoredCredentials } from './lib/creds';
@@ -95,7 +96,7 @@ const main = async () => {
    * window as the app's `attachRomanizedText`). Both files must be timestamped; a plain-text
    * lyrics file simply gets no reference.
    */
-  const MATCH_WINDOW_MS = 300;
+  const MATCH_WINDOW_MS = ROMALRC_MATCH_WINDOW_MS;
   const findRomanized = (index: number) => {
     const lyricEntry = lyricEntries[index];
     const lyricAtMs = lyricEntry?.atMs;

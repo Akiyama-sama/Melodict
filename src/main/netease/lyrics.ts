@@ -1,4 +1,5 @@
 import parseLyrics from '../../common/parseLyrics';
+import { ROMALRC_MATCH_WINDOW_MS } from '../../common/lyricsTiming';
 import { callNeteaseForBody } from './client';
 import { readNeteaseLyricsCache, writeNeteaseLyricsCache } from './lyricsCache';
 
@@ -183,7 +184,7 @@ export const attachRomanizedText = (lyrics: SongLyrics, romalrcLyric: string): v
 
   // Contributors re-sync romalrc by hand, so timestamps can drift a few tens of ms from the main
   // lyrics; match to the nearest entry within a small window instead of requiring equality.
-  const MATCH_WINDOW_MS = 300;
+  const MATCH_WINDOW_MS = ROMALRC_MATCH_WINDOW_MS;
 
   let matched = 0;
   for (const line of lyrics.lyrics.parsedLyrics) {
