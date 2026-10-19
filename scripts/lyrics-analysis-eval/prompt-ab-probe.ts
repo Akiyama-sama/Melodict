@@ -14,6 +14,8 @@ import {
   type LyricsAnalysisInputLine
 } from '../../src/common/lyricsAnalysis';
 
+import { readCredsFromEnvFile } from './lib/creds';
+
 // Keep a private copy so variants can strip fields without touching the module under test.
 const buildVariantSystemPrompt = (
   uiLanguage: string,
@@ -75,15 +77,7 @@ const probeLines: LyricsAnalysisInputLine[] = TIMED.slice(0, 8).map((line, index
   };
 });
 
-const readCreds = () => {
-  const env = fs.readFileSync('/tmp/eval-creds.env', 'utf-8');
-  const get = (key: string) =>
-    new RegExp(`^(?:export\\s+)?${key}=(.*)$`, 'm').exec(env)?.[1]?.trim() ?? '';
-  return {
-    baseURL: get('LYRICS_ANALYSIS_BASE_URL') ?? '',
-    apiKey: get('LYRICS_ANALYSIS_API_KEY') ?? ''
-  };
-};
+const readCreds = () => readCredsFromEnvFile();
 
 const runVariant = async (variant: 'full' | 'directive-only' | 'roma-only' | 'v2') => {
   const { baseURL, apiKey } = readCreds();

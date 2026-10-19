@@ -81,7 +81,7 @@
     "eslint-inspector": "pnpm dlx @eslint/config-inspector@latest",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
+    "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web && pnpm run typecheck:scripts",
     "start": "electron-vite preview",
     "dev": "electron-vite dev --watch --inspect --sourcemap",
     "build": "electron-vite build",
@@ -105,7 +105,8 @@
     "renderer:generate-routes": "tsr generate",
     "renderer:watch-routes": "tsr watch",
     "preversion": "pnpm test",
-    "version": "pnpm install && pnpm run build"
+    "version": "pnpm install && pnpm run build",
+    "typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json --composite false"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.130",

@@ -21,6 +21,16 @@ export interface EvalToken {
   /** Grammar role (card.grammarFunction). */
   grammarFunction?: string;
   pronunciation?: Record<string, string>;
+  /**
+   * Production pipeline tokens nest these fields under `card`; older cached artifacts and grader
+   * views may carry them flat. Consumers read `token.card?.x ?? token.x`.
+   */
+  card?: {
+    term?: string;
+    meaning?: string;
+    grammarFunction?: string;
+    pronunciation?: Record<string, string>;
+  };
 }
 
 /** One analyzed line, mirroring the production LyricsAnalysisLine. */

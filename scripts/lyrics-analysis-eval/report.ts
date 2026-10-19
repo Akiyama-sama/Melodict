@@ -24,6 +24,8 @@ import type {
   EvalRunSummary
 } from './types';
 
+import { escapeHtml } from './lib/html';
+
 const parseArgs = (argv: string[]) => {
   const get = (flag: string) => {
     const index = argv.indexOf(flag);
@@ -42,13 +44,6 @@ const parseArgs = (argv: string[]) => {
     telemetry: argv.includes('--telemetry')
   };
 };
-
-const escapeHtml = (value: string) =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 
 interface TokenCell {
   surface: string;
