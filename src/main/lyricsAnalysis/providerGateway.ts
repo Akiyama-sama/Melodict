@@ -2,6 +2,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import {
   APICallError,
   generateText,
+  type LanguageModel,
   NoObjectGeneratedError,
   Output,
   streamText,
@@ -127,6 +128,12 @@ export interface AnalyzeLyricsOptions {
   onRepairStarted?: (failedLineIds: string[]) => void;
   /** Fired after every batch (first or repair) with its timing/token/loss metrics. */
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
+  /**
+   * Test seam: overrides how the AI SDK model is constructed from the provider config. Defaults
+   * to the real OpenAI-compatible adapter; orchestration tests inject a scripted fake here so
+   * they run without an actual endpoint or Electron modules.
+   */
+  createModel?: (config: LyricsAnalysisProviderConfig) => LanguageModel;
 }
 
 /** Final aggregate for telemetry: token totals across every pass of a run. */
@@ -143,7 +150,7 @@ export interface AnalyzeLyricsPassStats {
 export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
   const { config, uiLanguage, songTitle, songArtists, lines, signal, onLine } = options;
   const textByLineId = new Map(lines.map((line) => [line.lineId, line.text]));
-  const model = createModel(config);
+  const model = options.createModel?.(config) ?? createModel(config);
   // The per-language rules cover the whole song's script mix, so they belong in the system
   // prompt once — not in each batch's user JSON, where they read as row data.
   const languageDirective = buildLanguageDirective(lines);
