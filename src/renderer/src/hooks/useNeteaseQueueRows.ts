@@ -1,4 +1,4 @@
-import { isNeteaseSongId } from '@common/netease';
+import { isNeteaseSongId, tryDecodeNeteaseSongId } from '@common/netease';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -22,7 +22,10 @@ export function useNeteaseQueueRows(
   localSongs: SongData[] | undefined
 ): QueueRowData[] | undefined {
   const neteaseIds = useMemo(
-    () => currentQueue.filter((songId) => isNeteaseSongId(songId)).map((id) => -(id + 1)),
+    () =>
+      currentQueue
+        .map((songId) => tryDecodeNeteaseSongId(songId))
+        .filter((neteaseId): neteaseId is number => neteaseId !== null),
     [currentQueue]
   );
 
@@ -46,7 +49,9 @@ export function useNeteaseQueueRows(
 
     return currentQueue.map((songId): QueueRowData | null => {
       if (isNeteaseSongId(songId)) {
-        const summary = summariesById.get(-(songId + 1));
+        // Negative ids always decode (the helper only rejects non-negative ones).
+        const neteaseId = tryDecodeNeteaseSongId(songId)!;
+        const summary = summariesById.get(neteaseId);
         return summary ? { kind: 'netease', summary } : null;
       }
       const song = localById.get(songId);
