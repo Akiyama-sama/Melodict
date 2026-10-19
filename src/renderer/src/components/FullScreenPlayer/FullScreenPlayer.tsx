@@ -99,7 +99,7 @@ const FullScreenPlayer = () => {
         />
         {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
       </div>
-      <TitleBar />
+      <TitleBar onCloseLyricsAnalysisPanel={() => setSelectedToken(undefined)} />
       <div
         className={`flex min-h-0 max-w-full flex-col justify-end overflow-hidden ${isChromeVisible && 'group/fullScreenPlayer'}`}
         ref={fullScreenPlayerContainerRef}
@@ -107,20 +107,19 @@ const FullScreenPlayer = () => {
         <div
           className={`full-screen-player-main-container absolute inset-0 w-full max-w-full! overflow-hidden ${
             isFullLyricsScreen
-              ? selectedToken
-                ? // The panel caps at 30rem on large windows, but follows a third of the player
-                  // width once the window gets tight (min 14rem), so the lyrics never get
-                  // squeezed into a sliver on smaller sizes.
-                  'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
-                : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
+              ? // The analysis panel is always mounted, so the lyrics column always shares the row
+                // with it. The panel caps at 30rem on large windows, but follows a third of the
+                // player width once the window gets tight (min 14rem), so the lyrics never get
+                // squeezed into a sliver on smaller sizes.
+                'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
               : 'grid grid-cols-1'
           }`}
         >
-          {/* With the panel open the song info floats over the top third of the lyrics column only,
-              so the lyrics keep their original position and the panel never gets blurred over. */}
-          {isFullLyricsScreen && !selectedToken && <SongInfoContainer songPos={songPos} />}
-
+          {/* The panel is always mounted, so the song info always floats over the top third of
+              the lyrics column instead of taking a grid column of its own. */}
           <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+            <SongInfoContainer songPos={songPos} isOverlay />
+
             <LyricsContainer
               isFullLyricsScreen={isFullLyricsScreen}
               isLyricsVisible={isLyricsVisible}
@@ -129,17 +128,12 @@ const FullScreenPlayer = () => {
               isAnalysisView={isAnalysisView}
               onTokenClick={(token, line) => setSelectedToken({ token, line })}
             />
-
-            {isFullLyricsScreen && selectedToken && (
-              <SongInfoContainer songPos={songPos} isOverlay />
-            )}
           </div>
 
-          {selectedToken && (
+          {isFullLyricsScreen && (
             <LyricsAnalysisPanel
-              token={selectedToken.token}
-              line={selectedToken.line}
-              onClose={() => setSelectedToken(undefined)}
+              token={selectedToken?.token}
+              line={selectedToken?.line}
             />
           )}
         </div>

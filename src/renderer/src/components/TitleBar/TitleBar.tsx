@@ -12,12 +12,19 @@ import NetworkIndicator from './indicators/NetworkIndicator';
 import NewUpdateIndicator from './indicators/NewUpdateIndicator';
 import NavigationControlsContainer from './NavigationControlsContainer';
 import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
+import CloseLyricsAnalysisPanelBtn from './special_controls/CloseLyricsAnalysisPanelBtn';
 import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
+import ToggleSystemFullScreenBtn from './special_controls/ToggleSystemFullScreenBtn';
 import WindowControlsContainer from './WindowControlsContainer';
 
 const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stable';
 
-const TitleBar = memo(() => {
+type Props = {
+  /** Closes the word-analysis panel; wired only on the fullscreen player. */
+  onCloseLyricsAnalysisPanel?: () => void;
+};
+
+const TitleBar = memo((props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const location = useLocation();
 
@@ -35,28 +42,31 @@ const TitleBar = memo(() => {
       <div
         className={`logo-and-app-name-and-navigation-controls-container flex h-full w-full items-center justify-between`}
       >
-        <div className="logo-and-app-name-container flex items-center">
-          <span className="logo-container">
-            <Img
-              className={`mr-2 aspect-square h-7 w-7 rounded-md p-1 shadow-md`}
-              src={LightModeLogo}
-              alt="Nora Logo"
-            />
-          </span>
-          <span className="app-name-container">
-            <span>
-              Nora
-              <sup
-                className={`app-version text-font-color-highlight dark:text-dark-font-color-highlight ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase ${
-                  bodyBackgroundImage && 'text-dark-font-color-highlight!'
-                } `}
-                title={`v${version}`}
-              >
-                {appReleasePhase}
-              </sup>
+        {/* The fullscreen player drops the logo and app name for a cleaner stage. */}
+        {!isFullScreenPlayer && (
+          <div className="logo-and-app-name-container flex items-center">
+            <span className="logo-container">
+              <Img
+                className={`mr-2 aspect-square h-7 w-7 rounded-md p-1 shadow-md`}
+                src={LightModeLogo}
+                alt="Nora Logo"
+              />
             </span>
-          </span>
-        </div>
+            <span className="app-name-container">
+              <span>
+                Nora
+                <sup
+                  className={`app-version text-font-color-highlight dark:text-dark-font-color-highlight ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase ${
+                    bodyBackgroundImage && 'text-dark-font-color-highlight!'
+                  } `}
+                  title={`v${version}`}
+                >
+                  {appReleasePhase}
+                </sup>
+              </span>
+            </span>
+          </div>
+        )}
         {!isFullScreenPlayer ? <NavigationControlsContainer /> : <div />}
       </div>
       {window.api.properties.isInDevelopment ? (
@@ -72,7 +82,13 @@ const TitleBar = memo(() => {
             <NetworkIndicator />
           </div>
           <div className="special-controls-container flex flex-row">
-            {window.api.properties.isInDevelopment && <ChangeThemeBtn />}
+            {!isFullScreenPlayer && window.api.properties.isInDevelopment && <ChangeThemeBtn />}
+            {isFullScreenPlayer && (
+              <>
+                <CloseLyricsAnalysisPanelBtn onClose={props.onCloseLyricsAnalysisPanel ?? (() => {})} />
+                <ToggleSystemFullScreenBtn />
+              </>
+            )}
             {isFullScreenPlayer && <GoToMainPlayerBtn />}
           </div>
         </div>

@@ -103,6 +103,7 @@
   },
   "titleBar": {
     "changeTheme": "切换主题",
+    "toggleSystemFullScreen": "切换系统全屏",
     "goBack": "返回 (Alt + 左箭头)",
     "goHome": "回到主页 (Alt + Home)",
     "goForward": "前进 (Alt + 右箭头)",
@@ -1061,6 +1062,7 @@
   },
   "lyricsAnalysis": {
     "panelTitle": "词语详情",
+    "noTokenSelected": "点击歌词中的词语查看详解",
     "closePanel": "关闭侧边栏",
     "lineContext": "所在歌词",
     "meaning": "在本句中的含义",

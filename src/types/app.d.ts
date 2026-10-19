@@ -33,6 +33,8 @@ declare global {
     | 'app/Close'
     | 'app/minimize'
     | 'app/toggleMaximize'
+    | 'app/toggleFullScreen'
+    | 'app/isFullScreen'
     | 'app/focused'
     | 'app/blurred'
     | 'app/systemThemeChange'

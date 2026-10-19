@@ -103,6 +103,7 @@
   },
   "titleBar": {
     "changeTheme": "Change theme",
+    "toggleSystemFullScreen": "Toggle system fullscreen",
     "goBack": "Go Back (Alt + Left-Arrow)",
     "goHome": "Go to Home (Alt + Home)",
     "goForward": "Go Forward (Alt + Right-Arrow)",
@@ -1061,6 +1062,7 @@
   },
   "lyricsAnalysis": {
     "panelTitle": "Word details",
+    "noTokenSelected": "Click a word in the lyrics to see its details",
     "closePanel": "Close panel",
     "lineContext": "Line",
     "meaning": "Meaning in this line",

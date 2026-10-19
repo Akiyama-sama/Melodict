@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 
-import type { LyricsAnalysisToken } from '../../../../../common/lyricsAnalysis';
+import type { LyricsAnalysisLine, LyricsAnalysisToken } from '../../../../../common/lyricsAnalysis';
 
 type Props = {
-  token: LyricsAnalysisToken;
-  line: LyricsAnalysisLine;
-  onClose: () => void;
+  /** Undefined while no token is selected — the panel stays mounted and shows an empty state. */
+  token?: LyricsAnalysisToken;
+  line?: LyricsAnalysisLine;
 };
 
 const PronunciationRow = ({ label, value }: { label: string; value?: string }) => {
@@ -22,12 +22,34 @@ const PronunciationRow = ({ label, value }: { label: string; value?: string }) =
 };
 
 /**
- * Right-hand study panel shown after a token is clicked. It sits in the grid next to the lyrics and
- * squeezes the album-cover column, mirroring the side-panel pattern of desktop code editors.
+ * Right-hand study panel for the selected token. It sits in the grid next to the lyrics and
+ * squeezes the album-cover column, mirroring the side-panel pattern of desktop code editors. The
+ * panel is always mounted on the fullscreen player; without a selected token it shows an empty
+ * state instead of its content.
  */
 const LyricsAnalysisPanel = (props: Props) => {
-  const { token, line, onClose } = props;
+  const { token, line } = props;
   const { t } = useTranslation();
+
+  if (!token || !line) {
+    return (
+      <aside
+        className="lyrics-analysis-panel text-font-color-white flex h-full min-h-0 flex-col overflow-y-auto border-l border-white/10 bg-black/25 px-8 py-10 backdrop-blur-lg"
+        id="lyricsAnalysisPanel"
+      >
+        <div className="text-font-color-white/50 mb-1 text-xs tracking-[0.2em] uppercase">
+          {t('lyricsAnalysis.panelTitle')}
+        </div>
+        <div className="text-font-color-white/40 mt-32 flex flex-col items-center gap-3 text-center">
+          <span className="material-icons-round-outlined text-5xl leading-none">touch_app</span>
+          <p className="max-w-60 text-lg leading-relaxed">
+            {t('lyricsAnalysis.noTokenSelected')}
+          </p>
+        </div>
+      </aside>
+    );
+  }
+
   const { card } = token;
 
   const hasPronunciation = Object.values(card.pronunciation).some((value) => Boolean(value));
@@ -47,15 +69,6 @@ const LyricsAnalysisPanel = (props: Props) => {
             <div className="text-font-color-white/60 mt-2 text-lg">“{card.term}”</div>
           )}
         </div>
-        <button
-          type="button"
-          className="lyrics-analysis-panel-close flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-white/10 text-white transition-colors hover:bg-white/20"
-          onClick={onClose}
-          title={t('lyricsAnalysis.closePanel')}
-          aria-label={t('lyricsAnalysis.closePanel')}
-        >
-          <span className="material-icons-round-outlined text-xl leading-none">close</span>
-        </button>
       </div>
 
       <div className="panel-line-context mb-8 rounded-xl bg-white/5 px-4 py-3">

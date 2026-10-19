@@ -14,6 +14,8 @@ const properties = {
 const windowControls = {
   minimizeApp: (): void => ipcRenderer.send('app/minimize'),
   toggleMaximizeApp: (): void => ipcRenderer.send('app/toggleMaximize'),
+  toggleFullScreenApp: (): void => ipcRenderer.send('app/toggleFullScreen'),
+  isFullScreenApp: (): Promise<boolean> => ipcRenderer.invoke('app/isFullScreen'),
   closeApp: (): void => ipcRenderer.send('app/close'),
   hideApp: (): void => ipcRenderer.send('app/hide'),
   showApp: (): void => ipcRenderer.send('app/show'),
@@ -187,7 +189,11 @@ const fullscreen = {
   onEnterFullscreen: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/enteredFullscreen', callback),
   onLeaveFullscreen: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/leftFullscreen', callback)
+    ipcRenderer.on('app/leftFullscreen', callback),
+  stopListeningForFullscreenChanges: (callback: (e: unknown) => void) => {
+    ipcRenderer.removeListener('app/enteredFullscreen', callback);
+    ipcRenderer.removeListener('app/leftFullscreen', callback);
+  }
 };
 
 // $ APP SEARCH

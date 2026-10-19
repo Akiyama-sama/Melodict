@@ -147,6 +147,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
     );
 
+    // OS-level fullscreen (the whole desktop workspace), not just a maximized window. The
+    // enter/leave-full-screen events below already notify the renderer for each change.
+    ipcMain.on('app/toggleFullScreen', () =>
+      mainWindow.isFullScreen() ? mainWindow.setFullScreen(false) : mainWindow.setFullScreen(true)
+    );
+
+    ipcMain.handle('app/isFullScreen', () => mainWindow.isFullScreen());
+
     ipcMain.on('app/hide', () => mainWindow.hide());
 
     ipcMain.on('app/show', () => mainWindow.show());
