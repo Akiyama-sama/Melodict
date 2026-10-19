@@ -1,4 +1,4 @@
-import { store } from '../store/store';
+import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import PlayerQueue from './playerQueue';
 
@@ -78,21 +78,10 @@ function setupQueueStoreSync(queue: PlayerQueue) {
       return;
     }
 
-    store.setState((state) => ({
-      ...state,
-      localStorage: {
-        ...state.localStorage,
-        queue: {
-          songIds: queue.getAllSongIds(),
-          position: queue.position,
-          queueBeforeShuffle: queue.queueBeforeShuffle,
-          metadata: queue.getMetadata()
-        }
-      }
-    }));
-
-    // Persist to localStorage
-    storage.queue.setQueue(queue.toJSON());
+    dispatch({
+      type: 'UPDATE_QUEUE',
+      data: queue.toJSON()
+    });
   });
 
   queue.on('positionChange', () => {
@@ -106,19 +95,10 @@ function setupQueueStoreSync(queue: PlayerQueue) {
       return;
     }
 
-    store.setState((state) => ({
-      ...state,
-      localStorage: {
-        ...state.localStorage,
-        queue: {
-          ...state.localStorage.queue,
-          position: queue.position
-        }
-      }
-    }));
-
-    // Persist to localStorage
-    storage.queue.setQueue(queue.toJSON());
+    dispatch({
+      type: 'UPDATE_QUEUE',
+      data: queue.toJSON()
+    });
   });
 
   // 2. Store → Queue: When store changes externally, sync queue
