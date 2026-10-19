@@ -44,7 +44,6 @@ const playerControls = {
     ipcRenderer.on('app/player/skipForward', callback),
   skipBackwardToPreviousSong: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/skipBackward', callback),
-  sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
   setDiscordRpcActivity: (activity: DiscordActivity): void =>
     ipcRenderer.send('app/setDiscordRpcActivity', activity),
 
@@ -387,9 +386,7 @@ const songDataFromInternet = {
 
 // $ APP USER DATA
 const userData = {
-  getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
-  saveUserData: (dataType: UserDataTypes, data: unknown) =>
-    ipcRenderer.invoke('app/saveUserData', dataType, data)
+  getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData')
 };
 
 // $ STORAGE DATA

@@ -7,7 +7,6 @@ import 'material-symbols/rounded.css';
 import ErrorBoundary from './components/ErrorBoundary';
 // ? CONTEXTS
 import { AppUpdateContext, type AppUpdateContextType } from './contexts/AppUpdateContext';
-// import { SongPositionContext } from './contexts/SongPositionContext';
 import { useAppLifecycle } from './hooks/useAppLifecycle';
 import { useAppUpdates } from './hooks/useAppUpdates';
 import { useAudioPlayer } from './hooks/useAudioPlayer';

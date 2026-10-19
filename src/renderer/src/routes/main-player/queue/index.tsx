@@ -74,7 +74,6 @@ function RouteComponent() {
   const queueRows = useNeteaseQueueRows(currentQueue, localQueuedSongs);
   const queuedSongs = queueRows;
 
-  // const previousQueueRef = useRef<string[]>([]);
   const { data: queueInfo } = useQuery({
     ...queueQuery.info({
       queueType: queue.metadata?.queueType ?? 'songs',
@@ -99,47 +98,6 @@ function RouteComponent() {
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
 
   const ListRef = useRef<VirtuosoHandle>(null);
-
-  // const isTheSameQueue = useCallback((newQueueSongIds: string[]) => {
-  //   const prevQueueSongIds = previousQueueRef.current;
-  //   const isSameQueue = prevQueueSongIds.every((id) => newQueueSongIds.includes(id));
-
-  //   return isSameQueue;
-  // }, []);
-
-  // const fetchAllSongsData = useCallback(() => {
-  //   window.api.audioLibraryControls
-  //     .getSongInfo(currentQueue, 'addedOrder', undefined, undefined, true)
-  //     .then((res) => {
-  //       if (res) {
-  //         setQueuedSongs(res);
-  //         previousQueueRef.current = currentQueue.slice();
-  //       }
-  //     });
-  // }, [currentQueue]);
-
-  // useEffect(() => {
-  //   fetchAllSongsData();
-  //   const manageSongUpdatesInCurrentQueue = (e: Event) => {
-  //     if ('detail' in e) {
-  //       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-  //       for (let i = 0; i < dataEvents.length; i += 1) {
-  //         const event = dataEvents[i];
-  //         if (
-  //           event.dataType.includes('songs') ||
-  //           event.dataType === 'userData/queue' ||
-  //           event.dataType === 'blacklist/songBlacklist' ||
-  //           event.dataType === 'songs/likes'
-  //         )
-  //           fetchAllSongsData();
-  //       }
-  //     }
-  //   };
-  //   document.addEventListener('app/dataUpdates', manageSongUpdatesInCurrentQueue);
-  //   return () => {
-  //     document.removeEventListener('app/dataUpdates', manageSongUpdatesInCurrentQueue);
-  //   };
-  // }, [fetchAllSongsData]);
 
   const selectAllHandler = useSelectAllHandler(
     (queuedSongs ?? []).map((row) => (row.kind === 'local' ? row.song : row.summary)) as SongData[],

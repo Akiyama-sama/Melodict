@@ -34,7 +34,7 @@ const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayabl
  *   updateCurrentSongPlaybackState(true);
  *   ```;
  *
- * @param player - The HTMLAudioElement instance
+ * @param playerInstance - The AudioPlayer singleton instance
  * @param playerQueue - The PlayerQueue instance for queue management
  * @param recordListeningData - Function to record listening session data
  * @param managePlaybackErrors - Function to handle playback errors
@@ -43,7 +43,7 @@ const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayabl
  * @returns Object containing player control functions
  */
 export function usePlayerControl(
-  playerInstance: AudioPlayer | HTMLAudioElement,
+  playerInstance: AudioPlayer,
   playerQueue: PlayerQueue,
   recordListeningData: (
     songId: number,
@@ -62,13 +62,10 @@ export function usePlayerControl(
   const { t } = useTranslation();
   const refStartPlay = useRef(false);
 
-  // Support both AudioPlayer instance and HTMLAudioElement for backward compatibility
-  const player =
-    playerInstance instanceof HTMLAudioElement
-      ? playerInstance
-      : (playerInstance as AudioPlayer).audio;
-  const audioPlayer =
-    playerInstance instanceof HTMLAudioElement ? null : (playerInstance as AudioPlayer);
+  // The app only ever passes the AudioPlayer singleton; the raw HTMLAudioElement lives on its
+  // `.audio` property for the listeners that need the element itself.
+  const player = playerInstance.audio;
+  const audioPlayer = playerInstance;
 
   const toggleSongPlayback = useCallback(
     (startPlay?: boolean) => {
@@ -77,38 +74,7 @@ export function usePlayerControl(
       const forcePlay = typeof startPlay === 'boolean' ? startPlay : undefined;
 
       if (store.state.currentSongData?.songId) {
-        // Use AudioPlayer's togglePlayback if available
-        if (audioPlayer) {
-          return audioPlayer.togglePlayback(forcePlay).catch((err) => managePlaybackErrors(err));
-        }
-
-        // Fallback to direct audio element control
-        if (typeof forcePlay !== 'boolean' || forcePlay === player.paused) {
-          if (player.readyState > 0) {
-            if (player.paused) {
-              return player
-                .play()
-                .then(() => {
-                  const playbackChange = new CustomEvent('player/playbackChange');
-                  return player.dispatchEvent(playbackChange);
-                })
-                .catch((err) => managePlaybackErrors(err));
-            }
-            if (player.ended) {
-              player.currentTime = 0;
-              return player
-                .play()
-                .then(() => {
-                  const playbackChange = new CustomEvent('player/playbackChange');
-                  return player.dispatchEvent(playbackChange);
-                })
-                .catch((err) => managePlaybackErrors(err));
-            }
-            const playbackChange = new CustomEvent('player/playbackChange');
-            player.dispatchEvent(playbackChange);
-            return player.pause();
-          }
-        }
+        return audioPlayer.togglePlayback(forcePlay).catch((err) => managePlaybackErrors(err));
       } else
         addNewNotifications([
           {
@@ -120,7 +86,7 @@ export function usePlayerControl(
         ]);
       return undefined;
     },
-    [addNewNotifications, t, managePlaybackErrors, player]
+    [addNewNotifications, t, managePlaybackErrors, audioPlayer]
   );
 
   const playSong = useCallback(
@@ -128,62 +94,14 @@ export function usePlayerControl(
       console.log('[playSong]', { songId, isStartPlay, playAsCurrentSongIndex });
 
       if (typeof songId === 'number') {
-        // Use AudioPlayer's playSongById if available (preferred path)
-        if (audioPlayer) {
-          return audioPlayer.playSongById(songId, {
-            autoPlay: isStartPlay,
-            recordListening: true,
-            onError: (error) => {
-              console.error('Error playing song via AudioPlayer:', error);
-              changePromptMenuData(true, <SongUnplayableErrorPrompt err={error as Error} />);
-            }
-          });
-        }
-
-        // Fallback to legacy direct control (deprecated)
-        console.time('timeForSongFetch');
-
-        return window.api.audioLibraryControls
-          .getSong(songId)
-          .then((songData) => {
-            console.timeEnd('timeForSongFetch');
-            if (songData) {
-              console.log('[playSong.received]', {
-                songId,
-                title: songData.title,
-                path: songData.path
-              });
-
-              dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
-
-              storage.playback.setCurrentSongOptions('songId', songData.songId);
-
-              const newSrc = `${songData.path}?ts=${Date.now()}`;
-              console.log('[playSong.src]', { src: newSrc });
-              player.src = newSrc;
-
-              const trackChangeEvent = new CustomEvent('player/trackchange', {
-                detail: songId
-              });
-              player.dispatchEvent(trackChangeEvent);
-
-              refStartPlay.current = isStartPlay;
-
-              if (isStartPlay) {
-                console.log('[playSong.autoStart]', { isStartPlay: true });
-                toggleSongPlayback();
-              }
-
-              // Dynamic theme is now handled automatically by useDynamicTheme hook
-
-              recordListeningData(songId, songData.duration);
-            } else console.log(songData);
-            return undefined;
-          })
-          .catch((err) => {
-            console.error(err);
-            changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
-          });
+        return audioPlayer.playSongById(songId, {
+          autoPlay: isStartPlay,
+          recordListening: true,
+          onError: (error) => {
+            console.error('Error playing song via AudioPlayer:', error);
+            changePromptMenuData(true, <SongUnplayableErrorPrompt err={error as Error} />);
+          }
+        });
       }
       changePromptMenuData(
         true,
@@ -202,7 +120,7 @@ export function usePlayerControl(
         'ERROR'
       );
     },
-    [audioPlayer, changePromptMenuData, toggleSongPlayback, recordListeningData, player, t]
+    [audioPlayer, changePromptMenuData, t]
   );
 
   const playSongFromUnknownSource = useCallback(
