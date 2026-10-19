@@ -11,8 +11,11 @@ overrides:
 # Packages whose install scripts are allowed to run. better-sqlite3 is deliberately absent: the app
 # uses PGlite, and it is only an auto-installed optional peer of drizzle-orm, so it must not compile.
 # electron-winstaller copies the vendored 7-Zip binary that `electron-builder --win` packages with.
+# electron MUST stay listed: its install script downloads the binary and writes path.txt; pnpm 10
+# skips unapproved scripts entirely, and without it `pnpm dev` dies with "Error: Electron uninstall".
 onlyBuiltDependencies:
   - '@swc/core'
+  - electron
   - esbuild
   - electron-winstaller
   - register-scheme
