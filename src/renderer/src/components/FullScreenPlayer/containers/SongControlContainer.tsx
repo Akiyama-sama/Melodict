@@ -8,7 +8,6 @@ import Button from '../../Button';
 import VolumeSlider from '../../VolumeSlider';
 
 type Props = {
-  isLyricsVisible: boolean;
   isLyricsAvailable: boolean;
   isMouseActive: boolean;
   isAnalysisView: boolean;
@@ -30,13 +29,7 @@ const SongControlContainer = (props: Props) => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const {
-    isLyricsVisible,
-    isLyricsAvailable,
-    isMouseActive,
-    isAnalysisView,
-    setIsAnalysisView
-  } = props;
+  const { isLyricsAvailable, isMouseActive, isAnalysisView, setIsAnalysisView } = props;
 
   const handleSkipForwardClickWithParams = useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
@@ -46,10 +39,10 @@ const SongControlContainer = (props: Props) => {
   return (
     <div
       className={`song-control-container peer/songControlContainer group/songControlContainer box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
-        isLyricsVisible && isLyricsAvailable
+        isLyricsAvailable
           ? 'invisible opacity-0 group-hover/fullScreenPlayer:visible group-hover/fullScreenPlayer:opacity-100'
           : 'visible opacity-100'
-      } ${!isCurrentSongPlaying && isLyricsVisible && 'visible! opacity-100!'}`}
+      } ${!isCurrentSongPlaying && 'visible! opacity-100!'}`}
     >
       <div className="song-controls-container flex h-fit items-center">
         <Button

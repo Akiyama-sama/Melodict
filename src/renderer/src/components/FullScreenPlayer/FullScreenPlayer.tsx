@@ -23,8 +23,6 @@ const FullScreenPlayer = () => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  // Lyrics stay visible; the notes button toggles between the plain and the token-analyzed view.
-  const isLyricsVisible = true;
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
   const [songPos, setSongPos] = useState(0);
   const [isAnalysisView, setIsAnalysisView] = useState(true);
@@ -99,7 +97,7 @@ const FullScreenPlayer = () => {
           fallbackSrc={DefaultSongCover}
           loading="eager"
           alt="Song Cover"
-          className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out ${isLyricsVisible ? 'blur-[2rem]!' : 'blur-[2rem]!'}`}
+          className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out blur-[2rem]!`}
         />
         {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
       </div>
@@ -132,7 +130,6 @@ const FullScreenPlayer = () => {
 
           <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
             <LyricsContainer
-              isLyricsVisible={isLyricsVisible}
               setIsLyricsAvailable={setIsLyricsAvailable}
               selectedToken={selectedToken}
               isPanelOpen={isAnalysisPanelOpen}
@@ -154,7 +151,6 @@ const FullScreenPlayer = () => {
 
         </div>
         <SongControlContainer
-          isLyricsVisible={isLyricsVisible}
           isLyricsAvailable={isLyricsAvailable}
           isMouseActive={isChromeVisible}
           isAnalysisView={isAnalysisView}
@@ -167,7 +163,7 @@ const FullScreenPlayer = () => {
           onSeek={(currentPosition) => setSongPos(currentPosition)}
           className={`full-screen-player-seek-slider bg-background-color-3/25 before:bg-background-color-3 absolute h-fit w-full appearance-none outline-hidden outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:max-w-full before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:outline! ${
             isChromeVisible && 'peer-hover/songInfoContainer:before:h-3'
-          } ${!isCurrentSongPlaying && isLyricsVisible && '-translate-y-8! scale-x-95!'}`}
+          } ${!isCurrentSongPlaying && '-translate-y-8! scale-x-95!'}`}
         />
       </div>
     </div>
