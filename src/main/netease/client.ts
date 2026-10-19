@@ -119,6 +119,12 @@ export const unwrapNeteaseBody = (
 export const isNeteaseAuthError = (error: unknown): error is NeteaseApiError =>
   error instanceof NeteaseApiError && error.code === 301;
 
+// QR login polling codes, mirroring https://docs-neteasecloudmusicapi.focalors.ltd
+export const QR_STATE_EXPIRED = 800;
+export const QR_STATE_WAITING = 801;
+export const QR_STATE_SCANNED = 802;
+export const QR_STATE_CONFIRMED = 803;
+
 /** QR-login polling codes (800 expired, 801 waiting, 802 scanned, 803 confirmed). */
 const isNeteasePollStateCode = (code: number) =>
-  code === 800 || code === 801 || code === 802 || code === 803;
+  code === QR_STATE_EXPIRED || code === QR_STATE_WAITING || code === QR_STATE_SCANNED || code === QR_STATE_CONFIRMED;

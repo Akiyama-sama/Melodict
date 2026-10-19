@@ -1,6 +1,6 @@
 import { dataUpdateEvent } from '../main';
 import logger from '../logger';
-import { callNetease } from './client';
+import { callNetease, QR_STATE_CONFIRMED, QR_STATE_EXPIRED, QR_STATE_SCANNED, QR_STATE_WAITING } from './client';
 import type { NeteaseApiRawResult } from './client';
 import type { NeteaseSessionProfile } from '../../common/netease';
 import {
@@ -9,12 +9,6 @@ import {
   updateNeteaseSessionProfile,
   writeNeteaseSession
 } from './session';
-
-// QR login polling codes, mirroring https://docs-neteasecloudmusicapi.focalors.ltd
-const QR_STATE_EXPIRED = 800;
-const QR_STATE_WAITING = 801;
-const QR_STATE_SCANNED = 802;
-const QR_STATE_CONFIRMED = 803;
 
 export const startNeteaseQrLogin = async (): Promise<{
   key: string;
