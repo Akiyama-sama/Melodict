@@ -1110,7 +1110,6 @@
       "modelIdHint": "The chat model used for analysis, e.g. gpt-4o-mini.",
       "save": "Save",
       "testConnection": "Test connection",
-      "saved": "Lyrics analysis settings saved.",
       "saveFailed": "Could not save the lyrics analysis settings.",
       "testSucceeded": "Connection works",
       "testFailed": "Connection failed",
@@ -1125,10 +1124,9 @@
       "editProfile": "Edit",
       "deleteProfile": "Delete",
       "addProfile": "Add provider",
-      "cancelEdit": "Cancel editing",
       "newProfileTitle": "Add a provider",
       "editProfileTitle": "Edit provider",
-      "emptyProfiles": "No provider saved yet. Fill in the fields below and save.",
+      "emptyProfiles": "No provider saved yet. Click \"Add provider\" to create one.",
       "apiKeyNotSet": "No key saved",
       "revealKey": "Show key",
       "hideKey": "Hide key",
@@ -1143,7 +1141,6 @@
       "profileDeleteFailed": "Could not delete the provider.",
       "deleteProfileConfirmTitle": "Delete provider",
       "deleteProfileConfirmMessage": "Delete \"{{name}}\"? Its saved key is removed too and cannot be recovered.",
-      "unsavedHint": "Save your edits before leaving. Switching providers changes what is used right away.",
       "modelMissing": "No model ID"
     }
   },

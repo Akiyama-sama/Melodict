@@ -1,3 +1,4 @@
+import { realpathSync } from 'fs';
 import { resolve } from 'path';
 
 import tailwindcss from '@tailwindcss/vite';
@@ -31,6 +32,14 @@ export default defineConfig({
     build: {
       minify: true,
       sourcemap: true
+    },
+    server: {
+      fs: {
+        // In worktrees `node_modules` is a symlink to a checkout outside this directory; Vite
+        // serves files by their real path, so the realpath (not the symlink) must be allowed,
+        // or the icon fonts resolve to a 403 and render as ligature text.
+        allow: [resolve(import.meta.dirname), realpathSync(resolve(import.meta.dirname, 'node_modules'))]
+      }
     },
     resolve: {
       alias: {
