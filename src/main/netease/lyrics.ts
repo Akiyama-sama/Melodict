@@ -1,7 +1,6 @@
 import parseLyrics from '../../common/parseLyrics';
 import { callNeteaseForBody } from './client';
 import { readNeteaseLyricsCache, writeNeteaseLyricsCache } from './lyricsCache';
-import { readNeteaseSession } from './session';
 
 /**
  * Fetches lyrics for a NetEase song and shapes them into the app's `SongLyrics` contract so the
@@ -26,31 +25,21 @@ interface NeteaseLyricBody {
 }
 
 const getLyricBody = async (neteaseId: number): Promise<NeteaseLyricBody> => {
-  const session = await readNeteaseSession();
-
   try {
-    const body = await callNeteaseForBody(
-      'lyric_new',
-      {
-        id: neteaseId,
-        lv: -1,
-        kv: -1,
-        tv: -1,
-        rv: -1,
-        yv: 1,
-        ytv: 1,
-        yrv: 1
-      },
-      session ? { cookie: session.cookie } : {}
-    );
+    const body = await callNeteaseForBody('lyric_new', {
+      id: neteaseId,
+      lv: -1,
+      kv: -1,
+      tv: -1,
+      rv: -1,
+      yv: 1,
+      ytv: 1,
+      yrv: 1
+    });
     return body as NeteaseLyricBody;
   } catch {
     // Older deployments may not know the v1 params; fall back to the classic endpoint.
-    const body = await callNeteaseForBody(
-      'lyric',
-      { id: neteaseId, lv: -1, tv: -1, rv: -1 },
-      session ? { cookie: session.cookie } : {}
-    );
+    const body = await callNeteaseForBody('lyric', { id: neteaseId, lv: -1, tv: -1, rv: -1 });
     return body as NeteaseLyricBody;
   }
 };

@@ -9,7 +9,6 @@ import type {
 import { encodeNeteaseSongId } from '../../common/netease';
 import logger from '../logger';
 import { callNeteaseForBody, isNeteaseAuthError } from './client';
-import { readNeteaseSession } from './session';
 
 interface NeteaseArtistLike {
   id?: number;
@@ -138,21 +137,13 @@ export const normalizeNeteaseArtistSummary = (
   isVip: Boolean(artist.accountId && artist.accountId > 0)
 });
 
-/** Cookie-aware wrapper: attaches the session cookie for any endpoints that need it. */
+/** Catalog wrapper that translates auth failures into the renderer-facing error code. */
 const callCatalog = async (
   name: string,
-  params: Record<string, unknown> = {},
-  needsSession = false
+  params: Record<string, unknown> = {}
 ): Promise<Record<string, unknown>> => {
-  const extraParams: Record<string, unknown> = {};
-
-  if (needsSession) {
-    const session = await readNeteaseSession();
-    if (session) extraParams.cookie = session.cookie;
-  }
-
   try {
-    return await callNeteaseForBody(name, { ...params, ...extraParams });
+    return await callNeteaseForBody(name, params);
   } catch (error) {
     if (isNeteaseAuthError(error)) {
       logger.warn(`NetEase ${name} requires a logged-in session.`);
@@ -272,7 +263,7 @@ export const searchNetease = async (
 };
 
 export const getNeteaseUserPlaylists = async (userId: number): Promise<NeteasePlaylistSummary[]> => {
-  const body = await callCatalog('user_playlist', { uid: userId, limit: 1000 }, true);
+  const body = await callCatalog('user_playlist', { uid: userId, limit: 1000 });
   const playlists = Array.isArray(body.playlist)
     ? (body.playlist as NeteasePlaylistLike[])
     : [];
@@ -302,7 +293,7 @@ export const likeUnlikeNeteaseSong = async (
   neteaseId: number,
   isLike: boolean
 ): Promise<boolean> => {
-  const body = await callCatalog('like', { id: neteaseId, like: isLike ? 'true' : 'false' }, true);
+  const body = await callCatalog('like', { id: neteaseId, like: isLike ? 'true' : 'false' });
   return body.code === 200 || body.playlistId !== undefined;
 };
 
@@ -347,7 +338,7 @@ export const getNeteaseStream = async (
 };
 
 export const getNeteaseRecommendSongs = async (): Promise<NeteaseSongSummary[]> => {
-  const body = await callCatalog('recommend_songs', {}, true);
+  const body = await callCatalog('recommend_songs', {});
   return asSongSummaries(
     ((body.data ?? {}) as { dailySongs?: unknown[] }).dailySongs ?? body.dailySongs
   );
