@@ -28,62 +28,6 @@ declare global {
 
   type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 
-  type IpcChannels =
-    | 'app/beforeQuitEvent'
-    | 'app/Close'
-    | 'app/minimize'
-    | 'app/toggleMaximize'
-    | 'app/toggleFullScreen'
-    | 'app/isFullScreen'
-    | 'app/focused'
-    | 'app/blurred'
-    | 'app/systemThemeChange'
-    | 'app/getSongPosition'
-    | 'app/incrementNoOfSongListens'
-    | 'app/addMusicFolder'
-    | 'app/getSong'
-    | 'app/getAllSongs'
-    | 'app/toggleLikeSongs'
-    | 'app/saveUserData'
-    | 'app/getUserData'
-    | 'app/search'
-    | 'app/getSongLyrics'
-    | 'app/getSongInfo'
-    | 'app/openDevTools'
-    | 'app/getArtistArtworks'
-    | 'app/getArtistData'
-    | 'app/getGenresData'
-    | 'app/getAlbumData'
-    | 'app/getPlaylistData'
-    | 'app/addNewPlaylist'
-    | 'app/removePlaylists'
-    | 'app/addSongToPlaylist'
-    | 'app/removeSongsFromLibrary'
-    | 'app/deleteSongFromSystem'
-    | 'app/resyncSongsLibrary'
-    | 'app/restoreBlacklistedSong'
-    | 'app/updateSongId3Tags'
-    | 'app/getSongId3Tags'
-    | 'app/openLogFile'
-    | 'revealSongInFileExplorer'
-    | 'app/openInBrowser'
-    | 'app/removeAMusicFolder'
-    | 'app/sendMessageToRendererEvent'
-    | 'app/dataUpdateEvent'
-    | 'app/toggleMiniPlayer'
-    | 'app/toggleAutoLaunch'
-    | 'app/updateTraySingleClickBehavior'
-    | 'app/getFolderData'
-    | 'app/restartRenderer'
-    | 'app/restartApp'
-    | 'app/resetApp'
-    | 'app/player/songPlaybackStateChange'
-    | 'app/player/toggleSongPlaybackState'
-    | 'app/player/skipForward'
-    | 'app/player/skipBackward'
-    | 'app/player/toggleSongPlaybackState'
-    | 'app/player/skipBackward';
-
   interface ImageCoverData {
     format: string;
     data: Buffer;
@@ -968,7 +912,10 @@ declare global {
     | 'SONG_REPARSE_FAILED'
     | 'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER'
     | 'WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY'
-    | 'UNSUPPORTED_FILE_EXTENSION';
+    | 'UNSUPPORTED_FILE_EXTENSION'
+    | 'NETEASE_AUTH_REQUIRED'
+    | 'NETEASE_REQUEST_FAILED'
+    | 'NETEASE_NETWORK_ERROR';
 
   type MessageCodes =
     | DefaultCodes
