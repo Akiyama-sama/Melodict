@@ -10,7 +10,8 @@ import { TOGGLE_ACTIVE_BAR } from '../uiToggles';
 
 type Props = {
   isLyricsAvailable: boolean;
-  isMouseActive: boolean;
+  /** Whether the bottom chrome (controls + seek bar) is currently shown. */
+  isChromeVisible: boolean;
   isAnalysisView: boolean;
   setIsAnalysisView: (callback: (state: boolean) => boolean) => void;
 };
@@ -30,7 +31,7 @@ const SongControlContainer = (props: Props) => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { isLyricsAvailable, isMouseActive, isAnalysisView, setIsAnalysisView } = props;
+  const { isLyricsAvailable, isChromeVisible, isAnalysisView, setIsAnalysisView } = props;
 
   const handleSkipForwardClickWithParams = useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
@@ -113,7 +114,7 @@ const SongControlContainer = (props: Props) => {
           />
 
           <div
-            className={`volume-slider-container invisible absolute left-full mr-4 max-w-[6rem] min-w-[4rem] opacity-0 transition-[visibility,opacity] delay-150 ease-in-out ${isMouseActive && 'group-hover/songControlContainer:visible group-hover/songControlContainer:opacity-100'}`}
+            className={`volume-slider-container invisible absolute left-full mr-4 max-w-[6rem] min-w-[4rem] opacity-0 transition-[visibility,opacity] delay-150 ease-in-out ${isChromeVisible && 'group-hover/songControlContainer:visible group-hover/songControlContainer:opacity-100'}`}
           >
             <VolumeSlider name="player-volume-slider" id="volumeSlider" />
           </div>

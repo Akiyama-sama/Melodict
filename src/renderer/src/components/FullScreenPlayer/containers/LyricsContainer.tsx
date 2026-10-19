@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { LyricsAnalysisToken } from '../../../../../common/lyricsAnalysis';
@@ -21,7 +21,11 @@ type Props = {
   onTokenClick: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 };
 
-const LyricsContainer = (props: Props) => {
+// Memoized: the fullscreen player re-renders on every song-position tick (songPos state), but
+// this subtree only depends on its own props, all of which hold stable across those ticks —
+// the setters and the click handler are useCallback'd, isPanelOpen/isAnalysisView are booleans,
+// and selectedToken only changes identity when the selection actually changes.
+const LyricsContainer = memo((props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
@@ -84,6 +88,12 @@ const LyricsContainer = (props: Props) => {
     setIsLyricsAvailable
   ]);
 
+  // Only the raw line/token ids of the selection matter to the rendered lines; keying the memo on
+  // the primitives (instead of the selectedToken object) keeps unrelated re-renders of the parent
+  // from rebuilding the whole line list, while an actual selection change still does.
+  const activeTokenLineId = selectedToken?.line.lineId;
+  const activeTokenId = selectedToken?.token.tokenId;
+
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
       const { isSynced, parsedLyrics, offset = 0 } = lyrics.lyrics;
@@ -104,9 +114,7 @@ const LyricsContainer = (props: Props) => {
               translatedLyricLines={lyric.translatedTexts}
               convertedLyric={lyric.romanizedText}
               analysis={isAnalysisView ? analysis : undefined}
-              activeTokenId={
-                selectedToken?.line.lineId === lineId ? selectedToken.token.tokenId : undefined
-              }
+              activeTokenId={activeTokenLineId === lineId ? activeTokenId : undefined}
               palette={currentSongData.paletteData}
               onTokenClick={onTokenClick}
             />
@@ -146,7 +154,15 @@ const LyricsContainer = (props: Props) => {
       }
     }
     return [];
-  }, [isAnalysisView, lyrics, linesById, onTokenClick, selectedToken, currentSongData.paletteData]);
+  }, [
+    isAnalysisView,
+    lyrics,
+    linesById,
+    onTokenClick,
+    activeTokenLineId,
+    activeTokenId,
+    currentSongData.paletteData
+  ]);
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
@@ -203,6 +219,7 @@ const LyricsContainer = (props: Props) => {
       )}
     </div>
   );
-};
+});
 
+LyricsContainer.displayName = 'LyricsContainer';
 export default LyricsContainer;

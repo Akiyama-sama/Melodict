@@ -80,6 +80,13 @@ const FullScreenPlayer = () => {
     setSelectedToken(undefined);
   }, []);
 
+  // Clicking a token selects it and opens the word panel. Stable identity, so the lyrics list's
+  // memo does not rebuild its whole line array on every fullscreen-player render.
+  const handleTokenClick = useCallback((token: LyricsAnalysisToken, line: LyricsAnalysisLine) => {
+    setSelectedToken({ token, line });
+    setIsAnalysisPanelOpen(true);
+  }, []);
+
   const imgPath = useMemo(() => {
     const selectedArtist = currentSongData?.artists?.find(
       (artist) => !!artist.onlineArtworkPaths?.picture_xl
@@ -136,10 +143,7 @@ const FullScreenPlayer = () => {
               selectedToken={selectedToken}
               isPanelOpen={isAnalysisPanelOpen}
               isAnalysisView={isAnalysisView}
-              onTokenClick={(token, line) => {
-                setSelectedToken({ token, line });
-                setIsAnalysisPanelOpen(true);
-              }}
+              onTokenClick={handleTokenClick}
             />
 
             {isAnalysisPanelOpen && (
@@ -154,7 +158,7 @@ const FullScreenPlayer = () => {
         </div>
         <SongControlContainer
           isLyricsAvailable={isLyricsAvailable}
-          isMouseActive={isChromeVisible}
+          isChromeVisible={isChromeVisible}
           isAnalysisView={isAnalysisView}
           setIsAnalysisView={setIsAnalysisView}
         />
