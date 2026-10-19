@@ -7,6 +7,13 @@ export const SYSTEM_PROMPT_TEMPLATE = [
   'Rules:',
   '- Echo back the exact lineId you were given. Never invent lineIds and never rewrite the lyric text.',
   '- Split each line into 1-6 clickable learning tokens: words, particles, set phrases, or inflections worth studying.',
+  // Observed on qwen-flash after the text/coverage rules landed: the model started emitting one
+  // token for a whole line (especially quote-wrapped lines) and gluing determiner+adjective+noun
+  // ("a long list") or preposition+noun ("of ex-lovers") into single phrase tokens. Both defeat
+  // the word-level study UI, so granularity is pinned here at the rule level, not left to the
+  // per-language profiles further down (weak models under-weight those).
+  '- Token granularity: a token is ONE word (or one particle, or one short fixed idiom). A token may never contain two separate words that could stand alone — never a determiner + noun ("a long list"), never an adjective + noun, never a subject + verb ("you heard"), never a preposition + noun phrase ("of ex-lovers"). Only multi-word IDIOMS whose meaning cannot be derived word-by-word ("nice to meet you", "go down") stay as one token.',
+  '- A line of several words is ALWAYS several tokens. Never return a single token covering an entire line — that is a failed annotation, not an idiom.',
   // The surface text is the token\'s identity: offsets are the field models miscount, and a phrase
   // token ("settled down") whose span only covers its first word silently loses the rest of the
   // phrase. The validator re-anchors spans from this text, so it must be exact and present.

@@ -140,6 +140,13 @@ const partialDraft = (lineId: string, text: string): LyricsAnalysisTransportLine
   tokens: [{ startChar: 0, endChar: 1, text: text.slice(0, 1), card: { meaning: 'x', grammarFunction: 'y' } }]
 });
 
+/** The degenerate output qwen-flash emits on quote-wrapped lines: the WHOLE line as one token. */
+const wholeLineDraft = (lineId: string, text: string): LyricsAnalysisTransportLine => ({
+  lineId,
+  translation: `译:${text}`,
+  tokens: [{ startChar: 0, endChar: text.length, text, card: { meaning: 'x', grammarFunction: 'y' } }]
+});
+
 const lines = (...texts: string[]): LyricsAnalysisInputLine[] =>
   texts.map((text, index) => ({ lineId: `line-${index}`, text }));
 
@@ -325,6 +332,35 @@ describe('analyzeLyrics orchestration', () => {
       outputTokens: 20,
       inputTokens: 10
     });
+  });
+
+  test('a whole-line single token is flagged degraded and re-asked by the repair pass', async () => {
+    // Regression: qwen-flash returned '"Oh my God, who is she?"' as ONE token spanning the whole
+    // line — spans legal, coverage perfect, so nothing else flags it. The validator must mark it
+    // degraded (multi-word line) so the repair gate re-asks, and a proper repair replaces it.
+    const inputLines = lines('"Oh my God, who is she?"', 'Grab your passport');
+    behaviors = [
+      elements(wholeLineDraft('line-0', '"Oh my God, who is she?"'), fullDraft('line-1', 'Grab your passport', 2)),
+      elements(fullDraft('line-0', '"Oh my God, who is she?"', 3))
+    ];
+
+    const { outcome, onRepairStarted } = await runAnalyze(inputLines);
+
+    expect(onRepairStarted).toHaveBeenCalledWith(['line-0']);
+    const repaired = outcome.lines.find((line) => line.lineId === 'line-0');
+    expect(repaired?.tokens).toHaveLength(3);
+    expect(outcome.failedLineIds).toEqual([]);
+  });
+
+  test('a genuinely single-word line as one token is NOT flagged', async () => {
+    const inputLines = lines('Ayy');
+    behaviors = [elements(wholeLineDraft('line-0', 'Ayy'))];
+
+    const { outcome, onRepairStarted } = await runAnalyze(inputLines);
+
+    expect(onRepairStarted).not.toHaveBeenCalled();
+    expect(outcome.failedLineIds).toEqual([]);
+    expect(outcome.lines[0]?.status).toBe('ready');
   });
 
   test('salvage recovers usable lines from a NoObjectGeneratedError completion', async () => {

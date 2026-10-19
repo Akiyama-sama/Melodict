@@ -13,7 +13,9 @@ export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
 // re-ask behavior, so older cached lines cannot be compared with newer ones.
 // Bumped to '5' adding the per-token pinyin field: cached artifacts from v4 predate the field and
 // render without per-token pinyin until re-analyzed.
-export const LYRICS_ANALYSIS_PROMPT_VERSION = '5';
+// Bumped to '6' pinning token granularity in the base prompt (one word per token, no whole-line
+// single tokens): artifacts from v5 carry the coarse-merged tokenization this version repairs.
+export const LYRICS_ANALYSIS_PROMPT_VERSION = '6';
 export const LYRICS_ANALYSIS_DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
 export type LyricsAnalysisLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'unknown';
@@ -498,6 +500,18 @@ export const validateAndNormalizeLineAnalysis = (input: {
   // gap; the tokens themselves are left alone — the repair pass owns re-asking for content.
   const uncoveredWords = findUncoveredLineWords(text, validated);
 
+  // Degenerate granularity: a lone token spanning essentially the whole line (weak models emit
+  // this for quote-wrapped lines like "Oh my God, who is she?"). Spans are legal and coverage is
+  // perfect, so nothing else flags it — but a one-token line is useless for study. Only lines
+  // with more than one word atom count: a genuinely single-word line ("Ayy") is fine as one
+  // token. Mark degraded so the first pass re-asks the line; keeping it 'ready' would hide the
+  // failure behind a perfect-looking coverage score.
+  const isWholeLineSingleToken =
+    validated.length === 1 &&
+    validated[0].startChar === 0 &&
+    validated[0].endChar >= text.length &&
+    findUncoveredLineWords(text, []).length > 1;
+
   return {
     kind: 'ok',
     line: {
@@ -506,7 +520,9 @@ export const validateAndNormalizeLineAnalysis = (input: {
       translation: asTrimmedString(draft.translation),
       tokens: validated,
       status:
-        validated.length < rawTokens.length || uncoveredWords.length > 0 ? 'degraded' : 'ready'
+        validated.length < rawTokens.length || uncoveredWords.length > 0 || isWholeLineSingleToken
+          ? 'degraded'
+          : 'ready'
     },
     // Telemetry input: how many raw tokens validation rejected for this line.
     droppedTokenCount: rawTokens.length - validated.length,
