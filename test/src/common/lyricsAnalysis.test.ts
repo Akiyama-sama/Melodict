@@ -6,10 +6,7 @@ import {
   validateAndNormalizeLineAnalysis
 } from '../../../src/common/lyricsAnalysis';
 
-const draftLine = (overrides: {
-  lineId?: string;
-  tokens?: Array<Record<string, unknown>>;
-}) => ({
+const draftLine = (overrides: { lineId?: string; tokens?: Array<Record<string, unknown>> }) => ({
   lineId: overrides.lineId ?? 'line-0',
   translation: 'test translation',
   tokens: (overrides.tokens ?? []) as never
@@ -21,7 +18,9 @@ describe('validateAndNormalizeLineAnalysis', () => {
     const text = "You know you didn't lose your self-control";
     const outcome = validateAndNormalizeLineAnalysis({
       draft: draftLine({
-        tokens: [{ startChar: 33, endChar: 42, card: { meaning: 'self-control', grammarFunction: 'noun' } }]
+        tokens: [
+          { startChar: 33, endChar: 42, card: { meaning: 'self-control', grammarFunction: 'noun' } }
+        ]
       }),
       text
     });
@@ -36,7 +35,9 @@ describe('validateAndNormalizeLineAnalysis', () => {
     // not extend across those CJK characters.
     const outcome = validateAndNormalizeLineAnalysis({
       draft: draftLine({
-        tokens: [{ startChar: 2, endChar: 4, card: { meaning: 'to connect', grammarFunction: 'verb' } }]
+        tokens: [
+          { startChar: 2, endChar: 4, card: { meaning: 'to connect', grammarFunction: 'verb' } }
+        ]
       }),
       text: '君を繋ぐ空の星'
     });
@@ -70,6 +71,30 @@ describe('validateAndNormalizeLineAnalysis', () => {
     expect(outcome.kind).toBe('ok');
     if (outcome.kind !== 'ok') return;
     expect(outcome.line.tokens[0]?.card.pronunciation.value).toBe('きみ / kimi');
+  });
+
+  test('keeps structured per-token pinyin for Chinese tokens', () => {
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({
+        tokens: [
+          {
+            startChar: 0,
+            endChar: 2,
+            card: {
+              term: '温柔',
+              pronunciation: { pinyin: 'wēn róu' },
+              meaning: '温柔',
+              grammarFunction: '形容词'
+            }
+          }
+        ]
+      }),
+      text: '温柔的光'
+    });
+
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    expect(outcome.line.tokens[0]?.card.pronunciation.pinyin).toBe('wēn róu');
   });
 });
 
@@ -155,7 +180,6 @@ describe('surface-text span re-anchoring', () => {
   });
 });
 
-
 describe('line coverage', () => {
   // The failure this guards against: a model emits a phrase token whose span only covers its
   // first word ("settled" of "settled down"), or simply stops before the last word. Every span is
@@ -183,20 +207,28 @@ describe('line coverage', () => {
 
   test('a merged phrase token covers both of its words', () => {
     const text = 'That you are settled down';
-    expect(findUncoveredLineWords(text, spans(text, ['That', 'you', 'are', 'settled down']) as never)).toEqual([]);
+    expect(
+      findUncoveredLineWords(text, spans(text, ['That', 'you', 'are', 'settled down']) as never)
+    ).toEqual([]);
   });
 
   test('ignores punctuation-only gaps', () => {
     const text = 'Nice to meet you, where you been?';
     expect(
-      findUncoveredLineWords(text, spans(text, ['Nice to meet you', 'where', 'you', 'been']) as never)
+      findUncoveredLineWords(
+        text,
+        spans(text, ['Nice to meet you', 'where', 'you', 'been']) as never
+      )
     ).toEqual([]);
   });
 
   test('ignores parenthetical backing vocals and translations', () => {
     // Echoes in brackets are routinely left untokenized; that is a valid reading, not a gap.
     expect(
-      findUncoveredLineWords('パッと花火が（パッと花火が）', spans('パッと花火が（パッと花火が）', ['パッと', '花火', 'が']) as never)
+      findUncoveredLineWords(
+        'パッと花火が（パッと花火が）',
+        spans('パッと花火が（パッと花火が）', ['パッと', '花火', 'が']) as never
+      )
     ).toEqual([]);
     expect(
       findUncoveredLineWords(

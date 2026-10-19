@@ -523,34 +523,36 @@ input[type='checkbox']:checked ~ .checkmark .icon {
 }
 
 /* ? LYRICS ANALYSIS TOKENS */
-/* Hover/active highlight for a lyric token. The span's own line box is much taller than the
-   glyphs (Poppins metrics), so a full-box background reads as a smoky block towering over the
-   text; a 0.9em band painted through background-image hugs just the token instead.
-   Painted via background rather than an absolutely-positioned ::after because Chromium
-   mispositions abs-pos pseudos of an inline that fragments at a line wrap — the stray vertical
-   tick that used to appear at the start of the line after a wrapped token. The band reaches
-   0.06em past the span on each side so it never hugs the ink, except where another token sits
-   flush against this one (no whitespace between them, common in CJK lines): those sides are
-   marked .adjacent-left / .adjacent-right by the renderer and clamp the band at the boundary so
-   neighbouring bars stay a hair apart instead of overlapping. */
-.lyrics-analysis-tokens [role='button'] {
+/* Analysed tokens render as inline-flex columns: the word on the first row (.token-main), its
+   romanization directly beneath (.token-romaji). The hover/active highlight band paints on
+   .token-main — the word row — so the romanization row below never shifts it.
+   The band is 0.9em tall through background-image so it hugs just the glyphs (the full line box
+   towers over the text); painted via background rather than an absolutely-positioned ::after
+   because Chromium mispositions abs-pos pseudos of an inline that fragments at a line wrap. The
+   token column itself is atomic (inline-flex never fragments), so .token-main cannot wrap either.
+   The band reaches 0.06em past the span on each side so it never hugs the ink, except where
+   another token sits flush against this one (no whitespace between them, common in CJK lines):
+   those sides are marked .adjacent-left / .adjacent-right by the renderer and clamp the band at
+   the boundary so neighbouring bars stay a hair apart instead of overlapping. */
+.lyrics-analysis-tokens [role='button'] .token-main {
   background-image: linear-gradient(rgb(255 255 255 / 0), rgb(255 255 255 / 0));
   background-repeat: no-repeat;
   background-size: calc(100% + 0.12em) 0.9em;
   background-position: center;
+  white-space: nowrap;
 }
 
-.lyrics-analysis-tokens [role='button'].adjacent-left {
+.lyrics-analysis-tokens [role='button'].adjacent-left .token-main {
   background-size: calc(100% + 0.03em) 0.9em;
   background-position: 0.03em center;
 }
 
-.lyrics-analysis-tokens [role='button'].adjacent-right {
+.lyrics-analysis-tokens [role='button'].adjacent-right .token-main {
   background-size: calc(100% + 0.03em) 0.9em;
   background-position: -0.06em center;
 }
 
-.lyrics-analysis-tokens [role='button'].adjacent-left.adjacent-right {
+.lyrics-analysis-tokens [role='button'].adjacent-left.adjacent-right .token-main {
   background-size: calc(100% - 0.06em) 0.9em;
   background-position: 0.03em center;
 }
@@ -566,9 +568,25 @@ input[type='checkbox']:checked ~ .checkmark .icon {
    the horizontal radius width-dependent but stays subtle (near-circular) for typical tokens. */
 .lyrics-analysis-tokens [role='button']:hover {
   color: rgb(255 255 255) !important;
+}
+
+.lyrics-analysis-tokens [role='button']:hover .token-main {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 90' preserveAspectRatio='none'%3E%3Crect width='240' height='90' rx='15' fill='white' fill-opacity='0.15'/%3E%3C/svg%3E");
 }
 
-.lyrics-analysis-tokens [role='button'].token-active {
+.lyrics-analysis-tokens [role='button'].token-active .token-main {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 90' preserveAspectRatio='none'%3E%3Crect width='240' height='90' rx='15' fill='white' fill-opacity='0.25'/%3E%3C/svg%3E");
+}
+
+/* ? TOKEN ROMAJI ROW */
+/* The romanization sits in flow inside the token column (ruby-style): it takes layout height, so
+   analysed lines grow a compact extra row instead of overlapping the next lyric line. It inherits
+   the token's colour — unsung lines' 20% alpha and the hover/active white flash carry over for
+   free — dimmed further with opacity so it reads as an annotation, not a second lyric. */
+.lyrics-analysis-tokens [role='button'] .token-romaji {
+  margin-top: 0.1em;
+  font-size: 0.6em;
+  line-height: 1;
+  opacity: 0.6;
+  white-space: nowrap;
 }
