@@ -27,9 +27,6 @@ const FullScreenPlayer = () => {
   const isLyricsVisible = true;
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
   const [songPos, setSongPos] = useState(0);
-  // The fullscreen player only renders the lyrics layout; the view toggle lives on the
-  // analysis mode button now.
-  const [isFullLyricsScreen] = useState(true);
   const [isAnalysisView, setIsAnalysisView] = useState(true);
   // The word panel is closed by default; the title-bar menu button toggles it, and clicking a
   // token opens it too. It stays mounted only while open, so the default lyrics layout is
@@ -119,25 +116,22 @@ const FullScreenPlayer = () => {
       >
         <div
           className={`full-screen-player-main-container absolute inset-0 w-full max-w-full! overflow-hidden ${
-            isFullLyricsScreen
-              ? isAnalysisPanelOpen
-                ? // The panel caps at 30rem on large windows, but follows a third of the player
-                  // width once the window gets tight (min 14rem), so the lyrics never get
-                  // squeezed into a sliver on smaller sizes.
-                  'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
-                : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
-              : 'grid grid-cols-1'
+            isAnalysisPanelOpen
+              ? // The panel caps at 30rem on large windows, but follows a third of the player
+                // width once the window gets tight (min 14rem), so the lyrics never get
+                // squeezed into a sliver on smaller sizes.
+                'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
+              : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
           }`}
         >
           {/* With the panel open the song info floats over the top third of the lyrics column only,
               so the lyrics keep their original position and the panel never gets blurred over.
               Panel open but no token selected renders the identical layout — only the panel texts
               fall back to a hint. */}
-          {isFullLyricsScreen && !isAnalysisPanelOpen && <SongInfoContainer songPos={songPos} />}
+          {!isAnalysisPanelOpen && <SongInfoContainer songPos={songPos} />}
 
           <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
             <LyricsContainer
-              isFullLyricsScreen={isFullLyricsScreen}
               isLyricsVisible={isLyricsVisible}
               setIsLyricsAvailable={setIsLyricsAvailable}
               selectedToken={selectedToken}
@@ -149,12 +143,12 @@ const FullScreenPlayer = () => {
               }}
             />
 
-            {isFullLyricsScreen && isAnalysisPanelOpen && (
+            {isAnalysisPanelOpen && (
               <SongInfoContainer songPos={songPos} isOverlay />
             )}
           </div>
 
-          {isFullLyricsScreen && isAnalysisPanelOpen && (
+          {isAnalysisPanelOpen && (
             <LyricsAnalysisPanel token={selectedToken?.token} line={selectedToken?.line} />
           )}
 

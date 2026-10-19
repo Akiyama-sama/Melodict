@@ -12,7 +12,6 @@ import LyricLine from '../../LyricsPage/LyricLine';
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 
 type Props = {
-  isFullLyricsScreen?: boolean;
   isLyricsVisible: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
   selectedToken?: { token: LyricsAnalysisToken; line: LyricsAnalysisLine };
