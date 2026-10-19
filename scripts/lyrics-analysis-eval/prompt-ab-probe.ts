@@ -4,58 +4,12 @@
  * (d) plain v2. Prints element counts + tokens per line for each.
  */
 import fs from 'node:fs';
-import path from 'node:path';
 import process from 'node:process';
 
 import { analyzeLyrics } from '../../src/main/lyricsAnalysis/providerGateway';
-import {
-  LYRICS_ANALYSIS_SCHEMA_VERSION,
-  LYRICS_ANALYSIS_PROMPT_VERSION,
-  type LyricsAnalysisInputLine
-} from '../../src/common/lyricsAnalysis';
+import { type LyricsAnalysisInputLine } from '../../src/common/lyricsAnalysis';
 
 import { readCredsFromEnvFile } from './lib/creds';
-
-// Keep a private copy so variants can strip fields without touching the module under test.
-const buildVariantSystemPrompt = (
-  uiLanguage: string,
-  variant: 'full' | 'directive-only' | 'roma-only' | 'v2'
-) => {
-  // Mirror of the gateway template; variant-gated additions are marked below.
-  const base = [
-    'You annotate song lyrics for a language-learning music player.',
-    'Return ONLY a JSON object. Do not wrap it in markdown fences and do not add any prose before or after it.',
-    'The JSON must have this shape: {"elements":[{"lineId":"...","translation":"...","tokens":[...]}]}',
-    'Rules:',
-    '- Echo back the exact lineId you were given. Never invent lineIds and never rewrite the lyric text.',
-    '- Split each line into 1-6 clickable learning tokens: words, particles, set phrases, or inflections worth studying.',
-    '- startChar/endChar are 0-based character offsets into that exact line, endChar exclusive. They must be ordered, non-overlapping, and within the line length.',
-    '- Every token needs card.meaning (what it means in this line, not a dictionary dump) and card.grammarFunction (its role in this sentence).',
-    '- Include card.term (dictionary form) and card.pronunciation when useful: kana/romaji for Japanese, ipa/us/uk for English, hangul/romanized for Korean, pinyin for Chinese.',
-    '- Set language to one of: en, ja, ko, zh, unknown.',
-    '- translation is the natural meaning of the whole line.',
-    '- Cover every line you are given, in the given order.',
-    'OUTPUT LANGUAGE (critical): every value the user reads — card.meaning, card.grammarFunction, and translation — MUST be written in Simplified Chinese (简体中文). Never switch languages between elements: the first element and the last element use the same language. Do not mix languages within one JSON object.',
-    'The only exceptions are quoted source-language words inside a meaning (e.g. the lyric word itself) and the pronunciation fields, which stay in their script.'
-  ];
-
-  if (variant === 'roma-only' || variant === 'full') {
-    base.push(
-      'ROMANIZED REFERENCE: some lines carry a "romanizedText" field — a HUMAN-AUTHORED romanization of that exact line. Use it as the ground truth for pronunciation: for each of your tokens, copy the matching segment(s) of the reference into card.pronunciation (keep the author\'s spacing). Do NOT change token granularity to match it — keep your normal word/particle-level tokens (1-6 per line); the reference is pronounced syllable-by-syllable but your tokens are not.'
-    );
-  }
-
-  let directive = '';
-  if (variant === 'directive-only' || variant === 'full') {
-    // Import lazily to keep the probe self-contained.
-    const { buildLanguageDirective } = require('../../src/common/lyricsLanguageProfiles') as {
-      buildLanguageDirective: (lines: Array<{ text: string }>) => string;
-    };
-    directive = buildLanguageDirective(probeLines);
-  }
-
-  return `${base.join('\n')}${directive ? `\n\n${directive}` : ''}`;
-};
 
 const TIMED = fs
   .readFileSync('/tmp/dont-say-lazy-timed-clean.lrc', 'utf-8')

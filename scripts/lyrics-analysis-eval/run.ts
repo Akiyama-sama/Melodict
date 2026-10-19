@@ -66,21 +66,6 @@ const parseArgs = (argv: string[]) => {
   };
 };
 
-/** Mirror of the app's fingerprint: hash(lines + uiLanguage + model + prompt/schema versions). */
-const buildFingerprint = (input: { lines: Array<{ lineId: string; text: string }>; uiLanguage: string; modelId: string; promptVersion: string; schemaVersion: string }) =>
-  crypto
-    .createHash('sha256')
-    .update(
-      JSON.stringify({
-        lines: input.lines,
-        uiLanguage: input.uiLanguage,
-        modelId: input.modelId,
-        promptVersion: input.promptVersion,
-        schemaVersion: input.schemaVersion
-      })
-    )
-    .digest('hex');
-
 const main = async () => {
   const args = parseArgs(process.argv.slice(2));
 
@@ -138,13 +123,8 @@ const main = async () => {
   const gold = JSON.parse(await fs.readFile(args.goldPath, 'utf-8')) as GoldStandard;
 
   // ---- Stage 1: analysis (cached unless --refresh) ------------------------------------------
-  const fingerprint = buildFingerprint({
-    lines,
-    uiLanguage: 'zh-CN',
-    modelId,
-    promptVersion: LYRICS_ANALYSIS_PROMPT_VERSION,
-    schemaVersion: '2'
-  });
+  // The eval harness always runs fresh within a run dir (analysis.json is the per-run cache), so
+  // unlike the app it does not fingerprint the input — --refresh decides reuse.
   const cachePath = path.join(runDir, 'analysis.json');
   // `undefined` until a cache hit or a fresh pipeline run fills it (the falsy check below is the
   // "must run the pipeline" signal, exactly as before — the explicit undefined default only

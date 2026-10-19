@@ -167,7 +167,6 @@ const main = async () => {
 
   const analysis = await readJson<EvalAnalysisResult>(args.analysisPath);
   const gold = await readJson<GoldStandard>(args.goldPath);
-  const goldByNorm = new Map(gold.lines.map((line) => [line.text.replace(/\s+/g, ''), line]));
 
   const provider = createOpenAI({ apiKey: args.apiKey, baseURL: args.baseURL });
   const model = provider.chat(args.modelId);
