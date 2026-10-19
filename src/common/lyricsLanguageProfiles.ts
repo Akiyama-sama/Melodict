@@ -133,25 +133,16 @@ const SCRIPT_TESTS: Array<{ family: ScriptFamily; test: RegExp }> = [
   { family: 'latin', test: /[A-Za-z]/u }
 ];
 
-const detectLineScript = (text: string): ScriptFamily => {
+// Exported for lyricsAnalysis.ts's inferTokenLanguage, which shares this exact mapping (verified
+// identical before unifying: same regexes, same kana→hangul→han→latin order, Han→zh default).
+export const detectLineScript = (text: string): ScriptFamily => {
   for (const { family, test } of SCRIPT_TESTS) {
     if (test.test(text)) return family;
   }
   return 'other';
 };
 
-/**
- * Dominant script language of one line. Note a Han-only line ('現実', '温柔') is ambiguous — the
- * song-level resolution in `analyzeLyricsLanguageMix` decides it; this returns 'zh' as the Han
- * default for standalone use (evaluation tooling, line attribution).
- */
-export const detectLineLanguage = (text: string): LyricsAnalysisLanguage => {
-  const script = detectLineScript(text);
-  if (script === 'han') return 'zh';
-  return FAMILY_TO_LANGUAGE[script];
-};
-
-const FAMILY_TO_LANGUAGE: Record<Exclude<ScriptFamily, 'han'>, LyricsAnalysisLanguage> = {
+export const FAMILY_TO_LANGUAGE: Record<Exclude<ScriptFamily, 'han'>, LyricsAnalysisLanguage> = {
   kana: 'ja',
   hangul: 'ko',
   latin: 'en',

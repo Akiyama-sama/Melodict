@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { FAMILY_TO_LANGUAGE, detectLineScript } from './lyricsLanguageProfiles';
+
 // Bumped to '2' when the normalizer gained word-boundary snapping + whitespace trimming: cached
 // artifacts from v1 carry misaligned token spans that would render clipped words.
 export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
@@ -200,10 +202,6 @@ export type LyricsAnalysisTransportLine = z.infer<typeof lyricsAnalysisTransport
 
 const LANGUAGES: LyricsAnalysisLanguage[] = ['en', 'ja', 'ko', 'zh', 'unknown'];
 
-const KANA_REGEX = /[\p{Script=Hiragana}\p{Script=Katakana}]/u;
-const HAN_REGEX = /\p{Script=Han}/u;
-const HANGUL_REGEX = /[가-힯]/u;
-
 const asTrimmedString = (value: unknown): string | undefined => {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
@@ -220,11 +218,11 @@ const asInteger = (value: unknown): number | undefined => {
 };
 
 export const inferTokenLanguage = (text: string): LyricsAnalysisLanguage => {
-  if (KANA_REGEX.test(text)) return 'ja';
-  if (HANGUL_REGEX.test(text)) return 'ko';
-  if (HAN_REGEX.test(text)) return 'zh';
-  if (/[A-Za-z]/.test(text)) return 'en';
-  return 'unknown';
+  // Single-sourced with the gateway's script detection: same regexes, same kana→hangul→han→latin
+  // order, and Han defaults to zh for standalone use (the song-level mix resolver overrides it
+  // when kana/hangul exists elsewhere in the song).
+  const script = detectLineScript(text);
+  return script === 'han' ? 'zh' : FAMILY_TO_LANGUAGE[script];
 };
 
 export const buildTokenId = (lineId: string, startChar: number, endChar: number) =>
