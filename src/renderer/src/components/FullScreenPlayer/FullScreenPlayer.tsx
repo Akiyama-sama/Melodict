@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LyricsAnalysisLine, LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
@@ -72,6 +72,14 @@ const FullScreenPlayer = () => {
     }
   }, [isAnalysisView]);
 
+  // Toggling the word panel always drops the selected token: the panel falls back to the hint
+  // text when opened from the title bar. Both setters are stable, so this callback is too and the
+  // title bar's memo can hold.
+  const handleToggleLyricsAnalysisPanel = useCallback(() => {
+    setIsAnalysisPanelOpen((prevState) => !prevState);
+    setSelectedToken(undefined);
+  }, []);
+
   const imgPath = useMemo(() => {
     const selectedArtist = currentSongData?.artists?.find(
       (artist) => !!artist.onlineArtworkPaths?.picture_xl
@@ -100,10 +108,7 @@ const FullScreenPlayer = () => {
       </div>
       <TitleBar
         isLyricsAnalysisPanelOpen={isAnalysisPanelOpen}
-        onToggleLyricsAnalysisPanel={() => {
-          setIsAnalysisPanelOpen((prevState) => !prevState);
-          setSelectedToken(undefined);
-        }}
+        onToggleLyricsAnalysisPanel={handleToggleLyricsAnalysisPanel}
       />
       <div
         className={`flex min-h-0 max-w-full flex-col justify-end overflow-hidden ${isChromeVisible && 'group/fullScreenPlayer'}`}

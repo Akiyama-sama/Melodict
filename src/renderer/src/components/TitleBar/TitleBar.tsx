@@ -8,13 +8,11 @@ import { store } from '../../store/store';
 import { getVersionInfoFromString } from '../../utils/isLatestVersion';
 import Img from '../Img';
 import CurrentLocationContainer from './CurrentLocationContainer';
+import FullscreenPlayerActions from './FullscreenPlayerActions';
 import NetworkIndicator from './indicators/NetworkIndicator';
 import NewUpdateIndicator from './indicators/NewUpdateIndicator';
 import NavigationControlsContainer from './NavigationControlsContainer';
 import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
-import ToggleLyricsAnalysisPanelBtn from './special_controls/ToggleLyricsAnalysisPanelBtn';
-import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
-import ToggleSystemFullScreenBtn from './special_controls/ToggleSystemFullScreenBtn';
 import WindowControlsContainer from './WindowControlsContainer';
 
 const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stable';
@@ -86,15 +84,11 @@ const TitleBar = memo((props: Props) => {
           <div className="special-controls-container flex flex-row">
             {!isFullScreenPlayer && window.api.properties.isInDevelopment && <ChangeThemeBtn />}
             {isFullScreenPlayer && (
-              <>
-                <ToggleLyricsAnalysisPanelBtn
-                  isOpen={props.isLyricsAnalysisPanelOpen ?? false}
-                  onToggle={props.onToggleLyricsAnalysisPanel ?? (() => {})}
-                />
-                <ToggleSystemFullScreenBtn />
-              </>
+              <FullscreenPlayerActions
+                isPanelOpen={props.isLyricsAnalysisPanelOpen}
+                onTogglePanel={props.onToggleLyricsAnalysisPanel}
+              />
             )}
-            {isFullScreenPlayer && <GoToMainPlayerBtn />}
           </div>
         </div>
         {!isDarwin && <WindowControlsContainer />}
