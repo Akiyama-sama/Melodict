@@ -236,6 +236,7 @@ const LyricLine = (props: LyricProp) => {
             text={getLyricText(lyric)}
             analysis={analysis}
             activeTokenId={activeTokenId}
+            isActiveLine={isInRange}
             palette={palette}
             onTokenClick={onTokenClick}
           />

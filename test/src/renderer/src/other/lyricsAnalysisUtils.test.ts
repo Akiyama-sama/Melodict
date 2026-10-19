@@ -51,7 +51,7 @@ describe('getTokenColorPalette', () => {
     expect(colors.length).toBeGreaterThan(1);
   });
 
-  test('spreads hues around the wheel when the palette collapses into one colour', () => {
+  test('spreads hues across the analogous range when the palette collapses into one colour', () => {
     // Monochrome covers (and the all-blue default palette) leave hue as the only differentiator.
     const mono: NodeVibrantPalette = {
       LightVibrant: swatch([0, 0, 0.74]),
@@ -65,9 +65,15 @@ describe('getTokenColorPalette', () => {
     const colors = getTokenColorPalette(mono);
 
     expect(colors.length).toBe(6);
-    // Every neighbouring pair must be far apart on the wheel — that is the whole point.
+    // Every neighbouring pair must be separable — that is the whole point.
     for (let i = 1; i < colors.length; i += 1) {
-      expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.1);
+      expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.04);
+    }
+    // The spread stays analogous: every hue within ±90° of the palette's own hue, which sits at
+    // the centre of the span (first entry - 0.25).
+    const baseHue = (parse(colors[0]).h + 0.25) % 1;
+    for (const color of colors) {
+      expect(hueDistance(color, `${baseHue * 360} 0% 0%`)).toBeLessThanOrEqual(0.25 + 0.01);
     }
     // The palette's own lightness/chroma survive the spread.
     const parsed = colors.map(parse);
@@ -76,12 +82,18 @@ describe('getTokenColorPalette', () => {
     expect(parsed[0].s).toBeGreaterThanOrEqual(0.55);
   });
 
-  test('spreads hues for the all-blue default palette used when a song has no palette', () => {
+  test('keeps the all-blue default palette (no-palette songs) in the blue family', () => {
     const colors = getTokenColorPalette(undefined);
 
-    expect(colors.length).toBeGreaterThanOrEqual(3);
+    expect(colors.length).toBe(6);
     for (let i = 1; i < colors.length; i += 1) {
-      expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.1);
+      expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.04);
+    }
+    // Anchored on the default palette's blue (~212°), the ±90° span must not reach red/green.
+    for (const color of colors) {
+      const h = parse(color).h * 360;
+      const dist = Math.min(Math.abs(h - 212), 360 - Math.abs(h - 212));
+      expect(dist).toBeLessThanOrEqual(93);
     }
   });
 

@@ -8,6 +8,12 @@ type Props = {
   text: string;
   analysis?: LyricsAnalysisLine;
   activeTokenId?: string;
+  /**
+   * Whether this line is the one currently being sung. Every analysed line shows token colours,
+   * but unsung lines render them at the same 20% dimness as the shared lyric colour so the
+   * page keeps its dark, only-the-sung-line-pops hierarchy.
+   */
+  isActiveLine?: boolean;
   /** The song's dynamic-theme palette; token colours are derived from its swatches. */
   palette?: NodeVibrantPalette;
   onTokenClick: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
@@ -24,7 +30,7 @@ type Props = {
  * so the analysed line keeps the same total width as plain text.
  */
 const LyricsAnalysisLineContent = (props: Props) => {
-  const { text, analysis, activeTokenId, palette, onTokenClick } = props;
+  const { text, analysis, activeTokenId, isActiveLine = false, palette, onTokenClick } = props;
 
   const segments = useMemo(
     () => (analysis ? splitLineIntoTokens(text, analysis.tokens) : [{ text }]),
@@ -47,6 +53,8 @@ const LyricsAnalysisLineContent = (props: Props) => {
         tokenIndex += 1;
         const isActive = token.tokenId === activeTokenId;
         const tokenColor = getTokenColor(tokenIndex, tokenColors);
+        // Unsung lines keep the 20% dimness the plain lyric colour had; the sung line is full.
+        const alpha = isActiveLine ? 1 : 0.2;
 
         return (
           <span
@@ -58,7 +66,7 @@ const LyricsAnalysisLineContent = (props: Props) => {
                 ? 'bg-white/25! text-white!'
                 : `bg-transparent! hover:bg-white/15! ${tokenColor ? '' : 'text-inherit'}`
             }`}
-            style={isActive || !tokenColor ? undefined : { color: `hsl(${tokenColor})` }}
+            style={isActive || !tokenColor ? undefined : { color: `hsl(${tokenColor} / ${alpha})` }}
             onClick={(event) => {
               // Clicking a token must not seek the line, which is the default line behaviour.
               event.stopPropagation();

@@ -28,6 +28,14 @@ const MIN_LIGHTNESS = 0.7;
 const MAX_SPREAD_LIGHTNESS = 0.85;
 /** Monochrome covers leave hue as the only differentiator; saturation makes the spread visible. */
 const MIN_SPREAD_SATURATION = 0.55;
+/**
+ * When a palette collapses into one colour, spread six hues across this span centred on the
+ * palette's own hue (±0.25 of the wheel = ±90°, 36° apart). Staying analogous keeps the tokens in
+ * the theme's colour family instead of an unrelated rainbow, while the 36° steps still separate
+ * neighbouring tokens clearly.
+ */
+const SPREAD_HALF_WIDTH = 0.25;
+const SPREAD_COUNT = 6;
 
 /**
  * Token colours come from the song's own dynamic-theme palette instead of a fixed rainbow, so the
@@ -37,9 +45,9 @@ const MIN_SPREAD_SATURATION = 0.55;
  * black, and Muted/Dark swatches would otherwise be unreadable), then near-duplicates are dropped
  * with a perceptual threshold. Covers whose swatches collapse into a single distinguishable
  * colour — monochrome artwork, or the all-blue default palette used when a song has no palette at
- * all (e.g. NetEase streams) — get their hues spread evenly around the wheel instead, keeping the
- * palette's own lightness and chroma: hue is the only axis left that can separate neighbouring
- * tokens, and tokens that look identical would read as one word.
+ * all (e.g. NetEase streams) — get their hues spread across the analogous range around that hue,
+ * keeping the palette's own lightness and chroma: hue is the only axis left that can separate
+ * neighbouring tokens, and tokens that look identical would read as one word.
  */
 export const getTokenColorPalette = (palette?: NodeVibrantPalette) => {
   const fallback = DEFAULT_SONG_PALETTE;
@@ -68,8 +76,13 @@ export const getTokenColorPalette = (palette?: NodeVibrantPalette) => {
   const saturation = Math.max(s, MIN_SPREAD_SATURATION);
   const lightness = Math.min(Math.max(l, MIN_LIGHTNESS), MAX_SPREAD_LIGHTNESS);
 
-  return Array.from({ length: 6 }, (_, index) =>
-    formatHsl([(h + index / 6) % 1, saturation, lightness])
+  return Array.from({ length: SPREAD_COUNT }, (_, index) =>
+    formatHsl([
+      // Even steps from h - SPREAD_HALF_WIDTH to h + SPREAD_HALF_WIDTH, wrapping at 1.
+      (h + SPREAD_HALF_WIDTH * ((index * 2) / (SPREAD_COUNT - 1) - 1) + 1) % 1,
+      saturation,
+      lightness
+    ])
   );
 };
 
