@@ -16,6 +16,8 @@ type Props = {
   isLyricsVisible: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
   selectedToken?: { token: LyricsAnalysisToken; line: LyricsAnalysisLine };
+  /** Whether the word panel is open — it, not the selected token, drives the lyrics layout. */
+  isPanelOpen?: boolean;
   /** When false, lyric lines render as plain text even where analysis is available. */
   isAnalysisView?: boolean;
   onTokenClick: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
@@ -25,8 +27,14 @@ const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isLyricsVisible, setIsLyricsAvailable, selectedToken, isAnalysisView = true, onTokenClick } = props;
-  const isPanelOpen = Boolean(selectedToken);
+  const {
+    isLyricsVisible,
+    setIsLyricsAvailable,
+    selectedToken,
+    isPanelOpen = false,
+    isAnalysisView = true,
+    onTokenClick
+  } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);

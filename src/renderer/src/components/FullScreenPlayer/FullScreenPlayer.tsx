@@ -130,7 +130,9 @@ const FullScreenPlayer = () => {
           }`}
         >
           {/* With the panel open the song info floats over the top third of the lyrics column only,
-              so the lyrics keep their original position and the panel never gets blurred over. */}
+              so the lyrics keep their original position and the panel never gets blurred over.
+              Panel open but no token selected renders the identical layout — only the panel texts
+              fall back to a hint. */}
           {isFullLyricsScreen && !isAnalysisPanelOpen && <SongInfoContainer songPos={songPos} />}
 
           <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
@@ -139,6 +141,7 @@ const FullScreenPlayer = () => {
               isLyricsVisible={isLyricsVisible}
               setIsLyricsAvailable={setIsLyricsAvailable}
               selectedToken={selectedToken}
+              isPanelOpen={isAnalysisPanelOpen}
               isAnalysisView={isAnalysisView}
               onTokenClick={(token, line) => {
                 setSelectedToken({ token, line });
@@ -146,7 +149,7 @@ const FullScreenPlayer = () => {
               }}
             />
 
-            {isFullLyricsScreen && isAnalysisPanelOpen && selectedToken && (
+            {isFullLyricsScreen && isAnalysisPanelOpen && (
               <SongInfoContainer songPos={songPos} isOverlay />
             )}
           </div>
@@ -154,6 +157,7 @@ const FullScreenPlayer = () => {
           {isFullLyricsScreen && isAnalysisPanelOpen && (
             <LyricsAnalysisPanel token={selectedToken?.token} line={selectedToken?.line} />
           )}
+
         </div>
         <SongControlContainer
           isLyricsVisible={isLyricsVisible}
