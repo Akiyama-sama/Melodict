@@ -147,7 +147,7 @@ const callCatalog = async (
   } catch (error) {
     if (isNeteaseAuthError(error)) {
       logger.warn(`NetEase ${name} requires a logged-in session.`);
-      throw new Error('NETEASE_AUTH_REQUIRED' as ErrorCodes);
+      throw new Error('NETEASE_AUTH_REQUIRED');
     }
     throw error;
   }
