@@ -30,6 +30,7 @@ import { useStore } from '@tanstack/react-store';
 
 import { appPreferences } from '../../../../../package.json';
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
+import useDurationParts from '../../hooks/useDurationParts';
 import { useQueueOperations } from '../../hooks/useQueueOperations';
 import { store } from '../../store/store';
 import Button from '../Button';
@@ -162,20 +163,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     toggleIsFavorite
   ]);
 
-  const { minutes, seconds } = useMemo(() => {
-    const addZero = (num: number) => {
-      if (num < 10) return `0${num}`;
-      return num.toString();
-    };
-
-    const min = Math.floor((duration || 0) / 60);
-    const sec = Math.floor((duration || 0) % 60);
-
-    return {
-      minutes: Number.isNaN(min) ? undefined : addZero(min),
-      seconds: Number.isNaN(sec) ? undefined : addZero(sec)
-    };
-  }, [duration]);
+  const { minutes, seconds } = useDurationParts(duration);
 
   const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;

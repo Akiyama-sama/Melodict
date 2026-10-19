@@ -9,6 +9,8 @@ import { store } from '../../store/store';
 import Button from '../Button';
 import Img from '../Img';
 import NavLink from '../NavLink';
+import NeteaseVipBadge from './NeteaseVipBadge';
+import buildNeteasePlaybackMenuItems from './neteaseMenuItems';
 import { useStore } from '@tanstack/react-store';
 
 interface NeteaseSongCardProp {
@@ -40,58 +42,23 @@ const NeteaseSongCard = (props: NeteaseSongCardProp) => {
   }, [playSong, songId]);
 
   const contextMenuItems: ContextMenuItem[] = useMemo(
-    () => [
-      {
-        label: t('common.play'),
-        iconName: 'play_arrow',
-        handlerFunction: handlePlayBtnClick
-      },
-      {
-        label: t('common.playNext'),
-        iconName: 'shortcut',
-        handlerFunction: () => {
-          addToNext([songId], { removeDuplicates: false });
-          addNewNotifications([
-            {
-              id: `${title}PlayNext`,
-              content: t('notifications.playingNext', { title }),
-              iconName: 'shortcut'
-            }
-          ]);
-        }
-      },
-      {
-        label: t('common.addToQueue'),
-        iconName: 'queue',
-        handlerFunction: () => {
-          addToEnd([songId], { removeDuplicates: false });
-          addNewNotifications([
-            {
-              id: `${title}AddedToQueue`,
-              content: t('notifications.addedToQueue', { count: 1 }),
-              iconName: 'queue'
-            }
-          ]);
-        }
-      },
-      {
-        label: 'Hr',
-        isContextMenuItemSeperator: true,
-        handlerFunction: () => true
-      },
-      {
-        label: t('song.goToAlbum'),
-        iconName: 'album',
-        isDisabled: !album,
-        handlerFunction: () =>
-          album &&
-          navigate({
-            to: '/main-player/netease/albums/$albumId',
-            params: { albumId: String(album.albumId) }
-          })
-      }
-    ],
-    [addToEnd, addToNext, album, handlePlayBtnClick, navigate, songId, t, title]
+    () =>
+      buildNeteasePlaybackMenuItems(
+        { songId, title, album },
+        { addToNext, addToEnd, addNewNotifications, navigate, handlePlayBtnClick },
+        t
+      ),
+    [
+      addNewNotifications,
+      addToEnd,
+      addToNext,
+      album,
+      handlePlayBtnClick,
+      navigate,
+      songId,
+      t,
+      title
+    ]
   );
 
   const contextMenuItemData: ContextMenuAdditionalData = {
@@ -134,11 +101,7 @@ const NeteaseSongCard = (props: NeteaseSongCardProp) => {
           clickHandler={handlePlayBtnClick}
         />
         <div className="song-artists w-full truncate text-sm" title={artists.map((a) => a.name).join(', ')}>
-          {isVip && (
-            <span className="mr-1 rounded bg-amber-500 px-1 align-middle text-[0.6rem] leading-tight text-white">
-              VIP
-            </span>
-          )}
+          {isVip && <NeteaseVipBadge />}
           {artists.length > 0 ? (
             <NavLink
               to="/main-player/netease/artists/$artistId"
