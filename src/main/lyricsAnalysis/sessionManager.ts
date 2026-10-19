@@ -4,6 +4,7 @@ import {
   LYRICS_ANALYSIS_DEFAULT_MODEL_ID,
   LYRICS_ANALYSIS_PROMPT_VERSION,
   LYRICS_ANALYSIS_SCHEMA_VERSION,
+  buildTokenId,
   type LyricsAnalysisError,
   type LyricsAnalysisInputLine,
   type LyricsAnalysisLine,
@@ -11,6 +12,7 @@ import {
   type LyricsAnalysisSnapshot
 } from '../../common/lyricsAnalysis';
 import { type LyricsAnalysisTelemetrySession } from '../../common/lyricsAnalysisTelemetry';
+import { analyzeLyricsLanguageMix } from '../../common/lyricsLanguageProfiles';
 import logger from '../logger';
 import { analyzeLyricsInWorker } from './analysisWorkerClient';
 import {
@@ -18,6 +20,12 @@ import {
   mergeLyricsAnalysisCache,
   readLyricsAnalysisPartialCache
 } from './cacheRepository';
+import {
+  buildLineAnalysisCacheKey,
+  hydrateLineAnalysisFromCache,
+  readLineAnalysisCache,
+  writeLineAnalysisCache
+} from './lineCacheRepository';
 import { getStoredProviderConfig } from './providerConfigRepository';
 import {
   emitAnalysisPassTelemetry,
@@ -74,13 +82,15 @@ const buildTelemetrySession = (input: {
   request: LyricsAnalysisRequest;
   modelId: string;
   preCachedLines: number;
+  /** Distinct lines actually sent; lower than total-preCached when repeated lines are deduped. */
+  requestedLines?: number;
 }): LyricsAnalysisTelemetrySession => ({
   sessionId: input.sessionId,
   startedAt: input.startedAt,
   modelId: input.modelId,
   totalLines: input.request.lines.length,
   preCachedLines: input.preCachedLines,
-  requestedLines: input.request.lines.length - input.preCachedLines,
+  requestedLines: input.requestedLines ?? input.request.lines.length - input.preCachedLines,
   passCount: 0,
   outputTokens: undefined,
   okLines: 0,
@@ -120,6 +130,69 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     if (cached && isCurrent()) preCachedLines = cached.lines.filter(isAnalyzed);
   }
 
+  // Line-level cache: a line whose exact text was analyzed before (this song's earlier runs, a
+  // repeated chorus line, or the same line in a different song) hydrates without an LLM call. The
+  // per-line language comes from the song-level mix, so a Japanese song's kanji-only lines key as
+  // Japanese rather than Chinese. Keys ignore lineId, which is what makes them reusable.
+  const languageMix = analyzeLyricsLanguageMix(request.lines);
+  const lineKeys = new Map<string, string>();
+  request.lines.forEach((line, index) => {
+    lineKeys.set(
+      line.lineId,
+      buildLineAnalysisCacheKey({
+        text: line.text,
+        romanizedText: line.romanizedText,
+        uiLanguage: request.uiLanguage,
+        modelId,
+        language: languageMix.lineLanguages[index] ?? 'unknown'
+      })
+    );
+  });
+
+  // Line-cache entries that were NOT already covered by the song artifact (those are the ones
+  // worth writing back to it — the artifact merge would be a no-op for the rest).
+  let lineCacheHits: LyricsAnalysisLine[] = [];
+  if (!request.forceRefresh) {
+    const cachedByLineId = new Map(preCachedLines.map((line) => [line.lineId, line]));
+    const entries = await Promise.all(
+      request.lines.map(async (line) => {
+        const existing = cachedByLineId.get(line.lineId);
+        if (existing) return { line: existing, fromLineCache: false };
+        const key = lineKeys.get(line.lineId);
+        if (!key) return undefined;
+        const entry = await readLineAnalysisCache(key);
+        return entry
+          ? {
+              line: hydrateLineAnalysisFromCache({ entry, lineId: line.lineId, text: line.text }),
+              fromLineCache: true
+            }
+          : undefined;
+      })
+    );
+    const hits = entries.filter(
+      (entry): entry is { line: LyricsAnalysisLine; fromLineCache: boolean } => entry !== undefined
+    );
+    lineCacheHits = hits.filter((hit) => hit.fromLineCache).map((hit) => hit.line);
+    // Union of the song artifact and the line cache: lines found in either skip the LLM.
+    preCachedLines = hits.map((hit) => hit.line);
+  }
+
+  if (isCurrent() && lineCacheHits.length > 0) {
+    // Hydrated lines are real analysis results for this fingerprint, so they belong in the
+    // song-level artifact too — the next open of this exact song is then a plain full-cache hit.
+    await mergeLyricsAnalysisCache({
+      fingerprint,
+      schemaVersion: LYRICS_ANALYSIS_SCHEMA_VERSION,
+      promptVersion: LYRICS_ANALYSIS_PROMPT_VERSION,
+      modelId,
+      uiLanguage: request.uiLanguage,
+      songPath: request.songPath,
+      songTitle: request.songTitle,
+      lines: lineCacheHits,
+      generatedAt: Date.now()
+    }).catch(() => undefined);
+  }
+
   const hasFullCache =
     preCachedLines.length > 0 && preCachedLines.length >= request.lines.length;
 
@@ -140,10 +213,29 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
 
   if (!isCurrent()) return activeSession;
 
-  // Resume inputs exclude lines the partial cache already covers, so the LLM only sees the gaps.
-  const resumeLines = request.lines.filter(
-    (line) => !preCachedLines.some((analyzed) => analyzed.lineId === line.lineId)
-  );
+  // Resume inputs exclude lines the cache already covers, so the LLM only sees the gaps.
+  const cachedLineIds = new Set(preCachedLines.map((line) => line.lineId));
+  const resumeLines = request.lines.filter((line) => !cachedLineIds.has(line.lineId));
+
+  // Repeated lines within one song (choruses) share a cache key: send each distinct line once,
+  // then fan the result out to its siblings on arrival. `lineId` stays the source of truth for
+  // the artifact, so the fan-out is id-level only.
+  const siblingLineIds = new Map<string, string[]>();
+  for (const line of resumeLines) {
+    const key = lineKeys.get(line.lineId);
+    if (!key) continue;
+    const ids = siblingLineIds.get(key);
+    if (ids) ids.push(line.lineId);
+    else siblingLineIds.set(key, [line.lineId]);
+  }
+  const requestedKeys = new Set<string>();
+  const dedupedResumeLines = resumeLines.filter((line) => {
+    const key = lineKeys.get(line.lineId);
+    if (!key) return true;
+    if (requestedKeys.has(key)) return false;
+    requestedKeys.add(key);
+    return true;
+  });
 
   const sessionId = `${fingerprint.slice(0, 12)}-${startedAt.toString(36)}`;
   const telemetrySession = buildTelemetrySession({
@@ -151,7 +243,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     startedAt,
     request,
     modelId,
-    preCachedLines: preCachedLines.length
+    preCachedLines: preCachedLines.length,
+    requestedLines: dedupedResumeLines.length
   });
   // Only the resume lines are up for grabs this run; pre-cached lines start out accounted for.
   for (const line of preCachedLines) telemetrySession.failedLineIds.delete(line.lineId);
@@ -193,17 +286,38 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
   };
 
   const onValidatedLine = (input: { line: LyricsAnalysisLine; source: 'first' | 'repair' }) => {
-    streamedLines.set(input.line.lineId, input.line);
-    telemetrySession.okLines += 1;
-    telemetrySession.failedLineIds.delete(input.line.lineId);
-    telemetrySession.firstLineAt ??= Date.now();
+    // One LLM element can stand for several identical lines (a chorus): fan the analysis out to
+    // every sibling lineId and persist it under each, so the artifact stays per-line complete.
+    const key = lineKeys.get(input.line.lineId);
+    const siblings = key ? (siblingLineIds.get(key) ?? [input.line.lineId]) : [input.line.lineId];
+    // Siblings share the key, and the key includes the text, so the surface text is identical.
+    const landedLines = siblings.map((lineId) =>
+      lineId === input.line.lineId
+        ? input.line
+        : {
+            ...input.line,
+            lineId,
+            tokens: input.line.tokens.map((token) => ({
+              ...token,
+              tokenId: buildTokenId(lineId, token.startChar, token.endChar)
+            }))
+          }
+    );
 
-    emitLineResultTelemetry({
-      session: telemetrySession,
-      line: input.line,
-      source: input.source
-    });
+    for (const landed of landedLines) {
+      streamedLines.set(landed.lineId, landed);
+      telemetrySession.okLines += 1;
+      telemetrySession.failedLineIds.delete(landed.lineId);
+      // One event per landed line, siblings included: telemetry consumers count per-line coverage.
+      emitLineResultTelemetry({ session: telemetrySession, line: landed, source: input.source });
+    }
+    telemetrySession.firstLineAt ??= Date.now();
     emitFirstLineTelemetry({ session: telemetrySession, source: input.source });
+
+    // Persist to the cross-song line cache once per distinct line text.
+    if (key && !request.forceRefresh) {
+      void writeLineAnalysisCache({ key, line: input.line });
+    }
 
     if (!isCurrent()) return;
 
@@ -215,11 +329,13 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       updatedAt: Date.now()
     };
     activeSession = snapshot;
-    sendToRenderer(LYRICS_ANALYSIS_LINE_CHANNEL, {
-      songPath: request.songPath,
-      fingerprint,
-      line: input.line
-    });
+    for (const landed of landedLines) {
+      sendToRenderer(LYRICS_ANALYSIS_LINE_CHANNEL, {
+        songPath: request.songPath,
+        fingerprint,
+        line: landed
+      });
+    }
 
     // Mid-run persistence: an exit or crash at any moment keeps every line landed so far.
     flushIfDue(false);
@@ -231,7 +347,7 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       uiLanguage: request.uiLanguage,
       songTitle: request.songTitle,
       songArtists: request.songArtists,
-      lines: resumeLines,
+      lines: dedupedResumeLines,
       sessionId,
       onLine: (line, source) => onValidatedLine({ line, source }),
       onRepairing: (failedLineIds) => {

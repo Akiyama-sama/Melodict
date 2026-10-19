@@ -72,6 +72,7 @@ import {
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import { registerLyricsAnalysisIpc } from './lyricsAnalysis/ipc';
+import { pruneLineAnalysisCache } from './lyricsAnalysis/lineCacheRepository';
 import { pruneLyricsAnalysisTelemetry } from './lyricsAnalysis/telemetryRepository';
 import { registerNeteaseIpc } from './netease/ipc';
 import {
@@ -132,8 +133,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
   registerLyricsAnalysisIpc();
   registerNeteaseIpc();
 
-  // Opportunistic housekeeping: drop telemetry shards older than the retention window.
+  // Opportunistic housekeeping: drop telemetry shards older than the retention window, and bound
+  // the cross-song line cache (age first, then oldest entries beyond the size cap).
   void pruneLyricsAnalysisTelemetry().catch(() => undefined);
+  void pruneLineAnalysisCache().catch(() => undefined);
 
   if (mainWindow) {
     ipcMain.on('app/close', () => app.quit());
