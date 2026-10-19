@@ -1,6 +1,6 @@
 import { dataUpdateEvent } from '../main';
 import logger from '../logger';
-import { callNetease, isNeteaseAuthError } from './client';
+import { callNetease } from './client';
 import type { NeteaseApiRawResult } from './client';
 import type { NeteaseSessionProfile } from '../../common/netease';
 import {
@@ -152,34 +152,6 @@ export const neteaseLogout = async (): Promise<void> => {
   }
 
   broadcastNeteaseSessionChange();
-};
-
-/**
- * Refreshes the login token; NetEase asks clients to refresh at most daily. Called rarely, and an
- * expiry is handled by the next revalidation instead of a forced logout.
- */
-export const refreshNeteaseSession = async (): Promise<void> => {
-  const session = await readNeteaseSession();
-  if (!session) return;
-
-  try {
-    const result = await callNetease('login_refresh', {}, { cookie: session.cookie });
-    const cookie = result.cookie;
-
-    // The refresh endpoint resets MUSIC_U only occasionally; when it does, persist the new one.
-    const refreshedCookie = Array.isArray(cookie)
-      ? (cookie.find((line: string) => line.includes('MUSIC_U')) as string | undefined)
-      : undefined;
-
-    if (refreshedCookie) await writeNeteaseSession(refreshedCookie);
-  } catch (error) {
-    if (isNeteaseAuthError(error)) {
-      await clearNeteaseSession();
-      broadcastNeteaseSessionChange();
-      return;
-    }
-    logger.warn('NetEase login refresh failed; skipping.', { error });
-  }
 };
 
 const broadcastNeteaseSessionChange = () => {

@@ -289,7 +289,6 @@ const neteaseControls = {
     ipcRenderer.invoke('app/netease/checkQrLogin', key),
   getMe: (): Promise<NeteaseSessionProfile | undefined> =>
     ipcRenderer.invoke('app/netease/getMe'),
-  refreshSession: (): Promise<void> => ipcRenderer.invoke('app/netease/refreshSession'),
   logOut: (): Promise<void> => ipcRenderer.invoke('app/netease/logOut'),
 
   search: (keywords: string, type: NeteaseSearchTypes): Promise<NeteaseApiSearchResult> =>
@@ -310,8 +309,6 @@ const neteaseControls = {
     ipcRenderer.invoke('app/netease/getSongSummary', neteaseId),
   getSongSummaries: (neteaseIds: number[]): Promise<NeteaseSongSummary[]> =>
     ipcRenderer.invoke('app/netease/getSongSummaries', neteaseIds),
-  getStream: (neteaseId: number, quality: NeteaseQualityTypes): Promise<NeteaseStreamInfo | undefined> =>
-    ipcRenderer.invoke('app/netease/getStream', neteaseId, quality),
   getSongPalette: (neteaseId: number, coverUrl?: string): Promise<PaletteData | undefined> =>
     ipcRenderer.invoke('app/netease/getSongPalette', neteaseId, coverUrl),
 

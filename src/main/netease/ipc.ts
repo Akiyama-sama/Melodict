@@ -2,14 +2,7 @@ import { ipcMain } from 'electron';
 
 import type { NeteaseSearchTypes } from '../../common/netease';
 import logger from '../logger';
-import {
-  checkNeteaseQrLogin,
-  getNeteaseMe,
-  neteaseLogout,
-  refreshNeteaseSession,
-  revalidateNeteaseSession,
-  startNeteaseQrLogin
-} from './auth';
+import { checkNeteaseQrLogin, getNeteaseMe, neteaseLogout, startNeteaseQrLogin } from './auth';
 import {
   getNeteaseAlbum,
   getNeteaseArtist,
@@ -64,14 +57,6 @@ export const registerNeteaseIpc = () => {
   );
 
   ipcMain.handle('app/netease/getMe', () => withNeteaseErrorHandling(() => getNeteaseMe()));
-
-  ipcMain.handle('app/netease/revalidateSession', () =>
-    withNeteaseErrorHandling(() => revalidateNeteaseSession())
-  );
-
-  ipcMain.handle('app/netease/refreshSession', () =>
-    withNeteaseErrorHandling(() => refreshNeteaseSession())
-  );
 
   ipcMain.handle('app/netease/logOut', () => withNeteaseErrorHandling(() => neteaseLogout()));
 
