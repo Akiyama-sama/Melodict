@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next';
 import type { LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import LyricsAnalysisLineContent from '../FullScreenPlayer/analysis/LyricsAnalysisLineContent';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
+import LyricsAnalysisLineContent from './LyricsAnalysisLineContent';
 import LyricsProgressBar from './LyricsProgressBar';
 import useSyncedLineHighlight from './useSyncedLineHighlight';
 
