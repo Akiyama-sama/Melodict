@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import { splitLineIntoTokens, validateAndNormalizeLineAnalysis } from '../../../src/common/lyricsAnalysis';
+import {
+  findUncoveredLineWords,
+  splitLineIntoTokens,
+  validateAndNormalizeLineAnalysis
+} from '../../../src/common/lyricsAnalysis';
 
 const draftLine = (overrides: {
   lineId?: string;
@@ -151,3 +155,141 @@ describe('surface-text span re-anchoring', () => {
   });
 });
 
+
+describe('line coverage', () => {
+  // The failure this guards against: a model emits a phrase token whose span only covers its
+  // first word ("settled" of "settled down"), or simply stops before the last word. Every span is
+  // well-formed, so without a coverage check the line reports status "ready" while a word is
+  // missing from the annotation.
+  const spans = (text: string, parts: string[]) => {
+    const tokens: Array<{ startChar: number; endChar: number }> = [];
+    let cursor = 0;
+    for (const part of parts) {
+      const at = text.indexOf(part, cursor);
+      tokens.push({ startChar: at, endChar: at + part.length });
+      cursor = at + part.length;
+    }
+    return tokens as never;
+  };
+
+  test('reports the trailing word a model never emitted', () => {
+    const text = 'That you are settled down';
+    const uncovered = findUncoveredLineWords(
+      text,
+      spans(text, ['That', 'you', 'are', 'settled']) as never
+    );
+    expect(uncovered).toEqual(['down']);
+  });
+
+  test('a merged phrase token covers both of its words', () => {
+    const text = 'That you are settled down';
+    expect(findUncoveredLineWords(text, spans(text, ['That', 'you', 'are', 'settled down']) as never)).toEqual([]);
+  });
+
+  test('ignores punctuation-only gaps', () => {
+    const text = 'Nice to meet you, where you been?';
+    expect(
+      findUncoveredLineWords(text, spans(text, ['Nice to meet you', 'where', 'you', 'been']) as never)
+    ).toEqual([]);
+  });
+
+  test('ignores parenthetical backing vocals and translations', () => {
+    // Echoes in brackets are routinely left untokenized; that is a valid reading, not a gap.
+    expect(
+      findUncoveredLineWords('パッと花火が（パッと花火が）', spans('パッと花火が（パッと花火が）', ['パッと', '花火', 'が']) as never)
+    ).toEqual([]);
+    expect(
+      findUncoveredLineWords(
+        "夜の匂いに (I'll spend all thirty nights)",
+        spans("夜の匂いに (I'll spend all thirty nights)", ['夜', 'の', '匂い', 'に']) as never
+      )
+    ).toEqual([]);
+  });
+
+  test('a partially covered line is marked degraded, a fully covered one ready', () => {
+    const text = 'That you are settled down';
+    const partial = validateAndNormalizeLineAnalysis({
+      draft: draftLine({ tokens: spans(text, ['That', 'you', 'are', 'settled']) as never }),
+      text
+    });
+    expect(partial.kind).toBe('ok');
+    if (partial.kind !== 'ok') return;
+    expect(partial.line.status).toBe('degraded');
+    expect(partial.droppedTokenCount).toBe(0);
+
+    const complete = validateAndNormalizeLineAnalysis({
+      draft: draftLine({ tokens: spans(text, ['That', 'you', 'are', 'settled down']) as never }),
+      text
+    });
+    expect(complete.kind).toBe('ok');
+    if (complete.kind !== 'ok') return;
+    expect(complete.line.status).toBe('ready');
+  });
+});
+
+describe('word-boundary snapping', () => {
+  test('does not drag a span that ends on a word boundary into the next word', () => {
+    // "insane" claimed at 19..25 on a line whose real word ends at 19 would previously snap
+    // forward over "I'm" (or the next word), overlap it, and get rejected — losing "insane".
+    const text = "They'll tell you I'm insane";
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({
+        tokens: [
+          { startChar: 0, endChar: 6 },
+          { startChar: 7, endChar: 11 },
+          { startChar: 12, endChar: 15 },
+          { startChar: 16, endChar: 19 },
+          { startChar: 20, endChar: 26 }
+        ]
+      }),
+      text
+    });
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    expect(outcome.line.tokens.map((token) => token.text)).toEqual([
+      "They'll",
+      'tell',
+      'you',
+      "I'm",
+      'insane'
+    ]);
+    expect(outcome.droppedTokenCount).toBe(0);
+  });
+
+  test('still snaps a span that stops mid-word out to the full word', () => {
+    const text = 'I need self-control';
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({ tokens: [{ startChar: 7, endChar: 11 }] }),
+      text
+    });
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    expect(outcome.line.tokens[0]?.text).toBe('self-control');
+  });
+
+  test('records why a raw token was rejected', () => {
+    const text = 'settled down';
+    const outcome = validateAndNormalizeLineAnalysis({
+      draft: draftLine({
+        tokens: [
+          { startChar: 0, endChar: 7 },
+          // Starts inside "settled", snaps out to the same span the first token already owns.
+          { startChar: 2, endChar: 5, card: { term: 'settled' } },
+          // Straddles the word boundary, so it survives snapping and collides partially.
+          { startChar: 5, endChar: 10, card: { term: 'down' } },
+          // No offsets at all.
+          { text: 'down' }
+        ]
+      }),
+      text
+    });
+    expect(outcome.kind).toBe('ok');
+    if (outcome.kind !== 'ok') return;
+    expect(outcome.droppedTokens.map((token) => token.reason)).toEqual([
+      'duplicate',
+      'overlap',
+      'offsets'
+    ]);
+    expect(outcome.droppedTokens[1]?.term).toBe('down');
+  });
+});

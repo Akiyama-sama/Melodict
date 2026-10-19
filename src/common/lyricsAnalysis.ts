@@ -6,7 +6,10 @@ export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
 // Bumped to '3' with the language-profile directive and the romanized-reference rule: cached
 // artifacts from v2 were produced without per-language guidance and without the human romaji
 // reference, so their tokenization/pronunciation quality no longer matches what the prompt asks for.
-export const LYRICS_ANALYSIS_PROMPT_VERSION = '3';
+// Bumped to '4' requiring per-token surface text and whole-line word coverage: cache keys must
+// change because the prompt now asks for a field some models never emitted, and coverage drives
+// re-ask behavior, so older cached lines cannot be compared with newer ones.
+export const LYRICS_ANALYSIS_PROMPT_VERSION = '4';
 export const LYRICS_ANALYSIS_DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
 export type LyricsAnalysisLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'unknown';
@@ -226,10 +229,76 @@ export const buildTokenId = (lineId: string, startChar: number, endChar: number)
 export const getFallbackMeaning = (lineText: string, tokenText: string) =>
   `在这句歌词“${lineText}”里，更接近“${tokenText}”这层意思。`;
 
+const PARENTHETICAL_PAIRS: Array<[string, string]> = [
+  ['(', ')'],
+  ['（', '）'],
+  ['【', '】'],
+  ['「', '」']
+];
+
+/**
+ * Marks characters inside bracketed asides. Backing vocals, translations and stage directions
+ * (「パッと花火が（パッと花火が）」, 「夜の匂いに (I'll spend all thirty nights)」) are echoes: models
+ * routinely leave them untokenized and that is a defensible reading, so they must not count as
+ * missing content when coverage is measured.
+ */
+const markParenthetical = (text: string): boolean[] => {
+  const mask = new Array<boolean>(text.length).fill(false);
+  const stack: string[] = [];
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index] ?? '';
+    const opening = PARENTHETICAL_PAIRS.find(([open]) => open === char);
+    const closing = PARENTHETICAL_PAIRS.find(([, close]) => close === char);
+    if (opening) {
+      stack.push(opening[1]);
+      mask[index] = true;
+    } else if (closing && stack.length > 0) {
+      stack.pop();
+      mask[index] = true;
+    } else if (stack.length > 0) {
+      mask[index] = true;
+    }
+  }
+  return mask;
+};
+
+/**
+ * The word atoms a line's tokens must cover. A token covers an atom when their spans intersect,
+ * so a merged phrase token ("settled down") covers both of its words. Punctuation and parenthetical
+ * echoes are not atoms. Used to detect lines the model annotated only partially — the failure mode
+ * is invisible otherwise, because a line whose last word was never emitted still validates cleanly
+ * and reports status "ready".
+ */
+export const findUncoveredLineWords = (text: string, tokens: LyricsAnalysisToken[]): string[] => {
+  const parenthetical = markParenthetical(text);
+  const uncovered: string[] = [];
+  const atomRegex = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
+  for (const match of text.matchAll(atomRegex)) {
+    const start = match.index ?? 0;
+    const end = start + match[0].length;
+    if (parenthetical[start]) continue;
+    if (tokens.some((token) => token.startChar < end && token.endChar > start)) continue;
+    uncovered.push(match[0]);
+  }
+  return uncovered;
+};
+
 export const getFallbackGrammarFunction = () => '歌词中的表达成分';
 
 export type LineValidationOutcome =
-  | { kind: 'ok'; line: LyricsAnalysisLine; droppedTokenCount: number }
+  | {
+      kind: 'ok';
+      line: LyricsAnalysisLine;
+      droppedTokenCount: number;
+      /** Diagnostics for rejected raw tokens, bounded; empty when nothing was rejected. */
+      droppedTokens: Array<{
+        reason: 'offsets' | 'range' | 'empty' | 'duplicate' | 'overlap';
+        startChar?: number;
+        endChar?: number;
+        text?: string;
+        term?: string;
+      }>;
+    }
   | { kind: 'failed'; lineId: string; reason: string };
 
 /**
@@ -251,12 +320,36 @@ export const validateAndNormalizeLineAnalysis = (input: {
 
   const seenSpans = new Set<string>();
   const validated: LyricsAnalysisToken[] = [];
+  const droppedTokens: Array<{
+    reason: 'offsets' | 'range' | 'empty' | 'duplicate' | 'overlap';
+    startChar?: number;
+    endChar?: number;
+    text?: string;
+    term?: string;
+  }> = [];
+  const noteDropped = (
+    reason: 'offsets' | 'range' | 'empty' | 'duplicate' | 'overlap',
+    rawToken: (typeof rawTokens)[number],
+    span?: { startChar: number; endChar: number }
+  ) => {
+    if (droppedTokens.length >= 8) return;
+    droppedTokens.push({
+      reason,
+      startChar: span?.startChar ?? asInteger(rawToken?.startChar),
+      endChar: span?.endChar ?? asInteger(rawToken?.endChar),
+      text: asTrimmedString(rawToken?.text),
+      term: asTrimmedString(rawToken?.card?.term)
+    });
+  };
 
   for (const rawToken of rawTokens) {
     const claimedStart = asInteger(rawToken?.startChar);
     const claimedEnd = asInteger(rawToken?.endChar);
 
-    if (claimedStart === undefined || claimedEnd === undefined) continue;
+    if (claimedStart === undefined || claimedEnd === undefined) {
+      noteDropped('offsets', rawToken);
+      continue;
+    }
     let startChar = claimedStart;
     let endChar = claimedEnd;
 
@@ -286,7 +379,10 @@ export const validateAndNormalizeLineAnalysis = (input: {
       }
     }
 
-    if (startChar < 0 || endChar <= startChar || endChar > text.length) continue;
+    if (startChar < 0 || endChar <= startChar || endChar > text.length) {
+      noteDropped('range', rawToken, { startChar, endChar });
+      continue;
+    }
 
     // Models sometimes stop a token mid-word (e.g. "self-cont" of "self-control"); snap the span
     // out to full word boundaries so Latin words never get cut apart. Deliberately Latin-only:
@@ -306,16 +402,25 @@ export const validateAndNormalizeLineAnalysis = (input: {
     while (fixedEnd > fixedStart && /\s/.test(text[fixedEnd - 1] ?? '')) fixedEnd -= 1;
 
     const tokenText = text.slice(fixedStart, fixedEnd);
-    if (tokenText.trim().length === 0) continue;
+    if (tokenText.trim().length === 0) {
+      noteDropped('empty', rawToken, { startChar: fixedStart, endChar: fixedEnd });
+      continue;
+    }
 
     const spanKey = `${fixedStart}-${fixedEnd}`;
-    if (seenSpans.has(spanKey)) continue;
+    if (seenSpans.has(spanKey)) {
+      noteDropped('duplicate', rawToken, { startChar: fixedStart, endChar: fixedEnd });
+      continue;
+    }
 
     // Reject overlaps: keep whichever token was emitted first for the overlapping region.
     const overlaps = validated.some(
       (token) => fixedStart < token.endChar && fixedEnd > token.startChar
     );
-    if (overlaps) continue;
+    if (overlaps) {
+      noteDropped('overlap', rawToken, { startChar: fixedStart, endChar: fixedEnd });
+      continue;
+    }
 
     seenSpans.add(spanKey);
 
@@ -376,6 +481,11 @@ export const validateAndNormalizeLineAnalysis = (input: {
 
   validated.sort((a, b) => a.startChar - b.startChar);
 
+  // A line the model annotated only partially (typically its final word missing) passes every
+  // span check above and would otherwise be reported "ready". Flag it so telemetry can measure the
+  // gap; the tokens themselves are left alone — the repair pass owns re-asking for content.
+  const uncoveredWords = findUncoveredLineWords(text, validated);
+
   return {
     kind: 'ok',
     line: {
@@ -383,10 +493,11 @@ export const validateAndNormalizeLineAnalysis = (input: {
       text,
       translation: asTrimmedString(draft.translation),
       tokens: validated,
-      status: validated.length < rawTokens.length ? 'degraded' : 'ready'
+      status: validated.length < rawTokens.length || uncoveredWords.length > 0 ? 'degraded' : 'ready'
     },
     // Telemetry input: how many raw tokens validation rejected for this line.
-    droppedTokenCount: rawTokens.length - validated.length
+    droppedTokenCount: rawTokens.length - validated.length,
+    droppedTokens
   };
 };
 

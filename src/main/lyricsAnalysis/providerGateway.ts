@@ -39,6 +39,11 @@ const SYSTEM_PROMPT_TEMPLATE = [
   'Rules:',
   '- Echo back the exact lineId you were given. Never invent lineIds and never rewrite the lyric text.',
   '- Split each line into 1-6 clickable learning tokens: words, particles, set phrases, or inflections worth studying.',
+  // The surface text is the token\'s identity: offsets are the field models miscount, and a phrase
+  // token ("settled down") whose span only covers its first word silently loses the rest of the
+  // phrase. The validator re-anchors spans from this text, so it must be exact and present.
+  '- Every token MUST include "text": the exact substring of the line that the token covers, copied verbatim (same spelling, punctuation and spacing). It must equal the line slice from startChar to endChar.',
+  '- The tokens of a line must cover the whole line: every word of the lyric belongs to exactly one token, including the last word. Never drop a trailing word or particle.',
   '- startChar/endChar are 0-based character offsets into that exact line, endChar exclusive. They must be ordered, non-overlapping, and within the line length.',
   '- Every token needs card.meaning (what it means in this line, not a dictionary dump) and card.grammarFunction (its role in this sentence).',
   '- Include card.term (dictionary form) and card.pronunciation when useful: kana/romaji for Japanese, ipa/us/uk for English, hangul/romanized for Korean, pinyin for Chinese.',
@@ -111,7 +116,8 @@ const buildRepairPrompt = (input: {
       outputLanguageRequirement: `All human-readable fields (meaning, grammarFunction, translation) must be in ${getOutputLanguageDirective(input.uiLanguage)}, consistently for every element.`,
       songTitle: input.songTitle,
       songArtists: input.songArtists,
-      task: 'A previous pass failed on these lines. Return corrected analysis for exactly these lineIds only.',
+      task:
+        'A previous pass failed on these lines. Return corrected analysis for exactly these lineIds only. When reason is "incomplete-coverage", the previous output missed words of the line (usually the last one) — this time cover every word of the line, including the final one, and give every token its exact "text".',
       lines: input.lines
     },
     null,
@@ -375,6 +381,13 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     targetLines: LyricsAnalysisInputLine[];
     maxOutputTokens: number;
     passKind: 'first' | 'repair';
+    /**
+     * Repair passes replace lines the first pass already emitted, but a repair can come back
+     * worse (fewer tokens, a fresh coverage gap). When supplied, a line is only accepted if it
+     * scores strictly better than what is already held; rejected replacements leave the earlier
+     * line — and what the user already saw — untouched.
+     */
+    preferOver?: Map<string, LyricsAnalysisLine>;
   }) => {
     const passStartedAt = Date.now();
     let finishReason: string | undefined;
@@ -409,6 +422,26 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     let emittedAny = false;
     let textTail = '';
 
+    // Quality of an emitted line, higher is better: covering the whole line first, then how many
+    // words it carries. A repair that loses a word or shrinks the annotation never wins.
+    const lineQuality = (line: LyricsAnalysisLine) =>
+      (line.status === 'degraded' ? 0 : 1_000_000) + line.tokens.length;
+
+    // Diagnostic sample of rejected raw tokens, bounded per pass so a pathological batch cannot
+    // flood the log. Shape only (the fields that decide rejection), never the whole element.
+    const droppedSamples: Array<Record<string, unknown>> = [];
+    const acceptLine = (line: LyricsAnalysisLine, dropped?: unknown[]) => {
+      if (dropped && dropped.length > 0 && droppedSamples.length < 6) {
+        for (const token of dropped.slice(0, 2)) {
+          droppedSamples.push({ lineId: line.lineId, text: line.text, ...(token as object) });
+        }
+      }
+      const incumbent = input.preferOver?.get(line.lineId);
+      if (incumbent && lineQuality(line) <= lineQuality(incumbent)) return;
+      finalLines.set(line.lineId, line);
+      onLine(line, input.passKind);
+    };
+
     // The element stream rejects (terminates with a throw) when the final envelope parse fails —
     // the same failure `result.output` reports. Catch it here so the salvage pass below still
     // runs over the raw completion instead of the exception bubbling out of streamPass.
@@ -423,9 +456,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
         const outcome = validateAndNormalizeLineAnalysis({ draft: element, text });
         if (outcome.kind === 'ok') {
-          const line = { ...outcome.line, droppedTokenCount: outcome.droppedTokenCount };
-          finalLines.set(lineId, line);
-          onLine(line, input.passKind);
+          acceptLine({ ...outcome.line, droppedTokenCount: outcome.droppedTokenCount }, outcome.droppedTokens);
         }
       }
     } catch (error) {
@@ -493,9 +524,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
           const outcome = validateAndNormalizeLineAnalysis({ draft, text });
           if (outcome.kind === 'ok') {
             salvagedAny = true;
-            const line = { ...outcome.line, droppedTokenCount: outcome.droppedTokenCount };
-            finalLines.set(lineId, line);
-            onLine(line, input.passKind);
+            acceptLine({ ...outcome.line, droppedTokenCount: outcome.droppedTokenCount }, outcome.droppedTokens);
           }
         }
       }
@@ -512,7 +541,20 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     const receivedIds = new Set(drafts.map((draft) => `${draft.lineId ?? ''}`.trim()));
     const failedIds = new Map<string, string>();
 
+    // Incomplete annotations are re-asked like invalid ones: a line whose trailing word was never
+    // emitted is unusable for study even though every span it did emit is well-formed. Repair
+    // passes are excluded (the line already had its second chance); the degraded status the
+    // validator set is what surfaces any gap that survives.
+    if (input.passKind === 'first') {
+      for (const [lineId, line] of finalLines) {
+        if (line.status !== 'degraded') continue;
+        if (!input.targetLines.some((target) => target.lineId === lineId)) continue;
+        failedIds.set(lineId, 'incomplete-coverage');
+      }
+    }
+
     for (const line of input.targetLines) {
+      if (failedIds.has(line.lineId)) continue;
       if (finalLines.has(line.lineId)) continue;
       failedIds.set(line.lineId, receivedIds.has(line.lineId) ? 'invalid-analysis' : 'missing-line');
     }
@@ -532,6 +574,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
         }, {} as Record<string, number>),
         finishReason,
         outputTokens: usage.outputTokens,
+        droppedSamples,
         textTail
       });
     }
@@ -628,7 +671,8 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
           prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
           targetLines: batch,
           maxOutputTokens: 600 + batch.length * 500,
-          passKind: 'repair'
+          passKind: 'repair',
+          preferOver: finalLines
         });
         repairedLines += batch.length - pass.failedIds.size;
         emitPassTelemetry({
