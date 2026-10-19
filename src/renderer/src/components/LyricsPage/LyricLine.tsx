@@ -182,10 +182,10 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `cursor-pointer blur-[1px] ${
               isInRange
-                ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
+                ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-100! font-medium blur-none! [&>div>span:not(.lyrics-analysis-tokens)]:mr-3!'
                 : 'scale-75!'
             }`
-          : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'
+          : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span:not(.lyrics-analysis-tokens)]:mr-3'
       } ${playerType === 'mini' ? 'text-font-color-white/20! mb-2! text-2xl!' : ''} ${playerType === 'full' ? 'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!' : ''}`}
       ref={lyricsRef}
       onClick={() =>
@@ -232,6 +232,7 @@ const LyricLine = (props: LyricProp) => {
             text={getLyricText(lyric)}
             analysis={analysis}
             activeTokenId={activeTokenId}
+            isActiveLine={isInRange}
             onTokenClick={onTokenClick}
           />
         ) : (

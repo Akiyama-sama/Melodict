@@ -9,16 +9,18 @@ export const getLineIdForIndex = (index: number) => `line-${index}`;
 
 /**
  * Stable visual bucket for a token, derived from its span rather than an array index so that
- * re-renders during streaming never reshuffle the colours.
+ * re-renders during streaming never reshuffle the colours. Tokens are distinguished by their
+ * text colour alone (no underline): the palette keeps every hue readable on the dark player
+ * background and against the dimmed inactive-lyric colour.
  */
 export const getTokenColorClass = (startChar: number) => {
   const palette = [
-    'decoration-sky-400/70',
-    'decoration-emerald-400/70',
-    'decoration-amber-400/70',
-    'decoration-fuchsia-400/70',
-    'decoration-rose-400/70',
-    'decoration-violet-400/70'
+    'text-sky-300',
+    'text-emerald-300',
+    'text-amber-300',
+    'text-fuchsia-300',
+    'text-rose-300',
+    'text-violet-300'
   ] as const;
 
   return palette[startChar % palette.length];
