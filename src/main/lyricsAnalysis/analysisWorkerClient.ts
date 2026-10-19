@@ -20,7 +20,7 @@ interface PendingAnalysis {
   }) => void;
   reject: (error: LyricsAnalysisError) => void;
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
-  onRepairing?: (failedLineIds: string[]) => void;
+  onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
 }
 
@@ -51,7 +51,7 @@ const createWorker = () => {
         pending.onLine(message.line, message.source);
         break;
       case 'repairing':
-        pending.onRepairing?.(message.failedLineIds);
+        pending.onRepairStarted?.(message.failedLineIds);
         break;
       case 'pass':
         pending.onPassCompleted?.(message.pass);
@@ -106,7 +106,7 @@ export const analyzeLyricsInWorker = (input: {
   lines: LyricsAnalysisInputLine[];
   sessionId?: string;
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
-  onRepairing?: (failedLineIds: string[]) => void;
+  onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
 }) =>
   new Promise<{
@@ -120,7 +120,7 @@ export const analyzeLyricsInWorker = (input: {
       resolve,
       reject,
       onLine: input.onLine,
-      onRepairing: input.onRepairing,
+      onRepairStarted: input.onRepairStarted,
       onPassCompleted: input.onPassCompleted
     });
 

@@ -365,7 +365,7 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       lines: dedupedResumeLines,
       sessionId,
       onLine: (line, source) => onValidatedLine({ line, source }),
-      onRepairing: (failedLineIds) => {
+      onRepairStarted: (failedLineIds) => {
         if (!isCurrent()) return;
         emitSnapshot({
           songPath: request.songPath,
