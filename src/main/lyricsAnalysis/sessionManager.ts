@@ -4,7 +4,6 @@ import {
   LYRICS_ANALYSIS_DEFAULT_MODEL_ID,
   LYRICS_ANALYSIS_PROMPT_VERSION,
   LYRICS_ANALYSIS_SCHEMA_VERSION,
-  buildTokenId,
   type LyricsAnalysisError,
   type LyricsAnalysisInputLine,
   type LyricsAnalysisLine,
@@ -24,6 +23,7 @@ import {
   buildLineAnalysisCacheKey,
   hydrateLineAnalysisFromCache,
   readLineAnalysisCache,
+  remapLineAnalysisLineId,
   writeLineAnalysisCache
 } from './lineCacheRepository';
 import { getStoredProviderConfig } from './providerConfigRepository';
@@ -290,18 +290,13 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     // every sibling lineId and persist it under each, so the artifact stays per-line complete.
     const key = lineKeys.get(input.line.lineId);
     const siblings = key ? (siblingLineIds.get(key) ?? [input.line.lineId]) : [input.line.lineId];
-    // Siblings share the key, and the key includes the text, so the surface text is identical.
+    // Siblings share the key, and the key includes the text, so the surface text is identical —
+    // remapping the analysis onto each sibling's lineId is exactly what the line cache does on
+    // hydration.
     const landedLines = siblings.map((lineId) =>
       lineId === input.line.lineId
         ? input.line
-        : {
-            ...input.line,
-            lineId,
-            tokens: input.line.tokens.map((token) => ({
-              ...token,
-              tokenId: buildTokenId(lineId, token.startChar, token.endChar)
-            }))
-          }
+        : remapLineAnalysisLineId({ line: input.line, lineId, text: input.line.text })
     );
 
     for (const landed of landedLines) {
