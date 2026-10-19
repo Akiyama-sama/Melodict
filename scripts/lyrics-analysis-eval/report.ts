@@ -16,6 +16,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
+import { escapeHtml } from './lib/html';
 import {
   type EvalAnalysisResult,
   type EvalLine,
@@ -24,8 +25,6 @@ import {
   type EvalRunSummary,
   readTokenCard
 } from './types';
-
-import { escapeHtml } from './lib/html';
 
 const parseArgs = (argv: string[]) => {
   const get = (flag: string) => {

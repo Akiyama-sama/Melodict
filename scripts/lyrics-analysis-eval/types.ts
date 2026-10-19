@@ -33,7 +33,10 @@ export interface EvalToken {
   };
 }
 
-/** The flattened token view every consumer stage reads: card fields with the flat fields as fallback. */
+/**
+ * The flattened token view every consumer stage reads: card fields with the flat fields as
+ * fallback.
+ */
 export interface TokenCardView {
   term?: string;
   meaning?: string;
@@ -44,8 +47,8 @@ export interface TokenCardView {
 /**
  * The single home of the `token.card?.x ?? token.x` fallback: production pipeline tokens nest the
  * annotation fields under `card`, while older cached artifacts and grader views carry them flat.
- * Consumer stages call this instead of repeating the chain. (report.ts's 注音 row deliberately
- * reads `token.pronunciation` flat-only — that quirk stays at its call site.)
+ * Consumer stages call this instead of repeating the chain. (report.ts's 注音 row deliberately reads
+ * `token.pronunciation` flat-only — that quirk stays at its call site.)
  */
 export const readTokenCard = (token: EvalToken): TokenCardView => ({
   term: token.card?.term ?? token.term,
