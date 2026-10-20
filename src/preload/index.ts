@@ -44,7 +44,6 @@ const playerControls = {
     ipcRenderer.on('app/player/skipForward', callback),
   skipBackwardToPreviousSong: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/skipBackward', callback),
-  sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
   setDiscordRpcActivity: (activity: DiscordActivity): void =>
     ipcRenderer.send('app/setDiscordRpcActivity', activity),
 
@@ -245,7 +244,24 @@ const lyricsAnalysis = {
     modelId?: string;
     apiKey?: string;
   }): Promise<LyricsAnalysisProviderTestResult> =>
-    ipcRenderer.invoke('app/lyricsAnalysis/testProvider', input)
+    ipcRenderer.invoke('app/lyricsAnalysis/testProvider', input),
+  probeConcurrency: (input?: {
+    profileId?: string;
+    baseURL?: string;
+    modelId?: string;
+    apiKey?: string;
+  }): Promise<{
+    ok: boolean;
+    message: string;
+    probedMaxConcurrency?: number;
+    perLevel?: Array<{
+      level: number;
+      ok: number;
+      rateLimited: number;
+      failed: number;
+      meanLatencyMs?: number;
+    }>;
+  }> => ipcRenderer.invoke('app/lyricsAnalysis/probeConcurrency', input)
 };
 
 // $ SONG LYRICS
@@ -289,7 +305,6 @@ const neteaseControls = {
     ipcRenderer.invoke('app/netease/checkQrLogin', key),
   getMe: (): Promise<NeteaseSessionProfile | undefined> =>
     ipcRenderer.invoke('app/netease/getMe'),
-  refreshSession: (): Promise<void> => ipcRenderer.invoke('app/netease/refreshSession'),
   logOut: (): Promise<void> => ipcRenderer.invoke('app/netease/logOut'),
 
   search: (keywords: string, type: NeteaseSearchTypes): Promise<NeteaseApiSearchResult> =>
@@ -310,8 +325,6 @@ const neteaseControls = {
     ipcRenderer.invoke('app/netease/getSongSummary', neteaseId),
   getSongSummaries: (neteaseIds: number[]): Promise<NeteaseSongSummary[]> =>
     ipcRenderer.invoke('app/netease/getSongSummaries', neteaseIds),
-  getStream: (neteaseId: number, quality: NeteaseQualityTypes): Promise<NeteaseStreamInfo | undefined> =>
-    ipcRenderer.invoke('app/netease/getStream', neteaseId, quality),
   getSongPalette: (neteaseId: number, coverUrl?: string): Promise<PaletteData | undefined> =>
     ipcRenderer.invoke('app/netease/getSongPalette', neteaseId, coverUrl),
 
@@ -390,9 +403,7 @@ const songDataFromInternet = {
 
 // $ APP USER DATA
 const userData = {
-  getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
-  saveUserData: (dataType: UserDataTypes, data: unknown) =>
-    ipcRenderer.invoke('app/saveUserData', dataType, data)
+  getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData')
 };
 
 // $ STORAGE DATA
@@ -408,40 +419,9 @@ const settings = {
   saveUserSettings: (settings: Partial<UserSettings>): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', settings),
 
-  updateDiscordRpcState: (enableDiscordRpc: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      enableDiscordRPC: enableDiscordRpc
-    }),
-  updateSongScrobblingToLastFMState: (enableScrobbling: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendSongScrobblingDataToLastFM: enableScrobbling
-    }),
-  updateSongFavoritesToLastFMState: (enableFavorites: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendSongFavoritesDataToLastFM: enableFavorites
-    }),
-  updateNowPlayingSongDataToLastFMState: (enableNowPlaying: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendNowPlayingSongDataToLastFM: enableNowPlaying
-    }),
-  updateSaveLyricsInLrcFilesForSupportedSongs: (enableSave: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      saveLyricsInLrcFilesForSupportedSongs: enableSave
-    }),
-  updateCustomLrcFilesSaveLocation: (location: string): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      customLrcFilesSaveLocation: location
-    }),
-  updateOpenWindowAsHiddenOnSystemStart: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      openWindowAsHiddenOnSystemStart: enable
-    }),
-  updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
+  // Separate channel on purpose: it also toggles the tray menu build in the main process.
   updateTraySingleClickBehavior: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/updateTraySingleClickBehavior', enable),
-  updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { saveVerboseLogs: enable })
+    ipcRenderer.invoke('app/updateTraySingleClickBehavior', enable)
 };
 
 // $ FOLDER DATA

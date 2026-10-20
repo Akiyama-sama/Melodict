@@ -2,14 +2,7 @@ import { ipcMain } from 'electron';
 
 import type { NeteaseSearchTypes } from '../../common/netease';
 import logger from '../logger';
-import {
-  checkNeteaseQrLogin,
-  getNeteaseMe,
-  neteaseLogout,
-  refreshNeteaseSession,
-  revalidateNeteaseSession,
-  startNeteaseQrLogin
-} from './auth';
+import { checkNeteaseQrLogin, getNeteaseMe, neteaseLogout, startNeteaseQrLogin } from './auth';
 import {
   getNeteaseAlbum,
   getNeteaseArtist,
@@ -34,14 +27,10 @@ const withNeteaseErrorHandling = async <T>(operation: () => Promise<T>) => {
   try {
     return await operation();
   } catch (error) {
-    const knownErrorCodes = [
-      'NETEASE_AUTH_REQUIRED',
-      'NETEASE_NETWORK_ERROR',
-      'NETEASE_VIP_REQUIRED',
-      'NETEASE_UNPLAYABLE'
-    ];
+    const knownErrorCodes = ['NETEASE_AUTH_REQUIRED', 'NETEASE_NETWORK_ERROR'];
 
-    // Known domain errors surface as-is (the renderer switches on the message).
+    // Known domain errors surface as-is; the renderer does not switch on these codes yet, so they
+    // currently surface through react-query's generic failure states.
     if (error instanceof Error && knownErrorCodes.includes(error.message)) throw error;
 
     if (error instanceof NeteaseApiError) {
@@ -64,14 +53,6 @@ export const registerNeteaseIpc = () => {
   );
 
   ipcMain.handle('app/netease/getMe', () => withNeteaseErrorHandling(() => getNeteaseMe()));
-
-  ipcMain.handle('app/netease/revalidateSession', () =>
-    withNeteaseErrorHandling(() => revalidateNeteaseSession())
-  );
-
-  ipcMain.handle('app/netease/refreshSession', () =>
-    withNeteaseErrorHandling(() => refreshNeteaseSession())
-  );
 
   ipcMain.handle('app/netease/logOut', () => withNeteaseErrorHandling(() => neteaseLogout()));
 

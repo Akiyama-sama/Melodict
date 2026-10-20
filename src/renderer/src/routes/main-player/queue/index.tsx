@@ -1,4 +1,10 @@
-import { Draggable, Droppable, DragDropContext, type DropResult } from '@hello-pangea/dnd';
+import {
+  Draggable,
+  Droppable,
+  DragDropContext,
+  type DraggableProvided,
+  type DropResult
+} from '@hello-pangea/dnd';
 // import DefaultSongCover from '@renderer/assets/images/webp/song_cover_default.webp';
 // import DefaultPlaylistCover from '@renderer/assets/images/webp/playlist_cover_default.webp';
 // import FolderImg from '@renderer/assets/images/webp/empty-folder.webp';
@@ -10,7 +16,7 @@ import NeteaseSongRow from '@renderer/components/Netease/NeteaseSongRow';
 import Song from '@renderer/components/SongsPage/Song';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
-import { useNeteaseQueueRows } from '@renderer/hooks/useNeteaseQueueRows';
+import { useNeteaseQueueRows, type QueueRowData } from '@renderer/hooks/useNeteaseQueueRows';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { queryClient } from '@renderer/index';
 import { queueQuery } from '@renderer/queries/queue';
@@ -38,6 +44,70 @@ export const Route = createFileRoute('/main-player/queue/')({
   component: RouteComponent,
   validateSearch: baseInfoPageSearchParamsSchema
 });
+
+/** The row's song duration in seconds, for both queue-duration totals and the per-row display. */
+const rowDuration = (row: QueueRowData) =>
+  row.kind === 'local' ? row.song.duration : row.summary.duration;
+
+/** The row's song id, shared by the drag-and-drop clone path and the list path. */
+const rowSongId = (row: QueueRowData) =>
+  row.kind === 'local' ? row.song.songId : row.summary.songId;
+
+/**
+ * One virtualized queue row, shared by the two drag-and-drop render paths: `Droppable`'s
+ * `renderClone` (used while an item is being dragged, when the item itself is unmounted) and the
+ * regular `itemContent` list path. Both paths render a `NeteaseSongRow` for NetEase rows and a
+ * `Song` for local rows; only the React key, the remove-from-queue menu item, and the local-row
+ * extras differ, so those are passed in.
+ */
+const renderQueueRow = (input: {
+  row: QueueRowData;
+  index: number;
+  provided: DraggableProvided;
+  key: string;
+  removeFromQueueItem: ContextMenuItem;
+  isIndexingSongs: boolean;
+  localSongExtras?: {
+    selectAllHandler?: (_upToId?: number) => void;
+    additionalContextMenuItems?: ContextMenuItem[];
+  };
+}) => {
+  const { row, index, provided, key, removeFromQueueItem, isIndexingSongs, localSongExtras } =
+    input;
+  if (row.kind === 'netease')
+    return (
+      <NeteaseSongRow
+        provided={provided}
+        key={key}
+        index={index}
+        ref={provided.innerRef}
+        summary={row.summary}
+        additionalContextMenuItems={[removeFromQueueItem]}
+      />
+    );
+  const data = row.song;
+  return (
+    <Song
+      provided={provided}
+      key={key}
+      isDraggable
+      index={index}
+      ref={provided.innerRef}
+      isIndexingSongs={isIndexingSongs}
+      title={data.title}
+      songId={data.songId}
+      artists={data.artists}
+      album={data.album}
+      artworkPaths={data.artworkPaths}
+      duration={data.duration}
+      path={data.path}
+      isAFavorite={data.isAFavorite}
+      year={data.year}
+      isBlacklisted={data.isBlacklisted}
+      {...localSongExtras}
+    />
+  );
+};
 
 /**
  * Render the main-player queue page, including header controls, queue metadata, and a virtualized,
@@ -74,7 +144,6 @@ function RouteComponent() {
   const queueRows = useNeteaseQueueRows(currentQueue, localQueuedSongs);
   const queuedSongs = queueRows;
 
-  // const previousQueueRef = useRef<string[]>([]);
   const { data: queueInfo } = useQuery({
     ...queueQuery.info({
       queueType: queue.metadata?.queueType ?? 'songs',
@@ -100,49 +169,8 @@ function RouteComponent() {
 
   const ListRef = useRef<VirtuosoHandle>(null);
 
-  // const isTheSameQueue = useCallback((newQueueSongIds: string[]) => {
-  //   const prevQueueSongIds = previousQueueRef.current;
-  //   const isSameQueue = prevQueueSongIds.every((id) => newQueueSongIds.includes(id));
-
-  //   return isSameQueue;
-  // }, []);
-
-  // const fetchAllSongsData = useCallback(() => {
-  //   window.api.audioLibraryControls
-  //     .getSongInfo(currentQueue, 'addedOrder', undefined, undefined, true)
-  //     .then((res) => {
-  //       if (res) {
-  //         setQueuedSongs(res);
-  //         previousQueueRef.current = currentQueue.slice();
-  //       }
-  //     });
-  // }, [currentQueue]);
-
-  // useEffect(() => {
-  //   fetchAllSongsData();
-  //   const manageSongUpdatesInCurrentQueue = (e: Event) => {
-  //     if ('detail' in e) {
-  //       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-  //       for (let i = 0; i < dataEvents.length; i += 1) {
-  //         const event = dataEvents[i];
-  //         if (
-  //           event.dataType.includes('songs') ||
-  //           event.dataType === 'userData/queue' ||
-  //           event.dataType === 'blacklist/songBlacklist' ||
-  //           event.dataType === 'songs/likes'
-  //         )
-  //           fetchAllSongsData();
-  //       }
-  //     }
-  //   };
-  //   document.addEventListener('app/dataUpdates', manageSongUpdatesInCurrentQueue);
-  //   return () => {
-  //     document.removeEventListener('app/dataUpdates', manageSongUpdatesInCurrentQueue);
-  //   };
-  // }, [fetchAllSongsData]);
-
   const selectAllHandler = useSelectAllHandler(
-    (queuedSongs ?? []).map((row) => (row.kind === 'local' ? row.song : row.summary)) as SongData[],
+    (queuedSongs ?? []).map((row) => (row.kind === 'local' ? row.song : row.summary)),
     'songs',
     'songId'
   );
@@ -187,10 +215,7 @@ function RouteComponent() {
   const queueDuration = useMemo(
     () =>
       calculateTimeFromSeconds(
-        queuedSongs?.reduce(
-          (prev, current) => prev + (current.kind === 'local' ? current.song.duration : current.summary.duration),
-          0
-        )
+        queuedSongs?.reduce((prev, current) => prev + rowDuration(current), 0)
       ).timeString,
     [queuedSongs]
   );
@@ -200,10 +225,7 @@ function RouteComponent() {
       calculateTimeFromSeconds(
         queuedSongs
           ?.slice(queue.position ?? 0)
-          .reduce(
-            (prev, current) => prev + (current.kind === 'local' ? current.song.duration : current.summary.duration),
-            0
-          )
+          .reduce((prev, current) => prev + rowDuration(current), 0)
       ).timeString,
     [queue.position, queuedSongs]
   );
@@ -352,51 +374,28 @@ function RouteComponent() {
                     mode="virtual"
                     renderClone={(provided, _, rubric) => {
                       const row = queuedSongs[rubric.source.index];
-                      const rowSongId =
-                        row.kind === 'local' ? row.song.songId : row.summary.songId;
+                      if (!row) return null;
+                      const clonedSongId = rowSongId(row);
                       const removeFromQueueItem: ContextMenuItem = {
                         label: t('common.removeFromQueue'),
                         iconName: 'remove_circle_outline',
                         handlerFunction: () => {
                           updateQueueData(
                             undefined,
-                            currentQueue.filter((id) => id !== rowSongId)
+                            currentQueue.filter((id) => id !== clonedSongId)
                           );
                           toggleMultipleSelections(false);
                         }
                       };
-                      if (row.kind === 'netease')
-                        return (
-                          <NeteaseSongRow
-                            provided={provided}
-                            key={row.summary.songId}
-                            index={rubric.source.index}
-                            ref={provided.innerRef}
-                            summary={row.summary}
-                            additionalContextMenuItems={[removeFromQueueItem]}
-                          />
-                        );
-                      const data = row.song;
-                      return (
-                        <Song
-                          provided={provided}
-                          key={data.songId}
-                          isDraggable
-                          index={rubric.source.index}
-                          ref={provided.innerRef}
-                          isIndexingSongs={preferences?.isSongIndexingEnabled}
-                          title={data.title}
-                          songId={data.songId}
-                          artists={data.artists}
-                          album={data.album}
-                          artworkPaths={data.artworkPaths}
-                          duration={data.duration}
-                          path={data.path}
-                          isAFavorite={data.isAFavorite}
-                          year={data.year}
-                          isBlacklisted={data.isBlacklisted}
-                        />
-                      );
+                      return renderQueueRow({
+                        row,
+                        index: rubric.source.index,
+                        provided,
+                        // Clone path keys by songId alone (no index suffix), as before.
+                        key: String(clonedSongId),
+                        removeFromQueueItem,
+                        isIndexingSongs: preferences?.isSongIndexingEnabled ?? false
+                      });
                     }}
                   >
                     {(droppableProvided) => (
@@ -416,11 +415,9 @@ function RouteComponent() {
                         itemContent={(index, row) => {
                           return (
                             <Draggable
-                              draggableId={String(
-                                row.kind === 'local' ? row.song.songId : row.summary.songId
-                              )}
+                              draggableId={String(rowSongId(row))}
                               index={index}
-                              key={row.kind === 'local' ? row.song.songId : row.summary.songId}
+                              key={String(rowSongId(row))}
                             >
                               {(provided) => {
                                 const { multipleSelections: songIds } = multipleSelectionsData;
@@ -428,8 +425,7 @@ function RouteComponent() {
                                   multipleSelectionsData.selectionType === 'songs' &&
                                   multipleSelectionsData.multipleSelections.length !== 1;
 
-                                const songId =
-                                  row.kind === 'local' ? row.song.songId : row.summary.songId;
+                                const songId = rowSongId(row);
 
                                 const removeFromQueueItem: ContextMenuItem = {
                                   label: t('common.removeFromQueue'),
@@ -447,34 +443,20 @@ function RouteComponent() {
                                   }
                                 };
 
-                                if (row.kind === 'netease')
-                                  return (
-                                    <NeteaseSongRow
-                                      provided={provided}
-                                      key={`${row.summary.songId}-${index}`}
-                                      index={index}
-                                      ref={provided.innerRef}
-                                      summary={row.summary}
-                                      additionalContextMenuItems={[removeFromQueueItem]}
-                                    />
-                                  );
-
-                                return (
-                                  <Song
-                                    provided={provided}
-                                    key={`${songId}-${index}`}
-                                    isDraggable
-                                    index={index}
-                                    ref={provided.innerRef}
-                                    isIndexingSongs={preferences?.isSongIndexingEnabled}
-                                    {...row.song}
-                                    trackNo={undefined}
-                                    selectAllHandler={selectAllHandler}
+                                return renderQueueRow({
+                                  row,
+                                  index,
+                                  provided,
+                                  key: `${songId}-${index}`,
+                                  removeFromQueueItem,
+                                  isIndexingSongs: preferences?.isSongIndexingEnabled ?? false,
+                                  localSongExtras: {
+                                    selectAllHandler,
                                     // no need for onPlayClick because the component is in the currentQueuePage
                                     // onPlayClick={handleSongPlayBtnClick}
-                                    additionalContextMenuItems={[removeFromQueueItem]}
-                                  />
-                                );
+                                    additionalContextMenuItems: [removeFromQueueItem]
+                                  }
+                                });
                               }}
                             </Draggable>
                           );

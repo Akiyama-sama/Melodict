@@ -4,7 +4,6 @@ import {
   LYRICS_ANALYSIS_DEFAULT_MODEL_ID,
   LYRICS_ANALYSIS_PROMPT_VERSION,
   LYRICS_ANALYSIS_SCHEMA_VERSION,
-  buildTokenId,
   type LyricsAnalysisError,
   type LyricsAnalysisInputLine,
   type LyricsAnalysisLine,
@@ -14,7 +13,11 @@ import {
 import { type LyricsAnalysisTelemetrySession } from '../../common/lyricsAnalysisTelemetry';
 import { analyzeLyricsLanguageMix } from '../../common/lyricsLanguageProfiles';
 import logger from '../logger';
-import { analyzeLyricsInWorker } from './analysisWorkerClient';
+import {
+  analyzeLyricsInWorker,
+  cancelLyricsAnalysisRequest,
+  inFlightAnalysisRequestIds
+} from './analysisWorkerClient';
 import {
   buildLyricsAnalysisFingerprint,
   mergeLyricsAnalysisCache,
@@ -24,6 +27,7 @@ import {
   buildLineAnalysisCacheKey,
   hydrateLineAnalysisFromCache,
   readLineAnalysisCache,
+  remapLineAnalysisLineId,
   writeLineAnalysisCache
 } from './lineCacheRepository';
 import { getStoredProviderConfig } from './providerConfigRepository';
@@ -76,6 +80,24 @@ const buildLinesWithStatuses = (input: {
 
 const isAnalyzed = (line: LyricsAnalysisLine) => line.tokens.length > 0;
 
+/**
+ * Lines of this request the run has NOT landed yet, derived from the landed-lines map instead of
+ * being maintained as a second mutable tally next to it. Every streamed key is always a request
+ * lineId (hydrated pre-cached lines, landed siblings, and worker lines alike are request lines or
+ * their same-text siblings), so the derivation below is exactly the tally the deleted
+ * `failedLineIds` set used to hold.
+ */
+const deriveUnlandedLineIds = (input: {
+  requestLines: LyricsAnalysisInputLine[];
+  landedByLineId: Map<string, LyricsAnalysisLine>;
+}): Set<string> => {
+  const unlanded = new Set<string>();
+  for (const line of input.requestLines) {
+    if (!input.landedByLineId.has(line.lineId)) unlanded.add(line.lineId);
+  }
+  return unlanded;
+};
+
 const buildTelemetrySession = (input: {
   sessionId: string;
   startedAt: number;
@@ -93,14 +115,35 @@ const buildTelemetrySession = (input: {
   requestedLines: input.requestedLines ?? input.request.lines.length - input.preCachedLines,
   passCount: 0,
   outputTokens: undefined,
-  okLines: 0,
-  firstLineEmitted: false,
-  failedLineIds: new Set(input.request.lines.map((line) => line.lineId))
+  firstLineEmitted: false
 });
 
 export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisRequest) => {
+  // An empty line list has nothing to analyse, yet a full prepare would still supersede (and
+  // now cancel) whatever healthy run is in flight — a pure destructive no-op. Refuse it before
+  // touching the generation; the callers' guards (trigger + fullscreen hook) stay as-is, this
+  // is the last line of defence against a stale-ref race reaching the main process.
+  if (request.lines.length === 0) {
+    logger.debug('Ignoring lyrics analysis prepare with an empty line list.', {
+      songPath: request.songPath
+    });
+    return activeSession;
+  }
+
   const generation = ++activeGeneration;
   const startedAt = Date.now();
+  // A new prepare supersedes whatever run was in flight. Stop it at the worker right away: its
+  // remaining batches would otherwise share the provider with the new run (double load → slow
+  // batches / 429s on free gateways) and its AIMD window keeps climbing. Everything the old run
+  // already landed is durable (per-line cache + superseded flush below), and its lines/events
+  // keep flowing until the abort lands, so this is purely a "stop wasting gateway capacity" cut.
+  const staleRequestIds = [...inFlightAnalysisRequestIds()];
+  if (staleRequestIds.length > 0) {
+    logger.debug('Superseding lyrics analysis session; cancelling stale worker runs.', {
+      staleRequestIds
+    });
+    void Promise.all(staleRequestIds.map((requestId) => cancelLyricsAnalysisRequest(requestId)));
+  }
   const provider = await getStoredProviderConfig();
   const modelId = provider.modelId || LYRICS_ANALYSIS_DEFAULT_MODEL_ID;
   const fingerprint = buildLyricsAnalysisFingerprint({
@@ -246,8 +289,6 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     preCachedLines: preCachedLines.length,
     requestedLines: dedupedResumeLines.length
   });
-  // Only the resume lines are up for grabs this run; pre-cached lines start out accounted for.
-  for (const line of preCachedLines) telemetrySession.failedLineIds.delete(line.lineId);
   emitSessionStartTelemetry(telemetrySession);
 
   emitSnapshot({
@@ -290,24 +331,17 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     // every sibling lineId and persist it under each, so the artifact stays per-line complete.
     const key = lineKeys.get(input.line.lineId);
     const siblings = key ? (siblingLineIds.get(key) ?? [input.line.lineId]) : [input.line.lineId];
-    // Siblings share the key, and the key includes the text, so the surface text is identical.
+    // Siblings share the key, and the key includes the text, so the surface text is identical —
+    // remapping the analysis onto each sibling's lineId is exactly what the line cache does on
+    // hydration.
     const landedLines = siblings.map((lineId) =>
       lineId === input.line.lineId
         ? input.line
-        : {
-            ...input.line,
-            lineId,
-            tokens: input.line.tokens.map((token) => ({
-              ...token,
-              tokenId: buildTokenId(lineId, token.startChar, token.endChar)
-            }))
-          }
+        : remapLineAnalysisLineId({ line: input.line, lineId, text: input.line.text })
     );
 
     for (const landed of landedLines) {
       streamedLines.set(landed.lineId, landed);
-      telemetrySession.okLines += 1;
-      telemetrySession.failedLineIds.delete(landed.lineId);
       // One event per landed line, siblings included: telemetry consumers count per-line coverage.
       emitLineResultTelemetry({ session: telemetrySession, line: landed, source: input.source });
     }
@@ -349,16 +383,28 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     activeSession = snapshot;
   };
 
+  // AIMD window summary from the gateway; arrives before the worker settles, so every
+  // session-end path below (ready / partial / error / superseded) can attach it.
+  let concurrencyStats: { max: number; mean: number; rateLimitedCount: number } | undefined;
+
   try {
     const outcome = await analyzeLyricsInWorker({
-      config: { baseURL: provider.baseURL, modelId, apiKey: provider.apiKey },
+      config: {
+        baseURL: provider.baseURL,
+        modelId,
+        apiKey: provider.apiKey,
+        // Absent on profiles saved before the field existed → the gateway default (4).
+        ...(provider.maxConcurrency !== undefined
+          ? { maxConcurrency: provider.maxConcurrency }
+          : {})
+      },
       uiLanguage: request.uiLanguage,
       songTitle: request.songTitle,
       songArtists: request.songArtists,
       lines: dedupedResumeLines,
       sessionId,
       onLine: (line, source) => onValidatedLine({ line, source }),
-      onRepairing: (failedLineIds) => {
+      onRepairStarted: (failedLineIds) => {
         if (!isCurrent()) return;
         emitSnapshot({
           songPath: request.songPath,
@@ -370,7 +416,10 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
         logger.debug('Lyrics analysis repair pass started.', { failedLineIds });
       },
       onPassCompleted: (pass) =>
-        emitAnalysisPassTelemetry({ session: telemetrySession, pass })
+        emitAnalysisPassTelemetry({ session: telemetrySession, pass }),
+      onConcurrencyStats: (stats) => {
+        concurrencyStats = stats;
+      }
     });
 
     await flushPromise;
@@ -382,10 +431,16 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       flushIfDue(true);
       await flushPromise;
       // Still close this run's telemetry so evaluation data stays complete.
+      const unlandedCount = deriveUnlandedLineIds({
+        requestLines: request.lines,
+        landedByLineId: streamedLines
+      }).size;
       emitSessionEndTelemetry({
         session: telemetrySession,
         finishedAt: Date.now(),
-        outcome: telemetrySession.failedLineIds.size === 0 ? 'ready' : 'partial'
+        outcome: unlandedCount === 0 ? 'ready' : 'partial',
+        failedLines: unlandedCount,
+        ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
       });
       return activeSession;
     }
@@ -415,7 +470,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       finishedAt: Date.now(),
       outcome: failedCount === 0 ? 'ready' : 'partial',
       failedLines: failedCount,
-      passStats: outcome.passStats
+      passStats: outcome.passStats,
+      ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
     });
     return snapshot;
   } catch (error) {
@@ -432,7 +488,12 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       session: telemetrySession,
       finishedAt: Date.now(),
       outcome: 'error',
-      errorCode: mapped.code
+      errorCode: mapped.code,
+      failedLines: deriveUnlandedLineIds({
+        requestLines: request.lines,
+        landedByLineId: streamedLines
+      }).size,
+      ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
     });
 
     const snapshot: LyricsAnalysisSnapshot = {

@@ -3,6 +3,7 @@ import {
   type LyricsAnalysisLine
 } from '../../common/lyricsAnalysis';
 import {
+  LYRICS_ANALYSIS_TELEMETRY_VERSION,
   type AnalysisPassTelemetryEvent,
   type LyricsAnalysisTelemetrySession,
   type SessionEndTelemetryEvent,
@@ -16,7 +17,7 @@ import { appendLyricsAnalysisTelemetryEvent } from './telemetryRepository';
  */
 
 const eventBase = (session: LyricsAnalysisTelemetrySession) => ({
-  v: 1 as const,
+  v: LYRICS_ANALYSIS_TELEMETRY_VERSION,
   sessionId: session.sessionId,
   ts: Date.now()
 });
@@ -84,16 +85,17 @@ export const emitSessionEndTelemetry = (input: {
   session: LyricsAnalysisTelemetrySession;
   finishedAt: number;
   outcome: 'ready' | 'partial' | 'error';
-  /** Unanalyzed lines left after the final tally; the emitter's own count covers error paths. */
-  failedLines?: number;
+  /** Lines of the request that never landed, exact on every path. */
+  failedLines: number;
   errorCode?: string;
   passStats?: { outputTokens: number | undefined };
+  /** AIMD window summary from the gateway, when the run reached the batch pool. */
+  concurrency?: { max: number; mean: number; rateLimitedCount: number };
 }) => {
-  // The ready/partial path passes the exact tally; on the error path failedLineIds already holds
-  // every line that never landed (initialized with all ids, removed as lines arrive). Derived
-  // okLines stays exact even when the model emits duplicate elements for the same line.
-  const failedLines = input.failedLines ?? input.session.failedLineIds.size;
-  const okLines = Math.max(0, input.session.totalLines - input.session.preCachedLines - failedLines) + input.session.preCachedLines;
+  const failedLines = input.failedLines;
+  const okLines =
+    Math.max(0, input.session.totalLines - input.session.preCachedLines - failedLines) +
+    input.session.preCachedLines;
 
   const event: SessionEndTelemetryEvent = {
     ...eventBase(input.session),
@@ -106,6 +108,13 @@ export const emitSessionEndTelemetry = (input: {
     passCount: input.session.passCount,
     outputTokens: input.passStats?.outputTokens ?? input.session.outputTokens,
     modelId: input.session.modelId,
+    ...(input.concurrency
+      ? {
+          concurrencyWindowMax: input.concurrency.max,
+          concurrencyWindowMean: input.concurrency.mean,
+          rateLimitedCount: input.concurrency.rateLimitedCount
+        }
+      : {}),
     ...(input.errorCode ? { errorCode: input.errorCode } : {})
   };
   void appendLyricsAnalysisTelemetryEvent(event);

@@ -7,11 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import VolumeSlider from '../../VolumeSlider';
+import { TOGGLE_ACTIVE_BAR } from '../uiToggles';
 
 type Props = {
-  isLyricsVisible: boolean;
   isLyricsAvailable: boolean;
-  isMouseActive: boolean;
+  /** Whether the bottom chrome (controls + seek bar) is currently shown. */
+  isChromeVisible: boolean;
   isAnalysisView: boolean;
   setIsAnalysisView: (callback: (state: boolean) => boolean) => void;
 };
@@ -35,8 +36,7 @@ const SongControlContainer = (props: Props) => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { isLyricsVisible, isLyricsAvailable, isMouseActive, isAnalysisView, setIsAnalysisView } =
-    props;
+  const { isLyricsAvailable, isChromeVisible, isAnalysisView, setIsAnalysisView } = props;
 
   const handleSkipForwardClickWithParams = useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
@@ -46,10 +46,10 @@ const SongControlContainer = (props: Props) => {
   return (
     <div
       className={`song-control-container peer/songControlContainer group/songControlContainer box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
-        isLyricsVisible && isLyricsAvailable
+        isLyricsAvailable
           ? 'invisible opacity-0 group-hover/fullScreenPlayer:visible group-hover/fullScreenPlayer:opacity-100'
           : 'visible opacity-100'
-      } ${!isCurrentSongPlaying && isLyricsVisible && 'visible! opacity-100!'}`}
+      } ${!isCurrentSongPlaying && 'visible! opacity-100!'}`}
     >
       <div className="song-controls-container flex h-fit items-center">
         <Button
@@ -93,7 +93,7 @@ const SongControlContainer = (props: Props) => {
         />
         <Button
           className={`lyrics-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] after:absolute after:h-1 focus-visible:outline! ${
-            isAnalysisView && 'text-dark-background-color-3! after:opacity-100'
+            isAnalysisView && TOGGLE_ACTIVE_BAR
           }`}
           iconClassName="text-2xl!"
           clickHandler={() => setIsAnalysisView((prevState) => !prevState)}
@@ -104,7 +104,7 @@ const SongControlContainer = (props: Props) => {
         <div className="volume-controls-container relative inline-flex items-center">
           <Button
             className={`volume-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] after:absolute after:h-1 focus-visible:outline! ${
-              isMuted && 'text-dark-background-color-3! after:opacity-100'
+              isMuted && TOGGLE_ACTIVE_BAR
             }`}
             tooltipLabel={t('player.muteUnmute')}
             iconClassName="text-2xl!"
@@ -113,7 +113,7 @@ const SongControlContainer = (props: Props) => {
           />
 
           <div
-            className={`volume-slider-container invisible absolute left-full mr-4 max-w-[6rem] min-w-[4rem] opacity-0 transition-[visibility,opacity] delay-150 ease-in-out ${isMouseActive && 'group-hover/songControlContainer:visible group-hover/songControlContainer:opacity-100'}`}
+            className={`volume-slider-container invisible absolute left-full mr-4 max-w-[6rem] min-w-[4rem] opacity-0 transition-[visibility,opacity] delay-150 ease-in-out ${isChromeVisible && 'group-hover/songControlContainer:visible group-hover/songControlContainer:opacity-100'}`}
           >
             <VolumeSlider name="player-volume-slider" id="volumeSlider" />
           </div>

@@ -1,5 +1,6 @@
 import { getAllSongs as getAllSavedSongs } from '@main/db/queries/songs';
 
+import { PALETTE_SWATCH_TYPES } from '../../common/swatchTypes';
 // import { getListeningData } from '../filesystem';
 import logger from '../logger';
 import { convertToSongData } from '../utils/convert';
@@ -15,49 +16,14 @@ export const parsePaletteFromArtworks = (artworks: SongArtwork[]): PaletteData |
 
     if (artworkWithPalette.palette && artworkWithPalette.palette.swatches.length > 0) {
       for (const swatch of artworkWithPalette.palette.swatches) {
-        switch (swatch.swatchType) {
-          case 'DARK_VIBRANT':
-            palette.DarkVibrant = {
-              hex: swatch.hex,
-              population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
-            };
-            break;
-          case 'LIGHT_VIBRANT':
-            palette.LightVibrant = {
-              hex: swatch.hex,
-              population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
-            };
-            break;
-          case 'DARK_MUTED':
-            palette.DarkMuted = {
-              hex: swatch.hex,
-              population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
-            };
-            break;
-          case 'LIGHT_MUTED':
-            palette.LightMuted = {
-              hex: swatch.hex,
-              population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
-            };
-            break;
-          case 'MUTED':
-            palette.Muted = {
-              hex: swatch.hex,
-              population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
-            };
-            break;
-          case 'VIBRANT':
-            palette.Vibrant = {
-              hex: swatch.hex,
-              population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
-            };
-            break;
+        const swatchKey = PALETTE_SWATCH_TYPES.find(({ label }) => label === swatch.swatchType)?.key;
+
+        if (swatchKey) {
+          palette[swatchKey] = {
+            hex: swatch.hex,
+            population: swatch.population,
+            hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+          };
         }
       }
     }

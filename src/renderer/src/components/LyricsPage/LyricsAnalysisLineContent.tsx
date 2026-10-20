@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
-import type { LyricsAnalysisToken } from '../../../../../common/lyricsAnalysis';
-import { splitLineIntoTokens } from '../../../../../common/lyricsAnalysis';
-import { getTokenColor, getTokenColorPalette } from '../../../other/lyricsAnalysisUtils';
+import type { LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
+import { splitLineIntoTokens } from '../../../../common/lyricsAnalysis';
+import { getTokenColor, getTokenColorPalette } from '../../other/lyricsAnalysisUtils';
 
 type Props = {
   text: string;

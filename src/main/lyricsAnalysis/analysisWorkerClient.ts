@@ -9,7 +9,13 @@ import type {
 } from '../../common/lyricsAnalysis';
 import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
 import logger from '../logger';
+import type { ProbeConcurrencyResult } from './providerGateway';
 import workerModulePath from './worker?modulePath';
+import type { WorkerResponse as WorkerMessage } from './workerProtocol';
+
+type ProbeOutcome =
+  | { ok: true; result: ProbeConcurrencyResult }
+  | { ok: false; error: string };
 
 interface PendingAnalysis {
   resolve: (value: {
@@ -19,12 +25,17 @@ interface PendingAnalysis {
   }) => void;
   reject: (error: LyricsAnalysisError) => void;
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
-  onRepairing?: (failedLineIds: string[]) => void;
+  onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
+  onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
 }
 
 const pendingAnalyses = new Map<string, PendingAnalysis>();
 const pendingTests = new Map<string, (result: LyricsAnalysisProviderTestResult) => void>();
+const pendingProbes = new Map<string, (outcome: ProbeOutcome) => void>();
+
+/** RequestIds currently running an analysis in the worker (used to cancel superseded runs). */
+export const inFlightAnalysisRequestIds = () => new Set(pendingAnalyses.keys());
 
 let worker: UtilityProcess | undefined;
 let requestCounter = 0;
@@ -42,6 +53,16 @@ const createWorker = () => {
       return;
     }
 
+    if (message.type === 'probe-result') {
+      pendingProbes.get(message.requestId)?.(
+        message.result
+          ? { ok: true, result: message.result }
+          : { ok: false, error: message.error ?? 'Unknown probe failure.' }
+      );
+      pendingProbes.delete(message.requestId);
+      return;
+    }
+
     const pending = pendingAnalyses.get(message.requestId);
     if (!pending) return;
 
@@ -50,10 +71,13 @@ const createWorker = () => {
         pending.onLine(message.line, message.source);
         break;
       case 'repairing':
-        pending.onRepairing?.(message.failedLineIds);
+        pending.onRepairStarted?.(message.failedLineIds);
         break;
       case 'pass':
         pending.onPassCompleted?.(message.pass);
+        break;
+      case 'concurrency':
+        pending.onConcurrencyStats?.(message.stats);
         break;
       case 'done':
         pending.resolve({
@@ -85,6 +109,10 @@ const createWorker = () => {
       pendingAnalyses.delete(requestId);
     }
     pendingTests.clear();
+    for (const [requestId, resolve] of pendingProbes) {
+      resolve({ ok: false, error: 'The background analysis process stopped unexpectedly.' });
+      pendingProbes.delete(requestId);
+    }
   });
 
   return child;
@@ -97,20 +125,6 @@ const getWorker = () => {
 
 const nextRequestId = () => `req-${++requestCounter}`;
 
-type WorkerMessage =
-  | { type: 'line'; requestId: string; line: LyricsAnalysisLine; source: 'first' | 'repair' }
-  | { type: 'repairing'; requestId: string; failedLineIds: string[] }
-  | {
-      type: 'done';
-      requestId: string;
-      lines: LyricsAnalysisLine[];
-      failedLineIds: string[];
-      passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
-    }
-  | { type: 'error'; requestId: string; error: LyricsAnalysisError }
-  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult }
-  | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };
-
 export const analyzeLyricsInWorker = (input: {
   config: LyricsAnalysisProviderConfig;
   uiLanguage: string;
@@ -119,8 +133,9 @@ export const analyzeLyricsInWorker = (input: {
   lines: LyricsAnalysisInputLine[];
   sessionId?: string;
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
-  onRepairing?: (failedLineIds: string[]) => void;
+  onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
+  onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
 }) =>
   new Promise<{
     lines: LyricsAnalysisLine[];
@@ -133,8 +148,9 @@ export const analyzeLyricsInWorker = (input: {
       resolve,
       reject,
       onLine: input.onLine,
-      onRepairing: input.onRepairing,
-      onPassCompleted: input.onPassCompleted
+      onRepairStarted: input.onRepairStarted,
+      onPassCompleted: input.onPassCompleted,
+      onConcurrencyStats: input.onConcurrencyStats
     });
 
     getWorker().postMessage({
@@ -163,11 +179,48 @@ export const testLyricsAnalysisProviderInWorker = (config: LyricsAnalysisProvide
     }
   });
 
-export const cancelLyricsAnalysisRequest = (requestId: string) => {
-  worker?.postMessage({ type: 'cancel', requestId });
-};
+export const probeProviderConcurrencyInWorker = (config: LyricsAnalysisProviderConfig) =>
+  new Promise<ProbeConcurrencyResult>((resolve, reject) => {
+    const requestId = nextRequestId();
 
-export const disposeLyricsAnalysisWorker = () => {
-  worker?.kill();
-  worker = undefined;
+    pendingProbes.set(requestId, (outcome) => {
+      if (outcome.ok) resolve(outcome.result);
+      else reject(new Error(outcome.error));
+    });
+
+    try {
+      getWorker().postMessage({ type: 'probe', requestId, config });
+    } catch (error) {
+      pendingProbes.delete(requestId);
+      reject(error);
+    }
+  });
+
+/**
+ * Cancels one in-flight worker analysis. Superseding a session must stop the old run's gateway
+ * traffic: with the app-level trigger a new song's prepare fires the moment playback starts,
+ * and the old run's remaining in-flight batches would otherwise share the provider's real
+ * concurrency with the new run — doubling the load right when the new song needs the window
+ * (its batches then slow down or trip 429s, showing the ⚠/partial state).
+ *
+ * The worker answers an abort silently (its runAnalysis just returns), so the pending entry is
+ * settled and removed here instead of waiting for a message that will never come; the worker
+ * keeps its own abortControllers cleanup. Late 'line'/'done' messages from batches already in
+ * flight find no pending entry and are dropped — the superseded session has already flushed
+ * whatever landed before the cut.
+ */
+export const cancelLyricsAnalysisRequest = (requestId: string) => {
+  const pending = pendingAnalyses.get(requestId);
+  if (!pending) return;
+
+  pendingAnalyses.delete(requestId);
+  try {
+    getWorker().postMessage({ type: 'cancel', requestId });
+  } catch {
+    // Worker is gone; its exit handler already rejected everything pending.
+  }
+  pending.reject({
+    code: 'unknown',
+    message: 'Superseded by a newer lyrics analysis session.'
+  });
 };

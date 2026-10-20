@@ -7,7 +7,6 @@ import 'material-symbols/rounded.css';
 import ErrorBoundary from './components/ErrorBoundary';
 // ? CONTEXTS
 import { AppUpdateContext, type AppUpdateContextType } from './contexts/AppUpdateContext';
-// import { SongPositionContext } from './contexts/SongPositionContext';
 import { useAppLifecycle } from './hooks/useAppLifecycle';
 import { useAppUpdates } from './hooks/useAppUpdates';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
@@ -37,6 +36,7 @@ import { initializeQueue } from './other/queueSingleton';
 
 // ? PROMPTS
 const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayableErrorPrompt'));
+const LyricsAnalysisTrigger = lazy(() => import('./components/LyricsAnalysisTrigger'));
 
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Outlet } from '@tanstack/react-router';
@@ -384,6 +384,9 @@ export default function App() {
           <Outlet />
           {/* Mounted at the app root so notifications also show over the fullscreen and mini players. */}
           <NotificationPanel />
+          {/* App-level lyrics-analysis trigger: starts the LLM session as soon as a song plays
+              with synced lyrics ready, instead of waiting for the fullscreen player to mount. */}
+          <LyricsAnalysisTrigger />
         </div>
       </AppUpdateContext.Provider>
       {/* <TanStackRouterDevtools position="bottom-right" /> */}

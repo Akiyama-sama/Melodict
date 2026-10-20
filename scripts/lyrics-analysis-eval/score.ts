@@ -20,9 +20,10 @@ import path from 'node:path';
 import process from 'node:process';
 
 import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, Output, type LanguageModel } from 'ai';
-import { z } from 'zod';
+import { generateText, type LanguageModel } from 'ai';
 
+import { aggregateCategoryMeans, aggregateOverallMean, aggregatePerCategory } from './lib/aggregate';
+import { graderVerdictSchema } from './lib/graderSchema';
 import {
   EVAL_CATEGORIES,
   type CategoryScore,
@@ -43,18 +44,6 @@ const CATEGORY_LABELS: Record<EvalCategory, string> = {
   translation: '整行翻译（translation）— line.translation 是否自然且忠实于原句（金标准的 translation 字段）',
   posTagging: '词性（posTagging）— token.language 及 grammarFunction 里的词性标注是否与金标准的词性一致（名词/动词/助词/形容动词/接续词/句型…）'
 };
-
-const graderVerdictSchema = z.object({
-  categoryScores: z.array(
-    z.object({
-      category: z.enum(EVAL_CATEGORIES),
-      score: z.number().min(0).max(10),
-      rationale: z.string(),
-      examples: z.array(z.string()).optional()
-    })
-  ),
-  lineNotes: z.array(z.string()).optional()
-});
 
 const parseArgs = (argv: string[]) => {
   const get = (flag: string) => {
@@ -178,7 +167,6 @@ const main = async () => {
 
   const analysis = await readJson<EvalAnalysisResult>(args.analysisPath);
   const gold = await readJson<GoldStandard>(args.goldPath);
-  const goldByNorm = new Map(gold.lines.map((line) => [line.text.replace(/\s+/g, ''), line]));
 
   const provider = createOpenAI({ apiKey: args.apiKey, baseURL: args.baseURL });
   const model = provider.chat(args.modelId);
@@ -225,23 +213,7 @@ const main = async () => {
       }
     }
 
-    const perCategory = new Map<EvalCategory, number[]>();
-    for (const score of categoryScores) {
-      const bucket = perCategory.get(score.category) ?? [];
-      bucket.push(score.score);
-      perCategory.set(score.category, bucket);
-    }
-
-    const categoryMean = (category: EvalCategory) => {
-      const bucket = perCategory.get(category);
-      if (!bucket || bucket.length === 0) return 0;
-      return bucket.reduce((a, b) => a + b, 0) / bucket.length;
-    };
-
-    const overall =
-      (EVAL_CATEGORIES.reduce((sum, category) => sum + categoryMean(category), 0) /
-        EVAL_CATEGORIES.length) *
-      10;
+    const { categoryMean, overall } = aggregatePerCategory(categoryScores);
 
     verdicts.push({
       graderIndex,
@@ -260,23 +232,8 @@ const main = async () => {
     process.exit(1);
   }
 
-  const categoryMeans = Object.fromEntries(
-    EVAL_CATEGORIES.map((category) => {
-      const values = verdicts.flatMap(
-        (verdict) =>
-          verdict.categoryScores
-            .filter((score) => score.category === category)
-            .map((score) => score.score)
-      );
-      const mean = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-      return [category, Math.round(mean * 10) / 10];
-    })
-  ) as Record<EvalCategory, number>;
-
-  const overallMean =
-    Math.round(
-      (verdicts.reduce((sum, verdict) => sum + verdict.overall, 0) / verdicts.length) * 10
-    ) / 10;
+  const categoryMeans = aggregateCategoryMeans(verdicts);
+  const overallMean = aggregateOverallMean(verdicts);
 
   const runId = `${crypto.randomBytes(4).toString('hex')}`;
   const outPath =

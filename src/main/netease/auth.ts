@@ -1,6 +1,6 @@
 import { dataUpdateEvent } from '../main';
 import logger from '../logger';
-import { callNetease, isNeteaseAuthError } from './client';
+import { callNetease, QR_STATE_CONFIRMED, QR_STATE_EXPIRED, QR_STATE_SCANNED, QR_STATE_WAITING } from './client';
 import type { NeteaseApiRawResult } from './client';
 import type { NeteaseSessionProfile } from '../../common/netease';
 import {
@@ -9,12 +9,6 @@ import {
   updateNeteaseSessionProfile,
   writeNeteaseSession
 } from './session';
-
-// QR login polling codes, mirroring https://docs-neteasecloudmusicapi.focalors.ltd
-const QR_STATE_EXPIRED = 800;
-const QR_STATE_WAITING = 801;
-const QR_STATE_SCANNED = 802;
-const QR_STATE_CONFIRMED = 803;
 
 export const startNeteaseQrLogin = async (): Promise<{
   key: string;
@@ -152,34 +146,6 @@ export const neteaseLogout = async (): Promise<void> => {
   }
 
   broadcastNeteaseSessionChange();
-};
-
-/**
- * Refreshes the login token; NetEase asks clients to refresh at most daily. Called rarely, and an
- * expiry is handled by the next revalidation instead of a forced logout.
- */
-export const refreshNeteaseSession = async (): Promise<void> => {
-  const session = await readNeteaseSession();
-  if (!session) return;
-
-  try {
-    const result = await callNetease('login_refresh', {}, { cookie: session.cookie });
-    const cookie = result.cookie;
-
-    // The refresh endpoint resets MUSIC_U only occasionally; when it does, persist the new one.
-    const refreshedCookie = Array.isArray(cookie)
-      ? (cookie.find((line: string) => line.includes('MUSIC_U')) as string | undefined)
-      : undefined;
-
-    if (refreshedCookie) await writeNeteaseSession(refreshedCookie);
-  } catch (error) {
-    if (isNeteaseAuthError(error)) {
-      await clearNeteaseSession();
-      broadcastNeteaseSessionChange();
-      return;
-    }
-    logger.warn('NetEase login refresh failed; skipping.', { error });
-  }
 };
 
 const broadcastNeteaseSessionChange = () => {

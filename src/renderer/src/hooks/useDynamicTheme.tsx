@@ -3,15 +3,18 @@ import { useStore } from '@tanstack/react-store';
 import { useCallback, useEffect } from 'react';
 
 import { resolveNeteaseSongPalette } from '../other/neteasePlayback';
-import { formatHsl, manageBrightness, manageSaturation } from '../other/themePalette';
+import { deriveThemeColors } from '../other/themePalette';
 import { settingsQuery } from '../queries/settings';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 
 const resetStyles = () => {
-  const root = document.getElementById('root');
+  // Variables go on `documentElement`, not the `#root` div: Headless UI dialogs portal to
+  // `document.body`, outside `#root`, and would otherwise inherit only the static palette
+  // from the `:root` stylesheet instead of the song's dynamic theme.
+  const root = document.documentElement;
 
-  if (root) {
+  {
     root.style.removeProperty('--side-bar-background');
     root.style.removeProperty('--background-color-2');
     root.style.removeProperty('--dark-background-color-2');
@@ -62,40 +65,19 @@ export interface UseDynamicThemeReturn {
  */
 export function useDynamicTheme(): UseDynamicThemeReturn {
   const setDynamicThemesFromSongPalette = useCallback((palette?: NodeVibrantPalette) => {
-    const generateColor = formatHsl;
-
-    const root = document.getElementById('root');
+    const root = document.documentElement;
     if (root) {
       if (palette) {
-        if (
-          palette?.LightVibrant &&
-          palette?.DarkVibrant &&
-          palette?.LightMuted &&
-          palette?.DarkMuted &&
-          palette?.Vibrant &&
-          palette?.Muted
-        ) {
-          const highLightVibrant = generateColor(manageBrightness(palette.LightVibrant.hsl));
-          const mediumLightVibrant = generateColor(
-            manageBrightness(palette.LightVibrant.hsl, { min: 0.75 })
-          );
-          const darkLightVibrant = generateColor(
-            manageSaturation(
-              manageBrightness(palette.LightVibrant.hsl, {
-                max: 0.2,
-                min: 0.2
-              }),
-              { max: 0.05, min: 0.05 }
-            )
-          );
-          const highVibrant = generateColor(manageBrightness(palette.Vibrant.hsl, { min: 0.7 }));
-
-          const lightVibrant = generateColor(palette.LightVibrant.hsl);
-          const darkVibrant = generateColor(palette.DarkVibrant.hsl);
-          // const lightMuted = generateColor(palette.LightMuted.hsl);
-          // const darkMuted = generateColor(palette.DarkMuted.hsl);
-          // const vibrant = generateColor(palette.Vibrant.hsl);
-          // const muted = generateColor(palette.Muted.hsl);
+        const { LightVibrant, DarkVibrant, LightMuted, DarkMuted, Vibrant, Muted } = palette;
+        if (LightVibrant && DarkVibrant && LightMuted && DarkMuted && Vibrant && Muted) {
+          const {
+            highLightVibrant,
+            mediumLightVibrant,
+            darkLightVibrant,
+            highVibrant,
+            lightVibrant,
+            darkVibrant
+          } = deriveThemeColors({ LightVibrant, Vibrant, DarkVibrant });
 
           root.style.setProperty('--side-bar-background', highLightVibrant, 'important');
           root.style.setProperty('--background-color-2', highLightVibrant, 'important');
@@ -179,10 +161,7 @@ export function useDynamicTheme(): UseDynamicThemeReturn {
     resolveNeteaseSongPalette(currentSongData)
       .then((palette) => {
         if (!isStale && palette)
-          dispatch({
-            type: 'CURRENT_SONG_DATA_CHANGE',
-            data: { ...currentSongData, paletteData: palette }
-          });
+          dispatch({ type: 'CURRENT_SONG_PALETTE_CHANGE', data: palette });
         return undefined;
       })
       .catch((error) => console.error('Failed to resolve the song palette:', error));

@@ -6,6 +6,10 @@ import {
   validateAndNormalizeLineAnalysis
 } from '../../../src/common/lyricsAnalysis';
 
+// NOTE: despite the file name, this suite exercises the line-validation / coverage helpers of
+// common/lyricsAnalysis (the numbers telemetry reports), NOT the telemetry event schemas.
+// The zod telemetry contract itself is covered in lyricsAnalysisTelemetrySchema.test.ts.
+
 const draftLine = (overrides: {
   lineId?: string;
   tokens?: Array<Record<string, unknown>>;

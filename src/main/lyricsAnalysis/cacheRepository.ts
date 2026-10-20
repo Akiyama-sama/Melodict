@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { app } from 'electron';
 import fs from 'fs/promises';
+import { app } from 'electron';
 import path from 'path';
 
 import {
@@ -10,6 +10,7 @@ import {
   type LyricsAnalysisLine
 } from '../../common/lyricsAnalysis';
 import logger from '../logger';
+import { getJsonTmpPath, readJsonFileOrNull, writeJsonFileAtomic } from './fsJson';
 
 export interface LyricsAnalysisCacheArtifact {
   fingerprint: string;
@@ -47,48 +48,26 @@ export const buildLyricsAnalysisFingerprint = (input: {
 const getArtifactPath = (fingerprint: string) =>
   path.join(getLyricsAnalysisCacheDir(), `${fingerprint}.json`);
 
-export const readLyricsAnalysisCache = async (
-  fingerprint: string
-): Promise<LyricsAnalysisCacheArtifact | undefined> => {
-  try {
-    const raw = await fs.readFile(getArtifactPath(fingerprint), 'utf-8');
-    const artifact = JSON.parse(raw) as LyricsAnalysisCacheArtifact;
-
-    if (
-      artifact?.fingerprint !== fingerprint ||
-      !Array.isArray(artifact.lines) ||
-      artifact.lines.length === 0
-    )
-      return undefined;
-
-    return artifact;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      logger.warn('Failed to read the lyrics analysis cache entry.', { error, fingerprint });
-    return undefined;
-  }
-};
-
 /**
- * Like `readLyricsAnalysisCache` but tolerates an artifact with zero lines — a run that crashed
- * before its first incremental flush. Partial artifacts still matter: whatever lines they hold can
+ * Reads the song-level artifact, tolerating an entry with zero lines — a run that crashed before
+ * its first incremental flush. Partial artifacts still matter: whatever lines they hold can
  * hydrate the UI instantly and cut the next run's LLM workload.
  */
 export const readLyricsAnalysisPartialCache = async (
   fingerprint: string
 ): Promise<LyricsAnalysisCacheArtifact | undefined> => {
-  try {
-    const raw = await fs.readFile(getArtifactPath(fingerprint), 'utf-8');
-    const artifact = JSON.parse(raw) as LyricsAnalysisCacheArtifact;
+  const artifact = await readJsonFileOrNull<LyricsAnalysisCacheArtifact>(
+    getArtifactPath(fingerprint),
+    (error) =>
+      logger.warn('Failed to read the partial lyrics analysis cache entry.', {
+        error,
+        fingerprint
+      })
+  );
 
-    if (artifact?.fingerprint !== fingerprint || !Array.isArray(artifact.lines)) return undefined;
+  if (artifact?.fingerprint !== fingerprint || !Array.isArray(artifact.lines)) return undefined;
 
-    return artifact;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      logger.warn('Failed to read the partial lyrics analysis cache entry.', { error, fingerprint });
-    return undefined;
-  }
+  return artifact;
 };
 
 /**
@@ -115,12 +94,10 @@ export const writeLyricsAnalysisCache = async (
   artifact: LyricsAnalysisCacheArtifact
 ): Promise<void> => {
   const artifactPath = getArtifactPath(artifact.fingerprint);
-  const tempPath = `${artifactPath}.tmp`;
+  const tempPath = getJsonTmpPath(artifactPath);
 
   try {
-    await fs.mkdir(getLyricsAnalysisCacheDir(), { recursive: true });
-    await fs.writeFile(tempPath, JSON.stringify(artifact), 'utf-8');
-    await fs.rename(tempPath, artifactPath);
+    await writeJsonFileAtomic(artifactPath, artifact);
   } catch (error) {
     logger.warn('Failed to write the lyrics analysis cache entry.', { error });
     await fs.rm(tempPath, { force: true }).catch(() => undefined);

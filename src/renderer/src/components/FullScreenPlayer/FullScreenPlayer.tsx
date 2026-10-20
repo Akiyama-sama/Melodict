@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LyricsAnalysisLine, LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
@@ -13,23 +13,15 @@ import LyricsContainer from './containers/LyricsContainer';
 import SongControlContainer from './containers/SongControlContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
 
-// type Props = {};
-
 const isArtistBackgroundsEnabled = false;
 
 const FullScreenPlayer = () => {
-  // (props: Props)
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  // Lyrics stay visible; the notes button toggles between the plain and the token-analyzed view.
-  const isLyricsVisible = true;
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
   const [songPos, setSongPos] = useState(0);
-  // The fullscreen player only renders the lyrics layout; the view toggle lives on the
-  // analysis mode button now.
-  const [isFullLyricsScreen] = useState(true);
   const [isAnalysisView, setIsAnalysisView] = useState(true);
   // The word panel is closed by default; the title-bar menu button toggles it, and clicking a
   // token opens it too. It stays mounted only while open, so the default lyrics layout is
@@ -80,6 +72,21 @@ const FullScreenPlayer = () => {
     }
   }, [isAnalysisView]);
 
+  // Toggling the word panel always drops the selected token: the panel falls back to the hint
+  // text when opened from the title bar. Both setters are stable, so this callback is too and the
+  // title bar's memo can hold.
+  const handleToggleLyricsAnalysisPanel = useCallback(() => {
+    setIsAnalysisPanelOpen((prevState) => !prevState);
+    setSelectedToken(undefined);
+  }, []);
+
+  // Clicking a token selects it and opens the word panel. Stable identity, so the lyrics list's
+  // memo does not rebuild its whole line array on every fullscreen-player render.
+  const handleTokenClick = useCallback((token: LyricsAnalysisToken, line: LyricsAnalysisLine) => {
+    setSelectedToken({ token, line });
+    setIsAnalysisPanelOpen(true);
+  }, []);
+
   const imgPath = useMemo(() => {
     const selectedArtist = currentSongData?.artists?.find(
       (artist) => !!artist.onlineArtworkPaths?.picture_xl
@@ -102,16 +109,13 @@ const FullScreenPlayer = () => {
           fallbackSrc={DefaultSongCover}
           loading="eager"
           alt="Song Cover"
-          className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out ${isLyricsVisible ? 'blur-[2rem]!' : 'blur-[2rem]!'}`}
+          className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out blur-[2rem]!`}
         />
         {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
       </div>
       <TitleBar
         isLyricsAnalysisPanelOpen={isAnalysisPanelOpen}
-        onToggleLyricsAnalysisPanel={() => {
-          setIsAnalysisPanelOpen((prevState) => !prevState);
-          setSelectedToken(undefined);
-        }}
+        onToggleLyricsAnalysisPanel={handleToggleLyricsAnalysisPanel}
       />
       <div
         className={`flex min-h-0 max-w-full flex-col justify-end overflow-hidden ${isChromeVisible && 'group/fullScreenPlayer'}`}
@@ -119,50 +123,42 @@ const FullScreenPlayer = () => {
       >
         <div
           className={`full-screen-player-main-container absolute inset-0 w-full max-w-full! overflow-hidden ${
-            isFullLyricsScreen
-              ? isAnalysisPanelOpen
-                ? // The panel caps at 30rem on large windows, but follows a third of the player
-                  // width once the window gets tight (min 14rem), so the lyrics never get
-                  // squeezed into a sliver on smaller sizes.
-                  'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
-                : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
-              : 'grid grid-cols-1'
+            isAnalysisPanelOpen
+              ? // The panel caps at 30rem on large windows, but follows a third of the player
+                // width once the window gets tight (min 14rem), so the lyrics never get
+                // squeezed into a sliver on smaller sizes.
+                'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
+              : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
           }`}
         >
           {/* With the panel open the song info floats over the top third of the lyrics column only,
               so the lyrics keep their original position and the panel never gets blurred over.
               Panel open but no token selected renders the identical layout — only the panel texts
               fall back to a hint. */}
-          {isFullLyricsScreen && !isAnalysisPanelOpen && <SongInfoContainer songPos={songPos} />}
+          {!isAnalysisPanelOpen && <SongInfoContainer songPos={songPos} />}
 
           <div className="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
             <LyricsContainer
-              isFullLyricsScreen={isFullLyricsScreen}
-              isLyricsVisible={isLyricsVisible}
               setIsLyricsAvailable={setIsLyricsAvailable}
               selectedToken={selectedToken}
               isPanelOpen={isAnalysisPanelOpen}
               isAnalysisView={isAnalysisView}
-              onTokenClick={(token, line) => {
-                setSelectedToken({ token, line });
-                setIsAnalysisPanelOpen(true);
-              }}
+              onTokenClick={handleTokenClick}
             />
 
-            {isFullLyricsScreen && isAnalysisPanelOpen && (
+            {isAnalysisPanelOpen && (
               <SongInfoContainer songPos={songPos} isOverlay />
             )}
           </div>
 
-          {isFullLyricsScreen && isAnalysisPanelOpen && (
+          {isAnalysisPanelOpen && (
             <LyricsAnalysisPanel token={selectedToken?.token} line={selectedToken?.line} />
           )}
 
         </div>
         <SongControlContainer
-          isLyricsVisible={isLyricsVisible}
           isLyricsAvailable={isLyricsAvailable}
-          isMouseActive={isChromeVisible}
+          isChromeVisible={isChromeVisible}
           isAnalysisView={isAnalysisView}
           setIsAnalysisView={setIsAnalysisView}
         />
@@ -171,9 +167,7 @@ const FullScreenPlayer = () => {
           id="fullScreenPlayerSeekSlider"
           sliderOpacity={0.25}
           onSeek={(currentPosition) => setSongPos(currentPosition)}
-          className={`full-screen-player-seek-slider bg-background-color-3/25 before:bg-background-color-3 absolute h-fit w-full appearance-none outline-hidden outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:max-w-full before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:outline! ${
-            isChromeVisible && 'peer-hover/songInfoContainer:before:h-3'
-          } ${!isCurrentSongPlaying && isLyricsVisible && '-translate-y-8! scale-x-95!'}`}
+          className={`full-screen-player-seek-slider bg-background-color-3/25 before:bg-background-color-3 absolute h-fit w-full appearance-none outline-hidden outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:max-w-full before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:outline! ${!isCurrentSongPlaying && '-translate-y-8! scale-x-95!'}`}
         />
       </div>
     </div>

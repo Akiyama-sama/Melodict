@@ -14,13 +14,11 @@ interface StoredNeteaseSession {
   /** Fallback for environments without OS-level encryption (some Linux setups). */
   cookiePlain?: string;
   profile?: NeteaseSessionProfile;
-  lastAuthCheckAt?: number;
 }
 
 export interface StoredNeteaseSessionData {
   cookie: string;
   profile?: NeteaseSessionProfile;
-  lastAuthCheckAt?: number;
 }
 
 const getSessionPath = () => path.join(app.getPath('userData'), SESSION_FILE_NAME);
@@ -84,8 +82,7 @@ export const readNeteaseSession = async (): Promise<StoredNeteaseSessionData | u
 
   return {
     cookie,
-    profile: stored.profile,
-    lastAuthCheckAt: stored.lastAuthCheckAt
+    profile: stored.profile
   };
 };
 
@@ -97,8 +94,7 @@ export const writeNeteaseSession = async (
   const next: StoredNeteaseSession = {
     ...createEmptySessionFileVersion(),
     ...encryptCookie(cookie),
-    profile: profile ?? current?.profile,
-    lastAuthCheckAt: Date.now()
+    profile: profile ?? current?.profile
   };
 
   await writeSessionFile(next);
@@ -109,7 +105,7 @@ export const updateNeteaseSessionProfile = async (profile: NeteaseSessionProfile
   const stored = await readJsonFile(getSessionPath());
   if (!stored) return;
 
-  await writeSessionFile({ ...stored, profile, lastAuthCheckAt: Date.now() });
+  await writeSessionFile({ ...stored, profile });
 };
 
 export const clearNeteaseSession = async (): Promise<void> => {

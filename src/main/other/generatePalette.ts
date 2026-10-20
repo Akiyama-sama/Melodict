@@ -1,4 +1,3 @@
-import { swatchTypeEnum } from '@db/schema';
 import { db } from '@main/db/db';
 import { createArtworkPalette, getLowResArtworksWithoutPalettes } from '@main/db/queries/palettes';
 import generateCoverBuffer from '@main/parseSong/generateCoverBuffer';
@@ -6,6 +5,7 @@ import { Vibrant } from 'node-vibrant/node';
 
 import { DEFAULT_SONG_PALETTE } from '../../common/defaultSongPalette';
 import roundTo from '../../common/roundTo';
+import { PALETTE_SWATCH_TYPES } from '../../common/swatchTypes';
 import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
@@ -107,19 +107,7 @@ const savePalette = async (
   if (palette) {
     const swatches: Parameters<typeof createArtworkPalette>[0]['swatches'] = [];
 
-    const swatchTypes: {
-      key: keyof typeof palette;
-      label: (typeof swatchTypeEnum.enumValues)[number];
-    }[] = [
-      { key: 'DarkVibrant', label: 'DARK_VIBRANT' },
-      { key: 'LightVibrant', label: 'LIGHT_VIBRANT' },
-      { key: 'DarkMuted', label: 'DARK_MUTED' },
-      { key: 'LightMuted', label: 'LIGHT_MUTED' },
-      { key: 'Muted', label: 'MUTED' },
-      { key: 'Vibrant', label: 'VIBRANT' }
-    ];
-
-    swatchTypes.forEach(({ key, label }) => {
+    PALETTE_SWATCH_TYPES.forEach(({ key, label }) => {
       const swatch = palette[key];
 
       if (swatch && typeof swatch === 'object') {

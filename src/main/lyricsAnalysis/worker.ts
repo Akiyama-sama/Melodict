@@ -1,44 +1,10 @@
-import type {
-  LyricsAnalysisError,
-  LyricsAnalysisInputLine,
-  LyricsAnalysisLine,
-  LyricsAnalysisProviderConfig,
-  LyricsAnalysisProviderTestResult
-} from '../../common/lyricsAnalysis';
-import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
-import { analyzeLyrics, mapProviderError, testLyricsAnalysisProvider } from './providerGateway';
-
-type WorkerRequest =
-  | {
-      type: 'analyze';
-      requestId: string;
-      config: LyricsAnalysisProviderConfig;
-      uiLanguage: string;
-      songTitle: string;
-      songArtists: string[];
-      lines: LyricsAnalysisInputLine[];
-      sessionId?: string;
-    }
-  | {
-      type: 'test';
-      requestId: string;
-      config: LyricsAnalysisProviderConfig;
-    }
-  | { type: 'cancel'; requestId: string };
-
-type WorkerResponse =
-  | { type: 'line'; requestId: string; line: LyricsAnalysisLine; source: 'first' | 'repair' }
-  | { type: 'repairing'; requestId: string; failedLineIds: string[] }
-  | {
-      type: 'done';
-      requestId: string;
-      lines: LyricsAnalysisLine[];
-      failedLineIds: string[];
-      passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
-    }
-  | { type: 'error'; requestId: string; error: LyricsAnalysisError }
-  | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult }
-  | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };
+import {
+  analyzeLyrics,
+  mapProviderError,
+  probeProviderConcurrency,
+  testLyricsAnalysisProvider
+} from './providerGateway';
+import type { WorkerRequest, WorkerResponse } from './workerProtocol';
 
 const port = process.parentPort;
 const abortControllers = new Map<string, AbortController>();
@@ -64,7 +30,9 @@ const runAnalysis = async (
         post({ type: 'line', requestId: request.requestId, line, source }),
       onRepairStarted: (failedLineIds) =>
         post({ type: 'repairing', requestId: request.requestId, failedLineIds }),
-      onPassCompleted: (pass) => post({ type: 'pass', requestId: request.requestId, pass })
+      onPassCompleted: (pass) => post({ type: 'pass', requestId: request.requestId, pass }),
+      onConcurrencyStats: (stats) =>
+        post({ type: 'concurrency', requestId: request.requestId, stats })
     });
 
     post({
@@ -92,6 +60,24 @@ const runTest = async (request: Extract<WorkerRequest, { type: 'test' }>) => {
   post({ type: 'test-result', requestId: request.requestId, result });
 };
 
+const runProbe = async (request: Extract<WorkerRequest, { type: 'probe' }>) => {
+  try {
+    const result = await probeProviderConcurrency({
+      baseURL: request.config.baseURL,
+      modelId: request.config.modelId,
+      apiKey: request.config.apiKey ?? ''
+    });
+    post({ type: 'probe-result', requestId: request.requestId, result });
+  } catch (error) {
+    // Probe failures are data, not crashes: the settings page shows the reason inline.
+    post({
+      type: 'probe-result',
+      requestId: request.requestId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+};
+
 port.on('message', (messageEvent) => {
   const request = messageEvent.data as WorkerRequest;
 
@@ -101,6 +87,9 @@ port.on('message', (messageEvent) => {
       break;
     case 'test':
       void runTest(request);
+      break;
+    case 'probe':
+      void runProbe(request);
       break;
     case 'cancel':
       abortControllers.get(request.requestId)?.abort();

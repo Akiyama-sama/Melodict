@@ -2,23 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   analyzeLyricsLanguageMix,
-  buildLanguageDirective,
-  detectLineLanguage
+  buildLanguageDirective
 } from '../../../src/common/lyricsLanguageProfiles';
-
-describe('detectLineLanguage', () => {
-  it('maps kana lines to Japanese', () => {
-    expect(detectLineLanguage('しっかりした花弁の空気')).toBe('ja');
-  });
-
-  it('maps hangul lines to Korean', () => {
-    expect(detectLineLanguage('사랑해 그대여')).toBe('ko');
-  });
-
-  it('maps Latin lines to English', () => {
-    expect(detectLineLanguage("Don't say lazy")).toBe('en');
-  });
-});
 
 describe('analyzeLyricsLanguageMix', () => {
   it('resolves Han-script lines as Japanese when the song carries kana', () => {

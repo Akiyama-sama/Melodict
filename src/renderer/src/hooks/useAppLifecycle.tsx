@@ -128,15 +128,6 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     // LOCAL STORAGE
     const { playback, preferences, queue } = storage.getAllItems();
 
-    const syncLocalStorage = () => {
-      const allItems = storage.getAllItems();
-      dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: allItems });
-
-      console.log('local storage updated');
-    };
-
-    document.addEventListener('localStorage', syncLocalStorage);
-
     // Navigate to default page on startup if needed
     if (
       playback?.currentSong?.songId &&
@@ -163,10 +154,6 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
 
           const currSongPosition = Number(playback.currentSong.stoppedPosition);
           player.currentTime = currSongPosition;
-          dispatch({
-            type: 'UPDATE_SONG_POSITION',
-            data: currSongPosition
-          });
         }
         return undefined;
       })
@@ -196,9 +183,6 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
         .catch((err) => console.error(err));
     }
 
-    return () => {
-      document.removeEventListener('localStorage', syncLocalStorage);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -315,7 +299,6 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       window.api.playerControls.removeTogglePlaybackStateEvent(handleToggleSongPlayback);
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
       window.api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
-      window.api.dataUpdates.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -11,7 +11,7 @@ const AdvancedSettings = () => {
   const { t } = useTranslation();
 
   const { mutate: updateSaveVerboseLogs } = useMutation({
-    mutationFn: (enable: boolean) => window.api.settings.updateSaveVerboseLogs(enable),
+    mutationFn: (enable: boolean) => window.api.settings.saveUserSettings({ saveVerboseLogs: enable }),
     onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }

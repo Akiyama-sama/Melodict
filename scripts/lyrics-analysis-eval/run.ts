@@ -19,23 +19,16 @@ import process from 'node:process';
 
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { z } from 'zod';
 
-import { LYRICS_ANALYSIS_PROMPT_VERSION, findUncoveredLineWords } from '../../src/common/lyricsAnalysis';
+import { findUncoveredLineWords } from '../../src/common/lyricsAnalysis';
+import { ROMALRC_MATCH_WINDOW_MS } from '../../src/common/lyricsTiming';
 import { analyzeLyrics } from '../../src/main/lyricsAnalysis/providerGateway';
-import { EVAL_CATEGORIES, type CategoryScore, type EvalAnalysisResult, type EvalCategory, type EvalLine, type GoldStandard, type GraderVerdict } from './types';
-
-const graderVerdictSchema = z.object({
-  categoryScores: z.array(
-    z.object({
-      category: z.enum(EVAL_CATEGORIES),
-      score: z.number().min(0).max(10),
-      rationale: z.string(),
-      examples: z.array(z.string()).optional()
-    })
-  ),
-  lineNotes: z.array(z.string()).optional()
-});
+import { aggregateCategoryMeans, aggregateOverallMean, aggregatePerCategory } from './lib/aggregate';
+import { readStoredCredentials } from './lib/creds';
+import { graderVerdictSchema } from './lib/graderSchema';
+import { escapeHtml } from './lib/html';
+import { parseLrcFile } from './lib/lrc';
+import { EVAL_CATEGORIES, readTokenCard, type CategoryScore, type EvalAnalysisResult, type EvalCategory, type EvalLine, type GoldLine, type GoldStandard, type GraderVerdict } from './types';
 
 const CATEGORY_LABELS: Record<EvalCategory, string> = {
   tokenization: '分词（tokenization）— 词元切分边界是否与金标准一致（该分的分、该合的合，句型/惯用成块）',
@@ -74,67 +67,6 @@ const parseArgs = (argv: string[]) => {
   };
 };
 
-const LRC_TIMESTAMP_REGEX = /^\s*\[(?<min>\d+):(?<sec>\d+)(?:[.:](?<ms>\d{1,3}))?\]\s*/;
-// `[ar:…]`-style tags and NetEase's JSON credit lines ({"t":0,"c":[{"tx":"作词: "}…]}) are metadata,
-// not lyrics. Without the second pattern those JSON blobs reach the analyzer as lyric lines and
-// get "analyzed" as gibberish, wasting a batch and polluting alignment.
-const LRC_METADATA_LINE_REGEX = /^(?:\[[a-z]+:|\{"t":)/i;
-
-/** Content lines of an LRC file, keeping each line's timestamp when it has one. */
-const parseLrcFile = async (filePath: string) => {
-  const raw = await fs.readFile(filePath, 'utf-8');
-  const entries: Array<{ atMs: number | undefined; text: string }> = [];
-
-  for (const line of raw.split('\n')) {
-    const match = LRC_TIMESTAMP_REGEX.exec(line);
-    const text = line.replace(LRC_TIMESTAMP_REGEX, '').trim();
-    if (text.length === 0 || LRC_METADATA_LINE_REGEX.test(text)) continue;
-
-    if (match?.groups) {
-      const minutes = Number.parseInt(match.groups.min, 10);
-      const seconds = Number.parseInt(match.groups.sec, 10);
-      const ms = Number.parseInt((match.groups.ms ?? '0').padEnd(3, '0'), 10);
-      entries.push({ atMs: minutes * 60000 + seconds * 1000 + ms, text });
-    } else {
-      entries.push({ atMs: undefined, text });
-    }
-  }
-
-  return entries;
-};
-
-const readStoredCredentials = async () => {
-  const configPath = path.join(
-    process.env.HOME ?? '',
-    'Library/Application Support/nora/lyrics-analysis-providers.json'
-  );
-  try {
-    const state = JSON.parse(await fs.readFile(configPath, 'utf-8')) as {
-      activeProfileId?: string;
-      profiles: Array<{ id: string; baseURL: string; modelId: string; apiKeyPlain?: string }>;
-    };
-    const active = state.profiles.find((p) => p.id === state.activeProfileId) ?? state.profiles[0];
-    return active ? { baseURL: active.baseURL, modelId: active.modelId, apiKey: active.apiKeyPlain } : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-/** Mirror of the app's fingerprint: hash(lines + uiLanguage + model + prompt/schema versions). */
-const buildFingerprint = (input: { lines: Array<{ lineId: string; text: string }>; uiLanguage: string; modelId: string; promptVersion: string; schemaVersion: string }) =>
-  crypto
-    .createHash('sha256')
-    .update(
-      JSON.stringify({
-        lines: input.lines,
-        uiLanguage: input.uiLanguage,
-        modelId: input.modelId,
-        promptVersion: input.promptVersion,
-        schemaVersion: input.schemaVersion
-      })
-    )
-    .digest('hex');
-
 const main = async () => {
   const args = parseArgs(process.argv.slice(2));
 
@@ -164,14 +96,17 @@ const main = async () => {
    * window as the app's `attachRomanizedText`). Both files must be timestamped; a plain-text
    * lyrics file simply gets no reference.
    */
-  const MATCH_WINDOW_MS = 300;
+  const MATCH_WINDOW_MS = ROMALRC_MATCH_WINDOW_MS;
   const findRomanized = (index: number) => {
     const lyricEntry = lyricEntries[index];
-    if (lyricEntry?.atMs === undefined) return undefined;
+    const lyricAtMs = lyricEntry?.atMs;
+    if (lyricAtMs === undefined) return undefined;
 
     let best: { delta: number; text: string } | undefined;
     for (const entry of romalrcEntries) {
-      const delta = Math.abs(entry.atMs - lyricEntry.atMs);
+      // `?? NaN` mirrors the original `entry.atMs - atMs` arithmetic for untimed entries (NaN
+      // compares false against everything), so the match outcome is byte-for-byte unchanged.
+      const delta = Math.abs((entry.atMs ?? Number.NaN) - lyricAtMs);
       if (delta > MATCH_WINDOW_MS) continue;
       if (!best || delta < best.delta) best = { delta, text: entry.text };
     }
@@ -189,15 +124,13 @@ const main = async () => {
   const gold = JSON.parse(await fs.readFile(args.goldPath, 'utf-8')) as GoldStandard;
 
   // ---- Stage 1: analysis (cached unless --refresh) ------------------------------------------
-  const fingerprint = buildFingerprint({
-    lines,
-    uiLanguage: 'zh-CN',
-    modelId,
-    promptVersion: LYRICS_ANALYSIS_PROMPT_VERSION,
-    schemaVersion: '2'
-  });
+  // The eval harness always runs fresh within a run dir (analysis.json is the per-run cache), so
+  // unlike the app it does not fingerprint the input — --refresh decides reuse.
   const cachePath = path.join(runDir, 'analysis.json');
-  let analysis: EvalAnalysisResult;
+  // `undefined` until a cache hit or a fresh pipeline run fills it (the falsy check below is the
+  // "must run the pipeline" signal, exactly as before — the explicit undefined default only
+  // satisfies the control-flow analyzer).
+  let analysis: EvalAnalysisResult | undefined;
   let analysisSource: 'pipeline' | 'cache' = 'cache';
 
   if (!args.refresh) {
@@ -205,7 +138,7 @@ const main = async () => {
       analysis = JSON.parse(await fs.readFile(cachePath, 'utf-8')) as EvalAnalysisResult;
       console.error(`[run] reused cached analysis (${analysis.lines.length} lines)`);
     } catch {
-      analysis = undefined as unknown as EvalAnalysisResult;
+      analysis = undefined;
     }
   }
 
@@ -238,7 +171,9 @@ const main = async () => {
       uiLanguage: 'zh-CN',
       modelId,
       generatedAt: startedAt,
-      lines: outcome.lines as EvalLine[],
+      // The pipeline shape is structurally compatible but its `card.pronunciation` is a closed
+      // interface, not an index signature; the JSON artifact is what downstream stages read.
+      lines: outcome.lines as unknown as EvalLine[],
       passes
     };
     await fs.writeFile(cachePath, JSON.stringify(analysis, null, 2), 'utf-8');
@@ -340,11 +275,7 @@ const main = async () => {
         translation: produced.translation,
         tokens: produced.tokens.map((token) => ({
           text: token.text,
-          term: token.card?.term ?? token.term,
-          meaning: token.card?.meaning ?? token.meaning,
-          grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
-          // Pronunciation lives on card.pronunciation in the pipeline's token shape.
-          pronunciation: token.card?.pronunciation ?? token.pronunciation
+          ...readTokenCard(token)
         }))
       };
 
@@ -387,18 +318,7 @@ const main = async () => {
       }
     }
 
-    const perCategory = new Map<EvalCategory, number[]>();
-    for (const score of categoryScores) {
-      const bucket = perCategory.get(score.category) ?? [];
-      bucket.push(score.score);
-      perCategory.set(score.category, bucket);
-    }
-    const categoryMean = (category: EvalCategory) => {
-      const bucket = perCategory.get(category);
-      return bucket && bucket.length > 0 ? bucket.reduce((a, b) => a + b, 0) / bucket.length : 0;
-    };
-    const overall =
-      (EVAL_CATEGORIES.reduce((sum, category) => sum + categoryMean(category), 0) / EVAL_CATEGORIES.length) * 10;
+    const { categoryMean, overall } = aggregatePerCategory(categoryScores);
 
     verdicts.push({
       graderIndex,
@@ -416,16 +336,8 @@ const main = async () => {
     process.exit(1);
   }
 
-  const categoryMeans = Object.fromEntries(
-    EVAL_CATEGORIES.map((category) => {
-      const values = verdicts.flatMap((verdict) =>
-        verdict.categoryScores.filter((score) => score.category === category).map((score) => score.score)
-      );
-      return [category, values.length > 0 ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10 : 0];
-    })
-  ) as Record<EvalCategory, number>;
-  const overallMean =
-    Math.round((verdicts.reduce((sum, verdict) => sum + verdict.overall, 0) / verdicts.length) * 10) / 10;
+  const categoryMeans = aggregateCategoryMeans(verdicts);
+  const overallMean = aggregateOverallMean(verdicts);
 
   const summary = {
     runId: path.basename(runDir),
@@ -452,9 +364,6 @@ const main = async () => {
     const aligned = alignGoldToProduced(goldLine);
     if (aligned) goldToProduced.set(normalize(goldLine.text), { produced: aligned.line, overlap: aligned.overlap });
   }
-  const escapeHtml = (value: string) =>
-    value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
   const renderTokens = (tokens: Array<Record<string, unknown>>, tone: string) =>
     `<table class="tokens ${tone}">${tokens
       .map(
@@ -469,15 +378,14 @@ const main = async () => {
       const produced = match?.produced;
       const overlapPct = match ? Math.round(match.overlap * 100) : 0;
       const producedView = (produced?.tokens ?? []).map((token) => {
-        // Pronunciation lives on card.pronunciation in the pipeline's token shape.
-        const pronunciation = token.card?.pronunciation ?? token.pronunciation;
+        const card = readTokenCard(token);
         return {
           text: token.text,
-          term: token.card?.term ?? token.term,
-          meaning: token.card?.meaning ?? token.meaning,
-          grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
-          pronunciation: pronunciation
-            ? Object.entries(pronunciation)
+          term: card.term,
+          meaning: card.meaning,
+          grammarFunction: card.grammarFunction,
+          pronunciation: card.pronunciation
+            ? Object.entries(card.pronunciation)
                 .filter(([, value]) => value && value !== token.text)
                 .map(([k, v]) => `${k}:${v}`)
                 .join(' · ') || '—'

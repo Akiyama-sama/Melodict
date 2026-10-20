@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { FAMILY_TO_LANGUAGE, detectLineScript } from './lyricsLanguageProfiles';
+
 // Bumped to '2' when the normalizer gained word-boundary snapping + whitespace trimming: cached
 // artifacts from v1 carry misaligned token spans that would render clipped words.
 export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
@@ -11,7 +13,9 @@ export const LYRICS_ANALYSIS_SCHEMA_VERSION = '2';
 // re-ask behavior, so older cached lines cannot be compared with newer ones.
 // Bumped to '5' adding the per-token pinyin field: cached artifacts from v4 predate the field and
 // render without per-token pinyin until re-analyzed.
-export const LYRICS_ANALYSIS_PROMPT_VERSION = '5';
+// Bumped to '6' pinning token granularity in the base prompt (one word per token, no whole-line
+// single tokens): artifacts from v5 carry the coarse-merged tokenization this version repairs.
+export const LYRICS_ANALYSIS_PROMPT_VERSION = '6';
 export const LYRICS_ANALYSIS_DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
 export type LyricsAnalysisLanguage = 'en' | 'ja' | 'ko' | 'zh' | 'unknown';
@@ -122,6 +126,12 @@ export interface LyricsAnalysisProviderConfig {
   baseURL: string;
   modelId: string;
   apiKey?: string;
+  /**
+   * Ceiling for the gateway's adaptive concurrent-batch window (AIMD: grow +1 per clean batch,
+   * halve on 429/timeout/network). Absent = 4. Persisted per profile; older config files read as
+   * `undefined` and take the default.
+   */
+  maxConcurrency?: number;
 }
 
 /** One saved provider, safe to hand to the renderer: the key itself never leaves the main process. */
@@ -134,6 +144,11 @@ export interface LyricsAnalysisProviderProfile {
   /** Masked tail for display, e.g. `••••ab12`. */
   apiKeyHint?: string;
   isActive: boolean;
+  /**
+   * Ceiling for the analysis gateway's concurrent-batch window. Absent on profiles saved before
+   * the field existed; consumers default to 4.
+   */
+  maxConcurrency?: number;
 }
 
 export interface LyricsAnalysisProviderProfilesState {
@@ -150,6 +165,8 @@ export interface LyricsAnalysisProviderProfileInput {
   modelId: string;
   /** `undefined` keeps the stored key, an empty string clears it. */
   apiKey?: string;
+  /** `undefined` keeps the stored value; a number overwrites it (clamped 1..64 on save). */
+  maxConcurrency?: number;
 }
 
 export interface LyricsAnalysisProviderTestResult {
@@ -200,10 +217,6 @@ export type LyricsAnalysisTransportLine = z.infer<typeof lyricsAnalysisTransport
 
 const LANGUAGES: LyricsAnalysisLanguage[] = ['en', 'ja', 'ko', 'zh', 'unknown'];
 
-const KANA_REGEX = /[\p{Script=Hiragana}\p{Script=Katakana}]/u;
-const HAN_REGEX = /\p{Script=Han}/u;
-const HANGUL_REGEX = /[가-힯]/u;
-
 const asTrimmedString = (value: unknown): string | undefined => {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
@@ -220,11 +233,11 @@ const asInteger = (value: unknown): number | undefined => {
 };
 
 export const inferTokenLanguage = (text: string): LyricsAnalysisLanguage => {
-  if (KANA_REGEX.test(text)) return 'ja';
-  if (HANGUL_REGEX.test(text)) return 'ko';
-  if (HAN_REGEX.test(text)) return 'zh';
-  if (/[A-Za-z]/.test(text)) return 'en';
-  return 'unknown';
+  // Single-sourced with the gateway's script detection: same regexes, same kana→hangul→han→latin
+  // order, and Han defaults to zh for standalone use (the song-level mix resolver overrides it
+  // when kana/hangul exists elsewhere in the song).
+  const script = detectLineScript(text);
+  return script === 'han' ? 'zh' : FAMILY_TO_LANGUAGE[script];
 };
 
 export const buildTokenId = (lineId: string, startChar: number, endChar: number) =>
@@ -500,6 +513,18 @@ export const validateAndNormalizeLineAnalysis = (input: {
   // gap; the tokens themselves are left alone — the repair pass owns re-asking for content.
   const uncoveredWords = findUncoveredLineWords(text, validated);
 
+  // Degenerate granularity: a lone token spanning essentially the whole line (weak models emit
+  // this for quote-wrapped lines like "Oh my God, who is she?"). Spans are legal and coverage is
+  // perfect, so nothing else flags it — but a one-token line is useless for study. Only lines
+  // with more than one word atom count: a genuinely single-word line ("Ayy") is fine as one
+  // token. Mark degraded so the first pass re-asks the line; keeping it 'ready' would hide the
+  // failure behind a perfect-looking coverage score.
+  const isWholeLineSingleToken =
+    validated.length === 1 &&
+    validated[0].startChar === 0 &&
+    validated[0].endChar >= text.length &&
+    findUncoveredLineWords(text, []).length > 1;
+
   return {
     kind: 'ok',
     line: {
@@ -508,7 +533,9 @@ export const validateAndNormalizeLineAnalysis = (input: {
       translation: asTrimmedString(draft.translation),
       tokens: validated,
       status:
-        validated.length < rawTokens.length || uncoveredWords.length > 0 ? 'degraded' : 'ready'
+        validated.length < rawTokens.length || uncoveredWords.length > 0 || isWholeLineSingleToken
+          ? 'degraded'
+          : 'ready'
     },
     // Telemetry input: how many raw tokens validation rejected for this line.
     droppedTokenCount: rawTokens.length - validated.length,

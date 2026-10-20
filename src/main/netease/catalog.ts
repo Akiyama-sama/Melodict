@@ -9,67 +9,13 @@ import type {
 import { encodeNeteaseSongId } from '../../common/netease';
 import logger from '../logger';
 import { callNeteaseForBody, isNeteaseAuthError } from './client';
-import { readNeteaseSession } from './session';
-
-interface NeteaseArtistLike {
-  id?: number;
-  name?: string;
-}
-
-interface NeteaseSongLike {
-  id?: number;
-  name?: string;
-  duration?: number;
-  /** `song_detail` (v3 payload) reports the duration in milliseconds as `dt`. */
-  dt?: number;
-  fee?: number;
-  /** First element of freeTrialInfo marks a trial fragment (its play duration in ms). */
-  freeTrialInfo?: { start?: number; end?: number } | unknown[] | null;
-  artists?: NeteaseArtistLike[];
-  artist?: NeteaseArtistLike | null;
-  ar?: NeteaseArtistLike | null;
-  album?: NeteaseAlbumLike | null;
-  al?: NeteaseAlbumLike | null;
-  picUrl?: string;
-  alia?: string[];
-}
-
-interface NeteaseAlbumLike {
-  id?: number;
-  name?: string;
-  picUrl?: string;
-  coverImgUrl?: string;
-  artist?: NeteaseArtistLike | null;
-  artists?: NeteaseArtistLike[];
-  size?: number;
-  publishTime?: number;
-  company?: string;
-  description?: string;
-}
-
-interface NeteasePlaylistLike {
-  id?: number;
-  name?: string;
-  coverImgUrl?: string;
-  /** `personalized` entries carry `picUrl` instead of `coverImgUrl`. */
-  picUrl?: string;
-  trackCount?: number;
-  userId?: number;
-  creator?: NeteaseArtistLike | null;
-  description?: string;
-  playCount?: number;
-}
-
-interface NeteaseArtistEntryLike {
-  id?: number;
-  name?: string;
-  img1v1Url?: string;
-  picUrl?: string;
-  alias?: string[];
-  albumSize?: number;
-  musicSize?: number;
-  accountId?: number;
-}
+import type {
+  NeteaseAlbumLike,
+  NeteaseArtistEntryLike,
+  NeteaseArtistLike,
+  NeteasePlaylistLike,
+  NeteaseSongLike
+} from './catalogShapes';
 
 const isTrialInfo = (value: unknown): value is { start?: number; end?: number } =>
   Boolean(value && typeof value === 'object' && ('start' in (value as object) || 'end' in (value as object)));
@@ -138,25 +84,17 @@ export const normalizeNeteaseArtistSummary = (
   isVip: Boolean(artist.accountId && artist.accountId > 0)
 });
 
-/** Cookie-aware wrapper: attaches the session cookie for any endpoints that need it. */
+/** Catalog wrapper that translates auth failures into the renderer-facing error code. */
 const callCatalog = async (
   name: string,
-  params: Record<string, unknown> = {},
-  needsSession = false
+  params: Record<string, unknown> = {}
 ): Promise<Record<string, unknown>> => {
-  const extraParams: Record<string, unknown> = {};
-
-  if (needsSession) {
-    const session = await readNeteaseSession();
-    if (session) extraParams.cookie = session.cookie;
-  }
-
   try {
-    return await callNeteaseForBody(name, { ...params, ...extraParams });
+    return await callNeteaseForBody(name, params);
   } catch (error) {
     if (isNeteaseAuthError(error)) {
       logger.warn(`NetEase ${name} requires a logged-in session.`);
-      throw new Error('NETEASE_AUTH_REQUIRED' as ErrorCodes);
+      throw new Error('NETEASE_AUTH_REQUIRED');
     }
     throw error;
   }
@@ -272,7 +210,7 @@ export const searchNetease = async (
 };
 
 export const getNeteaseUserPlaylists = async (userId: number): Promise<NeteasePlaylistSummary[]> => {
-  const body = await callCatalog('user_playlist', { uid: userId, limit: 1000 }, true);
+  const body = await callCatalog('user_playlist', { uid: userId, limit: 1000 });
   const playlists = Array.isArray(body.playlist)
     ? (body.playlist as NeteasePlaylistLike[])
     : [];
@@ -302,7 +240,7 @@ export const likeUnlikeNeteaseSong = async (
   neteaseId: number,
   isLike: boolean
 ): Promise<boolean> => {
-  const body = await callCatalog('like', { id: neteaseId, like: isLike ? 'true' : 'false' }, true);
+  const body = await callCatalog('like', { id: neteaseId, like: isLike ? 'true' : 'false' });
   return body.code === 200 || body.playlistId !== undefined;
 };
 
@@ -347,7 +285,7 @@ export const getNeteaseStream = async (
 };
 
 export const getNeteaseRecommendSongs = async (): Promise<NeteaseSongSummary[]> => {
-  const body = await callCatalog('recommend_songs', {}, true);
+  const body = await callCatalog('recommend_songs', {});
   return asSongSummaries(
     ((body.data ?? {}) as { dailySongs?: unknown[] }).dailySongs ?? body.dailySongs
   );

@@ -21,6 +21,9 @@ import process from 'node:process';
 
 import { analyzeLyrics } from '../../src/main/lyricsAnalysis/providerGateway';
 
+import { readStoredCredentials } from './lib/creds';
+import { parseLrcFile } from './lib/lrc';
+
 interface CliArgs {
   lyricsPath: string;
   title: string;
@@ -56,38 +59,8 @@ const parseArgs = (argv: string[]): CliArgs => {
 
 /** Minimal LRC reader: keeps the line text, drops the timestamp. */
 const parseLrcLines = async (filePath: string) => {
-  const raw = await fs.readFile(filePath, 'utf-8');
-  return raw
-    .split('\n')
-    .map((line) => line.replace(/^\s*\[(\d+):(\d+)([.:]\d+)?\]\s*/, '').trim())
-    .filter((line) => line.length > 0 && !/^\[[a-z]+:/.test(line));
-};
-
-const readStoredCredentials = async (): Promise<
-  { baseURL: string; modelId: string; apiKey?: string } | undefined
-> => {
-  // The app's profile file stores safeStorage-encrypted keys, which this process cannot decrypt;
-  // only the plaintext fallback is readable here.
-  const configPath = path.join(
-    process.env.HOME ?? '',
-    'Library/Application Support/nora/lyrics-analysis-providers.json'
-  );
-  try {
-    const state = JSON.parse(await fs.readFile(configPath, 'utf-8')) as {
-      activeProfileId?: string;
-      profiles: Array<{ id: string; baseURL: string; modelId: string; apiKeyPlain?: string }>;
-    };
-    const active =
-      state.profiles.find((p) => p.id === state.activeProfileId) ?? state.profiles[0];
-    if (!active) return undefined;
-    return {
-      baseURL: active.baseURL,
-      modelId: active.modelId,
-      apiKey: active.apiKeyPlain
-    };
-  } catch {
-    return undefined;
-  }
+  const entries = await parseLrcFile(filePath);
+  return entries.map((entry) => entry.text);
 };
 
 const main = async () => {

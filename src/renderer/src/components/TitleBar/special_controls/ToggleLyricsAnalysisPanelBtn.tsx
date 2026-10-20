@@ -1,0 +1,29 @@
+import { useTranslation } from 'react-i18next';
+
+import Button from '../../Button';
+import { TITLEBAR_ICON_BTN_BASE, TOGGLE_ACTIVE_BAR } from '../../FullScreenPlayer/uiToggles';
+
+type Props = { isOpen: boolean; onToggle: () => void };
+
+/**
+ * Fullscreen-player title bar button that toggles the word-analysis side panel. When the panel is
+ * open the icon lights up with the same active treatment the bottom control bar uses for toggled
+ * buttons (icon colour + a short bar under the button).
+ */
+const ToggleLyricsAnalysisPanelBtn = ({ isOpen, onToggle }: Props) => {
+  const { t } = useTranslation();
+
+  return (
+    <Button
+      className={`close-lyrics-analysis-panel-btn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-font-color-highlight !mr-1 relative ${TITLEBAR_ICON_BTN_BASE}after:absolute after:bottom-0 after:left-1/2 after:h-1 after:w-1/2 after:-translate-x-1/2 after:rounded-full after:bg-dark-background-color-3 after:opacity-0 after:content-[''] after:transition-opacity ${
+        isOpen && TOGGLE_ACTIVE_BAR
+      }`}
+      clickHandler={onToggle}
+      tooltipLabel={t('lyricsAnalysis.togglePanel')}
+      iconName="menu"
+      iconClassName="material-icons-round icon text-center text-xl leading-none transition-[background] ease-in-out"
+    />
+  );
+};
+
+export default ToggleLyricsAnalysisPanelBtn;

@@ -37,7 +37,10 @@ vi.mock('electron', async (importOriginal) => {
 const analyzeLyricsInWorker = vi.fn();
 
 vi.mock('../../../../src/main/lyricsAnalysis/analysisWorkerClient', () => ({
-  analyzeLyricsInWorker: (...args: unknown[]) => analyzeLyricsInWorker(...args)
+  analyzeLyricsInWorker: (...args: unknown[]) => analyzeLyricsInWorker(...args),
+  // Supersede fires these against whatever runs the mock's controlled worker holds.
+  cancelLyricsAnalysisRequest: () => undefined,
+  inFlightAnalysisRequestIds: () => new Set<string>()
 }));
 
 vi.mock('../../../../src/main/lyricsAnalysis/providerConfigRepository', () => ({

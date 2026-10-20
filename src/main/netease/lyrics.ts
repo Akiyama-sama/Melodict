@@ -1,7 +1,7 @@
 import parseLyrics from '../../common/parseLyrics';
+import { ROMALRC_MATCH_WINDOW_MS } from '../../common/lyricsTiming';
 import { callNeteaseForBody } from './client';
 import { readNeteaseLyricsCache, writeNeteaseLyricsCache } from './lyricsCache';
-import { readNeteaseSession } from './session';
 
 /**
  * Fetches lyrics for a NetEase song and shapes them into the app's `SongLyrics` contract so the
@@ -26,31 +26,21 @@ interface NeteaseLyricBody {
 }
 
 const getLyricBody = async (neteaseId: number): Promise<NeteaseLyricBody> => {
-  const session = await readNeteaseSession();
-
   try {
-    const body = await callNeteaseForBody(
-      'lyric_new',
-      {
-        id: neteaseId,
-        lv: -1,
-        kv: -1,
-        tv: -1,
-        rv: -1,
-        yv: 1,
-        ytv: 1,
-        yrv: 1
-      },
-      session ? { cookie: session.cookie } : {}
-    );
+    const body = await callNeteaseForBody('lyric_new', {
+      id: neteaseId,
+      lv: -1,
+      kv: -1,
+      tv: -1,
+      rv: -1,
+      yv: 1,
+      ytv: 1,
+      yrv: 1
+    });
     return body as NeteaseLyricBody;
   } catch {
     // Older deployments may not know the v1 params; fall back to the classic endpoint.
-    const body = await callNeteaseForBody(
-      'lyric',
-      { id: neteaseId, lv: -1, tv: -1, rv: -1 },
-      session ? { cookie: session.cookie } : {}
-    );
+    const body = await callNeteaseForBody('lyric', { id: neteaseId, lv: -1, tv: -1, rv: -1 });
     return body as NeteaseLyricBody;
   }
 };
@@ -194,7 +184,7 @@ export const attachRomanizedText = (lyrics: SongLyrics, romalrcLyric: string): v
 
   // Contributors re-sync romalrc by hand, so timestamps can drift a few tens of ms from the main
   // lyrics; match to the nearest entry within a small window instead of requiring equality.
-  const MATCH_WINDOW_MS = 300;
+  const MATCH_WINDOW_MS = ROMALRC_MATCH_WINDOW_MS;
 
   let matched = 0;
   for (const line of lyrics.lyrics.parsedLyrics) {

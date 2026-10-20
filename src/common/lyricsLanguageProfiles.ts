@@ -8,8 +8,16 @@ import type { LyricsAnalysisLanguage } from './lyricsAnalysis';
  * the lyric lines and the matching profiles' guidance is injected into the prompt. A song mixing
  * Japanese and English lines gets both profiles — generalization is per language, not per song.
  *
- * Adding a language = adding one entry to LYRICS_LANGUAGE_PROFILES plus one script test in
- * SCRIPT_TESTS. Nothing else in the pipeline needs touching.
+ * Adding a language touches, in practice:
+ *  - LYRICS_LANGUAGE_PROFILES + one script test in SCRIPT_TESTS (this file);
+ *  - the LyricsAnalysisLanguage union, the LANGUAGES list, and inferTokenLanguage's coverage in
+ *    lyricsAnalysis.ts (a new script family also needs a SCRIPT_TESTS/FAMILY_TO_LANGUAGE entry
+ *    here — inferTokenLanguage reuses them);
+ *  - the SYSTEM_PROMPT_TEMPLATE prose in main/lyricsAnalysis/analysisPrompts.ts, which hardcodes
+ *    the pronunciation field names per language ("kana/romaji for Japanese, ipa/us/uk for
+ *    English, …") — guard test src/common/lyricsAnalysisPromptGuard.test.ts fails if a new
+ *    profile's pronunciation fields never appear there;
+ *  - tests pinning the directive text.
  */
 
 export interface LyricsLanguageProfile {
@@ -133,25 +141,16 @@ const SCRIPT_TESTS: Array<{ family: ScriptFamily; test: RegExp }> = [
   { family: 'latin', test: /[A-Za-z]/u }
 ];
 
-const detectLineScript = (text: string): ScriptFamily => {
+// Exported for lyricsAnalysis.ts's inferTokenLanguage, which shares this exact mapping (verified
+// identical before unifying: same regexes, same kana→hangul→han→latin order, Han→zh default).
+export const detectLineScript = (text: string): ScriptFamily => {
   for (const { family, test } of SCRIPT_TESTS) {
     if (test.test(text)) return family;
   }
   return 'other';
 };
 
-/**
- * Dominant script language of one line. Note a Han-only line ('現実', '温柔') is ambiguous — the
- * song-level resolution in `analyzeLyricsLanguageMix` decides it; this returns 'zh' as the Han
- * default for standalone use (evaluation tooling, line attribution).
- */
-export const detectLineLanguage = (text: string): LyricsAnalysisLanguage => {
-  const script = detectLineScript(text);
-  if (script === 'han') return 'zh';
-  return FAMILY_TO_LANGUAGE[script];
-};
-
-const FAMILY_TO_LANGUAGE: Record<Exclude<ScriptFamily, 'han'>, LyricsAnalysisLanguage> = {
+export const FAMILY_TO_LANGUAGE: Record<Exclude<ScriptFamily, 'han'>, LyricsAnalysisLanguage> = {
   kana: 'ja',
   hangul: 'ko',
   latin: 'en',

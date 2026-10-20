@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 import { app, safeStorage } from 'electron';
-import fs from 'fs/promises';
 import path from 'path';
 
 import type { LyricsAnalysisProviderProfileInput } from '../../common/lyricsAnalysis';
 import logger from '../logger';
+import { readJsonFileOrNull, writeJsonFileAtomic } from './fsJson';
 
 const CONFIG_FILE_NAME = 'lyrics-analysis-providers.json';
 
@@ -13,6 +13,12 @@ interface StoredProfileFile {
   name: string;
   baseURL: string;
   modelId: string;
+  /**
+   * Ceiling for the analysis gateway's concurrent-batch window. Optional for backward
+   * compatibility: profiles written before the field existed read as `undefined` and the
+   * consumer applies the default (4).
+   */
+  maxConcurrency?: number;
   /** base64 of `safeStorage.encryptString(apiKey)` when OS encryption is available. */
   apiKeyEncrypted?: string;
   /** Only used when OS encryption is unavailable (e.g. minimal Linux environments). */
@@ -32,6 +38,8 @@ export interface StoredProviderProfile {
   modelId: string;
   apiKeyHint?: string;
   hasApiKey: boolean;
+  /** Undefined when the profile predates the field; consumers default to 4. */
+  maxConcurrency?: number;
 }
 
 export interface StoredProviderProfileWithKey extends StoredProviderProfile {
@@ -81,25 +89,18 @@ const decryptApiKey = (stored: Pick<StoredProfileFile, 'apiKeyEncrypted' | 'apiK
 };
 
 const readJsonFile = async <T>(filePath: string): Promise<T | undefined> => {
-  try {
-    const data = await fs.readFile(filePath, 'utf-8');
-    const parsed = JSON.parse(data) as T;
-    return parsed && typeof parsed === 'object' ? parsed : undefined;
-  } catch (error) {
-    // A missing file is the normal first-run case, not an error worth logging loudly.
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      logger.warn('Failed to read the lyrics analysis provider config.', { error, filePath });
-    return undefined;
-  }
+  // ENOENT — the normal first-run case — already reads as undefined without noise inside
+  // readJsonFileOrNull; only unexpected failures are logged.
+  const parsed = await readJsonFileOrNull<T>(filePath, (error) =>
+    logger.warn('Failed to read the lyrics analysis provider config.', { error, filePath })
+  );
+  return parsed && typeof parsed === 'object' ? parsed : undefined;
 };
 
 const writeState = async (state: StoredProfilesFile) => {
-  const configPath = getLyricsAnalysisConfigPath();
-  const tempPath = `${configPath}.tmp`;
-
-  await fs.mkdir(path.dirname(configPath), { recursive: true });
-  await fs.writeFile(tempPath, JSON.stringify(state, null, 2), { mode: 0o600 });
-  await fs.rename(tempPath, configPath);
+  // Failures propagate: provider settings actions surface a write error to the user, so unlike the
+  // caches this write has no swallow-and-cleanup wrapper of its own.
+  await writeJsonFileAtomic(getLyricsAnalysisConfigPath(), state, { spacing: 2, mode: 0o600 });
 };
 
 const deriveProfileName = (baseURL: string) => {
@@ -198,7 +199,8 @@ export const getStoredProviderProfiles = async () => {
         baseURL: profile.baseURL,
         modelId: profile.modelId,
         hasApiKey: Boolean(apiKey?.trim()),
-        apiKeyHint: maskApiKey(apiKey)
+        apiKeyHint: maskApiKey(apiKey),
+        ...(profile.maxConcurrency !== undefined ? { maxConcurrency: profile.maxConcurrency } : {})
       };
     })
   };
@@ -211,6 +213,7 @@ export const getStoredProviderConfig = async (): Promise<{
   baseURL: string;
   modelId: string;
   apiKey?: string;
+  maxConcurrency?: number;
 }> => {
   const state = await readState();
   const active =
@@ -223,7 +226,10 @@ export const getStoredProviderConfig = async (): Promise<{
     name: active.name,
     baseURL: active.baseURL,
     modelId: active.modelId,
-    apiKey: decryptApiKey(active)
+    apiKey: decryptApiKey(active),
+    ...(active.maxConcurrency !== undefined
+      ? { maxConcurrency: active.maxConcurrency }
+      : {})
   };
 };
 
@@ -241,8 +247,18 @@ export const getStoredProviderProfile = async (profileId: string): Promise<Store
     modelId: profile.modelId,
     hasApiKey: Boolean(apiKey?.trim()),
     apiKeyHint: maskApiKey(apiKey),
-    apiKey
+    apiKey,
+    ...(profile.maxConcurrency !== undefined ? { maxConcurrency: profile.maxConcurrency } : {})
   };
+};
+
+/**
+ * Clamps the user/probe-supplied concurrency ceiling to what the AIMD window can use: a whole
+ * number 1..64. `undefined` (field absent) falls through and keeps/uses the default.
+ */
+const normalizeMaxConcurrency = (value: number | undefined): number | undefined => {
+  if (value === undefined || !Number.isFinite(value)) return undefined;
+  return Math.min(64, Math.max(1, Math.round(value)));
 };
 
 export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderProfileInput) => {
@@ -250,6 +266,7 @@ export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderPro
   const baseURL = input.baseURL.trim();
   const modelId = input.modelId.trim();
   const name = input.name?.trim() || deriveProfileName(baseURL);
+  const maxConcurrency = normalizeMaxConcurrency(input.maxConcurrency);
   const existingIndex = input.id
     ? state.profiles.findIndex((profile) => profile.id === input.id)
     : -1;
@@ -261,6 +278,8 @@ export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderPro
       name,
       baseURL,
       modelId,
+      // Absent input keeps the stored value; a number (including a re-saved default) overwrites.
+      maxConcurrency: maxConcurrency ?? existing.maxConcurrency,
       apiKeyEncrypted: existing.apiKeyEncrypted,
       apiKeyPlain: existing.apiKeyPlain
     };
@@ -273,6 +292,7 @@ export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderPro
       name,
       baseURL,
       modelId,
+      ...(maxConcurrency !== undefined ? { maxConcurrency } : {}),
       ...encryptApiKey(input.apiKey?.trim() ?? '')
     };
 

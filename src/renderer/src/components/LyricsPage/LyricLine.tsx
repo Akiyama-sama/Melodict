@@ -1,15 +1,17 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { SYNCED_LYRICS_REGEX } from '@common/isLyricsSynced';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import LyricsAnalysisLineContent from '../FullScreenPlayer/analysis/LyricsAnalysisLineContent';
+import { getSpacedLyricLineText } from '../../other/lyricsAnalysisUtils';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
+import LyricsAnalysisLineContent from './LyricsAnalysisLineContent';
 import LyricsProgressBar from './LyricsProgressBar';
+import useSyncedLineHighlight from './useSyncedLineHighlight';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
@@ -27,12 +29,6 @@ interface LyricProp {
   onTokenClick?: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 }
 
-// const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
-
-const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
-  detail: 'scrollingUsingScrollIntoView'
-});
-
 const getLyricText = (lyrics: string) => {
   const match = SYNCED_LYRICS_REGEX.exec(lyrics);
   SYNCED_LYRICS_REGEX.lastIndex = 0;
@@ -41,15 +37,26 @@ const getLyricText = (lyrics: string) => {
   return lyrics;
 };
 
+/**
+ * Maps an enhanced (YRC) word array to the per-word animated spans, exactly as the three inline
+ * copies in LyricLine did (main line, translation, romanization): index keys, `isActive` from the
+ * line's in-range state, and a zero delay.
+ */
+const renderExtendedWords = (words: SyncedLyricsLineWord[], isActive: boolean) =>
+  words.map((extendedText, i) => (
+    <EnhancedSyncedLyricWord
+      key={i}
+      isActive={isActive}
+      start={extendedText.start}
+      end={extendedText.end}
+      text={extendedText.text}
+      delay={0}
+    />
+  ));
+
 const LyricLine = (props: LyricProp) => {
-  // const preferences = useStore(store, (state) => state.localStorage.preferences);
-
   const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
-  const [isInRange, setIsInRange] = useState(false);
   const { t } = useTranslation();
-
-  const lyricsRef = useRef(null as HTMLDivElement | null);
-  const isTheCurrnetLineRef = useRef(false);
 
   const {
     index,
@@ -65,58 +72,11 @@ const LyricLine = (props: LyricProp) => {
     onTokenClick
   } = props;
 
-  const handleLyricsActivity = useCallback(
-    (e: Event) => {
-      if ('detail' in e && !Number.isNaN(e.detail)) {
-        const songPosition = e.detail as number;
-
-        if (lyricsRef.current && syncedLyrics) {
-          const { start, end } = syncedLyrics;
-          if (songPosition > start && songPosition < end) {
-            if (!isTheCurrnetLineRef.current) {
-              isTheCurrnetLineRef.current = true;
-              setIsInRange(true);
-              if (isAutoScrolling)
-                lyricsRef.current?.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'center'
-                });
-
-              document.dispatchEvent(lyricsScrollIntoViewEvent);
-            }
-          } else {
-            isTheCurrnetLineRef.current = false;
-            setIsInRange(false);
-          }
-        }
-      }
-    },
-    [isAutoScrolling, syncedLyrics]
-  );
-
-  useEffect(() => {
-    document.addEventListener('player/positionChange', handleLyricsActivity);
-
-    return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
-  }, [handleLyricsActivity]);
+  const { isInRange, lyricsRef } = useSyncedLineHighlight({ isAutoScrolling, syncedLyrics });
 
   const lyricString = useMemo(() => {
     if (typeof lyric === 'string') return getLyricText(lyric);
-
-    const extendedLyricLines = lyric.map((extendedText, i) => {
-      return (
-        <EnhancedSyncedLyricWord
-          key={i}
-          isActive={isInRange}
-          start={extendedText.start}
-          end={extendedText.end}
-          text={extendedText.text}
-          delay={0}
-        />
-      );
-    });
-
-    return extendedLyricLines;
+    return renderExtendedWords(lyric, isInRange);
   }, [isInRange, lyric]);
 
   const translatedLyricString = useMemo(() => {
@@ -125,40 +85,14 @@ const LyricLine = (props: LyricProp) => {
     const translatedLyric = translatedLyricLines[0].text;
     if (typeof translatedLyric === 'string') return getLyricText(translatedLyric);
 
-    const extendedLyricLines = translatedLyric.map((extendedText, i) => {
-      return (
-        <EnhancedSyncedLyricWord
-          key={i}
-          isActive={isInRange}
-          start={extendedText.start}
-          end={extendedText.end}
-          text={extendedText.text}
-          delay={0}
-        />
-      );
-    });
-
-    return extendedLyricLines;
+    return renderExtendedWords(translatedLyric, isInRange);
   }, [isInRange, translatedLyricLines]);
 
   const convertedLyricString = useMemo(() => {
     if (!convertedLyric || convertedLyric.length === 0) return undefined;
     if (typeof convertedLyric === 'string') return getLyricText(convertedLyric);
 
-    const extendedLyricLines = convertedLyric.map((extendedText, i) => {
-      return (
-        <EnhancedSyncedLyricWord
-          key={i}
-          isActive={isInRange}
-          start={extendedText.start}
-          end={extendedText.end}
-          text={extendedText.text}
-          delay={0}
-        />
-      );
-    });
-
-    return extendedLyricLines;
+    return renderExtendedWords(convertedLyric, isInRange);
   }, [isInRange, convertedLyric]);
 
   // The original lyric is always the primary (large) line; the translation renders above it in a
@@ -169,12 +103,13 @@ const LyricLine = (props: LyricProp) => {
   const lyricStringLinePrimary = lyricString;
   const lyricStringLineSecondary = translatedLyricString;
   // Enhanced (YRC) lines carry their text as a word array; the token view needs that text as a
-  // plain string to split into token spans. It is the same string the analysis was built from
-  // (getRawLyricLineText joins the words without separators), so token offsets line up exactly.
+  // plain string to split into token spans. It is the same spaced string the analysis was built
+  // from (getSpacedLyricLineText), so token offsets line up exactly — an unspaced join here would
+  // shift every span past the first space.
   const isTokenizedLine = Boolean(analysis && onTokenClick && typeof lyric === 'string');
   const tokenizedEnhancedText =
     analysis && onTokenClick && typeof lyric !== 'string'
-      ? lyric.map((word) => word.text).join('')
+      ? getSpacedLyricLineText(lyric)
       : undefined;
   const lyricStringLineTertiary = isTokenizedLine || tokenizedEnhancedText !== undefined
     ? undefined

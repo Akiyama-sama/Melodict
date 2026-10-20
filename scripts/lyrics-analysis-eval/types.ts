@@ -21,7 +21,41 @@ export interface EvalToken {
   /** Grammar role (card.grammarFunction). */
   grammarFunction?: string;
   pronunciation?: Record<string, string>;
+  /**
+   * Production pipeline tokens nest these fields under `card`; older cached artifacts and grader
+   * views may carry them flat. Read both layouts through `readTokenCard`.
+   */
+  card?: {
+    term?: string;
+    meaning?: string;
+    grammarFunction?: string;
+    pronunciation?: Record<string, string>;
+  };
 }
+
+/**
+ * The flattened token view every consumer stage reads: card fields with the flat fields as
+ * fallback.
+ */
+export interface TokenCardView {
+  term?: string;
+  meaning?: string;
+  grammarFunction?: string;
+  pronunciation?: Record<string, string>;
+}
+
+/**
+ * The single home of the `token.card?.x ?? token.x` fallback: production pipeline tokens nest the
+ * annotation fields under `card`, while older cached artifacts and grader views carry them flat.
+ * Consumer stages call this instead of repeating the chain. (report.ts's 注音 row deliberately reads
+ * `token.pronunciation` flat-only — that quirk stays at its call site.)
+ */
+export const readTokenCard = (token: EvalToken): TokenCardView => ({
+  term: token.card?.term ?? token.term,
+  meaning: token.card?.meaning ?? token.meaning,
+  grammarFunction: token.card?.grammarFunction ?? token.grammarFunction,
+  pronunciation: token.card?.pronunciation ?? token.pronunciation
+});
 
 /** One analyzed line, mirroring the production LyricsAnalysisLine. */
 export interface EvalLine {

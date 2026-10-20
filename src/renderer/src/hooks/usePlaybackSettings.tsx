@@ -140,7 +140,6 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
       )
         .then((newFavorite) => {
           if (typeof newFavorite === 'boolean') {
-            store.state.currentSongData.isAFavorite = newFavorite;
             return dispatch({
               type: 'TOGGLE_IS_FAVORITE_STATE',
               data: newFavorite

@@ -27,6 +27,7 @@ export interface AppReducer {
 export type AppReducerStateActions =
   | { type: 'START_PLAY_STATE_CHANGE'; data: unknown }
   | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData }
+  | { type: 'CURRENT_SONG_PALETTE_CHANGE'; data: PaletteData }
   | { type: 'UP_NEXT_SONG_DATA_CHANGE'; data?: AudioPlayerData }
   | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
   | { type: 'PROMPT_MENU_DATA_CHANGE'; data: PromptMenuNavigationHistoryData }
@@ -37,18 +38,12 @@ export type AppReducerStateActions =
   | { type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE'; data: PageData }
   | { type: 'UPDATE_NAVIGATION_HISTORY'; data: NavigationHistoryData }
   | { type: 'UPDATE_PLAYER_TYPE'; data: PlayerTypes }
-  | {
-      type: 'UPDATE_VOLUME';
-      data: PlayerVolume;
-    }
   | { type: 'UPDATE_MUTED_STATE'; data?: boolean }
-  | { type: 'UPDATE_SONG_POSITION'; data: number }
   | { type: 'UPDATE_IS_REPEATING_STATE'; data: RepeatTypes }
   | { type: 'TOGGLE_IS_FAVORITE_STATE'; data?: boolean }
   | { type: 'TOGGLE_SHUFFLE_STATE'; data?: boolean }
   | { type: 'UPDATE_VOLUME_VALUE'; data: number }
   | { type: 'UPDATE_QUEUE'; data: PlayerQueueJson }
-  | { type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX'; data: number }
   | { type: 'TOGGLE_REDUCED_MOTION'; data?: boolean }
   | { type: 'TOGGLE_SONG_INDEXING'; data?: boolean }
   | { type: 'PLAYER_WAITING_STATUS'; data: boolean }
@@ -59,10 +54,6 @@ export type AppReducerStateActions =
   | { type: 'UPDATE_BATTERY_POWER_STATE'; data: boolean }
   | { type: 'TOGGLE_SHOW_SONG_REMAINING_DURATION'; data?: boolean }
   | { type: 'UPDATE_LOCAL_STORAGE_PREFERENCES'; data: LocalStorage['preferences'] }
-  | {
-      type: 'UPDATE_LOCAL_STORAGE_PREFERENCE_ITEM';
-      data: { item: string; value: LocalStorage['preferences'] };
-    }
   | { type: 'UPDATE_PLAYBACK_RATE'; data: number };
 
 export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
@@ -186,6 +177,14 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
           }
         }
       };
+    case 'CURRENT_SONG_PALETTE_CHANGE':
+      return {
+        ...state,
+        currentSongData: {
+          ...state.currentSongData,
+          paletteData: action.data
+        }
+      };
     case 'UP_NEXT_SONG_DATA_CHANGE':
       return {
         ...state,
@@ -212,14 +211,6 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
         playerType: type
       };
     }
-    case 'UPDATE_SONG_POSITION':
-      return {
-        ...state,
-        player: {
-          ...state.player,
-          songPosition: action.data ?? state.player.songPosition
-        }
-      };
     case 'UPDATE_IS_REPEATING_STATE': {
       const isRepeating = action.data ?? state.player.isRepeating;
       return {
@@ -258,23 +249,6 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
           playback: {
             ...state.localStorage.playback,
             isShuffling
-          }
-        }
-      };
-    }
-    case 'UPDATE_VOLUME': {
-      const volume = action.data ?? state.player.volume;
-      return {
-        ...state,
-        player: {
-          ...state.player,
-          volume
-        },
-        localStorage: {
-          ...state.localStorage,
-          playback: {
-            ...state.localStorage.playback,
-            volume
           }
         }
       };
@@ -398,6 +372,8 @@ export const createDefaultReducerData = (localStorage: LocalStorage): AppReducer
     volume: localStorage.playback.volume,
     isRepeating: localStorage.playback.isRepeating,
     isShuffling: localStorage.playback.isShuffling,
+    // Required by the `Player` interface; nothing reads it (live position flows through the
+    // 'player/positionChange' DOM events instead) and the UPDATE_SONG_POSITION writer is gone.
     songPosition: 0,
     isPlayerStalled: false,
     playbackRate: localStorage.playback.playbackRate

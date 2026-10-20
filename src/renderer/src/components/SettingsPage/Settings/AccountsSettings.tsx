@@ -19,7 +19,7 @@ const AccountsSettings = () => {
 
   const { mutate: updateDiscordRpcState } = useMutation({
     mutationFn: (enableDiscordRpc: boolean) =>
-      window.api.settings.updateDiscordRpcState(enableDiscordRpc),
+      window.api.settings.saveUserSettings({ enableDiscordRPC: enableDiscordRpc }),
     onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
@@ -27,7 +27,7 @@ const AccountsSettings = () => {
 
   const { mutate: updateSongScrobblingToLastFMState } = useMutation({
     mutationFn: (enableScrobbling: boolean) =>
-      window.api.settings.updateSongScrobblingToLastFMState(enableScrobbling),
+      window.api.settings.saveUserSettings({ sendSongScrobblingDataToLastFM: enableScrobbling }),
     onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
@@ -35,7 +35,7 @@ const AccountsSettings = () => {
 
   const { mutate: updateSongFavoritesToLastFMState } = useMutation({
     mutationFn: (enableFavorites: boolean) =>
-      window.api.settings.updateSongFavoritesToLastFMState(enableFavorites),
+      window.api.settings.saveUserSettings({ sendSongFavoritesDataToLastFM: enableFavorites }),
     onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
@@ -43,7 +43,7 @@ const AccountsSettings = () => {
 
   const { mutate: updateSendNowPlayingSongDataToLastFMState } = useMutation({
     mutationFn: (enableNowPlaying: boolean) =>
-      window.api.settings.updateNowPlayingSongDataToLastFMState(enableNowPlaying),
+      window.api.settings.saveUserSettings({ sendNowPlayingSongDataToLastFM: enableNowPlaying }),
     onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }

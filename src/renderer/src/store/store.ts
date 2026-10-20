@@ -12,7 +12,6 @@ import {
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../other/localStorageTemplate';
 import addMissingPropsToAnObject from '../utils/addMissingPropsToAnObject';
 import storage from '../utils/localStorage';
-// import hasDataChanged from '../utils/hasDataChanged';
 
 /**
  * `utils/localStorage` imports this module, so the module body must not touch its bindings
@@ -83,12 +82,6 @@ export const initializeStore = () => {
     }
 
     storage.setLocalStorage(currentState.localStorage);
-
-    // const modified = hasDataChanged(state.prevVal, state.currentVal);
-    // const onlyModified = Object.groupBy(
-    //   Object.entries(modified),
-    //   ([, value]) => `${value.isModified}`
-    // );
 
     if (window.api.properties.isInDevelopment) {
       console.debug('store state changed:', cloneDeep(currentState));

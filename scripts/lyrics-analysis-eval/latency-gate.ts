@@ -5,19 +5,17 @@
  *
  * Usage: pnpm tsx scripts/lyrics-analysis-eval/latency-gate.ts [--base-url ... --model ... --api-key ...]
  */
-import fs from 'node:fs';
 import process from 'node:process';
 
 import { analyzeLyrics } from '../../src/main/lyricsAnalysis/providerGateway';
 
+import { readCredsFromEnvFile } from './lib/creds';
+
 const readCreds = () => {
-  const get = (key: string) => {
-    const env = fs.readFileSync('/tmp/eval-creds.env', 'utf-8');
-    return new RegExp(`^(?:export\\s+)?${key}=(.*)$`, 'm').exec(env)?.[1]?.trim() ?? '';
-  };
+  const creds = readCredsFromEnvFile();
   return {
-    baseURL: get('LYRICS_ANALYSIS_BASE_URL') || 'http://127.0.0.1:3425/v1',
-    apiKey: get('LYRICS_ANALYSIS_API_KEY') || 'local'
+    baseURL: creds.baseURL || 'http://127.0.0.1:3425/v1',
+    apiKey: creds.apiKey || 'local'
   };
 };
 

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { app } from 'electron';
 import fs from 'fs/promises';
+import { app } from 'electron';
 import path from 'path';
 
 import {
@@ -11,6 +11,7 @@ import {
   type LyricsAnalysisLine
 } from '../../common/lyricsAnalysis';
 import logger from '../logger';
+import { getJsonTmpPath, readJsonFileOrNull, writeJsonFileAtomic } from './fsJson';
 
 /**
  * Line-level analysis cache.
@@ -75,24 +76,20 @@ export const buildLineAnalysisCacheKey = (input: {
 export const readLineAnalysisCache = async (
   key: string
 ): Promise<LineAnalysisCacheEntry | undefined> => {
-  try {
-    const raw = await fs.readFile(getEntryPath(key), 'utf-8');
-    const entry = JSON.parse(raw) as LineAnalysisCacheEntry;
+  const entry = await readJsonFileOrNull<LineAnalysisCacheEntry>(
+    getEntryPath(key),
+    (error) => logger.warn('Failed to read the line analysis cache entry.', { error, key })
+  );
 
-    if (
-      entry?.v !== LINE_CACHE_FORMAT_VERSION ||
-      typeof entry.text !== 'string' ||
-      !Array.isArray(entry.tokens) ||
-      entry.tokens.length === 0
-    )
-      return undefined;
-
-    return entry;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT')
-      logger.warn('Failed to read the line analysis cache entry.', { error, key });
+  if (
+    entry?.v !== LINE_CACHE_FORMAT_VERSION ||
+    typeof entry.text !== 'string' ||
+    !Array.isArray(entry.tokens) ||
+    entry.tokens.length === 0
+  )
     return undefined;
-  }
+
+  return entry;
 };
 
 /** Rewrites an analysis onto a different lineId, rebuilding every token id from its span. */
@@ -141,12 +138,10 @@ export const writeLineAnalysisCache = async (input: {
   };
 
   const entryPath = getEntryPath(input.key);
-  const tempPath = `${entryPath}.tmp`;
+  const tempPath = getJsonTmpPath(entryPath);
 
   try {
-    await fs.mkdir(getLineAnalysisCacheDir(), { recursive: true });
-    await fs.writeFile(tempPath, JSON.stringify(entry), 'utf-8');
-    await fs.rename(tempPath, entryPath);
+    await writeJsonFileAtomic(entryPath, entry);
   } catch (error) {
     logger.warn('Failed to write the line analysis cache entry.', { error });
     await fs.rm(tempPath, { force: true }).catch(() => undefined);
