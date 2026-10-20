@@ -582,6 +582,145 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
   };
 };
 
+export interface ProbeConcurrencyOptions {
+  baseURL: string;
+  modelId: string;
+  apiKey: string;
+  signal?: AbortSignal;
+}
+
+export interface ProbeConcurrencyLevelResult {
+  /** Concurrency level this round fired at. */
+  level: number;
+  /** Requests that completed within the per-level timeout, regardless of status. */
+  ok: number;
+  /** Rate-limited (429) responses. */
+  rateLimited: number;
+  /** 5xx / network / timeout failures. */
+  failed: number;
+  /** Mean wall-clock of the successful requests in ms (when any succeeded). */
+  meanLatencyMs?: number;
+}
+
+export interface ProbeConcurrencyResult {
+  probedMaxConcurrency: number;
+  perLevel: ProbeConcurrencyLevelResult[];
+}
+
+/** Exported for tests: the exponential climb the probe walks through. */
+export const PROBE_LEVELS = [1, 2, 4, 8, 16];
+const PROBE_LEVEL_TIMEOUT_MS = 3000;
+
+/**
+ * Concurrency probe: climbs 1→2→4→8→16, firing `level` tiny requests (one-token completion) at
+ * once per level and counting 429/5xx/timeout failures. The first level with any failure marks
+ * the ceiling: the previous level × 0.75, at least 1, at most 16. Whole probe is bounded by the
+ * per-level timeouts (~20s worst case) so the settings page can await it directly.
+ *
+ * Independent of the AIMD window: the probe measures what the endpoint tolerates in a burst; the
+ * window still adapts within the returned ceiling while analyzing.
+ */
+export const probeProviderConcurrency = async (
+  options: ProbeConcurrencyOptions
+): Promise<ProbeConcurrencyResult> => {
+  const model = createModel({
+    baseURL: options.baseURL,
+    modelId: options.modelId,
+    apiKey: options.apiKey
+  });
+
+  const perLevel: ProbeConcurrencyLevelResult[] = [];
+  let probedMaxConcurrency = 1;
+  // Last level whose requests all succeeded; a level-1 failure has none (0 → ceiling 1).
+  let lastPassingLevel = 0;
+
+  for (const level of PROBE_LEVELS) {
+    if (options.signal?.aborted) break;
+
+    // Per-level deadline: every request at this level is raced against one 3s timer, so a hung
+    // endpoint costs at most 3s per level (~20s total across the 5 levels).
+    let levelTimeout: ReturnType<typeof setTimeout> | undefined;
+    const deadline = new Promise<never>((_resolve, _reject) => {
+      levelTimeout = setTimeout(
+        () => _reject(new Error('probe level timed out')),
+        PROBE_LEVEL_TIMEOUT_MS
+      );
+    });
+    levelTimeout?.unref?.();
+
+    const request = async () => {
+      const startedAt = Date.now();
+      try {
+        await generateText({
+          model,
+          prompt: 'hi',
+          maxOutputTokens: 1,
+          temperature: 0,
+          abortSignal: options.signal,
+          providerOptions: { openai: { strictJsonSchema: false } }
+        });
+        return { ok: true, latencyMs: Date.now() - startedAt, rateLimited: false };
+      } catch (error) {
+        const statusCode = APICallError.isInstance(error) ? error.statusCode : undefined;
+        return {
+          ok: false,
+          latencyMs: Date.now() - startedAt,
+          rateLimited: statusCode === 429
+        };
+      }
+    };
+
+    let outcomes: Array<{ ok: boolean; latencyMs: number; rateLimited: boolean }>;
+    try {
+      outcomes = await Promise.race([
+        Promise.all(Array.from({ length: level }, request)),
+        deadline
+      ]);
+    } catch {
+      // Level deadline hit before every request answered: treat the level as failed.
+      outcomes = Array.from({ length: level }, () => ({
+        ok: false,
+        latencyMs: PROBE_LEVEL_TIMEOUT_MS,
+        rateLimited: false
+      }));
+    } finally {
+      if (levelTimeout) clearTimeout(levelTimeout);
+    }
+
+    const okCount = outcomes.filter((outcome) => outcome.ok).length;
+    const rateLimitedCount = outcomes.filter((outcome) => outcome.rateLimited).length;
+    const failedCount = level - okCount;
+    const latencies = outcomes.filter((outcome) => outcome.ok).map((outcome) => outcome.latencyMs);
+
+    const levelResult: ProbeConcurrencyLevelResult = {
+      level,
+      ok: okCount,
+      rateLimited: rateLimitedCount,
+      failed: failedCount,
+      ...(latencies.length > 0
+        ? {
+            meanLatencyMs: Math.round(
+              latencies.reduce((sum, latency) => sum + latency, 0) / latencies.length
+            )
+          }
+        : {})
+    };
+    perLevel.push(levelResult);
+
+    if (failedCount > 0 || options.signal?.aborted) {
+      // First failing level ends the climb: the tolerated ceiling sits below the last level
+      // that actually passed, not below the failing one (failing at 8 → 4 × 0.75 = 3).
+      probedMaxConcurrency = Math.max(1, Math.min(16, Math.floor(lastPassingLevel * 0.75)));
+      break;
+    }
+
+    lastPassingLevel = level;
+    probedMaxConcurrency = level;
+  }
+
+  return { probedMaxConcurrency, perLevel };
+};
+
 export interface TestProviderOptions {
   baseURL: string;
   modelId: string;
