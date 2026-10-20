@@ -1,3 +1,4 @@
+import { isNeteaseSongId } from '@common/netease';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useContext, useEffect, useRef } from 'react';
@@ -15,6 +16,10 @@ const SongControlsAndSeekbarContainer = () => {
   const isRepeating = useStore(store, (state) => state.player.isRepeating);
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const isPlayerStalled = useStore(store, (state) => state.player.isPlayerStalled);
+
+  // NetEase songs are "unknown source" for the local library, but their hearts work through the
+  // NetEase API; only genuinely unknown sources (dropped files, random ids) disable the button.
+  const isLikeSupported = isKnownSource || isNeteaseSongId(store.state.currentSongData.songId);
 
   const {
     toggleQueueShuffle,
@@ -44,15 +49,15 @@ const SongControlsAndSeekbarContainer = () => {
         <Button
           className={`like-btn after:bg-font-color-highlight dark:after:bg-dark-font-color-highlight !mr-0 !rounded-none !border-0 bg-transparent !p-0 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
             isAFavorite && 'active after:opacity-100'
-          } ${!isKnownSource && 'cursor-none! brightness-50'}`}
-          tooltipLabel={isKnownSource ? t('player.likeDislike') : t('player.likeDislikeDisabled')}
+          } ${!isLikeSupported && 'cursor-none! brightness-50'}`}
+          tooltipLabel={isLikeSupported ? t('player.likeDislike') : t('player.likeDislikeDisabled')}
           iconName="favorite"
           iconClassName={`${
             isAFavorite
               ? 'material-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight! opacity-100!'
               : 'material-icons-round-outlined'
           } icon cursor-pointer !text-2xl leading-none text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white`}
-          clickHandler={() => isKnownSource && toggleIsFavorite(!isAFavorite)}
+          clickHandler={() => isLikeSupported && toggleIsFavorite(!isAFavorite)}
         />
 
         <Button

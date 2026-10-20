@@ -1,5 +1,14 @@
-import { useCallback } from 'react';
+import { isNeteaseSongId, tryDecodeNeteaseSongId } from '@common/netease';
+import { neteaseQuery } from '@renderer/queries/netease';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect } from 'react';
 
+import {
+  ensureNeteaseLikes,
+  isNeteaseSongLiked,
+  resetNeteaseLikes,
+  toggleNeteaseSongFavorite
+} from '../other/neteaseLikes';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -34,6 +43,33 @@ import { useUserPreferences } from './useUserPreferences';
  */
 export function usePlaybackSettings(player: HTMLAudioElement) {
   const { saveEqualizerPreset } = useUserPreferences();
+
+  // Keep the NetEase likes cache warm and account-scoped: every session change (login, logout,
+  // account switch — broadcast from the main process) drops the old likes and loads the new
+  // user's, so heart states on player surfaces reflect reality without per-song round-trips.
+  // Once loaded, also corrects the playing song's heart — `buildNeteasePlayerSongData` defaults
+  // to unliked and the cache may finish loading after playback already started.
+  const { data: neteaseProfile } = useQuery(neteaseQuery.session);
+  useEffect(() => {
+    if (!neteaseProfile?.userId) {
+      resetNeteaseLikes();
+      return undefined;
+    }
+    ensureNeteaseLikes(neteaseProfile.userId)
+      .then(() => {
+        const { songId } = store.state.currentSongData;
+        if (tryDecodeNeteaseSongId(songId) !== null) {
+          const isLiked = isNeteaseSongLiked(songId);
+          if (isLiked !== store.state.currentSongData.isAFavorite) {
+            store.state.currentSongData.isAFavorite = isLiked;
+            dispatch({ type: 'TOGGLE_IS_FAVORITE_STATE', data: isLiked });
+          }
+        }
+        return undefined;
+      })
+      .catch((err) => console.error(err));
+    return undefined;
+  }, [neteaseProfile?.userId]);
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -78,6 +114,24 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
 
   const toggleIsFavorite = useCallback(
     (isFavorite?: boolean, onlyChangeCurrentSongData = false) => {
+      // NetEase songs live in the negative id space and like through the NetEase API; the local
+      // toggle would try to flip them in the library DB, which has no such rows.
+      if (isNeteaseSongId(store.state.currentSongData.songId)) {
+        void toggleNeteaseSongFavorite(store.state.currentSongData, isFavorite)
+          .then((newFavorite) => {
+            if (typeof newFavorite === 'boolean') {
+              store.state.currentSongData.isAFavorite = newFavorite;
+              return dispatch({
+                type: 'TOGGLE_IS_FAVORITE_STATE',
+                data: newFavorite
+              });
+            }
+            return undefined;
+          })
+          .catch((err) => console.error(err));
+        return;
+      }
+
       toggleSongIsFavorite(
         store.state.currentSongData.songId,
         store.state.currentSongData.isAFavorite,

@@ -1,3 +1,4 @@
+import { isNeteaseSongId } from '@common/netease';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext } from 'react';
@@ -21,6 +22,10 @@ const SongControlContainer = (props: Props) => {
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const isMuted = useStore(store, (state) => state.player.volume.isMuted);
   const volume = useStore(store, (state) => state.player.volume.value);
+
+  // NetEase songs are "unknown source" for the local library, but their hearts work through the
+  // NetEase API; only genuinely unknown sources (dropped files, random ids) disable the button.
+  const isLikeSupported = currentSongData.isKnownSource || isNeteaseSongId(currentSongData.songId);
 
   const {
     toggleIsFavorite,
@@ -51,18 +56,12 @@ const SongControlContainer = (props: Props) => {
           className="favorite-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white dark:after:bg-dark-font-color-highlight h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
           iconClassName={`text-2xl! ${
             currentSongData.isAFavorite
-              ? 'meterial-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
+              ? 'material-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
               : 'material-icons-round-outlined'
           }`}
-          isDisabled={!currentSongData.isKnownSource}
-          tooltipLabel={
-            currentSongData.isKnownSource
-              ? t('player.likeDislike')
-              : t('player.likeDislikeDisabled')
-          }
-          clickHandler={() =>
-            currentSongData.isKnownSource && toggleIsFavorite(!currentSongData.isAFavorite)
-          }
+          isDisabled={!isLikeSupported}
+          tooltipLabel={isLikeSupported ? t('player.likeDislike') : t('player.likeDislikeDisabled')}
+          clickHandler={() => isLikeSupported && toggleIsFavorite(!currentSongData.isAFavorite)}
           iconName="favorite"
           removeFocusOnClick
         />

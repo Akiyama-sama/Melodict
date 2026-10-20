@@ -1,5 +1,12 @@
-import { buildNeteaseSongPath, tryGetNeteaseIdFromPath, type NeteaseQualityTypes, type NeteaseSongSummary } from '@common/netease';
+import {
+  buildNeteaseSongPath,
+  isNeteaseSongId,
+  tryGetNeteaseIdFromPath,
+  type NeteaseQualityTypes,
+  type NeteaseSongSummary
+} from '@common/netease';
 
+import { isNeteaseSongLiked } from '../other/neteaseLikes';
 import storage from '../utils/localStorage';
 
 /** The localStorage-backed stream quality preference for NetEase playback. */
@@ -27,7 +34,9 @@ export const buildNeteasePlayerSongData = async (
   if (!summary) {
     throw new Error(
       `NetEase song ${
-        typeof neteaseIdOrSummary === 'number' ? neteaseIdOrSummary : neteaseIdOrSummary.neteaseSongId
+        typeof neteaseIdOrSummary === 'number'
+          ? neteaseIdOrSummary
+          : neteaseIdOrSummary.neteaseSongId
       } could not be resolved.`
     );
   }
@@ -39,7 +48,9 @@ export const buildNeteasePlayerSongData = async (
     duration: summary.duration,
     artworkPath: summary.cover || undefined,
     path: buildNeteaseSongPath(summary.neteaseSongId, getNeteaseSongQuality()),
-    isAFavorite: false,
+    // Consulted against the warm likes cache; if it has not loaded yet the session effect in
+    // `usePlaybackSettings` corrects the heart once it lands.
+    isAFavorite: isNeteaseSongId(summary.songId) && isNeteaseSongLiked(summary.songId),
     album: summary.album,
     isKnownSource: false,
     isBlacklisted: false
@@ -51,8 +62,8 @@ export const buildNeteasePlayerSongData = async (
 /**
  * Fills in `paletteData` for NetEase songs after playback has started. Local songs carry their
  * artwork palette in the library DB, but NetEase covers are remote and their palettes live in the
- * main-process disk cache instead — resolving one is a network round-trip on first play, so it
- * must never block `buildNeteasePlayerSongData`.
+ * main-process disk cache instead — resolving one is a network round-trip on first play, so it must
+ * never block `buildNeteasePlayerSongData`.
  *
  * Resolves to `undefined` when the song is not a NetEase stream (nothing to fill) or the palette
  * could not be produced; callers dispatch the result into the store when it resolves.

@@ -18,6 +18,11 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useDurationParts from '../../hooks/useDurationParts';
 import { useQueueOperations } from '../../hooks/useQueueOperations';
+import {
+  getNeteaseLikeNotification,
+  isNeteaseSongLiked,
+  setNeteaseSongLiked
+} from '../../other/neteaseLikes';
 import { store } from '../../store/store';
 import Button from '../Button';
 import Img from '../Img';
@@ -63,7 +68,11 @@ const NeteaseSongRow = forwardRef((props: NeteaseSongRowProp, ref: ForwardedRef<
 
   const neteaseId = tryDecodeNeteaseSongId(songId) ?? summary.neteaseSongId;
 
-  const [likeState, setLikeState] = useState<'unknown' | 'liked' | 'notLiked'>('unknown');
+  const [likeState, setLikeState] = useState<'unknown' | 'liked' | 'notLiked'>(() =>
+    // The shared likes cache is session-scoped and warmed by `usePlaybackSettings`; when it has
+    // already loaded, rows render the real state instead of a neutral guess.
+    isNeteaseSongLiked(neteaseId) ? 'liked' : 'notLiked'
+  );
   const likeErrorShown = useRef(false);
 
   const isCurrentSong = currentSongData.songId === songId && isCurrentSongPlaying;
@@ -99,43 +108,25 @@ const NeteaseSongRow = forwardRef((props: NeteaseSongRowProp, ref: ForwardedRef<
   }, [artists, t]);
 
   // The NetEase like endpoint can only add or remove — the current liked-state is not queryable per
-  // song — so the row renders a neutral "favorite" afforance; failures roll the UI back.
+  // song — so the row consults the shared session-wide likes cache for its initial state and
+  // routes the toggle through it (which also keeps other surfaces in sync); failures roll back.
   const toggleLike = useCallback(() => {
     const isLike = likeState !== 'liked';
     setLikeState(isLike ? 'liked' : 'notLiked');
-    window.api.neteaseControls
-      .likeUnlikeSong(neteaseId, isLike)
-      .then(() =>
-        addNewNotifications([
-          {
-            id: `neteaseLike-${neteaseId}`,
-            duration: 4000,
-            content: isLike
-              ? t('netease.addedToNeteaseLikes', { title })
-              : t('netease.removedFromNeteaseLikes', { title }),
-            iconName: isLike ? 'favorite' : 'favorite_border'
-          }
-        ])
-      )
+    setNeteaseSongLiked(neteaseId, isLike)
+      .then(() => addNewNotifications([getNeteaseLikeNotification(title, isLike)]))
       .catch((err) => {
         console.error(err);
-        setLikeState('unknown');
+        setLikeState(isNeteaseSongLiked(neteaseId) ? 'liked' : 'notLiked');
         if (!likeErrorShown.current) {
           likeErrorShown.current = true;
           setTimeout(() => {
             likeErrorShown.current = false;
           }, 5000);
         }
-        addNewNotifications([
-          {
-            id: `neteaseLikeError-${neteaseId}`,
-            duration: 5000,
-            content: t('song.toggleLikeFailed'),
-            iconName: 'error'
-          }
-        ]);
+        addNewNotifications([getNeteaseLikeNotification(title, isLike, true)]);
       });
-  }, [addNewNotifications, likeState, neteaseId, t, title]);
+  }, [addNewNotifications, likeState, neteaseId, title]);
 
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const items: ContextMenuItem[] = [
