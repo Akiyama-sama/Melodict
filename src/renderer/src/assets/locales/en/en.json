@@ -106,6 +106,7 @@
     "toggleSystemFullScreen": "Toggle system fullscreen",
     "goBack": "Go Back (Alt + Left-Arrow)",
     "goHome": "Go to Home (Alt + Home)",
+    "exitFullScreenPlayer": "Exit fullscreen (back to the previous page)",
     "goForward": "Go Forward (Alt + Right-Arrow)",
     "minimize": "Minimize",
     "maximize": "Maximize",

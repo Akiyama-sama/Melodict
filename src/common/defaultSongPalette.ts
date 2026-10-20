@@ -3,7 +3,10 @@
  * Lives in `common` so both the main process (palette generation) and the renderer (token
  * colours) can use the same values.
  */
-export const DEFAULT_SONG_PALETTE: PaletteData = {
+/** `NodeVibrantPalette`'s swatches are all optional; this constant really has every one. */
+export type CompleteSongPalette = PaletteData & Required<NodeVibrantPalette>;
+
+export const DEFAULT_SONG_PALETTE: CompleteSongPalette = {
   paletteId: 'DEFAULT_PALETTE',
   DarkMuted: {
     hex: '#104888',

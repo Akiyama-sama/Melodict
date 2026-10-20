@@ -81,80 +81,58 @@ describe('getSpacedLyricLineText', () => {
 });
 
 describe('getTokenColorPalette', () => {
-  test('derives colours from the song palette and lifts every swatch to readable lightness', () => {
+  // The token colour contract: exactly two colours — the song title's own colour (LightVibrant,
+  // which is what --dark-text-color-highlight uses in the always-dark fullscreen player) and its
+  // hue complement — alternating across tokens.
+  test('returns exactly two colours, the second being the complement of the first', () => {
     const colors = getTokenColorPalette(palette());
 
-    // The hue-0.1 swatches collapse into one lifted entry; the hue-0.6 LightMuted stays distinct.
-    expect(colors).toEqual(['36 90% 74%', '216 30% 75%']);
-    expect(colors.map(parse).every((c) => c.l >= 0.7)).toBe(true);
+    expect(colors).toHaveLength(2);
+    const [a, b] = colors.map(parse);
+    // Complement: hue diametrically opposite, same saturation and lightness.
+    expect(hueDistance(colors[0], colors[1])).toBeCloseTo(0.5, 5);
+    expect(b.s).toBeCloseTo(a.s, 5);
+    expect(b.l).toBeCloseTo(a.l, 5);
   });
 
-  test('keeps distinct hues distinguishable', () => {
+  test('colour A is the LightVibrant swatch verbatim (the song title colour)', () => {
     const colors = getTokenColorPalette(palette());
-
-    expect(new Set(colors).size).toBe(colors.length);
-    expect(colors.length).toBeGreaterThan(1);
+    expect(parse(colors[0])).toEqual({ h: 0.1, s: 0.9, l: 0.74 });
   });
 
-  test('spreads hues across the analogous range when the palette collapses into one colour', () => {
-    // Monochrome covers (and the all-blue default palette) leave hue as the only differentiator.
-    const mono: NodeVibrantPalette = {
-      LightVibrant: swatch([0, 0, 0.74]),
-      Vibrant: swatch([0, 0, 0.5]),
-      LightMuted: swatch([0, 0, 0.75]),
-      Muted: swatch([0, 0, 0.486]),
-      DarkVibrant: swatch([0, 0, 0.26]),
-      DarkMuted: swatch([0, 0, 0.267])
-    };
+  test('clamps lightness into the readable band and saturation up to a visible floor', () => {
+    // A dark, desaturated cover would otherwise produce unreadable token colours.
+    const colors = getTokenColorPalette(
+      palette({ LightVibrant: swatch([0.3, 0.1, 0.3]) })
+    );
 
-    const colors = getTokenColorPalette(mono);
-
-    expect(colors.length).toBe(6);
-    // Every neighbouring pair must be separable — that is the whole point.
-    for (let i = 1; i < colors.length; i += 1) {
-      expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.04);
-    }
-    // The spread stays analogous: every hue within ±45° of the palette's own hue, which sits at
-    // the centre of the span (first entry - 0.125).
-    const baseHue = (parse(colors[0]).h + 0.125) % 1;
     for (const color of colors) {
-      expect(hueDistance(color, `${baseHue * 360} 0% 0%`)).toBeLessThanOrEqual(0.125 + 0.01);
+      const { s, l } = parse(color);
+      expect(l).toBeGreaterThanOrEqual(0.7);
+      expect(l).toBeLessThanOrEqual(0.85);
+      expect(s).toBeGreaterThanOrEqual(0.55);
     }
-    // The palette's own lightness/chroma survive the spread.
-    const parsed = colors.map(parse);
-    expect(new Set(parsed.map((c) => c.l)).size).toBe(1);
-    expect(parsed[0].l).toBeGreaterThanOrEqual(0.7);
-    expect(parsed[0].s).toBeGreaterThanOrEqual(0.55);
-  });
-
-  test('keeps the all-blue default palette (no-palette songs) in the blue family', () => {
-    const colors = getTokenColorPalette(undefined);
-
-    expect(colors.length).toBe(6);
-    for (let i = 1; i < colors.length; i += 1) {
-      expect(hueDistance(colors[i - 1], colors[i])).toBeGreaterThan(0.04);
-    }
-    // Anchored on the default palette's blue (~212°), the ±45° span must stay in blue/teal.
-    for (const color of colors) {
-      const h = parse(color).h * 360;
-      const dist = Math.min(Math.abs(h - 212), 360 - Math.abs(h - 212));
-      expect(dist).toBeLessThanOrEqual(48);
-    }
+    // The two entries stay distinct even after clamping.
+    expect(hueDistance(colors[0], colors[1])).toBeCloseTo(0.5, 5);
   });
 
   test('falls back to the default song palette when the cover has no palette', () => {
     expect(getTokenColorPalette(undefined)).toEqual(getTokenColorPalette({}));
+    // The default palette is blue (~215°); colour B must be its complement (~35°, orange).
+    const [a, b] = getTokenColorPalette(undefined).map(parse);
+    expect(a.h * 360).toBeCloseTo(214.9, 0);
+    expect(b.h * 360).toBeCloseTo(34.9, 0);
   });
 });
 
 describe('getTokenColor', () => {
-  const colors = ['a', 'b', 'c'];
+  const colors = ['a', 'b'];
 
-  test('consecutive token ordinals land on consecutive colours', () => {
+  test('alternates between the two colours for consecutive tokens', () => {
     expect(getTokenColor(0, colors)).toBe('a');
     expect(getTokenColor(1, colors)).toBe('b');
-    expect(getTokenColor(2, colors)).toBe('c');
-    expect(getTokenColor(3, colors)).toBe('a');
+    expect(getTokenColor(2, colors)).toBe('a');
+    expect(getTokenColor(3, colors)).toBe('b');
   });
 
   test('returns undefined for an empty palette instead of crashing', () => {

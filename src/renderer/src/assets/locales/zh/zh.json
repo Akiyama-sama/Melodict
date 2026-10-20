@@ -106,6 +106,7 @@
     "toggleSystemFullScreen": "切换系统全屏",
     "goBack": "返回 (Alt + 左箭头)",
     "goHome": "回到主页 (Alt + Home)",
+    "exitFullScreenPlayer": "退出全屏（回到上一页）",
     "goForward": "前进 (Alt + 右箭头)",
     "minimize": "最小化",
     "maximize": "最大化",
