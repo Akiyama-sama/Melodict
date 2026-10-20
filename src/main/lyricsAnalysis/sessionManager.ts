@@ -119,6 +119,17 @@ const buildTelemetrySession = (input: {
 });
 
 export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisRequest) => {
+  // An empty line list has nothing to analyse, yet a full prepare would still supersede (and
+  // now cancel) whatever healthy run is in flight — a pure destructive no-op. Refuse it before
+  // touching the generation; the callers' guards (trigger + fullscreen hook) stay as-is, this
+  // is the last line of defence against a stale-ref race reaching the main process.
+  if (request.lines.length === 0) {
+    logger.debug('Ignoring lyrics analysis prepare with an empty line list.', {
+      songPath: request.songPath
+    });
+    return activeSession;
+  }
+
   const generation = ++activeGeneration;
   const startedAt = Date.now();
   // A new prepare supersedes whatever run was in flight. Stop it at the worker right away: its

@@ -62,8 +62,15 @@ const LyricsAnalysisTrigger = () => {
         // only a session already working on (or done with) THIS song is left alone.
         if (!isActive || canPiggybackOnSession(session, songPath)) return undefined;
 
+        // Re-read the CURRENT input inside the async continuation: `prepareInputRef` is mutable
+        // and the lyrics state can reset (song switch / preference change) during the getSession
+        // round-trip. Sending the stale ref's lines could even send ZERO lines — a prepare whose
+        // only product is superseding (and cancelling!) whatever run is in flight, which is
+        // exactly the ghost that killed healthy sessions mid-analysis.
         const { currentSongData: song, artists: songArtists, inputLines: lines } =
           prepareInputRef.current;
+        if (song.path !== songPath || lines.length === 0) return undefined;
+
         return window.api.lyricsAnalysis.prepareSession({
           songPath,
           songTitle: song.title,

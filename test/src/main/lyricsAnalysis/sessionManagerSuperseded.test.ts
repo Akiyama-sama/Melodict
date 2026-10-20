@@ -319,4 +319,31 @@ describe('superseded lyrics analysis sessions', () => {
     held[0].finish();
     await prepareA;
   });
+  test('an empty-line prepare is refused: it must not supersede or cancel a healthy in-flight run', async () => {
+    installHeldWorker();
+
+    // A healthy run for song A is in flight.
+    const prepareA = sessionManager.prepareLyricsAnalysisSession(
+      request({ songPath: '/music/a.flac', lines: lines('夢ならば') })
+    );
+    await vi.waitFor(() => expect(held).toHaveLength(1));
+
+    // A ghost prepare with zero lines (stale-ref race) arrives. It must be refused before
+    // bumping the generation — A stays current and its worker request is never cancelled.
+    // The refusal returns the current session unchanged (no snapshot of its own).
+    const ghostSnapshot = await sessionManager.prepareLyricsAnalysisSession(
+      request({ songPath: '/music/ghost.flac', songTitle: 'Ghost', lines: [] })
+    );
+    expect(ghostSnapshot?.songPath).toBe('/music/a.flac');
+
+    await vi.waitFor(() => expect(held).toHaveLength(1));
+    expect(cancelLyricsAnalysisRequest).not.toHaveBeenCalled();
+
+    // A still completes as the current session.
+    held[0].emit('夢ならば');
+    held[0].finish();
+    const snapshotA = await prepareA;
+    expect(snapshotA.status).toBe('ready');
+    expect(sessionManager.getLyricsAnalysisSession()?.songPath).toBe('/music/a.flac');
+  });
 });
