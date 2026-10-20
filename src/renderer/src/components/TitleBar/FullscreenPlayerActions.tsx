@@ -10,16 +10,17 @@ type Props = {
 };
 
 /**
- * The fullscreen player's slot of the title-bar special controls: the word-panel toggle (which
- * shares the bottom bar's active treatment), the system fullscreen toggle, and the link back to
- * the main player. The defaults keep the button inert when a caller wires no toggle.
+ * The fullscreen player's slot of the title-bar special controls, left to right: the system
+ * fullscreen toggle, the exit (back to the previous page) button, and the word-panel toggle (which
+ * shares the bottom bar's active treatment). The defaults keep the panel button inert when a
+ * caller wires no toggle.
  */
 const FullscreenPlayerActions = ({ isPanelOpen = false, onTogglePanel = () => {} }: Props) => {
   return (
     <>
-      <ToggleLyricsAnalysisPanelBtn isOpen={isPanelOpen} onToggle={onTogglePanel} />
       <ToggleSystemFullScreenBtn />
       <GoToMainPlayerBtn />
+      <ToggleLyricsAnalysisPanelBtn isOpen={isPanelOpen} onToggle={onTogglePanel} />
     </>
   );
 };
