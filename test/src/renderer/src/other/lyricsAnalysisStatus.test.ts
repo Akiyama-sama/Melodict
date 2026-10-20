@@ -16,6 +16,7 @@ describe('deriveLyricsAnalysisUiStatus', () => {
     expect(
       deriveLyricsAnalysisUiStatus({
         isEnabled: false,
+        isAutoAnalysisEnabled: true,
         totalLines: 10,
         completedLines: 0,
         snapshot: snapshot('analyzing')
@@ -23,14 +24,47 @@ describe('deriveLyricsAnalysisUiStatus', () => {
     ).toEqual({ ...IDLE_LYRICS_ANALYSIS_STATUS, totalLines: 10 });
 
     expect(
-      deriveLyricsAnalysisUiStatus({ isEnabled: true, totalLines: 0, completedLines: 0 })
+      deriveLyricsAnalysisUiStatus({
+        isEnabled: true,
+        isAutoAnalysisEnabled: true,
+        totalLines: 0,
+        completedLines: 0
+      })
     ).toEqual(IDLE_LYRICS_ANALYSIS_STATUS);
   });
 
   test('reports preparing until the first snapshot arrives', () => {
     expect(
-      deriveLyricsAnalysisUiStatus({ isEnabled: true, totalLines: 10, completedLines: 0 }).phase
+      deriveLyricsAnalysisUiStatus({
+        isEnabled: true,
+        isAutoAnalysisEnabled: true,
+        totalLines: 10,
+        completedLines: 0
+      }).phase
     ).toBe('preparing');
+  });
+
+  test('reports autoDisabled when the toggle is off and nothing is cached', () => {
+    expect(
+      deriveLyricsAnalysisUiStatus({
+        isEnabled: true,
+        isAutoAnalysisEnabled: false,
+        totalLines: 10,
+        completedLines: 0
+      }).phase
+    ).toBe('autoDisabled');
+  });
+
+  test('a cached snapshot outranks the auto-disabled state', () => {
+    expect(
+      deriveLyricsAnalysisUiStatus({
+        isEnabled: true,
+        isAutoAnalysisEnabled: false,
+        totalLines: 10,
+        completedLines: 10,
+        snapshot: snapshot('cached')
+      }).phase
+    ).toBe('cached');
   });
 
   test('maps each snapshot status to its phase', () => {
@@ -38,6 +72,7 @@ describe('deriveLyricsAnalysisUiStatus', () => {
       (status) =>
         deriveLyricsAnalysisUiStatus({
           isEnabled: true,
+          isAutoAnalysisEnabled: true,
           totalLines: 10,
           completedLines: 3,
           snapshot: snapshot(status)
@@ -50,6 +85,7 @@ describe('deriveLyricsAnalysisUiStatus', () => {
   test('splits a finished run into ready and partial using the completed line count', () => {
     const ready = deriveLyricsAnalysisUiStatus({
       isEnabled: true,
+      isAutoAnalysisEnabled: true,
       totalLines: 10,
       completedLines: 10,
       snapshot: snapshot('ready')
@@ -58,6 +94,7 @@ describe('deriveLyricsAnalysisUiStatus', () => {
 
     const partial = deriveLyricsAnalysisUiStatus({
       isEnabled: true,
+      isAutoAnalysisEnabled: true,
       totalLines: 10,
       completedLines: 7,
       snapshot: snapshot('ready')
@@ -68,6 +105,7 @@ describe('deriveLyricsAnalysisUiStatus', () => {
   test('carries the error code and status code into the error phase', () => {
     const error = deriveLyricsAnalysisUiStatus({
       isEnabled: true,
+      isAutoAnalysisEnabled: true,
       totalLines: 10,
       completedLines: 0,
       snapshot: {

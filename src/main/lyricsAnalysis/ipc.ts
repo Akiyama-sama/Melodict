@@ -26,7 +26,11 @@ import {
   saveStoredProviderProfile,
   setActiveProviderProfile
 } from './providerConfigRepository';
-import { getLyricsAnalysisSession, prepareLyricsAnalysisSession } from './sessionManager';
+import {
+  getCachedLyricsAnalysisSnapshot,
+  getLyricsAnalysisSession,
+  prepareLyricsAnalysisSession
+} from './sessionManager';
 
 const toProfilesState = async (): Promise<LyricsAnalysisProviderProfilesState> => {
   const { profiles, activeProfileId } = await getStoredProviderProfiles();
@@ -55,6 +59,14 @@ export const registerLyricsAnalysisIpc = () => {
   );
 
   ipcMain.handle('app/lyricsAnalysis/getSession', () => getLyricsAnalysisSession());
+
+  // Read-only cache hydration for the manual path when background analysis is off — see
+  // getCachedLyricsAnalysisSnapshot for why this must not touch any session state.
+  ipcMain.handle(
+    'app/lyricsAnalysis/getCachedAnalysis',
+    (_, request: Pick<LyricsAnalysisRequest, 'lines' | 'uiLanguage'>) =>
+      getCachedLyricsAnalysisSnapshot(request)
+  );
 
   ipcMain.handle('app/lyricsAnalysis/getProviderProfiles', () => toProfilesState());
 

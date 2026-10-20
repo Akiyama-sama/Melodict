@@ -61,6 +61,37 @@ const emitSnapshot = (snapshot: LyricsAnalysisSnapshot) => {
 
 export const getLyricsAnalysisSession = () => activeSession;
 
+/**
+ * Read-only hydration for the manual fullscreen path when background analysis is disabled: builds
+ * the fingerprint the prepare would have built and reads only the song-level artifact. No
+ * generation bump, no supersede, no worker, no telemetry — a cache miss is simply undefined, and
+ * the renderer shows plain lyrics instead of starting a run. (The line cache is intentionally not
+ * consulted: without a run there is nothing to resume, and partial per-line hydration would
+ * suggest an analysis that never happened for this song.)
+ */
+export const getCachedLyricsAnalysisSnapshot = async (
+  request: Pick<LyricsAnalysisRequest, 'lines' | 'uiLanguage'>
+): Promise<LyricsAnalysisSnapshot | undefined> => {
+  const provider = await getStoredProviderConfig();
+  const modelId = provider.modelId || LYRICS_ANALYSIS_DEFAULT_MODEL_ID;
+  const fingerprint = buildLyricsAnalysisFingerprint({
+    lines: request.lines,
+    uiLanguage: request.uiLanguage,
+    modelId
+  });
+
+  const cached = await readLyricsAnalysisPartialCache(fingerprint);
+  if (!cached) return undefined;
+
+  return {
+    songPath: cached.songPath,
+    fingerprint,
+    status: 'cached',
+    lines: cached.lines,
+    updatedAt: cached.generatedAt
+  };
+};
+
 const buildLinesWithStatuses = (input: {
   requestLines: LyricsAnalysisInputLine[];
   analyzed: LyricsAnalysisLine[];

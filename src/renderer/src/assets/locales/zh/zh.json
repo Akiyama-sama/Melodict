@@ -1075,6 +1075,8 @@
       "idleDescription": "当前歌曲没有可解析的同步歌词。",
       "preparing": "准备解析歌词",
       "preparingDescription": "正在读取歌词，准备提交给 AI 模型。",
+      "autoDisabled": "自动解析已关闭",
+      "autoDisabledDescription": "由于设置中关闭了「播放时自动解析」，这首歌不会被解析。已保存的解析结果仍会显示。",
       "notConfigured": "尚未配置 AI 服务",
       "notConfiguredDescription": "请到「设置 > 歌词解析」填写 Base URL 和 API Key。",
       "analyzing": "正在解析歌词",

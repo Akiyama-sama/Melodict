@@ -27,6 +27,10 @@ type Props = {
 // and selectedToken only changes identity when the selection actually changes.
 const LyricsContainer = memo((props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isAutoAnalysisEnabled = useStore(
+    store,
+    (state) => state.localStorage.preferences.autoAnalyzeLyricsWithAi
+  );
 
   const { setIsLyricsAvailable, selectedToken, isPanelOpen = false, isAnalysisView = true, onTokenClick } =
     props;
@@ -47,7 +51,8 @@ const LyricsContainer = memo((props: Props) => {
     songArtists: Array.isArray(currentSongData.artists)
       ? currentSongData.artists.map((artist) => artist.name)
       : [],
-    lyrics
+    lyrics,
+    isAutoAnalysisEnabled
   });
 
   // Only the raw line/token ids of the selection matter to the rendered lines; keying the memo on
