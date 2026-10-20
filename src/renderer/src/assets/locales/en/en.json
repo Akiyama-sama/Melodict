@@ -1075,6 +1075,8 @@
       "idleDescription": "This song has no synced lyrics to analyze.",
       "preparing": "Preparing lyrics",
       "preparingDescription": "Reading the lyrics and getting them ready for the AI model.",
+      "autoDisabled": "Automatic analysis is off",
+      "autoDisabledDescription": "This song was not analyzed because automatic analysis is disabled in Settings > Lyrics analysis. Stored analyses still show here.",
       "notConfigured": "AI provider not configured",
       "notConfiguredDescription": "Set the base URL and API key in Settings > Lyrics analysis.",
       "analyzing": "Analyzing lyrics",
@@ -1099,6 +1101,7 @@
     },
     "settings": {
       "title": "Lyrics analysis (AI)",
+      "autoAnalyze": "Analyze lyrics automatically while a song is playing",
       "description": "An OpenAI-compatible endpoint used to split lyric lines into clickable learning tokens. Works with OpenAI and most third-party gateways.",
       "baseURL": "Base URL",
       "baseURLHint": "Include the version prefix, e.g. https://api.openai.com/v1.",

@@ -527,6 +527,8 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
+    /** Whether a playing song's synced lyrics are analyzed in the background (the app-level trigger). */
+    autoAnalyzeLyricsWithAi: boolean;
     neteaseSongQuality: NeteaseQualityTypes;
   }
 

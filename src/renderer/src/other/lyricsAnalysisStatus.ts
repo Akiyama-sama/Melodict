@@ -8,6 +8,7 @@ export type LyricsAnalysisUiPhase =
   | 'idle'
   | 'preparing'
   | 'notConfigured'
+  | 'autoDisabled'
   | 'cached'
   | 'analyzing'
   | 'repairing'
@@ -36,22 +37,29 @@ export const IDLE_LYRICS_ANALYSIS_STATUS: LyricsAnalysisUiStatus = {
  * `ready` and `partial` are split here because a finished run can still leave lines unanalyzed.
  */
 export const deriveLyricsAnalysisUiStatus = (input: {
+  /** Hook-level enable (the fullscreen container). False means nothing to show at all. */
   isEnabled: boolean;
+  /** The autoAnalyzeLyricsWithAi preference. False blocks prepares but not cache hydration. */
+  isAutoAnalysisEnabled: boolean;
   totalLines: number;
   completedLines: number;
   snapshot?: LyricsAnalysisSnapshot;
 }): LyricsAnalysisUiStatus => {
-  const { isEnabled, totalLines, completedLines, snapshot } = input;
+  const { isEnabled, isAutoAnalysisEnabled, totalLines, completedLines, snapshot } = input;
   const counts = { completedLines, totalLines };
 
   if (!isEnabled || totalLines === 0) return { phase: 'idle', ...counts };
-  if (!snapshot) return { phase: 'preparing', ...counts };
+  // A cached snapshot arrives even with the toggle off (read-only hydration), so it outranks the
+  // auto-disabled state.
+  if (snapshot?.status === 'cached') return { phase: 'cached', ...counts };
+  if (!snapshot) {
+    const waiting = isAutoAnalysisEnabled ? 'preparing' : 'autoDisabled';
+    return { phase: waiting, ...counts };
+  }
 
   switch (snapshot.status) {
     case 'notConfigured':
       return { phase: 'notConfigured', ...counts };
-    case 'cached':
-      return { phase: 'cached', ...counts };
     case 'analyzing':
       return { phase: 'analyzing', ...counts };
     case 'repairing':

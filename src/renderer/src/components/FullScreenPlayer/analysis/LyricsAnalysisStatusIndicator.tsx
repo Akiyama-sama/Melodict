@@ -11,6 +11,8 @@ const PHASE_ICONS: Record<LyricsAnalysisUiPhase, string> = {
   idle: 'lyrics',
   preparing: 'hourglass_top',
   notConfigured: 'key_off',
+  // `ai_off` needs a newer material-symbols than the app pins (0.45); this reads as "switched off".
+  autoDisabled: 'do_not_disturb_on',
   cached: 'cached',
   analyzing: 'progress_activity',
   repairing: 'autorenew',
@@ -37,6 +39,12 @@ const LyricsAnalysisStatusIndicator = () => {
           label: t('lyricsAnalysis.status.preparing'),
           description: t('lyricsAnalysis.status.preparingDescription'),
           toneClass: 'text-font-color-white/60'
+        };
+      case 'autoDisabled':
+        return {
+          label: t('lyricsAnalysis.status.autoDisabled'),
+          description: t('lyricsAnalysis.status.autoDisabledDescription'),
+          toneClass: 'text-font-color-white/40'
         };
       case 'notConfigured':
         return {

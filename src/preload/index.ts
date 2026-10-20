@@ -214,6 +214,10 @@ const lyricsAnalysis = {
     ipcRenderer.invoke('app/lyricsAnalysis/prepareSession', request),
   getSession: (): Promise<LyricsAnalysisSnapshot | undefined> =>
     ipcRenderer.invoke('app/lyricsAnalysis/getSession'),
+  getCachedAnalysis: (
+    request: Pick<LyricsAnalysisRequest, 'lines' | 'uiLanguage'>
+  ): Promise<LyricsAnalysisSnapshot | undefined> =>
+    ipcRenderer.invoke('app/lyricsAnalysis/getCachedAnalysis', request),
   onLine: (callback: (event: unknown, payload: LyricsAnalysisLineEvent) => void) =>
     ipcRenderer.on('app/lyricsAnalysis/line', callback),
   removeLineListener: (callback: (event: unknown, payload: LyricsAnalysisLineEvent) => void) =>

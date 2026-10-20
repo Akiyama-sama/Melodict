@@ -16,6 +16,8 @@ type UseLyricsAnalysisOptions = {
   /** Parsed synced lyrics; analysis only runs when this is a synced track. */
   lyrics?: SongLyrics | null;
   isEnabled?: boolean;
+  /** The autoAnalyzeLyricsWithAi preference. False blocks prepares; the cache stays readable. */
+  isAutoAnalysisEnabled?: boolean;
 };
 
 /** Exported for tests: the exact analysis input the hook builds from parsed lyrics. */
@@ -42,7 +44,14 @@ export const toInputLines = (lyrics?: SongLyrics | null) => {
  * snapshot; a cold run streams line events that are merged into `linesById` as they land.
  */
 const useLyricsAnalysis = (options: UseLyricsAnalysisOptions) => {
-  const { songPath, songTitle, songArtists = [], lyrics, isEnabled = true } = options;
+  const {
+    songPath,
+    songTitle,
+    songArtists = [],
+    lyrics,
+    isEnabled = true,
+    isAutoAnalysisEnabled = true
+  } = options;
   const { addNewNotifications } = useContext(AppUpdateContext);
   const { i18n, t } = useTranslation();
 
@@ -70,12 +79,13 @@ const useLyricsAnalysis = (options: UseLyricsAnalysisOptions) => {
     setLyricsAnalysisUiStatus(
       deriveLyricsAnalysisUiStatus({
         isEnabled,
+        isAutoAnalysisEnabled,
         totalLines: inputLines.length,
         completedLines,
         snapshot: snapshot?.songPath === songKey ? snapshot : undefined
       })
     );
-  }, [isEnabled, inputLines.length, completedLines, snapshot, songKey]);
+  }, [isEnabled, isAutoAnalysisEnabled, inputLines.length, completedLines, snapshot, songKey]);
 
   // Unmounting (leaving the fullscreen player) must not leave a stale icon behind.
   useEffect(() => () => setLyricsAnalysisUiStatus(IDLE_LYRICS_ANALYSIS_STATUS), []);
@@ -127,6 +137,22 @@ const useLyricsAnalysis = (options: UseLyricsAnalysisOptions) => {
     const handleSnapshotEvent = (_event: unknown, next: LyricsAnalysisSnapshot) =>
       handleSnapshot(next);
 
+    // With the toggle off, this path must not start (or supersede) any run: hydrate the read-only
+    // cache snapshot and leave the song as plain lyrics when nothing is stored. Listeners stay
+    // attached so a cached snapshot another song's run produced for a shared fingerprint still
+    // reaches this view, but no prepare is ever issued here.
+    if (!isAutoAnalysisEnabled) {
+      window.api.lyricsAnalysis
+        .getCachedAnalysis({ lines: inputLines, uiLanguage: i18n.language })
+        .then((cached) => {
+          if (isActive && cached) handleSnapshot(cached);
+        })
+        .catch((error) => console.error('Failed to read cached lyrics analysis.', error));
+      return () => {
+        isActive = false;
+      };
+    }
+
     window.api.lyricsAnalysis.onLine(handleLineEvent);
     window.api.lyricsAnalysis.onSnapshot(handleSnapshotEvent);
 
@@ -171,7 +197,15 @@ const useLyricsAnalysis = (options: UseLyricsAnalysisOptions) => {
     };
     // `inputLinesKey` stands in for `inputLines` so a new array identity does not restart the run.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEnabled, songKey, songTitle, songArtists.join(','), inputLinesKey, i18n.language]);
+  }, [
+    isEnabled,
+    isAutoAnalysisEnabled,
+    songKey,
+    songTitle,
+    songArtists.join(','),
+    inputLinesKey,
+    i18n.language
+  ]);
 
   return {
     snapshot,

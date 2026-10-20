@@ -16,6 +16,10 @@ import {
  * opening the fullscreen player, so the analysis streams in the background and the first
  * fullscreen open hydrates from getSession instead of starting cold.
  *
+ * Gated by the autoAnalyzeLyricsWithAi preference: OFF means no background analysis — the
+ * fullscreen container keeps its own prepare (see useLyricsAnalysis) for users who only want
+ * analysis when they deliberately open the player.
+ *
  * The fullscreen container keeps a fallback prepare (see useLyricsAnalysis) for paused songs
  * and for anything this trigger did not cover; the getSession check here keeps that fallback
  * from superseding a session this hook already started.
@@ -23,12 +27,17 @@ import {
 const LyricsAnalysisTrigger = () => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isAutoAnalysisEnabled = useStore(
+    store,
+    (state) => state.localStorage.preferences.autoAnalyzeLyricsWithAi
+  );
   const { i18n } = useTranslation();
 
   // Same lyrics loading + enhancement the lyrics containers run (translate/romanize preferences
   // applied), so the analysis input sees the same romanizedText the display does and shares the
-  // line cache/fingerprint with a fullscreen-triggered run.
-  const { lyrics } = useSongLyrics({ enabled: isCurrentSongPlaying });
+  // line cache/fingerprint with a fullscreen-triggered run. Loading is gated on the preference
+  // too: with the trigger disabled there is no other consumer of this fetch.
+  const { lyrics } = useSongLyrics({ enabled: isCurrentSongPlaying && isAutoAnalysisEnabled });
 
   const inputLines = useMemo(() => toInputLines(lyrics), [lyrics]);
   const inputLinesKey = useMemo(
@@ -50,7 +59,8 @@ const LyricsAnalysisTrigger = () => {
 
   useEffect(() => {
     const songPath = currentSongData.path;
-    if (!isCurrentSongPlaying || !songPath || !currentSongData.title) return undefined;
+    if (!isAutoAnalysisEnabled || !isCurrentSongPlaying || !songPath || !currentSongData.title)
+      return undefined;
     if (inputLines.length === 0) return undefined;
 
     let isActive = true;
@@ -86,7 +96,14 @@ const LyricsAnalysisTrigger = () => {
     };
     // `inputLinesKey` stands in for `inputLines` so a new array identity does not restart the run.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCurrentSongPlaying, currentSongData.path, currentSongData.title, inputLinesKey, i18n.language]);
+  }, [
+    isAutoAnalysisEnabled,
+    isCurrentSongPlaying,
+    currentSongData.path,
+    currentSongData.title,
+    inputLinesKey,
+    i18n.language
+  ]);
 
   return null;
 };

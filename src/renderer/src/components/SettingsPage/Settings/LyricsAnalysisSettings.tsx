@@ -1,8 +1,13 @@
 import { lazy, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
+
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import storage from '../../../utils/localStorage';
 import Button from '../../Button';
+import Checkbox from '../../Checkbox';
 
 const LyricsAnalysisProviderPrompt = lazy(() => import('../LyricsAnalysisProviderPrompt'));
 const RemoveLyricsAnalysisProviderPrompt = lazy(
@@ -158,6 +163,11 @@ const LyricsAnalysisSettings = () => {
   const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
+  const isAutoAnalysisEnabled = useStore(
+    store,
+    (state) => state.localStorage.preferences.autoAnalyzeLyricsWithAi
+  );
+
   const [profilesState, setProfilesState] = useState<LyricsAnalysisProviderProfilesState>({
     profiles: []
   });
@@ -263,6 +273,18 @@ const LyricsAnalysisSettings = () => {
         {t('lyricsAnalysis.settings.title')}
       </div>
       <ul className="marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight list-disc pl-6">
+        <li className="lyrics-analysis-auto-analysis mb-6">
+          <div className="secondary-container auto-analyze-lyrics mb-4">
+            <Checkbox
+              id="autoAnalyzeLyricsWithAi"
+              isChecked={isAutoAnalysisEnabled}
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences('autoAnalyzeLyricsWithAi', state)
+              }
+              labelContent={t('lyricsAnalysis.settings.autoAnalyze')}
+            />
+          </div>
+        </li>
         <li className="lyrics-analysis-providers mb-6">
           <div className="description">{t('lyricsAnalysis.settings.profilesDescription')}</div>
           <div className="mt-4">
