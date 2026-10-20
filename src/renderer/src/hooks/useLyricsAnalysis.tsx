@@ -138,17 +138,29 @@ const useLyricsAnalysis = (options: UseLyricsAnalysisOptions) => {
     window.api.lyricsAnalysis
       .getSession()
       .then((session) => {
-        if (isActive && session?.songPath === songKey && session.lines) handleSnapshot(session);
-      })
-      .catch(() => undefined);
+        if (!isActive) return undefined;
+        if (session?.songPath === songKey && session.lines) handleSnapshot(session);
 
-    window.api.lyricsAnalysis
-      .prepareSession({
-        songPath: songKey,
-        songTitle,
-        songArtists,
-        uiLanguage: i18n.language,
-        lines: inputLines
+        // The app-level trigger (LyricsAnalysisTrigger) may already have started — or finished —
+        // a session for this song while we were unmounted. Piggyback on any live run instead of
+        // calling prepareSession again: a new prepare would supersede it (bump the generation)
+        // and stream nothing new. Only cold paths (no session, another song's, errored) actually
+        // prepare here, which keeps manual opens working when nothing else fired.
+        const isLiveOrFinished =
+          session?.songPath === songKey &&
+          (session.status === 'analyzing' ||
+            session.status === 'repairing' ||
+            session.status === 'ready' ||
+            session.status === 'cached');
+        if (isLiveOrFinished) return undefined;
+
+        return window.api.lyricsAnalysis.prepareSession({
+          songPath: songKey,
+          songTitle,
+          songArtists,
+          uiLanguage: i18n.language,
+          lines: inputLines
+        });
       })
       .catch((error) => console.error('Failed to prepare lyrics analysis.', error));
 
