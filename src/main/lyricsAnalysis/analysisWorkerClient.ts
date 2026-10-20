@@ -9,8 +9,13 @@ import type {
 } from '../../common/lyricsAnalysis';
 import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
 import logger from '../logger';
+import type { ProbeConcurrencyResult } from './providerGateway';
 import workerModulePath from './worker?modulePath';
 import type { WorkerResponse as WorkerMessage } from './workerProtocol';
+
+type ProbeOutcome =
+  | { ok: true; result: ProbeConcurrencyResult }
+  | { ok: false; error: string };
 
 interface PendingAnalysis {
   resolve: (value: {
@@ -26,6 +31,7 @@ interface PendingAnalysis {
 
 const pendingAnalyses = new Map<string, PendingAnalysis>();
 const pendingTests = new Map<string, (result: LyricsAnalysisProviderTestResult) => void>();
+const pendingProbes = new Map<string, (outcome: ProbeOutcome) => void>();
 
 let worker: UtilityProcess | undefined;
 let requestCounter = 0;
@@ -40,6 +46,16 @@ const createWorker = () => {
     if (message.type === 'test-result') {
       pendingTests.get(message.requestId)?.(message.result);
       pendingTests.delete(message.requestId);
+      return;
+    }
+
+    if (message.type === 'probe-result') {
+      pendingProbes.get(message.requestId)?.(
+        message.result
+          ? { ok: true, result: message.result }
+          : { ok: false, error: message.error ?? 'Unknown probe failure.' }
+      );
+      pendingProbes.delete(message.requestId);
       return;
     }
 
@@ -86,6 +102,10 @@ const createWorker = () => {
       pendingAnalyses.delete(requestId);
     }
     pendingTests.clear();
+    for (const [requestId, resolve] of pendingProbes) {
+      resolve({ ok: false, error: 'The background analysis process stopped unexpectedly.' });
+      pendingProbes.delete(requestId);
+    }
   });
 
   return child;
@@ -146,6 +166,23 @@ export const testLyricsAnalysisProviderInWorker = (config: LyricsAnalysisProvide
       getWorker().postMessage({ type: 'test', requestId, config });
     } catch (error) {
       pendingTests.delete(requestId);
+      reject(error);
+    }
+  });
+
+export const probeProviderConcurrencyInWorker = (config: LyricsAnalysisProviderConfig) =>
+  new Promise<ProbeConcurrencyResult>((resolve, reject) => {
+    const requestId = nextRequestId();
+
+    pendingProbes.set(requestId, (outcome) => {
+      if (outcome.ok) resolve(outcome.result);
+      else reject(new Error(outcome.error));
+    });
+
+    try {
+      getWorker().postMessage({ type: 'probe', requestId, config });
+    } catch (error) {
+      pendingProbes.delete(requestId);
       reject(error);
     }
   });

@@ -1,4 +1,9 @@
-import { analyzeLyrics, mapProviderError, testLyricsAnalysisProvider } from './providerGateway';
+import {
+  analyzeLyrics,
+  mapProviderError,
+  probeProviderConcurrency,
+  testLyricsAnalysisProvider
+} from './providerGateway';
 import type { WorkerRequest, WorkerResponse } from './workerProtocol';
 
 const port = process.parentPort;
@@ -53,6 +58,24 @@ const runTest = async (request: Extract<WorkerRequest, { type: 'test' }>) => {
   post({ type: 'test-result', requestId: request.requestId, result });
 };
 
+const runProbe = async (request: Extract<WorkerRequest, { type: 'probe' }>) => {
+  try {
+    const result = await probeProviderConcurrency({
+      baseURL: request.config.baseURL,
+      modelId: request.config.modelId,
+      apiKey: request.config.apiKey ?? ''
+    });
+    post({ type: 'probe-result', requestId: request.requestId, result });
+  } catch (error) {
+    // Probe failures are data, not crashes: the settings page shows the reason inline.
+    post({
+      type: 'probe-result',
+      requestId: request.requestId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+};
+
 port.on('message', (messageEvent) => {
   const request = messageEvent.data as WorkerRequest;
 
@@ -62,6 +85,9 @@ port.on('message', (messageEvent) => {
       break;
     case 'test':
       void runTest(request);
+      break;
+    case 'probe':
+      void runProbe(request);
       break;
     case 'cancel':
       abortControllers.get(request.requestId)?.abort();

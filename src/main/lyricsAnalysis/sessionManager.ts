@@ -358,7 +358,15 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
 
   try {
     const outcome = await analyzeLyricsInWorker({
-      config: { baseURL: provider.baseURL, modelId, apiKey: provider.apiKey },
+      config: {
+        baseURL: provider.baseURL,
+        modelId,
+        apiKey: provider.apiKey,
+        // Absent on profiles saved before the field existed → the gateway default (4).
+        ...(provider.maxConcurrency !== undefined
+          ? { maxConcurrency: provider.maxConcurrency }
+          : {})
+      },
       uiLanguage: request.uiLanguage,
       songTitle: request.songTitle,
       songArtists: request.songArtists,
