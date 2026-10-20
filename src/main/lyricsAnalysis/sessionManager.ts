@@ -13,7 +13,11 @@ import {
 import { type LyricsAnalysisTelemetrySession } from '../../common/lyricsAnalysisTelemetry';
 import { analyzeLyricsLanguageMix } from '../../common/lyricsLanguageProfiles';
 import logger from '../logger';
-import { analyzeLyricsInWorker } from './analysisWorkerClient';
+import {
+  analyzeLyricsInWorker,
+  cancelLyricsAnalysisRequest,
+  inFlightAnalysisRequestIds
+} from './analysisWorkerClient';
 import {
   buildLyricsAnalysisFingerprint,
   mergeLyricsAnalysisCache,
@@ -115,8 +119,31 @@ const buildTelemetrySession = (input: {
 });
 
 export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisRequest) => {
+  // An empty line list has nothing to analyse, yet a full prepare would still supersede (and
+  // now cancel) whatever healthy run is in flight — a pure destructive no-op. Refuse it before
+  // touching the generation; the callers' guards (trigger + fullscreen hook) stay as-is, this
+  // is the last line of defence against a stale-ref race reaching the main process.
+  if (request.lines.length === 0) {
+    logger.debug('Ignoring lyrics analysis prepare with an empty line list.', {
+      songPath: request.songPath
+    });
+    return activeSession;
+  }
+
   const generation = ++activeGeneration;
   const startedAt = Date.now();
+  // A new prepare supersedes whatever run was in flight. Stop it at the worker right away: its
+  // remaining batches would otherwise share the provider with the new run (double load → slow
+  // batches / 429s on free gateways) and its AIMD window keeps climbing. Everything the old run
+  // already landed is durable (per-line cache + superseded flush below), and its lines/events
+  // keep flowing until the abort lands, so this is purely a "stop wasting gateway capacity" cut.
+  const staleRequestIds = [...inFlightAnalysisRequestIds()];
+  if (staleRequestIds.length > 0) {
+    logger.debug('Superseding lyrics analysis session; cancelling stale worker runs.', {
+      staleRequestIds
+    });
+    void Promise.all(staleRequestIds.map((requestId) => cancelLyricsAnalysisRequest(requestId)));
+  }
   const provider = await getStoredProviderConfig();
   const modelId = provider.modelId || LYRICS_ANALYSIS_DEFAULT_MODEL_ID;
   const fingerprint = buildLyricsAnalysisFingerprint({
@@ -356,9 +383,21 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     activeSession = snapshot;
   };
 
+  // AIMD window summary from the gateway; arrives before the worker settles, so every
+  // session-end path below (ready / partial / error / superseded) can attach it.
+  let concurrencyStats: { max: number; mean: number; rateLimitedCount: number } | undefined;
+
   try {
     const outcome = await analyzeLyricsInWorker({
-      config: { baseURL: provider.baseURL, modelId, apiKey: provider.apiKey },
+      config: {
+        baseURL: provider.baseURL,
+        modelId,
+        apiKey: provider.apiKey,
+        // Absent on profiles saved before the field existed → the gateway default (4).
+        ...(provider.maxConcurrency !== undefined
+          ? { maxConcurrency: provider.maxConcurrency }
+          : {})
+      },
       uiLanguage: request.uiLanguage,
       songTitle: request.songTitle,
       songArtists: request.songArtists,
@@ -377,7 +416,10 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
         logger.debug('Lyrics analysis repair pass started.', { failedLineIds });
       },
       onPassCompleted: (pass) =>
-        emitAnalysisPassTelemetry({ session: telemetrySession, pass })
+        emitAnalysisPassTelemetry({ session: telemetrySession, pass }),
+      onConcurrencyStats: (stats) => {
+        concurrencyStats = stats;
+      }
     });
 
     await flushPromise;
@@ -397,7 +439,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
         session: telemetrySession,
         finishedAt: Date.now(),
         outcome: unlandedCount === 0 ? 'ready' : 'partial',
-        failedLines: unlandedCount
+        failedLines: unlandedCount,
+        ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
       });
       return activeSession;
     }
@@ -427,7 +470,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       finishedAt: Date.now(),
       outcome: failedCount === 0 ? 'ready' : 'partial',
       failedLines: failedCount,
-      passStats: outcome.passStats
+      passStats: outcome.passStats,
+      ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
     });
     return snapshot;
   } catch (error) {
@@ -448,7 +492,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       failedLines: deriveUnlandedLineIds({
         requestLines: request.lines,
         landedByLineId: streamedLines
-      }).size
+      }).size,
+      ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
     });
 
     const snapshot: LyricsAnalysisSnapshot = {

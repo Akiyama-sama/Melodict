@@ -244,7 +244,24 @@ const lyricsAnalysis = {
     modelId?: string;
     apiKey?: string;
   }): Promise<LyricsAnalysisProviderTestResult> =>
-    ipcRenderer.invoke('app/lyricsAnalysis/testProvider', input)
+    ipcRenderer.invoke('app/lyricsAnalysis/testProvider', input),
+  probeConcurrency: (input?: {
+    profileId?: string;
+    baseURL?: string;
+    modelId?: string;
+    apiKey?: string;
+  }): Promise<{
+    ok: boolean;
+    message: string;
+    probedMaxConcurrency?: number;
+    perLevel?: Array<{
+      level: number;
+      ok: number;
+      rateLimited: number;
+      failed: number;
+      meanLatencyMs?: number;
+    }>;
+  }> => ipcRenderer.invoke('app/lyricsAnalysis/probeConcurrency', input)
 };
 
 // $ SONG LYRICS

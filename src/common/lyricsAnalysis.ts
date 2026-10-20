@@ -126,6 +126,12 @@ export interface LyricsAnalysisProviderConfig {
   baseURL: string;
   modelId: string;
   apiKey?: string;
+  /**
+   * Ceiling for the gateway's adaptive concurrent-batch window (AIMD: grow +1 per clean batch,
+   * halve on 429/timeout/network). Absent = 4. Persisted per profile; older config files read as
+   * `undefined` and take the default.
+   */
+  maxConcurrency?: number;
 }
 
 /** One saved provider, safe to hand to the renderer: the key itself never leaves the main process. */
@@ -138,6 +144,11 @@ export interface LyricsAnalysisProviderProfile {
   /** Masked tail for display, e.g. `••••ab12`. */
   apiKeyHint?: string;
   isActive: boolean;
+  /**
+   * Ceiling for the analysis gateway's concurrent-batch window. Absent on profiles saved before
+   * the field existed; consumers default to 4.
+   */
+  maxConcurrency?: number;
 }
 
 export interface LyricsAnalysisProviderProfilesState {
@@ -154,6 +165,8 @@ export interface LyricsAnalysisProviderProfileInput {
   modelId: string;
   /** `undefined` keeps the stored key, an empty string clears it. */
   apiKey?: string;
+  /** `undefined` keeps the stored value; a number overwrites it (clamped 1..64 on save). */
+  maxConcurrency?: number;
 }
 
 export interface LyricsAnalysisProviderTestResult {

@@ -29,6 +29,7 @@ import {
   buildSystemPrompt,
   buildUserPrompt
 } from './analysisPrompts';
+import { ConcurrencyWindow, isThrottlingError, runWithConcurrency } from './concurrencyPool';
 import { salvageEnvelopeElements } from './salvageEnvelopeElements';
 
 // The prompt/salvage modules moved out of this file (see analysisPrompts.ts /
@@ -129,6 +130,12 @@ export interface AnalyzeLyricsOptions {
   onRepairStarted?: (failedLineIds: string[]) => void;
   /** Fired after every batch (first or repair) with its timing/token/loss metrics. */
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
+  /** AIMD window stats aggregated across every pass, surfaced for the session-end event. */
+  onConcurrencyStats?: (stats: {
+    max: number;
+    mean: number;
+    rateLimitedCount: number;
+  }) => void;
   /**
    * Test seam: overrides how the AI SDK model is constructed from the provider config. Defaults
    * to the real OpenAI-compatible adapter; orchestration tests inject a scripted fake here so
@@ -408,33 +415,98 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
   // ~1000 output tokens, so keep batches small enough that the worst case fits under the cap.
   const ANALYSIS_BATCH_SIZE = 4;
   const sessionId = options.sessionId ?? '';
+
+  // Batches run through a bounded pool (window starts at min(4, cap), AIMD-adjusts per batch
+  // settle) instead of a serial for/await — whole-song wall time then approaches
+  // ceil(lines / window) × T_batch instead of sum over batches.
+  const window = new ConcurrencyWindow(config.maxConcurrency ?? 4);
+  const reportWindowStats = () => options.onConcurrencyStats?.(window.stats);
+  // First abort/permanent-config failure seen by any batch. Transient failures do NOT set this —
+  // their batch's lines simply join the repair queue. Checked before every pool launch so a
+  // fatal failure stops the remaining batches from starting.
+  let fatalFailure: unknown;
+
+  const chunk = <T>(items: T[], size: number): T[][] => {
+    const chunks: T[][] = [];
+    for (let offset = 0; offset < items.length; offset += size) chunks.push(items.slice(offset, offset + size));
+    return chunks;
+  };
+
+  /**
+   * Runs one streamPass wrapped for the pool:AIMD settles on the pass outcome (a thrown pass is
+   * a failure only when the cause is transient — config/abort failures are fatal and reported
+   * as-is), and the pass event carries the window value that was in effect for the batch.
+   */
+  const pooledStreamPass = async (input: {
+    batchIndex: number;
+    prompt: string;
+    targetLines: LyricsAnalysisInputLine[];
+    maxOutputTokens: number;
+    passKind: 'first' | 'repair';
+    preferOver?: Map<string, LyricsAnalysisLine>;
+  }) => {
+    try {
+      const pass = await streamPass({
+        prompt: input.prompt,
+        targetLines: input.targetLines,
+        maxOutputTokens: input.maxOutputTokens,
+        passKind: input.passKind,
+        ...(input.preferOver ? { preferOver: input.preferOver } : {})
+      });
+      window.onSuccess();
+      emitPassTelemetry({
+        sessionId,
+        batchIndex: input.batchIndex,
+        passKind: input.passKind,
+        targetLines: input.targetLines.length,
+        okLines: input.targetLines.length - pass.failedIds.size,
+        failedLines: pass.failedIds.size,
+        passStartedAt: pass.passStartedAt,
+        finishReason: pass.finishReason,
+        outputTokens: pass.passOutputTokens,
+        inputTokens: pass.passInputTokens
+      });
+      reportWindowStats();
+      return pass;
+    } catch (error) {
+      // Aborts and permanent config failures end the run either way; only transient
+      // provider trouble (429/5xx/timeout/network) teaches the window something.
+      if (signal?.aborted || !isThrottlingError(error)) fatalFailure ??= error;
+      else {
+        window.onFailure();
+        reportWindowStats();
+      }
+      throw error;
+    }
+  };
+
   const firstPassFailures = new Map<string, string>();
-  let firstPassBatchIndex = 0;
 
-  for (let offset = 0; offset < lines.length; offset += ANALYSIS_BATCH_SIZE) {
-    if (signal?.aborted) break;
-
-    const batch = lines.slice(offset, offset + ANALYSIS_BATCH_SIZE);
-    const pass = await streamPass({
+  const firstPassBatches = chunk(lines, ANALYSIS_BATCH_SIZE);
+  const firstPassTasks = firstPassBatches.map((batch, batchIndex) => async () => {
+    const pass = await pooledStreamPass({
+      batchIndex,
       prompt: buildUserPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
       targetLines: batch,
       maxOutputTokens: 1000 + batch.length * 500,
       passKind: 'first'
     });
-    emitPassTelemetry({
-      sessionId,
-      batchIndex: firstPassBatchIndex,
-      passKind: 'first',
-      targetLines: batch.length,
-      okLines: batch.length - pass.failedIds.size,
-      failedLines: pass.failedIds.size,
-      passStartedAt: pass.passStartedAt,
-      finishReason: pass.finishReason,
-      outputTokens: pass.passOutputTokens,
-      inputTokens: pass.passInputTokens
-    });
     for (const [lineId, reason] of pass.failedIds) firstPassFailures.set(lineId, reason);
-    firstPassBatchIndex += 1;
+  });
+
+  // Every batch runs even when siblings reject (PoolOutcome separates errors from results), so
+  // one endpoint hiccup costs only its own lines — the repair pass covers them. A FATAL failure
+  // (auth, abort) instead stops unstarted batches: there is no point paying for calls that will
+  // fail identically. Either way the FIRST submission-order error is re-thrown, the same outcome
+  // the serial loop propagated, with deterministic error identity for tests and callers.
+  const firstPassOutcome = await runWithConcurrency(
+    firstPassTasks,
+    () => window.value,
+    () => fatalFailure !== undefined
+  );
+  const firstErrorIndex = [...firstPassOutcome.errors.keys()].sort((a, b) => a - b)[0];
+  if (firstErrorIndex !== undefined) {
+    throw firstPassOutcome.errors.get(firstErrorIndex);
   }
 
   if (firstPassFailures.size > 0 && !signal?.aborted) {
@@ -445,42 +517,56 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
     options.onRepairStarted?.(repairTargets.map((line) => line.lineId));
 
+    const repairBatches = chunk(repairTargets, ANALYSIS_BATCH_SIZE);
     let repairedLines = 0;
-    let repairBatchIndex = 0;
+    const repairTasks = repairBatches.map((batch, batchIndex) => async () => {
+      const pass = await pooledStreamPass({
+        batchIndex,
+        prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
+        targetLines: batch,
+        maxOutputTokens: 600 + batch.length * 500,
+        passKind: 'repair',
+        preferOver: finalLines
+      });
+      repairedLines += batch.length - pass.failedIds.size;
+      return { batch, pass, batchIndex, repairedLinesAfter: repairedLines };
+    });
 
     try {
-      for (let offset = 0; offset < repairTargets.length; offset += ANALYSIS_BATCH_SIZE) {
-        if (signal?.aborted) break;
-
-        const batch = repairTargets.slice(offset, offset + ANALYSIS_BATCH_SIZE);
-        const pass = await streamPass({
-          prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
-          targetLines: batch,
-          maxOutputTokens: 600 + batch.length * 500,
-          passKind: 'repair',
-          preferOver: finalLines
-        });
-        repairedLines += batch.length - pass.failedIds.size;
+      // Repair quality gate: `preferOver` reads `finalLines`, which every pass mutates through
+      // acceptLine — running batches concurrently means a repair may compare against a line a
+      // sibling repair just improved. That is safe (strictly-better-only acceptance is
+      // order-insensitive for the final state) and the same guarantee the serial loop had.
+      const repairOutcome = await runWithConcurrency(
+        repairTasks,
+        () => window.value,
+        () => fatalFailure !== undefined
+      );
+      for (const entry of repairOutcome.results) {
+        if (!entry) continue;
         emitPassTelemetry({
           sessionId,
-          batchIndex: repairBatchIndex,
+          batchIndex: entry.batchIndex,
           passKind: 'repair',
-          targetLines: batch.length,
-          okLines: batch.length - pass.failedIds.size,
-          failedLines: pass.failedIds.size,
-          passStartedAt: pass.passStartedAt,
-          finishReason: pass.finishReason,
-          outputTokens: pass.passOutputTokens,
-          inputTokens: pass.passInputTokens,
-          repairedLines
+          targetLines: entry.batch.length,
+          okLines: entry.batch.length - entry.pass.failedIds.size,
+          failedLines: entry.pass.failedIds.size,
+          passStartedAt: entry.pass.passStartedAt,
+          finishReason: entry.pass.finishReason,
+          outputTokens: entry.pass.passOutputTokens,
+          inputTokens: entry.pass.passInputTokens,
+          repairedLines: entry.repairedLinesAfter
         });
-        repairBatchIndex += 1;
       }
+      const repairErrorIndex = [...repairOutcome.errors.keys()].sort((a, b) => a - b)[0];
+      if (repairErrorIndex !== undefined) throw repairOutcome.errors.get(repairErrorIndex);
     } catch (error) {
       // A failed repair pass must not discard the lines that already succeeded.
       if (signal?.aborted) throw error;
     }
   }
+
+  reportWindowStats();
 
   return {
     lines: lines
@@ -494,6 +580,145 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
       inputTokens: totalInputTokens.length > 0 ? totalInputTokens.reduce((a, b) => a + b, 0) : undefined
     }
   };
+};
+
+export interface ProbeConcurrencyOptions {
+  baseURL: string;
+  modelId: string;
+  apiKey: string;
+  signal?: AbortSignal;
+}
+
+export interface ProbeConcurrencyLevelResult {
+  /** Concurrency level this round fired at. */
+  level: number;
+  /** Requests that completed within the per-level timeout, regardless of status. */
+  ok: number;
+  /** Rate-limited (429) responses. */
+  rateLimited: number;
+  /** 5xx / network / timeout failures. */
+  failed: number;
+  /** Mean wall-clock of the successful requests in ms (when any succeeded). */
+  meanLatencyMs?: number;
+}
+
+export interface ProbeConcurrencyResult {
+  probedMaxConcurrency: number;
+  perLevel: ProbeConcurrencyLevelResult[];
+}
+
+/** Exported for tests: the exponential climb the probe walks through. */
+export const PROBE_LEVELS = [1, 2, 4, 8, 16];
+const PROBE_LEVEL_TIMEOUT_MS = 3000;
+
+/**
+ * Concurrency probe: climbs 1→2→4→8→16, firing `level` tiny requests (one-token completion) at
+ * once per level and counting 429/5xx/timeout failures. The first level with any failure marks
+ * the ceiling: the previous level × 0.75, at least 1, at most 16. Whole probe is bounded by the
+ * per-level timeouts (~20s worst case) so the settings page can await it directly.
+ *
+ * Independent of the AIMD window: the probe measures what the endpoint tolerates in a burst; the
+ * window still adapts within the returned ceiling while analyzing.
+ */
+export const probeProviderConcurrency = async (
+  options: ProbeConcurrencyOptions
+): Promise<ProbeConcurrencyResult> => {
+  const model = createModel({
+    baseURL: options.baseURL,
+    modelId: options.modelId,
+    apiKey: options.apiKey
+  });
+
+  const perLevel: ProbeConcurrencyLevelResult[] = [];
+  let probedMaxConcurrency = 1;
+  // Last level whose requests all succeeded; a level-1 failure has none (0 → ceiling 1).
+  let lastPassingLevel = 0;
+
+  for (const level of PROBE_LEVELS) {
+    if (options.signal?.aborted) break;
+
+    // Per-level deadline: every request at this level is raced against one 3s timer, so a hung
+    // endpoint costs at most 3s per level (~20s total across the 5 levels).
+    let levelTimeout: ReturnType<typeof setTimeout> | undefined;
+    const deadline = new Promise<never>((_resolve, _reject) => {
+      levelTimeout = setTimeout(
+        () => _reject(new Error('probe level timed out')),
+        PROBE_LEVEL_TIMEOUT_MS
+      );
+    });
+    levelTimeout?.unref?.();
+
+    const request = async () => {
+      const startedAt = Date.now();
+      try {
+        await generateText({
+          model,
+          prompt: 'hi',
+          maxOutputTokens: 1,
+          temperature: 0,
+          abortSignal: options.signal,
+          providerOptions: { openai: { strictJsonSchema: false } }
+        });
+        return { ok: true, latencyMs: Date.now() - startedAt, rateLimited: false };
+      } catch (error) {
+        const statusCode = APICallError.isInstance(error) ? error.statusCode : undefined;
+        return {
+          ok: false,
+          latencyMs: Date.now() - startedAt,
+          rateLimited: statusCode === 429
+        };
+      }
+    };
+
+    let outcomes: Array<{ ok: boolean; latencyMs: number; rateLimited: boolean }>;
+    try {
+      outcomes = await Promise.race([
+        Promise.all(Array.from({ length: level }, request)),
+        deadline
+      ]);
+    } catch {
+      // Level deadline hit before every request answered: treat the level as failed.
+      outcomes = Array.from({ length: level }, () => ({
+        ok: false,
+        latencyMs: PROBE_LEVEL_TIMEOUT_MS,
+        rateLimited: false
+      }));
+    } finally {
+      if (levelTimeout) clearTimeout(levelTimeout);
+    }
+
+    const okCount = outcomes.filter((outcome) => outcome.ok).length;
+    const rateLimitedCount = outcomes.filter((outcome) => outcome.rateLimited).length;
+    const failedCount = level - okCount;
+    const latencies = outcomes.filter((outcome) => outcome.ok).map((outcome) => outcome.latencyMs);
+
+    const levelResult: ProbeConcurrencyLevelResult = {
+      level,
+      ok: okCount,
+      rateLimited: rateLimitedCount,
+      failed: failedCount,
+      ...(latencies.length > 0
+        ? {
+            meanLatencyMs: Math.round(
+              latencies.reduce((sum, latency) => sum + latency, 0) / latencies.length
+            )
+          }
+        : {})
+    };
+    perLevel.push(levelResult);
+
+    if (failedCount > 0 || options.signal?.aborted) {
+      // First failing level ends the climb: the tolerated ceiling sits below the last level
+      // that actually passed, not below the failing one (failing at 8 → 4 × 0.75 = 3).
+      probedMaxConcurrency = Math.max(1, Math.min(16, Math.floor(lastPassingLevel * 0.75)));
+      break;
+    }
+
+    lastPassingLevel = level;
+    probedMaxConcurrency = level;
+  }
+
+  return { probedMaxConcurrency, perLevel };
 };
 
 export interface TestProviderOptions {

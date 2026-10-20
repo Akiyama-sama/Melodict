@@ -105,6 +105,15 @@ export const sessionEndEventSchema = z.object({
   /** Sum of output tokens across all passes when the provider reported them. */
   outputTokens: z.number().int().nonnegative().nullish(),
   modelId: z.string().min(1),
+  /**
+   * Concurrency-window summary (added in v1 as optional fields — later readers must tolerate
+   * shards written before the AIMD window existed):
+   * highest in-flight batch window the session held / its time-weighted mean / count of settles
+   * that shrank the window (429, timeout, network failure).
+   */
+  concurrencyWindowMax: z.number().int().nonnegative().nullish(),
+  concurrencyWindowMean: z.number().nullish(),
+  rateLimitedCount: z.number().int().nonnegative().nullish(),
   /** Present only when outcome is 'error'. */
   errorCode: z.string().optional()
 });

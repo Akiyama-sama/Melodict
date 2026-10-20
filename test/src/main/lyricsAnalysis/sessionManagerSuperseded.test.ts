@@ -59,8 +59,14 @@ vi.mock('electron', async (importOriginal) => {
 
 const analyzeLyricsInWorker = vi.fn();
 
+const cancelLyricsAnalysisRequest = vi.fn();
+const inFlightAnalysisRequestIds = vi.fn(() => new Set<string>());
+
 vi.mock('../../../../src/main/lyricsAnalysis/analysisWorkerClient', () => ({
-  analyzeLyricsInWorker: (...args: unknown[]) => analyzeLyricsInWorker(...args)
+  analyzeLyricsInWorker: (...args: unknown[]) => analyzeLyricsInWorker(...args),
+  // Supersede fires these against whatever runs the mock's controlled worker holds.
+  cancelLyricsAnalysisRequest: (...args: unknown[]) => cancelLyricsAnalysisRequest(...args),
+  inFlightAnalysisRequestIds: (...args: unknown[]) => inFlightAnalysisRequestIds(...args)
 }));
 
 vi.mock('../../../../src/main/lyricsAnalysis/providerConfigRepository', () => ({
@@ -178,6 +184,9 @@ describe('superseded lyrics analysis sessions', () => {
     await fs.rm(userDataDir, { recursive: true, force: true });
     await fs.mkdir(userDataDir, { recursive: true });
     analyzeLyricsInWorker.mockReset();
+    cancelLyricsAnalysisRequest.mockReset();
+    inFlightAnalysisRequestIds.mockReset();
+    inFlightAnalysisRequestIds.mockImplementation(() => new Set<string>());
     sendLine.mockClear();
     sendSnapshot.mockClear();
     vi.mocked(telemetryEmitter.emitSessionEndTelemetry).mockClear();
@@ -279,5 +288,62 @@ describe('superseded lyrics analysis sessions', () => {
     // Its one request line never landed, superseded or not — the telemetry says 'partial'.
     expect(aEnd?.[0].outcome).toBe('partial');
     expect(sessionManager.getLyricsAnalysisSession()?.songPath).toBe('/music/b.flac');
+  });
+  test('superseding a run cancels its stale worker request so it stops consuming gateway capacity', async () => {
+    installHeldWorker();
+
+    // Nothing is in flight when the first song's prepare starts, so nothing gets cancelled.
+    const prepareA = sessionManager.prepareLyricsAnalysisSession(
+      request({ songPath: '/music/a.flac', lines: lines('夢ならば') })
+    );
+    await vi.waitFor(() => expect(held).toHaveLength(1));
+    expect(cancelLyricsAnalysisRequest).not.toHaveBeenCalled();
+
+    // A's request is now the one live worker call (the fake client's ids are simulated).
+    inFlightAnalysisRequestIds.mockImplementation(() => new Set(['req-a']));
+
+    // Run B supersedes A mid-flight: A's worker request must be cancelled immediately.
+    const prepareB = sessionManager.prepareLyricsAnalysisSession(
+      request({ songPath: '/music/b.flac', songTitle: 'Song B', lines: lines('新しい歌詞') })
+    );
+    expect(cancelLyricsAnalysisRequest).toHaveBeenCalledTimes(1);
+    expect(cancelLyricsAnalysisRequest).toHaveBeenCalledWith('req-a');
+
+    // B still completes normally after the cut.
+    await vi.waitFor(() => expect(held).toHaveLength(2));
+    held[1].emit('新しい歌詞');
+    held[1].finish();
+    const snapshotB = await prepareB;
+    expect(snapshotB.status).toBe('ready');
+
+    held[0].finish();
+    await prepareA;
+  });
+  test('an empty-line prepare is refused: it must not supersede or cancel a healthy in-flight run', async () => {
+    installHeldWorker();
+
+    // A healthy run for song A is in flight.
+    const prepareA = sessionManager.prepareLyricsAnalysisSession(
+      request({ songPath: '/music/a.flac', lines: lines('夢ならば') })
+    );
+    await vi.waitFor(() => expect(held).toHaveLength(1));
+
+    // A ghost prepare with zero lines (stale-ref race) arrives. It must be refused before
+    // bumping the generation — A stays current and its worker request is never cancelled.
+    // The refusal returns the current session unchanged (no snapshot of its own).
+    const ghostSnapshot = await sessionManager.prepareLyricsAnalysisSession(
+      request({ songPath: '/music/ghost.flac', songTitle: 'Ghost', lines: [] })
+    );
+    expect(ghostSnapshot?.songPath).toBe('/music/a.flac');
+
+    await vi.waitFor(() => expect(held).toHaveLength(1));
+    expect(cancelLyricsAnalysisRequest).not.toHaveBeenCalled();
+
+    // A still completes as the current session.
+    held[0].emit('夢ならば');
+    held[0].finish();
+    const snapshotA = await prepareA;
+    expect(snapshotA.status).toBe('ready');
+    expect(sessionManager.getLyricsAnalysisSession()?.songPath).toBe('/music/a.flac');
   });
 });

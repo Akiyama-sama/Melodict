@@ -289,16 +289,21 @@ describe('analyzeLyrics orchestration', () => {
       statusCode: 401,
       isRetryable: false
     });
-    // Two batches' worth of lines: only the first call is ever made; the 401 must stop everything.
+    // Two batches' worth of lines. The run must reject with the 401 and never reach a repair
+    // pass. Since batches now run through a bounded concurrent pool, the batch holding the 401
+    // stops all UNSTARTED batches, but batches already launched inside the same window wave
+    // still fire (they are concurrent, not retries) — so the call count is bounded by the
+    // initial window (min(4, cap) = 4), never by a serial re-run.
     const inputLines = lines('a', 'b', 'c', 'd', 'e', 'f');
-    behaviors = [failWith(authError), elements(), elements()];
+    behaviors = [failWith(authError), elements(), elements(), elements()];
 
     await expect(runAnalyze(inputLines)).rejects.toMatchObject({
       name: 'AI_APICallError',
       statusCode: 401
     });
 
-    expect(calls).toHaveLength(1);
+    expect(calls.length).toBeGreaterThan(0);
+    expect(calls.length).toBeLessThanOrEqual(4);
   });
 
   test('telemetry pass events carry per-batch metrics', async () => {

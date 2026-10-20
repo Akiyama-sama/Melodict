@@ -148,7 +148,10 @@ describe('session-end events', () => {
     failedLines: 1,
     passCount: 12,
     outputTokens: 9999,
-    modelId: 'glm-5.3-flash'
+    modelId: 'glm-5.3-flash',
+    concurrencyWindowMax: 8,
+    concurrencyWindowMean: 4.62,
+    rateLimitedCount: 2
   };
 
   test('accepts a legal sample (round-trip)', () => {
@@ -161,9 +164,28 @@ describe('session-end events', () => {
       ...valid,
       outcome: 'error',
       outputTokens: null,
+      concurrencyWindowMax: null,
+      concurrencyWindowMean: null,
+      rateLimitedCount: null,
       errorCode: 'authFailed'
     };
     expect(sessionEndEventSchema.parse(errorEvent)).toEqual(errorEvent);
+  });
+
+  test('accepts pre-concurrency events without the window fields (v1 backward compatibility)', () => {
+    const legacy = {
+      ...base,
+      kind: 'session-end',
+      outcome: 'ready',
+      durationMs: 1200,
+      totalLines: 3,
+      okLines: 3,
+      failedLines: 0,
+      passCount: 1,
+      outputTokens: 120,
+      modelId: 'test-model'
+    };
+    expect(sessionEndEventSchema.parse(legacy)).toEqual(legacy);
   });
 
   test('rejects an outcome outside the enum', () => {
