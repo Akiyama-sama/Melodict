@@ -56,4 +56,9 @@ export type WorkerResponse =
       result?: ProbeConcurrencyResult;
       error?: string;
     }
+  | {
+      type: 'concurrency';
+      requestId: string;
+      stats: { max: number; mean: number; rateLimitedCount: number };
+    }
   | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };

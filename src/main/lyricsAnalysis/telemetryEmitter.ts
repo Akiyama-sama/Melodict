@@ -89,6 +89,8 @@ export const emitSessionEndTelemetry = (input: {
   failedLines: number;
   errorCode?: string;
   passStats?: { outputTokens: number | undefined };
+  /** AIMD window summary from the gateway, when the run reached the batch pool. */
+  concurrency?: { max: number; mean: number; rateLimitedCount: number };
 }) => {
   const failedLines = input.failedLines;
   const okLines =
@@ -106,6 +108,13 @@ export const emitSessionEndTelemetry = (input: {
     passCount: input.session.passCount,
     outputTokens: input.passStats?.outputTokens ?? input.session.outputTokens,
     modelId: input.session.modelId,
+    ...(input.concurrency
+      ? {
+          concurrencyWindowMax: input.concurrency.max,
+          concurrencyWindowMean: input.concurrency.mean,
+          rateLimitedCount: input.concurrency.rateLimitedCount
+        }
+      : {}),
     ...(input.errorCode ? { errorCode: input.errorCode } : {})
   };
   void appendLyricsAnalysisTelemetryEvent(event);

@@ -30,7 +30,9 @@ const runAnalysis = async (
         post({ type: 'line', requestId: request.requestId, line, source }),
       onRepairStarted: (failedLineIds) =>
         post({ type: 'repairing', requestId: request.requestId, failedLineIds }),
-      onPassCompleted: (pass) => post({ type: 'pass', requestId: request.requestId, pass })
+      onPassCompleted: (pass) => post({ type: 'pass', requestId: request.requestId, pass }),
+      onConcurrencyStats: (stats) =>
+        post({ type: 'concurrency', requestId: request.requestId, stats })
     });
 
     post({

@@ -27,6 +27,7 @@ interface PendingAnalysis {
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
   onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
+  onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
 }
 
 const pendingAnalyses = new Map<string, PendingAnalysis>();
@@ -71,6 +72,9 @@ const createWorker = () => {
         break;
       case 'pass':
         pending.onPassCompleted?.(message.pass);
+        break;
+      case 'concurrency':
+        pending.onConcurrencyStats?.(message.stats);
         break;
       case 'done':
         pending.resolve({
@@ -128,6 +132,7 @@ export const analyzeLyricsInWorker = (input: {
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
   onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
+  onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
 }) =>
   new Promise<{
     lines: LyricsAnalysisLine[];
@@ -141,7 +146,8 @@ export const analyzeLyricsInWorker = (input: {
       reject,
       onLine: input.onLine,
       onRepairStarted: input.onRepairStarted,
-      onPassCompleted: input.onPassCompleted
+      onPassCompleted: input.onPassCompleted,
+      onConcurrencyStats: input.onConcurrencyStats
     });
 
     getWorker().postMessage({

@@ -356,6 +356,10 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     activeSession = snapshot;
   };
 
+  // AIMD window summary from the gateway; arrives before the worker settles, so every
+  // session-end path below (ready / partial / error / superseded) can attach it.
+  let concurrencyStats: { max: number; mean: number; rateLimitedCount: number } | undefined;
+
   try {
     const outcome = await analyzeLyricsInWorker({
       config: {
@@ -385,7 +389,10 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
         logger.debug('Lyrics analysis repair pass started.', { failedLineIds });
       },
       onPassCompleted: (pass) =>
-        emitAnalysisPassTelemetry({ session: telemetrySession, pass })
+        emitAnalysisPassTelemetry({ session: telemetrySession, pass }),
+      onConcurrencyStats: (stats) => {
+        concurrencyStats = stats;
+      }
     });
 
     await flushPromise;
@@ -405,7 +412,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
         session: telemetrySession,
         finishedAt: Date.now(),
         outcome: unlandedCount === 0 ? 'ready' : 'partial',
-        failedLines: unlandedCount
+        failedLines: unlandedCount,
+        ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
       });
       return activeSession;
     }
@@ -435,7 +443,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       finishedAt: Date.now(),
       outcome: failedCount === 0 ? 'ready' : 'partial',
       failedLines: failedCount,
-      passStats: outcome.passStats
+      passStats: outcome.passStats,
+      ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
     });
     return snapshot;
   } catch (error) {
@@ -456,7 +465,8 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       failedLines: deriveUnlandedLineIds({
         requestLines: request.lines,
         landedByLineId: streamedLines
-      }).size
+      }).size,
+      ...(concurrencyStats ? { concurrency: concurrencyStats } : {})
     });
 
     const snapshot: LyricsAnalysisSnapshot = {
