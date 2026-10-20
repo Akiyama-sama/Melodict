@@ -126,6 +126,12 @@ export interface LyricsAnalysisProviderConfig {
   baseURL: string;
   modelId: string;
   apiKey?: string;
+  /**
+   * Ceiling for the gateway's adaptive concurrent-batch window (AIMD: grow +1 per clean batch,
+   * halve on 429/timeout/network). Absent = 4. Persisted per profile; older config files read as
+   * `undefined` and take the default.
+   */
+  maxConcurrency?: number;
 }
 
 /** One saved provider, safe to hand to the renderer: the key itself never leaves the main process. */
