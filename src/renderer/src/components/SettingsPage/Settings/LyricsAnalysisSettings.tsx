@@ -54,7 +54,7 @@ const ProfileRow = (props: ProfileRowProps) => {
     <li
       className={`provider-profile-row dark:text-font-color-white group flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 -outline-offset-2 transition-colors focus-visible:!outline ${
         profile.isActive
-          ? 'bg-background-color-3/90! text-font-color-black!'
+          ? 'bg-background-color-3/90! text-font-color-black! dark:bg-dark-background-color-3/90! dark:text-font-color-black!'
           : 'hover:bg-background-color-2! dark:hover:bg-dark-background-color-2!'
       }`}
       data-profile-id={profile.id}

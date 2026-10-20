@@ -223,7 +223,10 @@ const LyricsAnalysisProviderPrompt = (props: LyricsAnalysisProviderPromptProps) 
       {testResult && (
         <div
           className={`test-result mt-6 rounded-xl px-4 py-3 text-sm ${
-            testResult.ok ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'
+            testResult.ok
+              ? 'bg-background-color-3/15 text-font-color-highlight dark:bg-dark-background-color-3/15 dark:text-dark-font-color-highlight'
+              : // The project's danger token doubles as its only error colour (danger-btn, ErrorPrompt).
+                'bg-font-color-crimson/15 text-font-color-crimson dark:bg-font-color-crimson/15 dark:text-font-color-crimson'
           }`}
         >
           <div className="flex items-center gap-2 font-medium">
@@ -262,7 +265,7 @@ const LyricsAnalysisProviderPrompt = (props: LyricsAnalysisProviderPromptProps) 
           iconName="save"
           iconClassName="material-icons-round-outlined"
           isDisabled={isSaving}
-          className="bg-background-color-3! text-font-color-black!"
+          className="bg-background-color-3! text-font-color-black! dark:bg-dark-background-color-3! dark:text-font-color-black!"
           clickHandler={() => void saveProfile()}
         />
       </div>
