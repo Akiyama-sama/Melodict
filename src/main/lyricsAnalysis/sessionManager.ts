@@ -13,7 +13,11 @@ import {
 import { type LyricsAnalysisTelemetrySession } from '../../common/lyricsAnalysisTelemetry';
 import { analyzeLyricsLanguageMix } from '../../common/lyricsLanguageProfiles';
 import logger from '../logger';
-import { analyzeLyricsInWorker } from './analysisWorkerClient';
+import {
+  analyzeLyricsInWorker,
+  cancelLyricsAnalysisRequest,
+  inFlightAnalysisRequestIds
+} from './analysisWorkerClient';
 import {
   buildLyricsAnalysisFingerprint,
   mergeLyricsAnalysisCache,
@@ -117,6 +121,18 @@ const buildTelemetrySession = (input: {
 export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisRequest) => {
   const generation = ++activeGeneration;
   const startedAt = Date.now();
+  // A new prepare supersedes whatever run was in flight. Stop it at the worker right away: its
+  // remaining batches would otherwise share the provider with the new run (double load → slow
+  // batches / 429s on free gateways) and its AIMD window keeps climbing. Everything the old run
+  // already landed is durable (per-line cache + superseded flush below), and its lines/events
+  // keep flowing until the abort lands, so this is purely a "stop wasting gateway capacity" cut.
+  const staleRequestIds = [...inFlightAnalysisRequestIds()];
+  if (staleRequestIds.length > 0) {
+    logger.debug('Superseding lyrics analysis session; cancelling stale worker runs.', {
+      staleRequestIds
+    });
+    void Promise.all(staleRequestIds.map((requestId) => cancelLyricsAnalysisRequest(requestId)));
+  }
   const provider = await getStoredProviderConfig();
   const modelId = provider.modelId || LYRICS_ANALYSIS_DEFAULT_MODEL_ID;
   const fingerprint = buildLyricsAnalysisFingerprint({
