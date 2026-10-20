@@ -1099,6 +1099,7 @@
     },
     "settings": {
       "title": "Lyrics analysis (AI)",
+      "autoAnalyze": "Analyze lyrics automatically while a song is playing",
       "description": "An OpenAI-compatible endpoint used to split lyric lines into clickable learning tokens. Works with OpenAI and most third-party gateways.",
       "baseURL": "Base URL",
       "baseURLHint": "Include the version prefix, e.g. https://api.openai.com/v1.",

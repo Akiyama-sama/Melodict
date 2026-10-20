@@ -1099,6 +1099,7 @@
     },
     "settings": {
       "title": "歌词解析（AI）",
+      "autoAnalyze": "歌曲播放时自动解析歌词",
       "description": "一个兼容 OpenAI 的接口，用于把歌词拆分成可点击的学习词块。支持 OpenAI 及大多数第三方中转服务。",
       "baseURL": "Base URL",
       "baseURLHint": "需要包含版本前缀，例如 https://api.openai.com/v1。",
