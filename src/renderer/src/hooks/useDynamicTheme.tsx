@@ -9,9 +9,12 @@ import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 
 const resetStyles = () => {
-  const root = document.getElementById('root');
+  // Variables go on `documentElement`, not the `#root` div: Headless UI dialogs portal to
+  // `document.body`, outside `#root`, and would otherwise inherit only the static palette
+  // from the `:root` stylesheet instead of the song's dynamic theme.
+  const root = document.documentElement;
 
-  if (root) {
+  {
     root.style.removeProperty('--side-bar-background');
     root.style.removeProperty('--background-color-2');
     root.style.removeProperty('--dark-background-color-2');
@@ -62,7 +65,7 @@ export interface UseDynamicThemeReturn {
  */
 export function useDynamicTheme(): UseDynamicThemeReturn {
   const setDynamicThemesFromSongPalette = useCallback((palette?: NodeVibrantPalette) => {
-    const root = document.getElementById('root');
+    const root = document.documentElement;
     if (root) {
       if (palette) {
         const { LightVibrant, DarkVibrant, LightMuted, DarkMuted, Vibrant, Muted } = palette;
