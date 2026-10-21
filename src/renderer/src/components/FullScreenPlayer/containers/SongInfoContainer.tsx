@@ -81,9 +81,9 @@ const SongInfoContainer = (props: Props) => {
           className="absolute inset-0 -z-10 backdrop-blur-2xl"
           style={{
             maskImage:
-              'linear-gradient(to bottom, black 30%, transparent 95%), linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+              'linear-gradient(to bottom, black 60%, transparent 95%), linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
             WebkitMaskImage:
-              'linear-gradient(to bottom, black 30%, transparent 95%), linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+              'linear-gradient(to bottom, black 60%, transparent 95%), linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
             maskComposite: 'intersect',
             WebkitMaskComposite: 'source-in'
           }}
