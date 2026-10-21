@@ -34,54 +34,33 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('getNeteaseStream quality ladder', () => {
-  test('returns the requested level untouched when it resolves', async () => {
+describe('getNeteaseStream', () => {
+  test('passes the requested level through as-is', async () => {
     mockBody(streamData({ type: 'mp3' }));
 
     const info = await getNeteaseStream(1, 'standard');
 
     expect(callNeteaseForBody).toHaveBeenCalledTimes(1);
     expect(callNeteaseForBody).toHaveBeenCalledWith('song_url_v1', { id: 1, level: 'standard' });
-    expect(info?.resolvedLevel).toBe('standard');
     expect(info?.playable).toBe(true);
     expect(info?.vipRequired).toBe(false);
   });
 
-  test('falls back lossless → exhigh → standard on a free account', async () => {
-    // lossless: no URL for this account.
+  test('does not fall back when the requested tier has no URL', async () => {
+    // A free account asking for lossless gets no URL; there is no downgrade retry.
     mockBody(streamData({ url: '', fee: 8 }));
-    // exhigh: still nothing.
-    mockBody(streamData({ url: '', fee: 8 }));
-    // standard: playable.
-    mockBody(streamData({ type: 'mp3', br: 320000, size: 4194304 }));
 
     const info = await getNeteaseStream(2, 'lossless');
 
-    expect(callNeteaseForBody).toHaveBeenCalledTimes(3);
-    const levels = vi
-      .mocked(callNeteaseForBody)
-      .mock.calls.map(([, params]) => (params as { level: string }).level);
-    expect(levels).toEqual(['lossless', 'exhigh', 'standard']);
-    expect(info?.resolvedLevel).toBe('standard');
-    expect(info?.playable).toBe(true);
+    expect(callNeteaseForBody).toHaveBeenCalledTimes(1);
+    expect(info?.playable).toBe(false);
+    expect(info?.vipRequired).toBe(false);
   });
 
-  test('stops the ladder early at the first playable level', async () => {
-    mockBody(streamData({ url: '', fee: 8 })); // lossless miss
-    mockBody(streamData({ type: 'mp3' })); // exhigh hit
-
-    const info = await getNeteaseStream(3, 'lossless');
-
-    expect(callNeteaseForBody).toHaveBeenCalledTimes(2);
-    expect(info?.resolvedLevel).toBe('exhigh');
-  });
-
-  test('reports vipRequired when the final miss is a fee 1/4 song', async () => {
-    mockBody(streamData({ url: '', fee: 1, freeTrialInfo: null }));
-    mockBody(streamData({ url: '', fee: 1, freeTrialInfo: null }));
+  test('reports vipRequired when the miss is a fee 1/4 song', async () => {
     mockBody(streamData({ url: '', fee: 1, freeTrialInfo: null }));
 
-    const info = await getNeteaseStream(4, 'lossless');
+    const info = await getNeteaseStream(3, 'standard');
 
     expect(info?.playable).toBe(false);
     expect(info?.vipRequired).toBe(true);
@@ -89,9 +68,15 @@ describe('getNeteaseStream quality ladder', () => {
   });
 
   test('flags trial fragments from freeTrialInfo', async () => {
-    mockBody(streamData({ url: 'https://m704.music.126.net/object/trial.mp3', fee: 1, freeTrialInfo: { start: 0, end: 30000 } }));
+    mockBody(
+      streamData({
+        url: 'https://m704.music.126.net/object/trial.mp3',
+        fee: 1,
+        freeTrialInfo: { start: 0, end: 30000 }
+      })
+    );
 
-    const info = await getNeteaseStream(5, 'standard');
+    const info = await getNeteaseStream(4, 'standard');
 
     expect(info?.playable).toBe(true);
     expect(info?.hasTrial).toBe(true);
@@ -103,6 +88,6 @@ describe('getNeteaseStream quality ladder', () => {
       new NeteaseApiError('NetEase request failed', 301)
     );
 
-    await expect(getNeteaseStream(6, 'standard')).rejects.toBeInstanceOf(NeteaseApiError);
+    await expect(getNeteaseStream(5, 'standard')).rejects.toBeInstanceOf(NeteaseApiError);
   });
 });

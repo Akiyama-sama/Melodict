@@ -29,11 +29,11 @@ const NeteaseSettings = () => {
 
   const { data: profile } = useQuery(neteaseQuery.session);
 
-  const [quality, setQuality] = useState('lossless');
+  const [quality, setQuality] = useState('standard');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    setQuality(storage.preferences.getPreferences('neteaseSongQuality') ?? 'lossless');
+    setQuality(storage.preferences.getPreferences('neteaseSongQuality') ?? 'standard');
   }, []);
 
   const notify = (content: string, iconName = 'done') =>

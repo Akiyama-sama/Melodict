@@ -255,19 +255,15 @@ export interface NeteaseStreamInfo {
   type: string;
   /** VIP-only song with no URL under the current account (fee 1/4); playback is paywalled. */
   vipRequired: boolean;
-  /** The quality level the URL actually resolved to, after the downgrade ladder. */
-  resolvedLevel: NeteaseQualityTypes;
 }
 
 /**
- * Quality levels in descending order, used by the resolution ladder: a free account (or a song
- * without the tier's rights) gets no URL for `lossless`, so each step falls back to the next
- * lower level until one resolves. `standard` works for every account.
+ * Resolves a fresh CDN stream URL at the requested quality; NetEase URLs expire in ~20 minutes,
+ * so never cache these. The requested `level` is passed through as-is — no fallback ladder: a
+ * free account asking for a tier it cannot hear simply gets no URL, and `vipRequired` reports
+ * the paywall so the renderer can pause with a clear notification.
  */
-const QUALITY_LADDER: readonly NeteaseQualityTypes[] = ['lossless', 'exhigh', 'standard'];
-
-/** Resolves one `song_url_v1` response into stream info without any fallback. */
-const resolveStreamAtLevel = async (
+export const getNeteaseStream = async (
   neteaseId: number,
   quality: NeteaseQualityTypes
 ): Promise<NeteaseStreamInfo | undefined> => {
@@ -292,37 +288,8 @@ const resolveStreamAtLevel = async (
     fee,
     playable,
     type: typeof data.type === 'string' ? data.type : 'mp3',
-    vipRequired: !playable && (fee === 1 || fee === 4),
-    resolvedLevel: quality
+    vipRequired: !playable && (fee === 1 || fee === 4)
   };
-};
-
-/**
- * Resolves a fresh CDN stream URL; NetEase URLs expire in ~20 minutes, so never cache these.
- * Walks the quality ladder downwards until a level returns a playable URL, so a free account
- * asking for `lossless` still lands on the best tier it can actually hear. The requested level
- * is tried first; the returned `resolvedLevel` reports what was really served.
- */
-export const getNeteaseStream = async (
-  neteaseId: number,
-  quality: NeteaseQualityTypes
-): Promise<NeteaseStreamInfo | undefined> => {
-  const startIndex = Math.max(
-    0,
-    QUALITY_LADDER.indexOf(quality)
-  );
-  let lastResult: NeteaseStreamInfo | undefined;
-
-  for (const level of QUALITY_LADDER.slice(startIndex)) {
-    const info = await resolveStreamAtLevel(neteaseId, level);
-    if (!info) return undefined;
-    if (info.playable) return info;
-    // Keep the lowest (most informative) miss: a VIP paywall at `standard` is the truthful
-    // reason the song cannot play, independent of which tiers were probed above it.
-    lastResult = info;
-  }
-
-  return lastResult;
 };
 
 export const getNeteaseRecommendSongs = async (): Promise<NeteaseSongSummary[]> => {

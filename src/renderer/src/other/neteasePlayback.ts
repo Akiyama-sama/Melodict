@@ -12,7 +12,7 @@ import storage from '../utils/localStorage';
 /** The localStorage-backed stream quality preference for NetEase playback. */
 export const getNeteaseSongQuality = (): NeteaseQualityTypes => {
   const quality = storage.preferences.getPreferences('neteaseSongQuality');
-  return quality === 'standard' || quality === 'exhigh' ? quality : 'lossless';
+  return quality === 'exhigh' || quality === 'lossless' ? quality : 'standard';
 };
 
 /** Whether the user opted into playing 30 s trial fragments of VIP songs (default: off). */
@@ -76,10 +76,10 @@ export const notifyNeteaseBlock = (error: NeteasePlaybackBlockedError): void => 
 
 /**
  * Probes the stream resolution before the audio element ever gets a source, so blocked songs
- * surface as typed errors instead of a bare 404 mid-playback. Returns the corrected path when a
- * quality fallback changed the level (e.g. lossless → exhigh for a free account).
+ * surface as typed errors instead of a bare 404 mid-playback. The requested quality is passed
+ * through unchanged — this only classifies playability, it never adjusts the tier.
  *
- * @returns The stream path to hand the player, possibly with a downgraded quality.
+ * @returns The stream path to hand the player, carrying an inert trial marker when applicable.
  * @throws NeteasePlaybackBlockedError when the song cannot play under the current preferences.
  */
 export const resolveNeteaseStreamPath = async (
@@ -100,7 +100,7 @@ export const resolveNeteaseStreamPath = async (
     throw new NeteasePlaybackBlockedError('NETEASE_TRIAL_DISABLED');
   }
 
-  const path = buildNeteaseSongPath(neteaseId, streamInfo.resolvedLevel);
+  const path = buildNeteaseSongPath(neteaseId, quality);
   // An inert display marker: the player bar reads it to badge trial fragments; the protocol
   // handler only reads `level` and ignores the rest.
   return streamInfo.hasTrial ? `${path}&trial=1` : path;

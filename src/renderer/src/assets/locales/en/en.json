@@ -513,8 +513,8 @@
       "loggedOut": "Logged out of NetEase Cloud Music.",
       "logoutFailed": "Could not log out. Try again.",
       "vipAccount": "VIP account",
-      "qualityDescription": "Preferred stream quality for songs played from NetEase.",
-      "qualityHint": "\"lossless\" is the default; if the account cannot get a tier, playback automatically falls back to the highest one it can. Trial (30 s) fragments are only played when allowed below.",
+      "qualityDescription": "Stream quality for songs played from NetEase.",
+      "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. VIP-only songs pause with a notification when your account cannot hear them.",
       "allowTrialPlay": "Allow playing trial fragments",
       "allowTrialPlayDescription": "When a song is VIP-only and your account only gets a 30-second trial, play that trial instead of refusing playback.",
       "allowTrialPlayHint": "Off by default. Trials only cover a fraction of the song; a VIP account plays everything without this."
