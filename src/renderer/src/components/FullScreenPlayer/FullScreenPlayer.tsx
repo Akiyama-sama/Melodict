@@ -128,7 +128,11 @@ const FullScreenPlayer = () => {
                 // width once the window gets tight (min 14rem), so the lyrics never get
                 // squeezed into a sliver on smaller sizes.
                 'grid grid-cols-[minmax(0,1fr)_clamp(14rem,33.33%,30rem)]'
-              : 'grid grid-cols-[minmax(22rem,34rem)_minmax(0,1fr)]'
+              : // The cover column scales with the window (38% of it) between a floor where the
+                // cover art stays legible and a cap that stops it dwarfing the lyrics on wide
+                // windows. A minmax(22rem,…) floor used to hold the column near-full size while
+                // the window shrank, squeezing the lyrics column into a sliver.
+                'grid grid-cols-[clamp(16rem,38%,32rem)_minmax(0,1fr)]'
           }`}
         >
           {/* With the panel open the song info floats over the top third of the lyrics column only,

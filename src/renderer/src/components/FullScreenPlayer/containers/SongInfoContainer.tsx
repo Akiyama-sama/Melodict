@@ -62,9 +62,11 @@ const SongInfoContainer = (props: Props) => {
       className={`song-img-and-info-container text-font-color-white flex flex-col justify-center gap-1 transition-[padding] duration-300 ${
         isOverlay
           ? // Floats over the top third of the (relative) lyrics column only, so the analysis panel
-            // stays clear. The lyrics scroll underneath and the gradient keeps text legible.
-            'absolute top-0 left-0 z-10 h-[34%] w-full justify-center overflow-hidden bg-linear-to-b from-black/85 via-black/60 to-transparent pt-10 pb-12'
-          : 'lg:ml-4 lg:w-full px-[10%]'
+            // stays clear. The lyrics scroll underneath and the gradient keeps text legible. The
+            // horizontal padding mirrors the lyrics wrapper's gutter, so the cover stays aligned
+            // with the lyric text at any window size.
+            'absolute top-0 left-0 z-10 h-[34%] w-full justify-center overflow-hidden bg-linear-to-b from-black/85 via-black/60 to-transparent pt-10 px-10 pb-12'
+          : 'gap-6 lg:ml-4 lg:w-full'
       }`}
     >
       <div
@@ -72,7 +74,10 @@ const SongInfoContainer = (props: Props) => {
           isOverlay
             ? // Same centered column as the lyrics block, so the cover lines up with the lyric text.
               'mx-auto flex w-full max-w-[52rem] flex-row items-center gap-6'
-            : 'grid auto-rows-min grid-cols-[20rem] items-center justify-center'
+            : // `min(20rem, 100%)` tracks the column width — which now scales with the window —
+              // so the cover shrinks alongside it instead of holding 20rem while the column
+              // (and the lyrics column next to it) collapses.
+              'grid auto-rows-min grid-cols-[min(20rem,100%)] items-center justify-center'
         }
       >
         <Img
