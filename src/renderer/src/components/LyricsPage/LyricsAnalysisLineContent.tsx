@@ -101,26 +101,26 @@ const LyricsAnalysisLineContent = (props: Props) => {
         // "sung" colour language as hover/selected), the rest keep the resting token colour. The
         // lit range can start past the token's first character (a multi-word token lights only
         // the word being sung), so the text splits into before/lit/after; .token-main keeps its
-        // hover band either way.
+        // hover band either way. A fully-lit token degenerates to before=after=empty and its lit
+        // span covers the whole text — same branch, no special case.
         const lit = singingWindows?.get(token.tokenId);
-        const tokenMain =
-          !lit || (lit.sungStart <= 0 && lit.sungEnd >= segment.text.length) ? (
-            <span className="token-main whitespace-pre">{segment.text}</span>
-          ) : (
-            <span className="token-main whitespace-pre">
-              {lit.sungStart > 0 && (
-                <span className="whitespace-pre">{segment.text.slice(0, lit.sungStart)}</span>
-              )}
-              <span className="token-sung whitespace-pre">
-                {segment.text.slice(lit.sungStart, lit.sungEnd)}
-              </span>
-              {lit.sungEnd < segment.text.length && (
-                <span className="whitespace-pre">
-                  {segment.text.slice(lit.sungEnd, segment.text.length)}
-                </span>
-              )}
+        const tokenMain = !lit ? (
+          <span className="token-main whitespace-pre">{segment.text}</span>
+        ) : (
+          <span className="token-main whitespace-pre">
+            {lit.sungStart > 0 && (
+              <span className="whitespace-pre">{segment.text.slice(0, lit.sungStart)}</span>
+            )}
+            <span className="token-sung whitespace-pre">
+              {segment.text.slice(lit.sungStart, lit.sungEnd)}
             </span>
-          );
+            {lit.sungEnd < segment.text.length && (
+              <span className="whitespace-pre">
+                {segment.text.slice(lit.sungEnd, segment.text.length)}
+              </span>
+            )}
+          </span>
+        );
 
         return (
           <span

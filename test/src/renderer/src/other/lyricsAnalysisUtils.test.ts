@@ -208,13 +208,18 @@ describe('getTokenSingingWindows', () => {
     endChar
   });
 
-  test('lights the token whose characters are sounding, quantized to whole characters', () => {
+  test('lights the whole token the moment its word starts sounding', () => {
     // "I have to go": token "have" spans [2, 6); its word sounds 10s..12s.
     const spans = [{ start: 2, end: 6, timeStart: 10, timeEnd: 12 }];
-    const windows = getTokenSingingWindows(11, [token('t1', 2, 6)], spans);
-
-    // Halfway through the word: the character being sung counts as lit, so 3 of 4 characters.
-    expect(windows?.get('t1')).toEqual({ sungStart: 0, sungEnd: 3 });
+    // Anywhere inside the window — 0.1s in or 1.9s in — the word is fully lit.
+    expect(getTokenSingingWindows(10.1, [token('t1', 2, 6)], spans)?.get('t1')).toEqual({
+      sungStart: 0,
+      sungEnd: 4
+    });
+    expect(getTokenSingingWindows(11.9, [token('t1', 2, 6)], spans)?.get('t1')).toEqual({
+      sungStart: 0,
+      sungEnd: 4
+    });
   });
 
   test('a multi-word token lights only the word being sung', () => {
@@ -229,9 +234,8 @@ describe('getTokenSingingWindows', () => {
       spans
     );
 
-    // "down" is sounding (halfway → 3 of its 4 chars): lit run is the word tail, "settled" stays
-    // unlit.
-    expect(windows?.get('t1')).toEqual({ sungStart: 8, sungEnd: 11 });
+    // "down" is sounding: the lit run is its characters only, "settled" stays unlit.
+    expect(windows?.get('t1')).toEqual({ sungStart: 8, sungEnd: 12 });
   });
 
   test('past words revert: the map only holds the currently-sounding span', () => {

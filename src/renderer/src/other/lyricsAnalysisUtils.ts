@@ -179,10 +179,10 @@ export const getTokenColor = (tokenIndex: number, palette: string[]) => {
 };
 
 /**
- * The portion of a token's text that is being sung right now, in the token's OWN character
- * coordinates: `sungStart`/`sungEnd` are offsets into the token's text delimiting the lit
- * characters. A token only appears here while one of its spans is sounding — the map IS the
- * highlight set; tokens absent from it render in their resting palette colour.
+ * The lit portion of a token's text right now, in the token's OWN character coordinates:
+ * `sungStart`/`sungEnd` are offsets into the token's text delimiting the lit characters. A token
+ * only appears here while one of its word spans is sounding — the map IS the highlight set;
+ * tokens absent from it render in their resting palette colour.
  */
 export interface TokenSingingSpan {
   sungStart: number;
@@ -195,11 +195,11 @@ export interface TokenSingingSpan {
  * spaced text (validateAndNormalizeLineAnalysis) and the singing spans are produced by the same
  * builder that produced the display text, so an intersection always means the same characters.
  *
- * Only spans whose audio window contains the position contribute (the plain synced view lights
- * just the word being sung — past words revert — and the token view honours that); within a
- * sounding span the highlight sweeps linearly through its characters, which is the per-character
- * granularity the YRC payload carries. A multi-word token lights only the characters of the word
- * being sung, so its earlier characters never flash back on when the next word starts.
+ * A word lights as a WHOLE the moment its audio window starts — no per-character sweep; the
+ * word is the highlight unit, matching the plain synced view's instant word lighting. A
+ * multi-word token lights only the characters of the words sounding right now, so its
+ * not-yet-sung words keep their resting colour until their own windows arrive. Overlapping
+ * word windows (rare but present in some YRC payloads) union their lit ranges.
  */
 export const getTokenSingingWindows = (
   songPosition: number,
@@ -210,23 +210,14 @@ export const getTokenSingingWindows = (
 
   for (const span of singingSpans) {
     if (songPosition < span.timeStart || songPosition >= span.timeEnd) continue;
-    const spanDuration = span.timeEnd - span.timeStart;
-    const progress = spanDuration > 0 ? (songPosition - span.timeStart) / spanDuration : 1;
-    // Quantized to whole characters: the first char lights the moment its word starts (the char
-    // being sung counts as lit — "唱到哪儿就上标识"), and the map then holds its value between
-    // character boundaries, so consumers can bail out on identity across position ticks.
-    const sungEnd =
-      span.start + Math.min(span.end - span.start, Math.floor((span.end - span.start) * progress) + 1);
 
     for (const token of tokens) {
       const start = Math.max(token.startChar, span.start);
-      const end = Math.min(token.endChar, sungEnd);
+      const end = Math.min(token.endChar, span.end);
       if (end <= start) continue;
 
       const existing = windows.get(token.tokenId);
       if (existing) {
-        // Overlapping word windows (rare but present in some YRC payloads) union their lit
-        // ranges instead of letting the last write truncate the earlier one.
         existing.sungStart = Math.min(existing.sungStart, start - token.startChar);
         existing.sungEnd = Math.max(existing.sungEnd, end - token.startChar);
       } else {
