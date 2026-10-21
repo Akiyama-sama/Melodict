@@ -596,3 +596,15 @@ input[type='checkbox']:checked ~ .checkmark .icon {
   opacity: 0.6;
   white-space: nowrap;
 }
+
+/* ? TOKEN SINGING WIPE */
+/* The per-character karaoke highlight hydrated from the line's YRC word timings (the plain synced
+   view lights each EnhancedSyncedLyricWord; the token view lost that data — this restores it).
+   Characters being sung flip to white, the same "spoken" colour hover and the selected token use,
+   over the token's resting palette colour; the flip rides the span's existing colour transition.
+   White beats the inline palette colour because the inline style sits on the token column and
+   color inherits unless overridden here. Unsung lines' 20%-alpha tokens wipe to white too — the
+   scrubbed-ahead line still shows the sung character. */
+.lyrics-analysis-tokens [role='button'] .token-sung {
+  color: rgb(255 255 255) !important;
+}

@@ -12,6 +12,7 @@ import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWor
 import LyricsAnalysisLineContent from './LyricsAnalysisLineContent';
 import LyricsProgressBar from './LyricsProgressBar';
 import useSyncedLineHighlight from './useSyncedLineHighlight';
+import useTokenSingingHighlight from './useTokenSingingHighlight';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
@@ -73,6 +74,16 @@ const LyricLine = (props: LyricProp) => {
   } = props;
 
   const { isInRange, lyricsRef } = useSyncedLineHighlight({ isAutoScrolling, syncedLyrics });
+
+  // Hydrate the YRC word timings into the token view: analysed lines otherwise lose the per-word
+  // (per-character) singing highlight the plain synced view's EnhancedSyncedLyricWord spans have.
+  // No-op unless this line is enhanced-synced AND analysed.
+  const isEnhanced = typeof lyric !== 'string';
+  const singingWindows = useTokenSingingHighlight({
+    analysis: analysis && isEnhanced ? analysis : undefined,
+    words: isEnhanced ? lyric : undefined,
+    isActiveLine: isInRange
+  });
 
   const lyricString = useMemo(() => {
     if (typeof lyric === 'string') return getLyricText(lyric);
@@ -184,6 +195,7 @@ const LyricLine = (props: LyricProp) => {
             activeTokenId={activeTokenId}
             isActiveLine={isInRange}
             palette={palette}
+            singingWindows={singingWindows}
             onTokenClick={onTokenClick}
           />
         ) : (
