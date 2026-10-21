@@ -28,7 +28,7 @@ export const seedDatabase = async () => {
     const isSettingsSeeded = await isSettingsTableSeeded();
     if (!isSettingsSeeded) {
       // user_settings table has no entries, seed it with default values
-      await db.insert(userSettings).values({ language: 'en' });
+      await db.insert(userSettings).values({ language: 'zh' });
       logger.info('Seeded user_settings table with default values.');
     } else {
       logger.info('user_settings table already seeded. Skipping seeding process.');

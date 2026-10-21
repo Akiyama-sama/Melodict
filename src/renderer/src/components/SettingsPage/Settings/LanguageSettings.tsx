@@ -12,7 +12,7 @@ const LanguageSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);
 
   const { addNewNotifications } = useContext(AppUpdateContext);
-  const appLang = userSettings?.language || 'en';
+  const appLang = userSettings?.language || 'zh';
 
   return (
     <li

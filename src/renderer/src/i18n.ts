@@ -34,7 +34,7 @@ const { language } = await window.api.settings.getUserSettings();
 // eslint-disable-next-line import/no-named-as-default-member
 i18n.use(initReactI18next).init({
   resources,
-  lng: language ?? 'en',
+  lng: language ?? 'zh',
   fallbackLng: 'en',
   interpolation: { escapeValue: false } // React is safe from xss attacks
 });

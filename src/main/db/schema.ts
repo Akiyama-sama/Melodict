@@ -409,7 +409,7 @@ export const userSettings = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
 
     // Language settings
-    language: varchar('language', { length: 10 }).notNull().default('en'),
+    language: varchar('language', { length: 10 }).notNull().default('zh'),
 
     // Theme settings (from AppThemeData)
     isDarkMode: boolean('is_dark_mode').notNull().default(true),
