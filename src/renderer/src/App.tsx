@@ -1,6 +1,8 @@
 // ? BASE IMPORTS
 import { lazy, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import i18n from './i18n';
+
 import './assets/styles/styles.css';
 import 'material-symbols/rounded.css';
 // ? MAIN APP COMPONENTS
@@ -32,6 +34,10 @@ import { useUpNextPopup } from './hooks/useUpNextPopup';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { useWindowManagement } from './hooks/useWindowManagement';
 import { registerNeteaseLikeNotifier } from './other/neteaseLikes';
+import {
+  getNeteaseBlockNotification,
+  registerNeteaseBlockNotifier
+} from './other/neteasePlayback';
 import { initializeQueue } from './other/queueSingleton';
 
 // ? PROMPTS
@@ -99,6 +105,13 @@ export default function App() {
   // The NetEase likes module raises like/unlike toasts from non-React code paths (the shared
   // favorite toggle); hand it the panel's add function once it exists.
   registerNeteaseLikeNotifier((notifications) => addNewNotifications([notifications]));
+  // Blocked NetEase songs (VIP paywall / trial off) raise corner notifications from the queue's
+  // auto-advance path, which lives outside React — same pattern as the likes notifier above.
+  registerNeteaseBlockNotifier((error) =>
+    addNewNotifications([
+      getNeteaseBlockNotification(error, (key: string) => i18n.t(key as never))
+    ])
+  );
 
   // ? INITIALIZE DYNAMIC THEME
   // Dynamic theme hook handles theme generation from song palettes and background images

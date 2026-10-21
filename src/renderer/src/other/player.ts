@@ -4,7 +4,7 @@ import { tryDecodeNeteaseSongId } from '@common/netease';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import { equalizerBandHertzData } from './equalizerData';
-import { buildNeteasePlayerSongData } from './neteasePlayback';
+import { buildNeteasePlayerSongData, isNeteasePlaybackBlockedError, notifyNeteaseBlock } from './neteasePlayback';
 import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
@@ -93,6 +93,12 @@ class AudioPlayer {
       if (songId) {
         this.loadSong(songId, { autoPlay: willAutoPlay }).catch((err) => {
           console.error('[AudioPlayer.positionChange] Failed to load song:', err);
+          // Typed NetEase blocks (VIP paywall / trial off) stop the queue instead of spinning
+          // through the rest of it; the corner notification comes from the registered sink.
+          if (isNeteasePlaybackBlockedError(err)) {
+            notifyNeteaseBlock(err);
+            return;
+          }
           if (this.queue.hasNext) {
             this.pendingAutoPlay = willAutoPlay;
             setTimeout(() => this.queue.moveToNext(), 0);

@@ -12,20 +12,20 @@ import storage from '../utils/localStorage';
 /** The localStorage-backed stream quality preference for NetEase playback. */
 export const getNeteaseSongQuality = (): NeteaseQualityTypes => {
   const quality = storage.preferences.getPreferences('neteaseSongQuality');
-  return quality === 'exhigh' || quality === 'lossless' ? quality : 'standard';
+  return quality === 'standard' || quality === 'exhigh' ? quality : 'lossless';
 };
 
 /** Whether the user opted into playing 30 s trial fragments of VIP songs (default: off). */
 export const getAllowNeteaseTrialPlay = (): boolean =>
   storage.preferences.getPreferences('allowNeteaseTrialPlay') === true;
 
-/** Why a NetEase song could not be played as requested; drives the error prompt copy. */
+/** Why a NetEase song could not be played as requested; drives the notification copy. */
 export type NeteasePlaybackBlockReason =
   | 'NETEASE_VIP_REQUIRED'
   | 'NETEASE_TRIAL_DISABLED'
   | 'NETEASE_STREAM_UNAVAILABLE';
 
-/** A typed playback block so the error prompt can show the real reason instead of a generic one. */
+/** A typed playback block so callers can surface the real reason instead of a generic one. */
 export class NeteasePlaybackBlockedError extends Error {
   reason: NeteasePlaybackBlockReason;
 
@@ -35,6 +35,44 @@ export class NeteasePlaybackBlockedError extends Error {
     this.reason = reason;
   }
 }
+
+/** Narrowing guard for the typed NetEase playback blocks. */
+export const isNeteasePlaybackBlockedError = (error: unknown): error is NeteasePlaybackBlockedError =>
+  error instanceof NeteasePlaybackBlockedError;
+
+/**
+ * Builds the corner notification for a blocked NetEase song. Copy comes from the shared
+ * `netease.playbackBlocked.<reason>` keys so the settings page and this notification stay in sync.
+ * `t` is typed loosely: i18next's strict `TFunction` key union resists a dynamic template key.
+ */
+export const getNeteaseBlockNotification = (
+  error: NeteasePlaybackBlockedError,
+  t: (key: string, ...args: unknown[]) => string
+): AppNotification => ({
+  id: `netease-block-${error.reason}`,
+  duration: 8000,
+  content: t(`netease.playbackBlocked.${error.reason}`),
+  iconName: 'error_outline',
+  iconClassName: 'material-icons-round-outlined'
+});
+
+type NeteaseBlockNotifier = (error: NeteasePlaybackBlockedError) => void;
+
+let neteaseBlockNotifier: NeteaseBlockNotifier | null = null;
+
+/**
+ * Registers the sink for blocked-playback notifications. Non-React code paths (the queue's
+ * auto-advance in `player.ts`) raise blocks too, where hooks are unreachable — the app root hands
+ * over the notification panel's add function once, mirroring `registerNeteaseLikeNotifier`.
+ */
+export const registerNeteaseBlockNotifier = (notifier: NeteaseBlockNotifier): void => {
+  neteaseBlockNotifier = notifier;
+};
+
+/** Raises the corner notification for a blocked song; a no-op before the app root registers. */
+export const notifyNeteaseBlock = (error: NeteasePlaybackBlockedError): void => {
+  neteaseBlockNotifier?.(error);
+};
 
 /**
  * Probes the stream resolution before the audio element ever gets a source, so blocked songs

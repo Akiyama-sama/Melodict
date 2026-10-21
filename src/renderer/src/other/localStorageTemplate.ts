@@ -32,7 +32,9 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     autoTranslateLyrics: false,
     autoConvertLyrics: false,
     autoAnalyzeLyricsWithAi: true,
-    neteaseSongQuality: 'standard',
+    // Lossless by default: the stream resolver's quality ladder falls back to the highest tier
+    // the account can actually hear, so a paid-tier default costs free accounts nothing.
+    neteaseSongQuality: 'lossless',
     allowNeteaseTrialPlay: false
   },
   playback: {
