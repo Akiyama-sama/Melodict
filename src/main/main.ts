@@ -24,7 +24,7 @@ import {
 } from 'electron';
 
 import { version, appPreferences } from '../../package.json';
-import noraAppIcon from '../../resources/logo_light_mode.png?asset';
+import knoteAppIcon from '../../resources/logo_light_mode.png?asset';
 import roundTo from '../common/roundTo';
 import manageLastFmAuth from './auth/manageLastFmAuth';
 import changeAppTheme from './core/changeAppTheme';
@@ -50,7 +50,7 @@ import checkForUpdates from './update';
 import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
-const DEFAULT_APP_PROTOCOL = 'nora';
+const DEFAULT_APP_PROTOCOL = 'knote';
 
 const MAIN_WINDOW_MIN_SIZE_X = 700;
 const MAIN_WINDOW_MIN_SIZE_Y = 500;
@@ -111,7 +111,7 @@ if (!hasSingleInstanceLock) {
 export const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
 const appIcon = nativeImage
-  .createFromPath(noraAppIcon)
+  .createFromPath(knoteAppIcon)
   .resize(process.platform === 'darwin' ? { width: 15, height: 15 } : { width: 50, height: 50 });
 
 // dotenv.config({ debug: true });
@@ -135,7 +135,7 @@ const APP_INFO = {
   }
 };
 
-logger.debug(`Starting up Nora`, { APP_INFO });
+logger.debug(`Starting up Knote`, { APP_INFO });
 
 function launchExtensionBackgroundWorkers(session = electronSession.defaultSession) {
   return Promise.all(
@@ -229,7 +229,7 @@ const createWindow = async () => {
     height: 700,
     minHeight: 500,
     minWidth: 700,
-    title: 'Nora',
+    title: 'Knote',
     webPreferences: {
       zoomFactor: currentWindowZoomFactor,
       preload: path.resolve(import.meta.dirname, '../preload/index.mjs')
@@ -269,7 +269,7 @@ const createWindow = async () => {
 
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: 'nora',
+    scheme: 'knote',
     privileges: {
       standard: true,
       secure: true,
@@ -281,7 +281,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 if (process.platform === 'win32') {
-  app.setAppUserModelId('com.sandakannipunajith.nora');
+  app.setAppUserModelId('com.sandakannipunajith.knote');
 }
 
 app
@@ -309,13 +309,13 @@ app
       else logger.warn('Default protocol registration failed.');
     }
 
-    // protocol.registerFileProtocol('nora', registerFileProtocol);
-    protocol.handle('nora', handleFileProtocol);
+    // protocol.registerFileProtocol('knote', registerFileProtocol);
+    protocol.handle('knote', handleFileProtocol);
 
     tray = new Tray(appIcon);
     trayContextMenu = Menu.buildFromTemplate([
       {
-        label: 'Show/Hide Nora',
+        label: 'Show/Hide Knote',
         type: 'normal',
         click: () => (mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()),
         role: 'hide'
@@ -325,7 +325,7 @@ app
     ]);
 
     tray.setContextMenu(trayContextMenu);
-    tray.setToolTip('Nora');
+    tray.setToolTip('Knote');
 
     if (traySingleClickTogglesWindow) {
       tray.addListener('click', () => {
@@ -465,7 +465,7 @@ async function handleBeforeQuit() {
       mainWindow.webContents.send('app/beforeQuitEvent');
       await closeDatabaseInstance();
 
-      logger.debug(`Quiting Nora`, { uptime: `${Math.floor(process.uptime())} seconds` });
+      logger.debug(`Quiting Knote`, { uptime: `${Math.floor(process.uptime())} seconds` });
       asyncOperationDone = true;
     } catch (error) {
       asyncOperationDone = true;
@@ -528,7 +528,7 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as number[],
 
 // function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
 //   const urlWithQueries = decodeURI(request.url).replace(
-//     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+//     /knote:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
 //     ''
 //   );
 
@@ -545,14 +545,14 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as number[],
 // const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
 //   try {
 //     const urlWithQueries = decodeURI(request.url).replace(
-//       /(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
+//       /(knote:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
 //       ''
 //     );
 //     let [fileDir] = urlWithQueries.split('?');
 
 //     if (os.platform() === 'darwin') fileDir = '/' + fileDir;
 
-//     // logger.verbose('Serving file from nora://', { filePath });
+//     // logger.verbose('Serving file from knote://', { filePath });
 
 //     const asFileUrl = pathToFileURL(fileDir).toString();
 //     const filePath = fileURLToPath(asFileUrl);
@@ -655,7 +655,7 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
 
 function manageSecondInstanceArgs(args: string[]) {
   for (const arg of args) {
-    if (arg.includes('nora://auth')) return manageAuthServices(arg);
+    if (arg.includes('knote://auth')) return manageAuthServices(arg);
   }
   return undefined;
 }
@@ -954,7 +954,7 @@ export async function toggleAutoLaunch(autoLaunchState: boolean) {
 
   app.setLoginItemSettings({
     openAtLogin: autoLaunchState,
-    name: 'Nora',
+    name: 'Knote',
     openAsHidden: openWindowAsHiddenOnSystemStart
   });
 

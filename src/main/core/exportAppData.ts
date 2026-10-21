@@ -21,10 +21,10 @@ export const songCoversFolderPath = path.join(userDataPath, 'song_covers');
 
 const warningMessage = `***** IMPORTANT *****
 
-Please do not try to edit the contents of the 'Nora exports' folder.
+Please do not try to edit the contents of the 'Knote exports' folder.
 
 This will most likely break the app in your system and you won't be able
-to restore your data in Nora again.
+to restore your data in Knote again.
 
 These files are in plain-text to show users that there's nothing to hide 
 in these config files.
@@ -40,7 +40,7 @@ const exportAppData = async (localStorageData: string) => {
   const operations = [
     // SONG DATA
     {
-      filename: 'nora.pglite.db.sql',
+      filename: 'knote.pglite.db.sql',
       dataString: dbDump
     },
     // USER PREFERENCES (keyboard shortcuts, equalizer, ignored items)
@@ -68,13 +68,13 @@ const exportAppData = async (localStorageData: string) => {
   try {
     if (Array.isArray(destinations) && destinations.length > 0) {
       const destination =
-        path.basename(destinations[0]) === 'Nora exports'
+        path.basename(destinations[0]) === 'Knote exports'
           ? destinations[0]
-          : path.join(destinations[0], 'Nora exports');
+          : path.join(destinations[0], 'Knote exports');
       const { exist } = await makeDir(destination);
 
       if (exist) {
-        logger.debug(`'Nora exports' folder already exists. Will re-write contents of the folder.`);
+        logger.debug(`'Knote exports' folder already exists. Will re-write contents of the folder.`);
       }
 
       for (let i = 0; i < operations.length; i++) {

@@ -8,7 +8,7 @@ vi.mock('@db/schema', () => ({
 
 vi.mock('../../../../src/main/filesystem', () => ({
   DEFAULT_ARTWORK_SAVE_LOCATION: 'artworks',
-  DEFAULT_FILE_URL: 'nora://localfiles/'
+  DEFAULT_FILE_URL: 'knote://localfiles/'
 }));
 
 vi.mock('../../../../src/renderer/src/assets/images/webp/album_cover_default.webp?asset', () => ({
@@ -119,7 +119,7 @@ describe('resolveFilePaths', () => {
   });
 
   test('removeDefaultAppProtocolFromFilePath strips protocol and query string', () => {
-    const input = 'nora://localfiles/C:/Music/Song.flac?ts=1234';
+    const input = 'knote://localfiles/C:/Music/Song.flac?ts=1234';
     const output = removeDefaultAppProtocolFromFilePath(input);
 
     expect(output).toContain('C:/Music/Song.flac');
@@ -128,7 +128,7 @@ describe('resolveFilePaths', () => {
 
   test('removeDefaultAppProtocolFromFilePath returns windows-style path without leading slash', () => {
     const output = removeDefaultAppProtocolFromFilePath(
-      'nora://localfiles/C:/Music/Song.flac?ts=1234',
+      'knote://localfiles/C:/Music/Song.flac?ts=1234',
       'win32'
     );
 
@@ -137,7 +137,7 @@ describe('resolveFilePaths', () => {
 
   test('removeDefaultAppProtocolFromFilePath returns leading slash on linux paths', () => {
     const output = removeDefaultAppProtocolFromFilePath(
-      'nora://localfiles/home/ada/music/song.flac?ts=1234',
+      'knote://localfiles/home/ada/music/song.flac?ts=1234',
       'linux'
     );
 
@@ -146,18 +146,18 @@ describe('resolveFilePaths', () => {
 
   test('removeDefaultAppProtocolFromFilePath returns leading slash on macos paths', () => {
     const output = removeDefaultAppProtocolFromFilePath(
-      'nora://localfiles/Users/ada/Music/song.flac?ts=1234',
+      'knote://localfiles/Users/ada/Music/song.flac?ts=1234',
       'darwin'
     );
 
     expect(output).toBe('/Users/ada/Music/song.flac');
   });
 
-  test('addDefaultAppProtocolToFilePath prefixes nora localfiles path', () => {
+  test('addDefaultAppProtocolToFilePath prefixes knote localfiles path', () => {
     const output = addDefaultAppProtocolToFilePath('C:/Music/Song.flac');
 
     expect(output).toContain('localfiles');
     expect(output).toContain('C:/Music/Song.flac');
-    expect(output.startsWith('nora:')).toBe(true);
+    expect(output.startsWith('knote:')).toBe(true);
   });
 });

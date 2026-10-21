@@ -10,20 +10,25 @@ import copyDir from '../utils/copyDir';
 import { songCoversFolderPath } from './exportAppData';
 import { type ExportedUserPreferences, importUserPreferences } from './userPreferencesExportImport';
 
-const requiredItemsForImport = ['nora.pglite.db.sql', 'song_covers'];
+// Older exports (pre-Knote) ship the dump as 'nora.pglite.db.sql'; accept both names.
+const DB_DUMP_FILENAME = 'knote.pglite.db.sql';
+const LEGACY_DB_DUMP_FILENAME = 'nora.pglite.db.sql';
 
 const optionalItemsForImport = ['local_storage.json', 'user_preferences.json'];
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
-  title: `Select a Destination where you saved Nora's Exported App Data`,
+  title: `Select a Destination where you saved Knote's Exported App Data`,
   buttonLabel: 'Select Destination',
   properties: ['openDirectory', 'createDirectory']
 };
 
 const importRequiredData = async (importDir: string) => {
   try {
-    // DATABASE IMPORT
-    const dbQuery = await fs.readFile(path.join(importDir, 'nora.pglite.db.sql'), {
+    // DATABASE IMPORT (accept both the Knote and the legacy Nora dump filename)
+    const dumpPath = existsSync(path.join(importDir, DB_DUMP_FILENAME))
+      ? path.join(importDir, DB_DUMP_FILENAME)
+      : path.join(importDir, LEGACY_DB_DUMP_FILENAME);
+    const dbQuery = await fs.readFile(dumpPath, {
       encoding: 'utf-8'
     });
     await importDatabase(dbQuery);
@@ -91,6 +96,9 @@ const importAppData = async () => {
 
       const entries = await fs.readdir(importDir);
 
+      // The db dump may arrive under either filename; at least one must be present.
+      const hasDbDump = entries.includes(DB_DUMP_FILENAME) || entries.includes(LEGACY_DB_DUMP_FILENAME);
+      const requiredItemsForImport = [hasDbDump ? DB_DUMP_FILENAME : LEGACY_DB_DUMP_FILENAME, 'song_covers'];
       const doesRequiredItemsExist = requiredItemsForImport.every((item) => {
         const isExist = entries.includes(item);
         if (!isExist) missingEntries.push(item);

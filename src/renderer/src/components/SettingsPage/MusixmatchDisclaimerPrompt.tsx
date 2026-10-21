@@ -28,7 +28,7 @@ const MusixmatchDisclaimerPrompt = () => {
             components={{
               Hyperlink: (
                 <Hyperlink
-                  link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora"
+                  link="mailto:sandakannipunajith@gmail.com?subject=Regarding Knote"
                   linkTitle="Email"
                   noValidityCheck
                 />

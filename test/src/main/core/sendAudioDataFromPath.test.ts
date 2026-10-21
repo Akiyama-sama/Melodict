@@ -11,7 +11,7 @@ vi.mock('node-taglib-sharp', () => ({
 }));
 
 vi.mock('../../../../src/main/filesystem', () => ({
-  DEFAULT_FILE_URL: 'nora://localfiles/'
+  DEFAULT_FILE_URL: 'knote://localfiles/'
 }));
 
 vi.mock('../../../../src/main/logger', () => ({
@@ -70,7 +70,7 @@ describe('sendAudioDataFromPath', () => {
     const knownAudioData = {
       songId: 123,
       title: 'Known Song',
-      path: 'nora://localfiles/C:/music/known.flac'
+      path: 'knote://localfiles/C:/music/known.flac'
     } as unknown as AudioPlayerData;
 
     mockedGetSongIdFromSongPath.mockResolvedValue(123);
@@ -122,7 +122,7 @@ describe('sendAudioDataFromPath', () => {
     expect(result.isKnownSource).toBe(false);
     expect(result.songId).toBeGreaterThanOrEqual(0);
     expect(result.songId).toBeLessThan(1000000);
-    expect(result.path).toContain('nora://localfiles/');
+    expect(result.path).toContain('knote://localfiles/');
     expect(result.path).toContain('unknown.flac');
     expect(result.path).not.toContain('\\localfiles\\');
     expect(result.artists?.map((artist) => artist.name)).toEqual(['Artist A', 'Artist B']);

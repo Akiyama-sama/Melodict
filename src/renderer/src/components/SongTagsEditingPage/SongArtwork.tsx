@@ -20,10 +20,10 @@ const SongArtwork = (props: Props) => {
           artworkPath
             ? /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(artworkPath)
               ? artworkPath
-              : `nora://localfiles/${artworkPath}`
+              : `knote://localfiles/${artworkPath}`
             : DefaultSongArtwork
           // : songArtworkPath
-          // ? `nora://localfiles/${songArtworkPath}`
+          // ? `knote://localfiles/${songArtworkPath}`
         }
         alt="Song Artwork"
         className="song-artwork aspect-square w-full rounded-xl object-cover object-center"

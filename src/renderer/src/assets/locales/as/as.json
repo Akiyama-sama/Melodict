@@ -104,7 +104,8 @@
     "restartApp": "এপ পুনৰাম্ভ কৰক",
     "skipSong": "পৰৱৰ্তী গীতটোলৈ যাওক",
     "ok": "ঠিক আছে",
-    "loading": "লোড হৈ আছে"
+    "loading": "লোড হৈ আছে",
+    "appName": "Knote"
   },
 
   "titleBar": {
@@ -514,10 +515,10 @@
     "songHistoryDeletionSuccess": "আপোনাৰ গীতৰ ইতিহাস সফলতাৰে পৰিষ্কাৰ কৰা হৈছে।",
     "exportAppData": "এপ ডাটা ৰপ্তানি কৰক",
     "importAppData": "এপ ডাটা আমদানি কৰক",
-    "createIssueOnNoraGithubRepo": "$t(settingsPage.noraGithubRepo)ত এটা ইছ্যু সৃষ্টি কৰক",
-    "contact": "যদি আপোনাৰ এপটোৰ বিষয়ে বাগ, ফিচাৰ অনুৰোধ (আদি) সম্পৰ্কে কোনো মতামত থাকে, অনুগ্ৰহ কৰি <Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>",
+    "createIssueOnKnoteGithubRepo": "$t(settingsPage.noraGithubRepo)ত এটা ইছ্যু সৃষ্টি কৰক",
+    "contact": "যদি আপোনাৰ এপটোৰ বিষয়ে বাগ, ফিচাৰ অনুৰোধ (আদি) সম্পৰ্কে কোনো মতামত থাকে, অনুগ্ৰহ কৰি <Hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</Hyperlink>",
     "emailContact": "বা মোৰ ইমেইলৰ জৰিয়তে মোৰ সৈতে যোগাযোগ কৰক।",
-    "loveNora": "<Hyperlink>সন্দাকন নিপুণাজিত</Hyperlink>ৰ দ্বাৰা <span>❤</span>ৰে নিৰ্মিত।",
+    "loveKnote": "<Hyperlink>সন্দাকন নিপুণাজিত</Hyperlink>ৰ দ্বাৰা <span>❤</span>ৰে নিৰ্মিত।",
     "sandakanGithubProfile": "সন্দাকনৰ গিথহাব প্ৰফাইল",
     "beautifulSriLanka": "সুন্দৰ শ্ৰীলংকা"
   },

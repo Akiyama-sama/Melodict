@@ -362,7 +362,7 @@ export const removeDefaultAppProtocolFromFilePath = (
   currentPlatform: NodeJS.Platform = platform
 ) => {
   const strippedPath = filePath.replaceAll(
-    /nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
+    /knote:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
     ''
   );
 
@@ -371,5 +371,5 @@ export const removeDefaultAppProtocolFromFilePath = (
 };
 
 export const addDefaultAppProtocolToFilePath = (filePath: string) => {
-  return joinPath('nora://localfiles/', filePath);
+  return joinPath('knote://localfiles/', filePath);
 };

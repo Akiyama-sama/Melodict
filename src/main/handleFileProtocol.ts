@@ -23,7 +23,7 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
       process.platform === 'darwin' ? decodedPath : decodedPath.replace(/^[/\\]{1,2}/gm, '');
 
     if (!existsSync(filePath)) {
-      logger.warn('File not found via nora:// protocol', { url: req.url, filePath });
+      logger.warn('File not found via knote:// protocol', { url: req.url, filePath });
       return new Response('File not found', { status: 404 });
     }
 
@@ -31,7 +31,7 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
     const stat = statSync(filePath);
     const fileSize = stat.size;
     const range = req.headers.get('range');
-    logger.silly('Serving file from nora://', { url: req.url, range, filePath, mimeType });
+    logger.silly('Serving file from knote://', { url: req.url, range, filePath, mimeType });
 
     const headers: Record<string, string> = {
       'Content-Type': mimeType,
@@ -112,7 +112,7 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
 };
 
 /**
- * Streams a NetEase CDN file through `nora://`. Streams are never cached: the resolved URL lives
+ * Streams a NetEase CDN file through `knote://`. Streams are never cached: the resolved URL lives
  * only ~20 minutes, so every fetch re-resolves via `song_url_v1`.
  */
 const handleNeteaseStreamRoute = async (req: GlobalRequest, url: URL) => {

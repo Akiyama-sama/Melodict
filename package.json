@@ -1,8 +1,8 @@
 {
-  "name": "nora",
+  "name": "knote",
   "version": "4.0.0-alpha.5",
   "type": "module",
-  "description": "Nora",
+  "description": "Knote — 知音, an elegant music player",
   "license": "AGPL-3.0",
   "packageManager": "pnpm@10.27.0",
   "devEngines": {

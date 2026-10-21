@@ -60,14 +60,14 @@ describe('hasDataChanged function check', () => {
         songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }],
         noOfSongs: 1,
         artworkPath:
-          'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
+          'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
       },
       genres: [],
       releasedYear: 2020,
       synchronizedLyrics:
         "[00:00.69] Ha-yay, ha-yay, yeah\n[00:05.77] You could make my heart beat stronger than a drumbeat\n[00:09.44] Drown by the screams when the show starts\n[02:52.76] Ooh, but you should know that I don't always love like this\n[02:59.95] ♪",
       artworkPath:
-        'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
+        'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
       duration: 182.47,
       trackNumber: 1,
       isLyricsSavePending: false,
@@ -101,14 +101,14 @@ describe('hasDataChanged function check', () => {
         songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }],
         noOfSongs: 1,
         artworkPath:
-          'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
+          'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
       },
       genres: [],
       releasedYear: 2020,
       synchronizedLyrics:
         "[00:00.69] Ha-yay, ha-yay, yeah\n[00:05.77] You could make my heart beat stronger than a drumbeat\n[00:09.44] Drown by the screams when the show starts\n[02:52.76] Ooh, but you should know that I don't always love like this\n[02:59.95] ♪",
       artworkPath:
-        'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
+        'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
       duration: 182.47,
       trackNumber: 1,
       isLyricsSavePending: false,
@@ -140,7 +140,7 @@ describe('hasDataChanged function check', () => {
           artists: ['Jessica Andrea'],
           artworkName: 'GsEGhFOgMA.webp',
           artworkPath:
-            'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
+            'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
           noOfSongs: 1,
           songs: [
             {
@@ -157,7 +157,7 @@ describe('hasDataChanged function check', () => {
           artists: ['Jessica Andrea'],
           artworkName: 'GsEGhFOgMA.webp',
           artworkPath:
-            'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
+            'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
           noOfSongs: 1,
           songs: [
             {
@@ -218,9 +218,9 @@ describe('hasDataChanged function check', () => {
       },
       artworkPath: {
         current:
-          'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
+          'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
         isModified: false,
-        prev: 'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
+        prev: 'knote:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Knote\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
       },
       duration: {
         current: 182.47,

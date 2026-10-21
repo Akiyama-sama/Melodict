@@ -104,7 +104,8 @@
     "restartApp": "Reiniciar aplicativo",
     "skipSong": "Pular para a próxima música",
     "ok": "Ok",
-    "loading": "Carregando"
+    "loading": "Carregando",
+    "appName": "Knote"
   },
 
   "titleBar": {
@@ -376,7 +377,7 @@
     "enableImageBasedDynamicThemesDescription": "Alterar o tema do aplicativo dinamicamente com base no tema da imagem de capa da música atual",
 
     "language": "Idioma",
-    "languageDescription": "Selecione o idioma no qual deseja que o Nora seja exibido.",
+    "languageDescription": "Selecione o idioma no qual deseja que o Knote seja exibido.",
 
     "audioPlayback": "Reprodução de áudio",
     "showRemainingSongDuration": "Mostrar duração restante da música",
@@ -389,7 +390,7 @@
     "second_other": "segundos",
 
     "accounts": "Contas",
-    "integrateLastFm": "Integrar Last.fm com o Nora.",
+    "integrateLastFm": "Integrar Last.fm com o Knote.",
     "lastFmLogo": "Logotipo do LastFM",
     "lastFmConnected": "LastFM conectado",
     "lastFmNotConnected": "LastFM não conectado",
@@ -406,7 +407,7 @@
     "sendFavoritesToLastFm": "Enviar dados de favoritos",
     "sendNowPlayingToLastFmDescription": "Enviar os dados da música em reprodução para o Last.fm automaticamente quando você começar a tocar uma música.",
     "sendNowPlayingToLastFm": "Enviar dados da música atual",
-    "enableDiscordRpcDescription": "Integrar Discord Rich Presence com o Nora",
+    "enableDiscordRpcDescription": "Integrar Discord Rich Presence com o Knote",
     "enableDiscordRpc": "Ativar Discord Rich Presence",
 
     "doNotSaveLyricsAutomatically": "Não salvar letras automaticamente",
@@ -420,11 +421,11 @@
     "musixmatchEnabled": "Letras do Musixmatch estão ativadas",
     "saveLyricsAutomaticallyDescription": "Selecione uma opção para salvar as letras das músicas automaticamente quando buscadas na página de letras.",
     "saveLyricsAutomaticallyInfo": "As letras baixadas automaticamente serão salvas após a música atual terminar para evitar qualquer corrupção.",
-    "saveLyricsInLrcFilesDescription": "Ativar salvamento de letras em arquivos LRC para músicas que suportam edição de metadados. O Nora salvará as letras em um arquivo LRC se o arquivo de música não suportar edição de metadados.",
+    "saveLyricsInLrcFilesDescription": "Ativar salvamento de letras em arquivos LRC para músicas que suportam edição de metadados. O Knote salvará as letras em um arquivo LRC se o arquivo de música não suportar edição de metadados.",
     "saveLyricsInLrcFiles": "Salvar letras também em arquivos LRC para músicas suportadas",
     "autoTranslateLyricsDescription": "Ativar tradução automática de letras para o idioma selecionado. As letras serão traduzidas automaticamente mesmo se tiverem o mesmo idioma que o seu idioma selecionado.",
     "autoTranslateLyrics": "Traduzir letras automaticamente",
-    "autoConvertLyricsDescription": "Ativar conversão automática de letras suportadas para caracteres latinos. Atualmente, o Nora suporta a conversão de letras japonesas, chinesas e coreanas para seus respectivos sistemas de romanização.",
+    "autoConvertLyricsDescription": "Ativar conversão automática de letras suportadas para caracteres latinos. Atualmente, o Knote suporta a conversão de letras japonesas, chinesas e coreanas para seus respectivos sistemas de romanização.",
     "autoConvertLyrics": "Converter letras automaticamente",
     "lrcFileCustomSaveLocationDescription": "Selecione um local personalizado para salvar arquivos LRC de músicas se você não quiser salvá-los na mesma pasta da música correspondente.",
     "selectedCustomLocation": "Local personalizado selecionado",
@@ -456,21 +457,21 @@
     "performance": "Desempenho",
     "removeAnimationOnBatteryDescription": "Remove as animações no aplicativo quando seu sistema está na bateria.",
     "removeAnimationOnBattery": "Remover animações quando estiver na bateria.",
-    "allowToPreventScreenSleepingDescription": "Permitir que o Nora evite que a tela entre em modo de espera em situações sem atividade do usuário, como exibição de letras.",
+    "allowToPreventScreenSleepingDescription": "Permitir que o Knote evite que a tela entre em modo de espera em situações sem atividade do usuário, como exibição de letras.",
     "allowToPreventScreenSleeping": "Permitir evitar que a tela entre em modo de espera.",
 
     "startupAndWindowCustomization": "Inicialização e configurações de janela",
-    "autoLaunchAtStartDescription": "Ativar esta configuração iniciará automaticamente o Nora quando você fizer login no seu computador.",
+    "autoLaunchAtStartDescription": "Ativar esta configuração iniciará automaticamente o Knote quando você fizer login no seu computador.",
     "autoLaunchAtStart": "Iniciar automaticamente na inicialização",
-    "hideWindowAtStartDescription": "Configure se o Nora deve ficar visível quando for iniciado.",
-    "hideWindowAtStart": "Iniciar o Nora na Bandeja do Sistema ao iniciar",
-    "hideWindowOnCloseDescription": "Configure como o Nora deve se comportar quando você clicar no botão fechar.",
-    "hideWindowOnClose": "Ocultar o Nora na Bandeja do Sistema quando o botão fechar for clicado.",
+    "hideWindowAtStartDescription": "Configure se o Knote deve ficar visível quando for iniciado.",
+    "hideWindowAtStart": "Iniciar o Knote na Bandeja do Sistema ao iniciar",
+    "hideWindowOnCloseDescription": "Configure como o Knote deve se comportar quando você clicar no botão fechar.",
+    "hideWindowOnClose": "Ocultar o Knote na Bandeja do Sistema quando o botão fechar for clicado.",
     "trayClickBehaviorDescription": "Configure o comportamento ao clicar no ícone da bandeja do sistema.",
     "traySingleClickTogglesWindow": "Um único clique no ícone da bandeja alterna a janela.",
 
     "storage": "Armazenamento",
-    "storageDescription": "Veja como o Nora gerencia sua biblioteca e utiliza seu armazenamento.",
+    "storageDescription": "Veja como o Knote gerencia sua biblioteca e utiliza seu armazenamento.",
 
     "fullStorageSpace": "Uso total de armazenamento",
     "fullStorageOutOfUsage": "{{value}} de {{total}}",
@@ -494,7 +495,7 @@
     "generateStorageMetrics": "Gerar métricas de armazenamento",
     "generateStorageMetricsAgain": "Gerar métricas de armazenamento novamente",
     "noStorageMetrics": "Parece que você ainda não gerou métricas de armazenamento.",
-    "storageMetricsGenerationDisclaimer": "Gerar métricas de armazenamento é uma tarefa computacional relativamente exigente. Isso significa que o Nora pode ficar temporariamente sem resposta. Por favor, seja paciente...",
+    "storageMetricsGenerationDisclaimer": "Gerar métricas de armazenamento é uma tarefa computacional relativamente exigente. Isso significa que o Knote pode ficar temporariamente sem resposta. Por favor, seja paciente...",
     "storageMetricsGenerationError": "Parece que algo deu errado. Por favor, reporte isso ao desenvolvedor.",
 
     "advanced": "Avançado",
@@ -503,12 +504,12 @@
 
     "about": "Sobre",
     "releasedOn": "Lançado em {{val, datetime}}",
-    "noraWebsite": "Site oficial do Nora",
-    "noraDiscordServer": "Servidor oficial do Nora no Discord",
-    "noraGithubRepo": "Repositório Github do Nora",
-    "noraGithubIssues": "Issues Github do Nora",
-    "noraLocalizationStatus": "Status de localização do Nora",
-    "noraDescription": "O Nora é um player de música elegante construído com Electron e React.",
+    "noraWebsite": "Site oficial do Knote",
+    "noraDiscordServer": "Servidor oficial do Knote no Discord",
+    "noraGithubRepo": "Repositório Github do Knote",
+    "noraGithubIssues": "Issues Github do Knote",
+    "noraLocalizationStatus": "Status de localização do Knote",
+    "noraDescription": "O Knote é um player de música elegante construído com Electron e React.",
     "noraInspiration": "Inspirado por <Hyperlink>Oto Music para Android</Hyperlink> de Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music para Android na Play Store",
     "noraLicenseNotice": "Este produto é licenciado sob a <Button>licença MIT.</Button>",
@@ -529,10 +530,10 @@
     "songHistoryDeletionSuccess": "Seu histórico de músicas foi limpo com sucesso.",
     "exportAppData": "Exportar dados do aplicativo",
     "importAppData": "Importar dados do aplicativo",
-    "createIssueOnNoraGithubRepo": "criar um issue no $t(settingsPage.noraGithubRepo)",
-    "contact": "Se você tiver algum feedback sobre bugs, solicitações de recursos (etc.) sobre o aplicativo, por favor, <Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>",
+    "createIssueOnKnoteGithubRepo": "criar um issue no $t(settingsPage.noraGithubRepo)",
+    "contact": "Se você tiver algum feedback sobre bugs, solicitações de recursos (etc.) sobre o aplicativo, por favor, <Hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</Hyperlink>",
     "emailContact": "ou entre em contato pelo meu e-mail.",
-    "loveNora": "Feito com <span>❤</span> por <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
+    "loveKnote": "Feito com <span>❤</span> por <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
     "sandakanGithubProfile": "Perfil Github do Sandakan",
     "beautifulSriLanka": "Linda Sri Lanka"
   },
@@ -650,7 +651,7 @@
     "updateAddedToBeSavedLater": "Atualizações de metadados de músicas em reprodução serão salvas após a reprodução da música terminar.",
     "pendingUpdateAvailable": "Uma atualização de metadados desta música está pendente para ser salva.",
     "saveTagsNotSupportedTitle": "Não suportado",
-    "saveTagsNotSupportedDescription": "<P1>O Nora atualmente não suporta edição de metadados de música no formato <Format/>.</P1><P2>Atualmente, apenas o formato <SupportedFormat/> é suportado.",
+    "saveTagsNotSupportedDescription": "<P1>O Knote atualmente não suporta edição de metadados de música no formato <Format/>.</P1><P2>Atualmente, apenas o formato <SupportedFormat/> é suportado.",
     "albumArtistNotMentioned": "A música já faz parte do álbum chamado `{{title}}`, mas seu(s) artista(s) '{{artists}}' não está/estão especificado(s) como artista(s) do álbum para esta música.",
     "songAlbumArtistMismatch": "O(s) artista(s) do álbum selecionado(s) '{{albumArtists}}' não corresponde(m) ao(s) artista(s) do álbum selecionado '{{albumTitle}}' '{{songAlbumArtists}}'.",
     "searchForArtists": "Pesquisar artistas aqui",
@@ -764,7 +765,7 @@
   "resetAppConfirmationPrompt": {
     "confirmAppReset": "Confirmar redefinição do aplicativo",
     "message": "Redefinir o aplicativo remove todos os dados do usuário, incluindo dados relacionados a músicas, favoritos, preferências, configurações aplicadas, etc., mas NÃO as próprias músicas. Observe que esta ação é <span>IRREVERSÍVEL</span>.",
-    "restartAfterReset": "O Nora será reiniciado após a redefinição.",
+    "restartAfterReset": "O Knote será reiniciado após a redefinição.",
     "systemPlaylistsRemovalProhibited": "Você não pode remover playlists como Histórico ou Favoritos."
   },
 
@@ -825,7 +826,7 @@
   },
 
   "lyricsEditorHelpPrompt": {
-    "title": "Como usar o editor de letras do Nora",
+    "title": "Como usar o editor de letras do Knote",
     "subTitle1": "Como começar a usar o editor?",
     "subTitle1Message": " <ol><li>Reproduza a música para a qual você está tentando editar as letras. (Se você não estiver na música correta, o aplicativo impedirá a adição de metadados incorretos às linhas da letra.)</li><li>Clique na área da página para obter o foco da página. (O foco da página é necessário para que os atalhos de teclado específicos da página funcionem.)</li><li>Inicie a música do início. Se quiser mais controle sobre a reprodução, configure para repetir a música atual.</li><li>Quando a voz da música estiver dizendo a linha da letra, pressione <ShortcutButton>$t(appShortcutsPrompt.enterKey)</ShortcutButton> para destacar a próxima linha da letra e adicionar o horário atual à tag de início.</li><li>Continue até a última linha da letra.</li></ol>",
     "subTitle2": "Quais são os atalhos de teclado que posso usar no Editor de Letras?",
@@ -840,7 +841,7 @@
     "saveEditedLyrics": "Salvar letras editadas",
     "copyLyrics": "Copiar letras",
     "saveLyricsToSong": "Salvar letras na música",
-    "saveLyricsNotSupported": "O Nora atualmente não suporta salvar letras em músicas no formato de áudio '{{format}}'.",
+    "saveLyricsNotSupported": "O Knote atualmente não suporta salvar letras em músicas no formato de áudio '{{format}}'.",
     "saveLyricsFormatInfo": "* As letras são salvas no <Hyperlink>formato LRC</Hyperlink>.",
     "readAboutLrcFormat": "Leia mais sobre o formato LRC"
   },
@@ -861,7 +862,7 @@
     "outdatedChangelogNotice": "Você pode estar vendo um changelog desatualizado.",
     "versionCheckError": "<br/><span>Falha ao verificar novas atualizações. Algo deu errado.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
     "versionCheckNetworkError": "<br/><span>Não foi possível verificar novas atualizações. Verifique sua conexão de rede e tente novamente.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
-    "noraReleases": "Lançamentos do Nora",
+    "noraReleases": "Lançamentos do Knote",
     "changelog": "Changelog",
     "doNotRemindThisVersionUpdate": "Não me lembrar novamente sobre esta versão do aplicativo.",
     "current": "Atual",
@@ -936,17 +937,17 @@
 
   "clearLocalStoragePrompt": {
     "title": "Confirmar limpeza dos dados de armazenamento local",
-    "description": "Este processo limpará quaisquer dados corrompidos de armazenamento local no Nora e os reverterá para as configurações padrão.",
-    "effect": "<p>Prosseguir com esta ação afetará os seguintes dados: </p><ul><li>A maioria das configurações de preferências no Nora</li><li>Configurações de reprodução, como música atual, volume etc.</li><li>Dados da fila atual</li><li>Dados de sugestões ignoradas, como artistas participantes, artistas separados e duplicatas</li><li>Dados de ordenação de páginas</li><li>Dados do equalizador</li><li>Configurações do editor de letras</li></ul>",
-    "restartNotice": "O Nora será reiniciado após o processo."
+    "description": "Este processo limpará quaisquer dados corrompidos de armazenamento local no Knote e os reverterá para as configurações padrão.",
+    "effect": "<p>Prosseguir com esta ação afetará os seguintes dados: </p><ul><li>A maioria das configurações de preferências no Knote</li><li>Configurações de reprodução, como música atual, volume etc.</li><li>Dados da fila atual</li><li>Dados de sugestões ignoradas, como artistas participantes, artistas separados e duplicatas</li><li>Dados de ordenação de páginas</li><li>Dados do equalizador</li><li>Configurações do editor de letras</li></ul>",
+    "restartNotice": "O Knote será reiniciado após o processo."
   },
 
   "musixmatchDisclaimerPrompt": {
     "title": "Aviso de Isenção - Letras do Musixmatch",
-    "message": "<li> As letras do Musixmatch são adicionadas como um recurso de avaliação a este software e podem ser removidas a qualquer momento.</li><li>O Nora não é afiliado, autorizado, mantido, patrocinado ou endossado pelo Musixmatch ou qualquer uma de suas afiliadas ou subsidiárias.</li><li>Os mantenedores deste aplicativo apelam à responsabilidade pessoal de seus usuários para usar este recurso de forma justa, conforme pretendido, obedecendo aos direitos autorais implementados pelo Musixmatch.</li>",
+    "message": "<li> As letras do Musixmatch são adicionadas como um recurso de avaliação a este software e podem ser removidas a qualquer momento.</li><li>O Knote não é afiliado, autorizado, mantido, patrocinado ou endossado pelo Musixmatch ou qualquer uma de suas afiliadas ou subsidiárias.</li><li>Os mantenedores deste aplicativo apelam à responsabilidade pessoal de seus usuários para usar este recurso de forma justa, conforme pretendido, obedecendo aos direitos autorais implementados pelo Musixmatch.</li>",
     "implementationNotice": "Implementação do repositório Github de Fashni's <Hyperlink/>.",
     "hyperlinkTitle": "Repositório Github MxLRC",
-    "contactAboutComplaints": "Se você tiver alguma reclamação, pode entrar em contato comigo através do servidor Discord do Nora, ou através do meu <Hyperlink>e-mail</Hyperlink>."
+    "contactAboutComplaints": "Se você tiver alguma reclamação, pode entrar em contato comigo através do servidor Discord do Knote, ou através do meu <Hyperlink>e-mail</Hyperlink>."
   },
 
   "musixmatchSettingsPrompt": {
@@ -959,7 +960,7 @@
     "tokenUpdateFailed": "Falha ao atualizar o token.",
     "tokenMissingCharacters": "O TOKEN deve ser uma string com 54 caracteres. ({{count}} caracteres adicionais necessários).",
     "tokenIncorrectCharacters": "O TOKEN deve conter apenas caracteres alfanuméricos.",
-    "savedTokenAvailableMessage": "<Title><span/> Um token salvo disponível.</Title><p> Um token Musixmatch válido salvo pelo usuário já está disponível no Nora.</p> <p> Você só precisa alterar o token se o serviço não estiver funcionando corretamente.</p>"
+    "savedTokenAvailableMessage": "<Title><span/> Um token salvo disponível.</Title><p> Um token Musixmatch válido salvo pelo usuário já está disponível no Knote.</p> <p> Você só precisa alterar o token se o serviço não estiver funcionando corretamente.</p>"
   },
 
   "customizeSelectedMetadataPrompt": {
@@ -1121,7 +1122,7 @@
   },
 
   "discordrpc": {
-    "noraOnGitHub": "Nora no GitHub",
+    "noraOnGitHub": "Knote no GitHub",
     "untitledSong": "Uma música sem título",
     "unknownArtist": "um artista desconhecido",
     "playingASong": "Reproduzindo uma música"

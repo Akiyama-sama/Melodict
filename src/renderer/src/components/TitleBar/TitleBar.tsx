@@ -1,6 +1,7 @@
 import { useLocation } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { version } from '../../../../../package.json';
 import LightModeLogo from '../../assets/images/webp/logo_light_mode.webp';
@@ -25,6 +26,7 @@ type Props = {
 };
 
 const TitleBar = memo((props: Props) => {
+  const { t } = useTranslation();
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const location = useLocation();
 
@@ -49,12 +51,12 @@ const TitleBar = memo((props: Props) => {
               <Img
                 className={`mr-2 aspect-square h-7 w-7 rounded-md p-1 shadow-md`}
                 src={LightModeLogo}
-                alt="Nora Logo"
+                alt="Knote Logo"
               />
             </span>
             <span className="app-name-container">
               <span>
-                Nora
+                {t('common.appName')}
                 <sup
                   className={`app-version text-font-color-highlight dark:text-dark-font-color-highlight ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase ${
                     bodyBackgroundImage && 'text-dark-font-color-highlight!'

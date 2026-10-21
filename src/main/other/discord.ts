@@ -42,9 +42,9 @@ const ActivityType = {
 const defaultPayload = {
   pid: process.pid,
   activity: {
-    details: 'Nora',
+    details: 'Knote',
     assets: {
-      large_image: 'nora_logo',
+      large_image: 'knote_logo',
       small_image: 'song_artwork'
     },
     instance: true,

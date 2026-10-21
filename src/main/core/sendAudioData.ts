@@ -97,7 +97,7 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
           end: now + data.duration * 1000
         },
         assets: {
-          large_image: artworkLink ?? 'nora_logo',
+          large_image: artworkLink ?? 'knote_logo',
           small_image: 'song_artwork'
         }
       });

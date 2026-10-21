@@ -104,7 +104,8 @@
     "restartApp": "Redémarrer l'application",
     "skipSong": "Passer la chanson",
     "ok": "OK",
-    "loading": "Chargement"
+    "loading": "Chargement",
+    "appName": "Knote"
   },
 
   "titleBar": {
@@ -376,7 +377,7 @@
     "enableImageBasedDynamicThemesDescription": "Change le thème de l'application dynamiquement selon la pochette de la chanson en cours.",
 
     "language": "Langue",
-    "languageDescription": "Sélectionnez la langue d'affichage de Nora.",
+    "languageDescription": "Sélectionnez la langue d'affichage de Knote.",
 
     "audioPlayback": "Lecture audio",
     "showRemainingSongDuration": "Afficher la durée restante",
@@ -389,7 +390,7 @@
     "second_other": "secondes",
 
     "accounts": "Comptes",
-    "integrateLastFm": "Intégrer Last.fm à Nora.",
+    "integrateLastFm": "Intégrer Last.fm à Knote.",
     "lastFmLogo": "Logo LastFM",
     "lastFmConnected": "LastFM connecté",
     "lastFmNotConnected": "LastFM non connecté",
@@ -406,7 +407,7 @@
     "sendFavoritesToLastFm": "Envoyer les favoris",
     "sendNowPlayingToLastFmDescription": "Envoyer automatiquement la chanson en cours à Last.fm.",
     "sendNowPlayingToLastFm": "Envoyer la chanson en cours",
-    "enableDiscordRpcDescription": "Intégrer Discord Rich Presence à Nora",
+    "enableDiscordRpcDescription": "Intégrer Discord Rich Presence à Knote",
     "enableDiscordRpc": "Activer Discord Rich Presence",
 
     "doNotSaveLyricsAutomatically": "Ne pas sauvegarder automatiquement",
@@ -460,9 +461,9 @@
     "allowToPreventScreenSleeping": "Empêcher la mise en veille de l'écran",
 
     "startupAndWindowCustomization": "Démarrage et fenêtre",
-    "autoLaunchAtStartDescription": "Lance automatiquement Nora à la connexion.",
+    "autoLaunchAtStartDescription": "Lance automatiquement Knote à la connexion.",
     "autoLaunchAtStart": "Lancer au démarrage",
-    "hideWindowAtStartDescription": "Configure si Nora doit être visible au démarrage.",
+    "hideWindowAtStartDescription": "Configure si Knote doit être visible au démarrage.",
     "hideWindowAtStart": "Lancer dans la barre des tâches",
     "hideWindowOnCloseDescription": "Configure le comportement lors du clic sur fermer.",
     "hideWindowOnClose": "Cacher dans la barre des tâches en fermant",
@@ -470,7 +471,7 @@
     "traySingleClickTogglesWindow": "Un clic simple sur l'icône bascule la fenêtre.",
 
     "storage": "Stockage",
-    "storageDescription": "Voir comment Nora gère votre bibliothèque et utilise le stockage.",
+    "storageDescription": "Voir comment Knote gère votre bibliothèque et utilise le stockage.",
 
     "fullStorageSpace": "Espace utilisé total",
     "fullStorageOutOfUsage": "{{value}} sur {{total}}",
@@ -494,7 +495,7 @@
     "generateStorageMetrics": "Générer les métriques de stockage",
     "generateStorageMetricsAgain": "Regénérer les métriques",
     "noStorageMetrics": "Vous n'avez pas encore généré de métriques.",
-    "storageMetricsGenerationDisclaimer": "La génération de métriques est une tâche exigeante. Nora peut devenir temporairement indisponible.",
+    "storageMetricsGenerationDisclaimer": "La génération de métriques est une tâche exigeante. Knote peut devenir temporairement indisponible.",
     "storageMetricsGenerationError": "Une erreur s'est produite. Veuillez signaler ce problème au développeur.",
 
     "advanced": "Avancé",
@@ -503,12 +504,12 @@
 
     "about": "À propos",
     "releasedOn": "Publié le {{val, datetime}}",
-    "noraWebsite": "Site officiel de Nora",
+    "noraWebsite": "Site officiel de Knote",
     "noraDiscordServer": "Serveur Discord officiel",
-    "noraGithubRepo": "Dépôt GitHub de Nora",
-    "noraGithubIssues": "Issues GitHub de Nora",
+    "noraGithubRepo": "Dépôt GitHub de Knote",
+    "noraGithubIssues": "Issues GitHub de Knote",
     "noraLocalizationStatus": "État de la localisation",
-    "noraDescription": "Nora est un lecteur de musique élégant construit avec Electron et React.",
+    "noraDescription": "Knote est un lecteur de musique élégant construit avec Electron et React.",
     "noraInspiration": "Inspiré par <Hyperlink>Oto Music for Android</Hyperlink> de Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music for Android sur le Play Store",
     "noraLicenseNotice": "Ce produit est sous licence <Button>MIT</Button>.",
@@ -529,10 +530,10 @@
     "songHistoryDeletionSuccess": "Votre historique a été effacé.",
     "exportAppData": "Exporter les données",
     "importAppData": "Importer les données",
-    "createIssueOnNoraGithubRepo": "créer une issue sur $t(settingsPage.noraGithubRepo)",
-    "contact": "Pour tout retour (bugs, suggestions, etc.), veuillez <Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>",
+    "createIssueOnKnoteGithubRepo": "créer une issue sur $t(settingsPage.noraGithubRepo)",
+    "contact": "Pour tout retour (bugs, suggestions, etc.), veuillez <Hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</Hyperlink>",
     "emailContact": "ou me contacter par email.",
-    "loveNora": "Fait avec <span>❤</span> par <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
+    "loveKnote": "Fait avec <span>❤</span> par <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
     "sandakanGithubProfile": "Profil GitHub de Sandakan",
     "beautifulSriLanka": "Magnifique Sri Lanka"
   },
@@ -650,7 +651,7 @@
     "updateAddedToBeSavedLater": "Les mises à jour seront sauvegardées après la lecture.",
     "pendingUpdateAvailable": "Une mise à jour des métadonnées est en attente.",
     "saveTagsNotSupportedTitle": "Non supporté",
-    "saveTagsNotSupportedDescription": "<P1>Nora ne supporte pas l'édition des métadonnées en format <Format/>.</P1><P2>Seul le format <SupportedFormat/> est supporté.",
+    "saveTagsNotSupportedDescription": "<P1>Knote ne supporte pas l'édition des métadonnées en format <Format/>.</P1><P2>Seul le format <SupportedFormat/> est supporté.",
     "albumArtistNotMentioned": "La chanson fait déjà partie de l'album `{{title}}` mais le(s) artiste(s) '{{artists}}' n'est/sont pas spécifié(s) comme artiste(s) de l'album.",
     "songAlbumArtistMismatch": "Le(s) artiste(s) d'album sélectionné(s) '{{albumArtists}}' ne correspond(ent) pas à l'album sélectionné '{{albumTitle}}' dont le(s) artiste(s) est/sont '{{songAlbumArtists}}'.",
     "searchForArtists": "Rechercher des artistes",
@@ -764,7 +765,7 @@
   "resetAppConfirmationPrompt": {
     "confirmAppReset": "Confirmer la réinitialisation",
     "message": "La réinitialisation supprime toutes les données utilisateur (favoris, préférences, paramètres, etc.) mais PAS les chansons. Cette action est <span>IRRÉVERSIBLE</span>.",
-    "restartAfterReset": "Nora redémarrera après la réinitialisation.",
+    "restartAfterReset": "Knote redémarrera après la réinitialisation.",
     "systemPlaylistsRemovalProhibited": "Vous ne pouvez pas supprimer les listes système (Historique, Favoris)."
   },
 
@@ -839,7 +840,7 @@
     "saveEditedLyrics": "Sauvegarder",
     "copyLyrics": "Copier",
     "saveLyricsToSong": "Sauvegarder sur la chanson",
-    "saveLyricsNotSupported": "Nora ne supporte pas la sauvegarde de paroles en format '{{format}}'.",
+    "saveLyricsNotSupported": "Knote ne supporte pas la sauvegarde de paroles en format '{{format}}'.",
     "saveLyricsFormatInfo": "* Les paroles sont sauvegardées en <Hyperlink>format LRC</Hyperlink>.",
     "readAboutLrcFormat": "En savoir plus sur le format LRC"
   },
@@ -860,7 +861,7 @@
     "outdatedChangelogNotice": "Vous consultez peut-être un changelog obsolète.",
     "versionCheckError": "<br/><span>Échec de la vérification des mises à jour.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
     "versionCheckNetworkError": "<br/><span>Impossible de vérifier les mises à jour. Vérifiez votre connexion.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
-    "noraReleases": "Versions de Nora",
+    "noraReleases": "Versions de Knote",
     "changelog": "Changelog",
     "doNotRemindThisVersionUpdate": "Ne plus me rappeler cette version.",
     "current": "Actuelle",
@@ -937,12 +938,12 @@
     "title": "Confirmer le nettoyage",
     "description": "Ce processus effacera les données corrompues et restaurera les paramètres par défaut.",
     "effect": "<p>Cette action affectera : </p><ul><li>La plupart des préférences</li><li>Les paramètres de lecture</li><li>La file d'attente</li><li>Les suggestions ignorées</li><li>Les tris de pages</li><li>Les réglages de l'égaliseur</li><li>Les paramètres de l'éditeur</li></ul>",
-    "restartNotice": "Nora redémarrera après l'opération."
+    "restartNotice": "Knote redémarrera après l'opération."
   },
 
   "musixmatchDisclaimerPrompt": {
     "title": "Avertissement - Musixmatch",
-    "message": "<li> Musixmatch est une fonctionnalité d'évaluation et peut être retirée à tout moment.</li><li>Nora n'est pas affiliée à Musixmatch.</li><li>Les mainteneurs de cette application appellent à une utilisation responsable de cette fonctionnalité.</li>",
+    "message": "<li> Musixmatch est une fonctionnalité d'évaluation et peut être retirée à tout moment.</li><li>Knote n'est pas affiliée à Musixmatch.</li><li>Les mainteneurs de cette application appellent à une utilisation responsable de cette fonctionnalité.</li>",
     "implementationNotice": "Implémentation depuis le <Hyperlink/> de Fashni.",
     "hyperlinkTitle": "Dépôt GitHub MxLRC",
     "contactAboutComplaints": "Pour toute réclamation, contactez-moi via Discord ou par <Hyperlink>email</Hyperlink>."
@@ -958,7 +959,7 @@
     "tokenUpdateFailed": "Échec de la mise à jour.",
     "tokenMissingCharacters": "Le jeton doit contenir 54 caractères ({{count}} requis supplémentaires).",
     "tokenIncorrectCharacters": "Le jeton ne doit contenir que des caractères alphanumériques.",
-    "savedTokenAvailableMessage": "<Title><span/> Un jeton sauvegardé existe.</Title><p> Un jeton Musixmatch valide sauvegardé est déjà disponible dans Nora.</p> <p> Vous n'avez besoin de changer le jeton que si le service ne fonctionne pas correctement.</p>"
+    "savedTokenAvailableMessage": "<Title><span/> Un jeton sauvegardé existe.</Title><p> Un jeton Musixmatch valide sauvegardé est déjà disponible dans Knote.</p> <p> Vous n'avez besoin de changer le jeton que si le service ne fonctionne pas correctement.</p>"
   },
 
   "customizeSelectedMetadataPrompt": {
@@ -1120,7 +1121,7 @@
   },
 
   "discordrpc": {
-    "noraOnGitHub": "Nora sur GitHub",
+    "noraOnGitHub": "Knote sur GitHub",
     "untitledSong": "Chanson sans titre",
     "unknownArtist": "artiste inconnu",
     "playingASong": "Lecture d'une chanson"

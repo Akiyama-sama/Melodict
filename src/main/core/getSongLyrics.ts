@@ -41,7 +41,7 @@ const fetchLyricsFromAudioSource = async (songPath: string) => {
 
       return undefined;
     }
-    logger.warn(`Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`, {
+    logger.warn(`Knote doesn't support reading lyrics metadata from songs in ${songExt} format.`, {
       songPath,
       songExt
     });
@@ -279,7 +279,7 @@ const getSongLyrics = async (
 ): Promise<SongLyrics | undefined> => {
   const { songTitle, songArtists = [], songPath: songPathWithProtocol } = trackInfo;
 
-  // NetEase songs stream through nora://netease/song/<id>; their lyrics come from the NetEase
+  // NetEase songs stream through knote://netease/song/<id>; their lyrics come from the NetEase
   // endpoint directly — no local file to read and nothing to save back.
   const neteaseId = tryGetNeteaseIdFromPath(songPathWithProtocol);
   if (neteaseId !== null) {

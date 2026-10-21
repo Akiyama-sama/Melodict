@@ -1,12 +1,12 @@
-appId: com.sandakannipunajith.nora
-productName: Nora
-executableName: Nora
+appId: com.sandakannipunajith.knote
+productName: Knote
+executableName: Knote
 copyright: Copyright © 2024 Sandakan Nipunajith
 icon: ./build/icon.ico
 artifactName: '${productName} v${version}-${os}-${arch}.${ext}'
 
 extraMetadata:
-  description: Nora
+  description: Knote — 知音, an elegant music player
 
 directories:
   buildResources: build
@@ -62,7 +62,7 @@ fileAssociations:
     role: Editor
 
 win:
-  executableName: Nora
+  executableName: Knote
   target:
     - target: nsis
       arch:
@@ -113,6 +113,6 @@ linux:
 npmRebuild: false
 
 protocols:
-  name: nora-protocol
+  name: knote-protocol
   schemes:
-    - nora
+    - knote

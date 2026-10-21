@@ -1,4 +1,4 @@
-import { mkdirSync } from 'fs';
+import { existsSync, mkdirSync, renameSync } from 'fs';
 import path from 'path';
 
 import * as schema from '@db/schema';
@@ -14,8 +14,22 @@ import { app } from 'electron';
 
 import { seedDatabase } from './seed';
 
-const DB_NAME = 'nora.pglite.db';
+const DB_NAME = 'knote.pglite.db';
 export const DB_PATH = app.getPath('userData') + '/' + DB_NAME;
+/** The database name the app used before the Knote rename; existing installs migrate from it. */
+const LEGACY_DB_NAME = 'nora.pglite.db';
+
+const migrateLegacyDatabaseIfNeeded = () => {
+  const userData = app.getPath('userData');
+  const legacyPath = `${userData}/${LEGACY_DB_NAME}`;
+  if (DB_NAME === LEGACY_DB_NAME || !existsSync(legacyPath) || existsSync(DB_PATH)) return;
+
+  logger.info(`Found a legacy '${LEGACY_DB_NAME}' database; renaming it to '${DB_NAME}'.`);
+  renameSync(legacyPath, DB_PATH);
+};
+
+migrateLegacyDatabaseIfNeeded();
+
 const migrationsFolder = path.resolve(import.meta.dirname, '../../resources/drizzle/');
 logger.debug(`Migrations folder: ${migrationsFolder}`);
 

@@ -50,7 +50,7 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       details: title,
       state: artists,
       assets: {
-        large_image: artworkLink ?? 'nora_logo',
+        large_image: artworkLink ?? 'knote_logo',
         small_image: artworkLink ?? 'song_artwork',
         small_text: firstArtistWithArtwork
           ? firstArtistWithArtwork.name

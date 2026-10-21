@@ -109,7 +109,7 @@ export const resolveNeteaseStreamPath = async (
 /**
  * Resolves a NetEase song into the same shape as a library `getSong` result so the regular player
  * pipeline (store, seekbar, lyrics, queue) treats it unchanged. The `path` streams through the
- * `nora://` protocol proxy, which resolves the CDN URL fresh on every request.
+ * `knote://` protocol proxy, which resolves the CDN URL fresh on every request.
  *
  * Accepts either the NetEase id (resolves the summary over IPC first) or an already-fetched
  * summary, so list rows avoid the extra round-trip.

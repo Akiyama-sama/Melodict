@@ -69,7 +69,7 @@ const AboutSettings = () => {
           <div className="flex items-center">
             <Img src={AppIcon} className="aspect-square max-h-12 rounded-md shadow-md" alt="" />
             <div className="ml-4 flex flex-col">
-              <span className="block">Nora</span>
+              <span className="block">{t('common.appName')}</span>
               <span className="text-sm font-light">
                 v{version}{' '}
                 {elapsed && (
@@ -409,7 +409,7 @@ const AboutSettings = () => {
                 Hyperlink: (
                   <Hyperlink
                     link={`${bugs.url}/new/choose`}
-                    linkTitle={t('settingsPage.createIssueOnNoraGithubRepo')}
+                    linkTitle={t('settingsPage.createIssueOnKnoteGithubRepo')}
                   />
                 )
               }}
@@ -417,14 +417,14 @@ const AboutSettings = () => {
           </div>
           <Hyperlink
             label={t('settingsPage.emailContact')}
-            link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
+            link="mailto:sandakannipunajith@gmail.com?subject=Regarding Knote&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
             linkTitle={t('settingsPage.emailContact')}
             noValidityCheck
           />
           <br />
           <div className="mt-6 text-sm">
             <Trans
-              i18nKey="settingsPage.loveNora"
+              i18nKey="settingsPage.loveKnote"
               components={{
                 span: (
                   <span className="heart text-font-color-crimson dark:text-font-color-crimson" />

@@ -1,7 +1,7 @@
 // Shared NetEase Cloud Music integration contracts. Keep this module free of Electron/main-only
 // imports so that both the main process and the renderer can use it.
 
-export const NETEASE_SCHEME = 'nora';
+export const NETEASE_SCHEME = 'knote';
 export const NETEASE_PROTOCOL_HOST = 'netease';
 export const NETEASE_SONG_PATH_PREFIX = `${NETEASE_SCHEME}://${NETEASE_PROTOCOL_HOST}/song/`;
 
@@ -22,12 +22,12 @@ export const tryDecodeNeteaseSongId = (songId: number): number | null =>
 
 export const isNeteaseSongId = (songId: number): boolean => songId < 0;
 
-/** Playable path used by the renderer player, proxied by the nora:// protocol handler. */
+/** Playable path used by the renderer player, proxied by the knote:// protocol handler. */
 export const buildNeteaseSongPath = (neteaseId: number, quality: NeteaseQualityTypes): string =>
   `${NETEASE_SONG_PATH_PREFIX}${neteaseId}?level=${quality}`;
 
 /**
- * Extracts a NetEase song id from a `nora://netease/song/<id>?...` path. Returns `null` for local
+ * Extracts a NetEase song id from a `knote://netease/song/<id>?...` path. Returns `null` for local
  * file paths, letting callers branch on a single object sentinel instead of extra flags.
  */
 export const tryGetNeteaseIdFromPath = (protocolPath: string): number | null => {
@@ -51,7 +51,7 @@ export const getNeteaseQualityFromPath = (protocolPath: string): NeteaseQualityT
 };
 
 /**
- * Whether this `nora://netease/song/...` path was resolved to a trial (30 s) fragment. The flag is
+ * Whether this `knote://netease/song/...` path was resolved to a trial (30 s) fragment. The flag is
  * written by the renderer's stream probe purely for display; the protocol handler ignores it.
  */
 export const isNeteaseTrialPath = (protocolPath: string): boolean => {

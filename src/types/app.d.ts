@@ -1342,7 +1342,7 @@ declare global {
   }
 
   type ArtAssetKeys =
-    | 'nora_logo'
+    | 'knote_logo'
     | 'song_artwork'
     | 'album_artwork'
     | 'favorites_artwork'
