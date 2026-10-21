@@ -1,7 +1,7 @@
 import { isNeteaseSongId } from '@common/netease';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useContext, useEffect, useRef } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -34,6 +34,12 @@ const SongControlsAndSeekbarContainer = () => {
 
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // The footer opens the fullscreen player on any bare click; interactive controls stop the
+  // event from bubbling so their own action wins.
+  const stopPropagation = useCallback((e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+  }, []);
+
   useEffect(() => {
     return () => {
       if (hoverTimerRef.current !== null) {
@@ -57,7 +63,10 @@ const SongControlsAndSeekbarContainer = () => {
               ? 'material-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight! opacity-100!'
               : 'material-icons-round-outlined'
           } icon cursor-pointer !text-2xl leading-none text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white`}
-          clickHandler={() => isLikeSupported && toggleIsFavorite(!isAFavorite)}
+          clickHandler={(e) => {
+            e.stopPropagation();
+            if (isLikeSupported) toggleIsFavorite(!isAFavorite);
+          }}
         />
 
         <Button
@@ -70,7 +79,10 @@ const SongControlsAndSeekbarContainer = () => {
             isShuffling &&
             'text-font-color-highlight! dark:text-dark-font-color-highlight! opacity-100!'
           }`}
-          clickHandler={toggleQueueShuffle}
+          clickHandler={(e) => {
+            e.stopPropagation();
+            toggleQueueShuffle();
+          }}
         />
 
         <Button
@@ -78,7 +90,10 @@ const SongControlsAndSeekbarContainer = () => {
           tooltipLabel={t('player.prevSong')}
           iconName="skip_previous"
           iconClassName="material-icons-round text-2xl! opacity-60 transition-opacity hover:opacity-80"
-          clickHandler={handleSkipBackwardClick}
+          clickHandler={(e) => {
+            e.stopPropagation();
+            handleSkipBackwardClick();
+          }}
         />
 
         <Button
@@ -91,7 +106,10 @@ const SongControlsAndSeekbarContainer = () => {
           iconClassName={`material-icons-round !text-5xl opacity-80 transition-opacity hover:opacity-80 ${
             isPlayerStalled && 'opacity-10!'
           }`}
-          clickHandler={() => !isPlayerStalled && toggleSongPlayback()}
+          clickHandler={(e) => {
+            e.stopPropagation();
+            if (!isPlayerStalled) toggleSongPlayback();
+          }}
         />
 
         <Button
@@ -99,7 +117,10 @@ const SongControlsAndSeekbarContainer = () => {
           tooltipLabel={t('player.nextSong')}
           iconName="skip_next"
           iconClassName="material-icons-round text-2xl! opacity-60 transition-opacity hover:opacity-80"
-          clickHandler={() => handleSkipForwardClick('USER_SKIP')}
+          clickHandler={(e) => {
+            e.stopPropagation();
+            handleSkipForwardClick('USER_SKIP');
+          }}
           onMouseEnter={() => {
             if (hoverTimerRef.current === null) {
               hoverTimerRef.current = setTimeout(() => showUpNextSongPopup(), 1_000);
@@ -123,11 +144,15 @@ const SongControlsAndSeekbarContainer = () => {
             isRepeating !== 'false' &&
             'text-font-color-highlight! dark:text-dark-font-color-highlight! opacity-100!'
           }`}
-          clickHandler={() => toggleRepeat()}
+          clickHandler={(e) => {
+            e.stopPropagation();
+            toggleRepeat();
+          }}
         />
 
         <NavLink
           to="/main-player/lyrics"
+          onClick={stopPropagation}
           className={`lyrics-btn group after:bg-font-color-highlight dark:after:bg-dark-font-color-highlight !m-0 flex items-center justify-center !border-0 bg-transparent !p-0 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent [&.active]:after:opacity-100`}
           title={t('player.lyrics')}
         >
@@ -138,7 +163,10 @@ const SongControlsAndSeekbarContainer = () => {
           </span>
         </NavLink>
       </div>
-      <SeekBarContainer />
+      {/* The seek bar area opts out of the footer's click-to-fullscreen fallback. */}
+      <div onClick={stopPropagation} onKeyDown={stopPropagation} role="presentation" className="w-full max-w-xl">
+        <SeekBarContainer />
+      </div>
     </div>
   );
 };

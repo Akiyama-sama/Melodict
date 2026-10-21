@@ -22,6 +22,12 @@ const OtherSongControlsContainer = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  // The footer opens the fullscreen player on any bare click; interactive controls stop the
+  // event from bubbling so their own action wins.
+  const stopPropagation = useCallback((e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+  }, []);
+
   const openOtherSettingsContextMenu = useCallback(
     (pageX: number, pageY: number) => {
       updateContextMenuData(
@@ -90,6 +96,7 @@ const OtherSongControlsContainer = () => {
     <div className="other-controls-container flex items-center justify-end">
       <NavLink
         to="/main-player/queue"
+        onClick={stopPropagation}
         className={`queue-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent`}
         title={t('player.currentQueue')}
       >
@@ -106,6 +113,7 @@ const OtherSongControlsContainer = () => {
 
       <NavLink
         to="/mini-player"
+        onClick={stopPropagation}
         className={`full-screen-player-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent`}
         title={t('player.openInMiniPlayer')}
       >
@@ -122,6 +130,7 @@ const OtherSongControlsContainer = () => {
 
       <NavLink
         to="/fullscreen-player"
+        onClick={stopPropagation}
         className={`full-screen-player-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent`}
         title={t('player.openInFullScreen')}
       >
@@ -145,13 +154,27 @@ const OtherSongControlsContainer = () => {
         iconClassName={`material-icons-round text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
           isMuted && 'text-font-color-highlight! opacity-100! dark:text-dark-font-color-highlight!'
         }`}
-        clickHandler={() => toggleMutedState(!isMuted)}
+        clickHandler={(e) => {
+          e.stopPropagation();
+          toggleMutedState(!isMuted);
+        }}
       />
 
-      <div className="volume-slider-container mr-4 max-w-24 min-w-16 lg:mr-4">
+      {/* Volume slider area opts out of the footer's click-to-fullscreen fallback. */}
+      <div
+        className="volume-slider-container mr-4 max-w-24 min-w-16 lg:mr-4"
+        onClick={stopPropagation}
+        onKeyDown={stopPropagation}
+        role="presentation"
+      >
         <VolumeSlider name="player-volume-slider" id="volumeSlider" />
       </div>
-      <div className="other-settings-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-4 flex cursor-pointer items-center justify-center">
+      <div
+        className="other-settings-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-4 flex cursor-pointer items-center justify-center"
+        onClick={stopPropagation}
+        onKeyDown={stopPropagation}
+        role="presentation"
+      >
         <span
           title={t('player.otherSettings')}
           className="material-icons-round icon text-font-color-black dark:text-font-color-white cursor-pointer text-xl opacity-60 transition-opacity hover:opacity-80"
