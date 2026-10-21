@@ -2,8 +2,10 @@ import { describe, expect, test } from 'vitest';
 
 import {
   getSpacedLyricLineText,
+  getSpacedLyricLineTextWithWordSpans,
   getTokenColor,
-  getTokenColorPalette
+  getTokenColorPalette,
+  getTokenSingingWindows
 } from '../../../../../src/renderer/src/other/lyricsAnalysisUtils';
 
 const word = (text: string): SyncedLyricsLineWord => ({
@@ -137,5 +139,115 @@ describe('getTokenColor', () => {
 
   test('returns undefined for an empty palette instead of crashing', () => {
     expect(getTokenColor(0, [])).toBeUndefined();
+  });
+});
+
+describe('getSpacedLyricLineTextWithWordSpans', () => {
+  // The singing highlight hydrates YRC word timings into the token view's char coordinates, so
+  // the spans MUST slice out each word's visible text from the same string the tokens are
+  // validated against.
+  test('reconstructs each word from the spaced text by its span', () => {
+    const words = [word('I'), word('have'), word('to'), word('go')];
+    const { text, wordSpans } = getSpacedLyricLineTextWithWordSpans(words);
+
+    expect(text).toBe('I have to go');
+    expect(wordSpans.map((span) => text.slice(span.start, span.end))).toEqual([
+      'I',
+      'have',
+      'to',
+      'go'
+    ]);
+  });
+
+  test('time windows ride through verbatim', () => {
+    const { wordSpans } = getSpacedLyricLineTextWithWordSpans([word('夜'), word('に')]);
+
+    expect(wordSpans).toHaveLength(2);
+    expect(wordSpans[0]).toMatchObject({ start: 0, end: 1, timeStart: 0, timeEnd: 1 });
+    expect(wordSpans[1]).toMatchObject({ start: 2, end: 3, timeStart: 0, timeEnd: 1 });
+  });
+
+  test('stray padding inside word payloads cannot shift spans', () => {
+    // The spaced text collapses 'I ' + ' have' to 'I have'; the spans must still slice the
+    // reconstructed words, not the raw payload boundaries.
+    const { text, wordSpans } = getSpacedLyricLineTextWithWordSpans([
+      word('I '),
+      word(' have')
+    ]);
+
+    expect(text).toBe('I have');
+    expect(wordSpans.map((span) => text.slice(span.start, span.end))).toEqual(['I', 'have']);
+  });
+
+  test('string lines carry no spans (nothing to hydrate)', () => {
+    expect(getSpacedLyricLineTextWithWordSpans('plain line')).toEqual({
+      text: 'plain line',
+      wordSpans: []
+    });
+  });
+});
+
+describe('getTokenSingingWindows', () => {
+  const token = (tokenId: string, startChar: number, endChar: number) => ({
+    tokenId,
+    startChar,
+    endChar
+  });
+
+  test('lights the token whose characters are sounding, quantized to whole characters', () => {
+    // "I have to go": token "have" spans [2, 6); its word sounds 10s..12s.
+    const spans = [{ start: 2, end: 6, timeStart: 10, timeEnd: 12 }];
+    const windows = getTokenSingingWindows(11, [token('t1', 2, 6)], spans);
+
+    // Halfway through the word: the character being sung counts as lit, so 3 of 4 characters.
+    expect(windows?.get('t1')).toEqual({ sungStart: 0, sungEnd: 3 });
+  });
+
+  test('a multi-word token lights only the word being sung', () => {
+    // "settled down": one token [0, 12); "settled" 0..10s, "down" 10..14s.
+    const spans = [
+      { start: 0, end: 7, timeStart: 0, timeEnd: 10 },
+      { start: 8, end: 12, timeStart: 10, timeEnd: 14 }
+    ];
+    const windows = getTokenSingingWindows(
+      12,
+      [token('t1', 0, 12)],
+      spans
+    );
+
+    // "down" is sounding (halfway → 3 of its 4 chars): lit run is the word tail, "settled" stays
+    // unlit.
+    expect(windows?.get('t1')).toEqual({ sungStart: 8, sungEnd: 11 });
+  });
+
+  test('past words revert: the map only holds the currently-sounding span', () => {
+    const spans = [
+      { start: 0, end: 1, timeStart: 0, timeEnd: 1 },
+      { start: 2, end: 6, timeStart: 1, timeEnd: 2 }
+    ];
+    const tokens = [token('t1', 0, 1), token('t2', 2, 6)];
+
+    expect(getTokenSingingWindows(0.5, tokens, spans)?.has('t2')).toBe(false);
+    expect(getTokenSingingWindows(1.5, tokens, spans)?.has('t1')).toBe(false);
+    expect(getTokenSingingWindows(1.5, tokens, spans)?.has('t2')).toBe(true);
+  });
+
+  test('returns undefined between words and before the line starts', () => {
+    const spans = [{ start: 0, end: 1, timeStart: 5, timeEnd: 6 }];
+
+    expect(getTokenSingingWindows(4.9, [token('t1', 0, 1)], spans)).toBeUndefined();
+    expect(getTokenSingingWindows(6.1, [token('t1', 0, 1)], spans)).toBeUndefined();
+  });
+
+  test('overlapping word windows union their lit ranges', () => {
+    const spans = [
+      { start: 0, end: 4, timeStart: 0, timeEnd: 2 },
+      { start: 2, end: 6, timeStart: 1, timeEnd: 3 }
+    ];
+    // At 1.5 both spans sound; the union covers [0, ~4) of the token.
+    const windows = getTokenSingingWindows(1.5, [token('t1', 0, 6)], spans);
+
+    expect(windows?.get('t1')).toMatchObject({ sungStart: 0 });
+    expect(windows?.get('t1')?.sungEnd).toBeGreaterThan(2);
   });
 });

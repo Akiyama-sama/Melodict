@@ -2,7 +2,11 @@ import { useMemo } from 'react';
 
 import type { LyricsAnalysisToken } from '../../../../common/lyricsAnalysis';
 import { splitLineIntoTokens } from '../../../../common/lyricsAnalysis';
-import { getTokenColor, getTokenColorPalette } from '../../other/lyricsAnalysisUtils';
+import {
+  getTokenColor,
+  getTokenColorPalette,
+  type TokenSingingSpan
+} from '../../other/lyricsAnalysisUtils';
 
 type Props = {
   text: string;
@@ -16,6 +20,12 @@ type Props = {
   isActiveLine?: boolean;
   /** The song's dynamic-theme palette; token colours are derived from its swatches. */
   palette?: NodeVibrantPalette;
+  /**
+   * The characters being sung right now, per token (offsets into the token's own text). Absent
+   * entries keep their resting palette colour; present ones render their covered characters in
+   * white — the karaoke wipe the plain synced view gives every YRC word.
+   */
+  singingWindows?: Map<string, TokenSingingSpan>;
   onTokenClick: (token: LyricsAnalysisToken, line: LyricsAnalysisLine) => void;
 };
 
@@ -45,7 +55,15 @@ const getTokenPronunciation = (token: LyricsAnalysisToken) => {
  * fragmented inlines cannot recur).
  */
 const LyricsAnalysisLineContent = (props: Props) => {
-  const { text, analysis, activeTokenId, isActiveLine = false, palette, onTokenClick } = props;
+  const {
+    text,
+    analysis,
+    activeTokenId,
+    isActiveLine = false,
+    palette,
+    singingWindows,
+    onTokenClick
+  } = props;
 
   const segments = useMemo(
     () => (analysis ? splitLineIntoTokens(text, analysis.tokens) : [{ text }]),
@@ -79,6 +97,31 @@ const LyricsAnalysisLineContent = (props: Props) => {
           /^\s/.test(nextSegment?.text ?? ' ') ? '' : 'adjacent-right'
         }`;
 
+        // The singing wipe: characters covered by the sounding YRC word render white (the same
+        // "sung" colour language as hover/selected), the rest keep the resting token colour. The
+        // lit range can start past the token's first character (a multi-word token lights only
+        // the word being sung), so the text splits into before/lit/after; .token-main keeps its
+        // hover band either way.
+        const lit = singingWindows?.get(token.tokenId);
+        const tokenMain =
+          !lit || (lit.sungStart <= 0 && lit.sungEnd >= segment.text.length) ? (
+            <span className="token-main whitespace-pre">{segment.text}</span>
+          ) : (
+            <span className="token-main whitespace-pre">
+              {lit.sungStart > 0 && (
+                <span className="whitespace-pre">{segment.text.slice(0, lit.sungStart)}</span>
+              )}
+              <span className="token-sung whitespace-pre">
+                {segment.text.slice(lit.sungStart, lit.sungEnd)}
+              </span>
+              {lit.sungEnd < segment.text.length && (
+                <span className="whitespace-pre">
+                  {segment.text.slice(lit.sungEnd, segment.text.length)}
+                </span>
+              )}
+            </span>
+          );
+
         return (
           <span
             key={token.tokenId}
@@ -101,7 +144,7 @@ const LyricsAnalysisLineContent = (props: Props) => {
             }}
             title={token.card.meaning}
           >
-            <span className="token-main whitespace-pre">{segment.text}</span>
+            {tokenMain}
             {pronunciation && <span className="token-romaji whitespace-pre">{pronunciation}</span>}
           </span>
         );
