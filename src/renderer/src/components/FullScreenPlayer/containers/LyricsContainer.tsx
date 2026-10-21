@@ -153,12 +153,14 @@ const LyricsContainer = memo((props: Props) => {
       id="miniPlayerLyricsContainer"
     >
       {lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
-        <>
+        // `min-w-*` plus `pl-*` keeps a guaranteed gutter from the window edge at ANY size —
+        // narrow windows used to push the lyric text flush against x=0. `min-w-0` lets the inner
+        // max-width actually shrink so the padding always survives. The centered block (panel open)
+        // uses padding-based symmetry: its max-width includes the gutters, so the text column sits
+        // equidistant from the lyrics column's both edges instead of leaving one side wide open.
+        <div className="min-w-0 w-full pl-10 pr-10">
           {isPanelOpen ? (
-            // With the analysis panel open the lyrics column no longer sits beside the cover, so
-            // center the block in the remaining space. The lines themselves stay left-aligned, and
-            // the source line lives inside the same wrapper so it aligns with the lyric text.
-            <div className="mx-auto w-full max-w-[52rem]">
+            <div className="mx-auto w-full max-w-[60rem]">
               {lyricsComponents}
               {lyricsSource}
             </div>
@@ -168,7 +170,7 @@ const LyricsContainer = memo((props: Props) => {
               {lyricsSource}
             </>
           )}
-        </>
+        </div>
       )}
       {lyrics && !lyrics.lyrics.isSynced && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
