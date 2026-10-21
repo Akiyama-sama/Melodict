@@ -1,12 +1,16 @@
+import { lazy, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
+
+/** Lazy so the QR flow's bundle loads only when login is actually requested. */
+const NeteaseQrLoginPrompt = lazy(() => import('./NeteaseQrLoginPrompt'));
 
 /** Shared "log in to see your NetEase content" card shown by the NetEase section pages. */
 const NeteaseNotLoggedInNotice = () => {
   const { t } = useTranslation();
-
-  const openWebPortal = () => window.api.settingsHelpers.openInBrowser('https://music.163.com/');
+  const { changePromptMenuData } = useContext(AppUpdateContext);
 
   return (
     <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
@@ -20,8 +24,9 @@ const NeteaseNotLoggedInNotice = () => {
       <Button
         className="mt-4 mr-0!"
         label={t('netease.goToLogin')}
-        iconName="login"
-        clickHandler={openWebPortal}
+        iconName="qr_code_2"
+        iconClassName="material-icons-round-outlined"
+        clickHandler={() => changePromptMenuData(true, <NeteaseQrLoginPrompt />)}
       />
     </div>
   );
