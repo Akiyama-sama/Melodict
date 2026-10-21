@@ -498,7 +498,7 @@
       "title": "网易云音乐",
       "accountDescription": "登录网易云音乐账号后，无需再添加本地文件，即可直接搜索、播放整个曲库并享受歌词解析。",
       "notLoggedIn": "未登录。",
-      "scanQrToLogin": "扫码登录",
+      "scanQrToLogin": "网易云扫码登录",
       "scanQrTitle": "用网易云音乐 App 扫码",
       "qrImageAlt": "网易云登录二维码",
       "qrLoading": "正在生成二维码…",
@@ -1171,8 +1171,8 @@
     "noPlaylists": "你的网易云账号下没有找到歌单。",
     "noLikedSongs": "你在网易云标记红心的歌曲会出现在这里。",
     "notLoggedInSectionTitle": "尚未连接网易云账号",
-    "notLoggedInSectionDescription": "到设置里扫码登录后，即可浏览你的网易云歌单、喜欢的音乐和每日推荐。",
-    "goToLogin": "去设置里登录",
+    "notLoggedInSectionDescription": "扫码登录后，即可浏览你的网易云歌单、喜欢的音乐和每日推荐。",
+    "goToLogin": "扫码登录",
     "addedToNeteaseLikes": "已将《{{title}}》加入网易云红心。",
     "removedFromNeteaseLikes": "已将《{{title}}》移出网易云红心。"
   }
