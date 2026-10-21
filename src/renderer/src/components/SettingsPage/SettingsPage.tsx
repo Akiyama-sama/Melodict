@@ -67,6 +67,18 @@ const settingsSections: SettingsSection[] = [
     Component: LanguageSettings
   },
   {
+    id: 'netease-settings-container',
+    icon: 'cloud',
+    labelKey: 'settingsPage.netease.navLabel',
+    Component: NeteaseSettings
+  },
+  {
+    id: 'lyrics-analysis-settings-container',
+    icon: 'auto_awesome',
+    labelKey: 'lyricsAnalysis.settings.title',
+    Component: LyricsAnalysisSettings
+  },
+  {
     id: 'audio-playback-settings-container',
     icon: 'slow_motion_video',
     labelKey: 'settingsPage.audioPlayback',
@@ -79,22 +91,10 @@ const settingsSections: SettingsSection[] = [
     Component: AccountsSettings
   },
   {
-    id: 'netease-settings-container',
-    icon: 'cloud',
-    labelKey: 'settingsPage.netease.navLabel',
-    Component: NeteaseSettings
-  },
-  {
     id: 'lyrics-settings-container',
     icon: 'notes',
     labelKey: 'settingsPage.lyrics',
     Component: LyricsSettings
-  },
-  {
-    id: 'lyrics-analysis-settings-container',
-    icon: 'auto_awesome',
-    labelKey: 'lyricsAnalysis.settings.title',
-    Component: LyricsAnalysisSettings
   },
   {
     id: 'equalizer-settings-container',
