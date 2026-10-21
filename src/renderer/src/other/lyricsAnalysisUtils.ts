@@ -21,15 +21,15 @@ export interface SingingSpan {
 }
 
 /**
- * Builds the spaced line text AND each word's char span inside it in one pass. The spaced text is
- * byte-identical to the classic `join(' ') + collapse + trim` join — the single source both the
- * analysis input (`useLyricsAnalysis`) and the token view's display text (`LyricLine`) already
- * rely on — so the singing-highlight coordinates are guaranteed to share the exact coordinate
- * system the token spans are validated against.
+ * Builds the spaced line text AND each word's char span inside it in one pass. This is the single
+ * source for BOTH the analysis input (`useLyricsAnalysis`) and the token view's display text
+ * (`LyricLine`) — plus the singing-highlight coordinates, which are therefore guaranteed to share
+ * the exact coordinate system the token spans are validated against.
  *
- * The builder replays that join's whitespace collapse character by character while attributing
- * every surviving character to the word it came from (separator spaces belong to no word), so
- * stray padding inside word payloads cannot shift spans and `text.slice(span.start, span.end)`
+ * Why not a naive cursor walk over the word array: the text is `join(' ') + collapse + trim`, so
+ * stray padding inside word payloads shifts positions — this builder replays the identical
+ * collapse character by character instead, attributing every surviving character to the word it
+ * came from (separator spaces belong to no word), so `text.slice(span.start, span.end)`
  * reconstructs each word's visible text exactly.
  */
 export const getSpacedLyricLineTextWithWordSpans = (
@@ -89,7 +89,10 @@ export const getSpacedLyricLineTextWithWordSpans = (
 
 /**
  * Joins a lyric line — plain text or an enhanced (YRC) word array — back into the line's spaced
- * text. `LyricLine.tsx` renders YRC words as separate spans with `mr-2` spacing, so a space between
+ * text. Thin wrapper over {@link getSpacedLyricLineTextWithWordSpans} for callers that only need
+ * the text; the word spans come free with it when the token view needs singing timing.
+ *
+ * `LyricLine.tsx` renders YRC words as separate spans with `mr-2` spacing, so a space between
  * words is how the line reads everywhere else; the unspaced `IhavetogosomewhereIsaw` fed to the LLM
  * left it no way to recover word boundaries and collapsed the whole line into one token.
  *
@@ -103,35 +106,64 @@ export const getSpacedLyricLineTextWithWordSpans = (
 export const getSpacedLyricLineText = (originalText: string | SyncedLyricsLineWord[]) =>
   getSpacedLyricLineTextWithWordSpans(originalText).text;
 
-/** Tokens must stay readable on the near-black player background. */
-const MIN_LIGHTNESS = 0.7;
-const MAX_LIGHTNESS = 0.85;
-/** Monochrome covers leave hue as the only differentiator; saturation makes it visible. */
-const MIN_SATURATION = 0.55;
+/**
+ * Swatches darker than this are excluded from colour-B candidates — the player background is
+ * near-black (`--dark-background-color-1: hsl(228 7% 14%)`), so a verbatim Dark swatch would be
+ * unreadable. Exclusion is a selection rule, not an adjustment: every colour that ships is a
+ * palette swatch exactly as the cover produced it.
+ */
+const MIN_TOKEN_SWATCH_LIGHTNESS = 0.5;
+
+/** Circular distance between two hues on the [0, 1) wheel — 0 (same hue) to 0.5 (opposite). */
+const hueDistance = (a: number, b: number) => {
+  const d = Math.abs(a - b);
+  return Math.min(d, 1 - d);
+};
 
 /**
- * The two-colour token palette.
+ * The two-colour token palette, both colours taken VERBATIM from the song's palette swatches —
+ * no recomputed hues, no clamping, nothing the cover's palette doesn't itself contain.
  *
  * Colour A is the song title's own colour: the fullscreen player always renders dark, where
  * `text-font-color-highlight` resolves to `--dark-text-color-highlight` — which the dynamic theme
  * sets to `LightVibrant` verbatim (deriveThemeColors). Reusing that exact swatch makes the tokens
  * belong to the same colour world as the title instead of introducing yet another accent.
  *
- * Colour B is A's complement (hue + 180°) at the same, clamped saturation/lightness — the largest
- * perceptual gap the wheel offers, still derived from the song's own palette rather than a fixed
- * colour. Tokens simply alternate A, B, A, B … so neighbouring words always differ.
+ * Colour B is whichever other readable swatch's hue sits farthest from A's (ties go to the
+ * earlier swatch in Vibrant → LightMuted → Muted → dark order, i.e. the more prominent one) —
+ * the largest perceptual gap the song's own palette offers, complement-like without inventing a
+ * colour. Tokens simply alternate A, B, A, B … so neighbouring words always differ. When the
+ * palette offers no other readable swatch, A takes the only slot and the tokens render
+ * single-colour — still strictly palette colours.
  */
 export const getTokenColorPalette = (palette?: NodeVibrantPalette): string[] => {
-  // Every palette swatch is optional; LightVibrant always exists on the default palette.
-  const swatch = palette?.LightVibrant ?? DEFAULT_SONG_PALETTE.LightVibrant;
-  const [h, rawS, rawL] = swatch.hsl;
-  const s = Math.max(Math.min(rawS, 1), MIN_SATURATION);
-  const l = Math.min(Math.max(rawL, MIN_LIGHTNESS), MAX_LIGHTNESS);
+  // A palette without its anchor swatch (LightVibrant, the song title's colour) is unusable —
+  // fall back to the default palette AS A WHOLE so token colours never mix a real cover's
+  // swatches with the default ones, and a song with no palette still gets two colours.
+  const source = palette?.LightVibrant ? palette : DEFAULT_SONG_PALETTE;
+  const swatchA = source.LightVibrant ?? DEFAULT_SONG_PALETTE.LightVibrant;
 
-  return [
-    formatHsl([h, s, l]),
-    formatHsl([(h + 0.5) % 1, s, l])
-  ];
+  let swatchB: NodeVibrantPaletteSwatch | undefined;
+  let maxHueDistance = -1;
+  for (const candidate of [
+    source.Vibrant,
+    source.LightMuted,
+    source.Muted,
+    source.DarkVibrant,
+    source.DarkMuted
+  ]) {
+    if (!candidate || candidate.hsl[2] < MIN_TOKEN_SWATCH_LIGHTNESS) continue;
+
+    const distance = hueDistance(candidate.hsl[0], swatchA.hsl[0]);
+    if (distance > maxHueDistance) {
+      maxHueDistance = distance;
+      swatchB = candidate;
+    }
+  }
+
+  if (!swatchB) return [formatHsl(swatchA.hsl)];
+
+  return [formatHsl(swatchA.hsl), formatHsl(swatchB.hsl)];
 };
 
 /**

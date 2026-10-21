@@ -83,47 +83,61 @@ describe('getSpacedLyricLineText', () => {
 });
 
 describe('getTokenColorPalette', () => {
-  // The token colour contract: exactly two colours — the song title's own colour (LightVibrant,
-  // which is what --dark-text-color-highlight uses in the always-dark fullscreen player) and its
-  // hue complement — alternating across tokens.
-  test('returns exactly two colours, the second being the complement of the first', () => {
+  // The token colour contract: exactly two colours, BOTH verbatim palette swatches — the song
+  // title's own colour (LightVibrant, which is what --dark-text-color-highlight uses in the
+  // always-dark fullscreen player) plus the other readable swatch whose hue is farthest from it —
+  // alternating across tokens. No recomputed hues, no clamping.
+  test('returns exactly two colours, both verbatim swatches, B the farthest-hue readable one', () => {
     const colors = getTokenColorPalette(palette());
 
     expect(colors).toHaveLength(2);
-    const [a, b] = colors.map(parse);
-    // Complement: hue diametrically opposite, same saturation and lightness.
-    expect(hueDistance(colors[0], colors[1])).toBeCloseTo(0.5, 5);
-    expect(b.s).toBeCloseTo(a.s, 5);
-    expect(b.l).toBeCloseTo(a.l, 5);
-  });
-
-  test('colour A is the LightVibrant swatch verbatim (the song title colour)', () => {
-    const colors = getTokenColorPalette(palette());
+    // Colour A is LightVibrant verbatim.
     expect(parse(colors[0])).toEqual({ h: 0.1, s: 0.9, l: 0.74 });
+    // Colour B is LightMuted's swatch, unmodified (h 0.6 is the farthest hue among readable
+    // candidates here).
+    expect(parse(colors[1])).toEqual({ h: 0.6, s: 0.3, l: 0.75 });
   });
 
-  test('clamps lightness into the readable band and saturation up to a visible floor', () => {
-    // A dark, desaturated cover would otherwise produce unreadable token colours.
+  test('prefers a readable swatch over darker far-hue ones and never brightens a dark pick', () => {
+    // A dark, far-hue Vibrant must NOT be brightened into colour B — the palette simply yields
+    // the readable LightMuted swatch instead, verbatim.
     const colors = getTokenColorPalette(
-      palette({ LightVibrant: swatch([0.3, 0.1, 0.3]) })
+      palette({
+        Vibrant: swatch([0.9, 0.9, 0.45]),
+        LightMuted: swatch([0.6, 0.3, 0.75]),
+        Muted: swatch([0.5, 0.3, 0.6])
+      })
     );
 
-    for (const color of colors) {
-      const { s, l } = parse(color);
-      expect(l).toBeGreaterThanOrEqual(0.7);
-      expect(l).toBeLessThanOrEqual(0.85);
-      expect(s).toBeGreaterThanOrEqual(0.55);
-    }
-    // The two entries stay distinct even after clamping.
-    expect(hueDistance(colors[0], colors[1])).toBeCloseTo(0.5, 5);
+    expect(colors).toHaveLength(2);
+    expect(parse(colors[1])).toEqual({ h: 0.6, s: 0.3, l: 0.75 });
+  });
+
+  test('returns a single colour when no other readable swatch exists instead of inventing one', () => {
+    const colors = getTokenColorPalette(
+      palette({
+        Vibrant: swatch([0.2, 0.9, 0.45]),
+        LightMuted: swatch([0.1, 0.3, 0.4]),
+        Muted: swatch([0.1, 0.9, 0.3]),
+        DarkVibrant: swatch([0.1, 0.9, 0.26]),
+        DarkMuted: swatch([0.1, 0.9, 0.3])
+      })
+    );
+
+    // Every remaining swatch is too dark for the near-black player background, so B would not
+    // be readable — and a recomputed complement would not be a palette colour.
+    expect(colors).toHaveLength(1);
+    expect(parse(colors[0])).toEqual({ h: 0.1, s: 0.9, l: 0.74 });
   });
 
   test('falls back to the default song palette when the cover has no palette', () => {
     expect(getTokenColorPalette(undefined)).toEqual(getTokenColorPalette({}));
-    // The default palette is blue (~215°); colour B must be its complement (~35°, orange).
+    // The default palette is one blue family (~215°); the only other swatch above the readability
+    // floor is Vibrant, so B is that swatch verbatim (a lighter-band blue, not a recomputed hue).
     const [a, b] = getTokenColorPalette(undefined).map(parse);
     expect(a.h * 360).toBeCloseTo(214.9, 0);
-    expect(b.h * 360).toBeCloseTo(34.9, 0);
+    expect(b.h * 360).toBeCloseTo(212.0, 0);
+    expect(b.l * 100).toBeCloseTo(57.6, 1);
   });
 });
 
