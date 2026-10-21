@@ -62,13 +62,33 @@ const SongInfoContainer = (props: Props) => {
       className={`song-img-and-info-container text-font-color-white flex flex-col justify-center gap-1 transition-[padding] duration-300 ${
         isOverlay
           ? // Floats over the top third of the (relative) lyrics column only, so the analysis panel
-            // stays clear. The lyrics scroll underneath and the gradient keeps text legible. The
-            // horizontal padding mirrors the lyrics wrapper's gutter, so the cover stays aligned
-            // with the lyric text at any window size.
-            'absolute top-0 left-0 z-10 h-[34%] w-full justify-center overflow-hidden bg-linear-to-b from-black/85 via-black/60 to-transparent pt-10 px-10 pb-12'
+            // stays clear. The horizontal padding mirrors the lyrics wrapper's gutter, so the
+            // cover stays aligned with the lyric text at any window size.
+            'absolute top-0 left-0 z-10 h-[34%] w-full justify-center pt-10 px-10 pb-12'
           : 'gap-6 lg:ml-4 lg:w-full'
       }`}
     >
+      {isOverlay && (
+        /*
+         * Frosted-glass scrim, edge-free by construction: the blur + dark tint live on their own
+         * layer, and two intersecting masks feather EVERY boundary — the bottom melts into the
+         * lyrics and the side seams (cover column / analysis panel) fade out too, so no rectangle
+         * edge can ever show regardless of how bright the artwork behind is. The black gradient
+         * stays for text legibility (lighter than before — the blur now does part of the work).
+         */
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-linear-to-b from-black/60 via-black/40 to-transparent backdrop-blur-2xl"
+          style={{
+            maskImage:
+              'linear-gradient(to bottom, black 30%, transparent 95%), linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+            WebkitMaskImage:
+              'linear-gradient(to bottom, black 30%, transparent 95%), linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+            maskComposite: 'intersect',
+            WebkitMaskComposite: 'source-in'
+          }}
+        />
+      )}
       <div
         className={
           isOverlay
