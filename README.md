@@ -136,6 +136,22 @@ pnpm start
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)
 
+## 📄 Open Source License
+
+This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
+
+- **Modification & distribution:** any modification or redistribution must also be licensed under **AGPL-3.0**, with the complete source code provided.
+- **Derivative works:** must adopt **AGPL-3.0** as well, and must retain this project's license and copyright notice in an appropriate place.
+- **Attribution:** the original author and copyright information must be preserved. This project is a fork of [Sandakan/Nora](https://github.com/Sandakan/Nora) (MIT-licensed); its original copyright notice is retained in [open_source_licenses.txt](open_source_licenses.txt).
+- **Commercial use:** if used for sale or any other for-profit purpose, the source code and a link to this project must be provided. Because this project relies on third-party services, commercial use may carry legal risk.
+- **Warranty:** this software is provided "as is", without warranty of any kind, as detailed in AGPL-3.0.
+
+## ⚠️ Disclaimer
+
+This project is intended **for personal study and research only**; commercial and illegal use is prohibited. Some features rely on third-party APIs (such as online music platforms) and on AI analysis services you configure yourself. Users must ensure on their own that their usage complies with applicable laws and regulations as well as the relevant service agreements. The authors bear no responsibility for any direct or indirect consequences arising from the use of this project.
+
+The app itself does not provide, store, or distribute any audio content; all content comes from your local files, the online platforms you actively sign into, or the AI services you configure. The app does not bypass any platform's paid or permission restrictions. See [docs/agreement.md](docs/agreement.md) for the full User Agreement & Disclaimer, which is also shown inside the app on first launch.
+
 ## 🤝 Feedback & Contributing
 
 Have feedback, bug reports, or feature requests? Reach out through:

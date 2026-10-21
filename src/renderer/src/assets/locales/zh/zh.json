@@ -101,6 +101,13 @@
     "ok": "确定",
     "loading": "加载中"
   },
+  "agreementPrompt": {
+    "title": "用户协议与免责声明",
+    "intro": "使用 Melodict 前，请先阅读并同意以下协议。您必须同意才能继续使用；不同意将退出应用。",
+    "hasReadCheckbox": "我已阅读并同意《用户协议与免责声明》",
+    "accept": "同意",
+    "decline": "不同意并退出"
+  },
   "titleBar": {
     "changeTheme": "切换主题",
     "toggleSystemFullScreen": "切换系统全屏",
@@ -515,7 +522,9 @@
       "vipAccount": "VIP 账号",
       "qualityDescription": "播放网易云音乐歌曲时使用的音质。",
       "qualityHint": "「standard」所有账号都可用；更高音质可能需要 VIP 会员。普通账号播放 VIP 歌曲时会播放 30 秒试听片段。"
-    }
+    },
+    "userAgreement": "用户协议与免责声明",
+    "userAgreementNotice": "本应用是基于 AGPL-3.0 的自由软件，仅供个人学习与研究使用。使用本应用即表示您已同意《用户协议与免责声明》。"
   },
   "artistInfoPage": {
     "likeArtist": "喜欢 {{name}}",

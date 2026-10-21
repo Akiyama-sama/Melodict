@@ -1,5 +1,5 @@
 // ? BASE IMPORTS
-import { lazy, useCallback, useEffect, useMemo, useRef } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import './assets/styles/styles.css';
 import 'material-symbols/rounded.css';
@@ -33,13 +33,18 @@ import { useUserPreferences } from './hooks/useUserPreferences';
 import { useWindowManagement } from './hooks/useWindowManagement';
 import { registerNeteaseLikeNotifier } from './other/neteaseLikes';
 import { initializeQueue } from './other/queueSingleton';
+import storage from './utils/localStorage';
+
+import { CURRENT_AGREEMENT_VERSION } from '@common/agreement';
 
 // ? PROMPTS
+const AgreementPrompt = lazy(() => import('./components/AgreementPrompt/AgreementPrompt'));
 const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayableErrorPrompt'));
 const LyricsAnalysisTrigger = lazy(() => import('./components/LyricsAnalysisTrigger'));
 
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Outlet } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 // ? SCREENS
 
 import NotificationPanel from './components/NotificationPanel/NotificationPanel';
@@ -73,11 +78,20 @@ window.addEventListener('offline', updateNetworkStatus);
  */
 
 export default function App() {
+  // ? AGREEMENT GATE
+  // Blocks the whole app behind the docs/agreement.md consent dialog until the user accepts
+  // the current agreement version (first launch and whenever the agreement text changes).
+  const agreedAgreementVersion = useStore(
+    store,
+    (state) => state.localStorage.preferences.agreedAgreementVersion
+  );
+  const isAgreementPending = (agreedAgreementVersion ?? 0) < CURRENT_AGREEMENT_VERSION;
+
   // ? INITIALIZE QUEUE (singleton with store sync)
   // This must be called before useAudioPlayer to ensure queue is ready
   useEffect(() => {
-    initializeQueue();
-  }, []);
+    if (!isAgreementPending) initializeQueue();
+  }, [isAgreementPending]);
 
   // ? INITIALIZE PLAYER AND QUEUE (singleton instances via custom hooks)
   const player = useAudioPlayer();
@@ -387,6 +401,19 @@ export default function App() {
           {/* App-level lyrics-analysis trigger: starts the LLM session as soon as a song plays
               with synced lyrics ready, instead of waiting for the fullscreen player to mount. */}
           <LyricsAnalysisTrigger />
+          {/* Blocking consent dialog for docs/agreement.md; shown above everything. */}
+          <Suspense fallback={null}>
+            <AgreementPrompt
+              isOpen={isAgreementPending}
+              onAccept={() =>
+                storage.preferences.setPreferences(
+                  'agreedAgreementVersion',
+                  CURRENT_AGREEMENT_VERSION
+                )
+              }
+              onDecline={() => window.api.windowControls.closeApp()}
+            />
+          </Suspense>
         </div>
       </AppUpdateContext.Provider>
       {/* <TanStackRouterDevtools position="bottom-right" /> */}

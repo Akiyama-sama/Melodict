@@ -101,6 +101,13 @@
     "ok": "Okay",
     "loading": "Loading"
   },
+  "agreementPrompt": {
+    "title": "User Agreement & Disclaimer",
+    "intro": "Please read and agree to the following agreement before using Melodict. You must accept it to continue; declining quits the app.",
+    "hasReadCheckbox": "I have read and agree to the User Agreement & Disclaimer",
+    "accept": "Agree",
+    "decline": "Decline & Quit"
+  },
   "titleBar": {
     "changeTheme": "Change theme",
     "toggleSystemFullScreen": "Toggle system fullscreen",
@@ -515,7 +522,9 @@
       "vipAccount": "VIP account",
       "qualityDescription": "Stream quality for songs played from NetEase.",
       "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. Trial (30 s) fragments are played for VIP songs on free accounts."
-    }
+    },
+    "userAgreement": "User Agreement & Disclaimer",
+    "userAgreementNotice": "This app is free software under AGPL-3.0, for personal study and research only. By using it you accept the User Agreement & Disclaimer."
   },
   "artistInfoPage": {
     "likeArtist": "Like {{name}}",

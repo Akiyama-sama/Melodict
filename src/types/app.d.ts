@@ -530,6 +530,8 @@ declare global {
     /** Whether a playing song's synced lyrics are analyzed in the background (the app-level trigger). */
     autoAnalyzeLyricsWithAi: boolean;
     neteaseSongQuality: NeteaseQualityTypes;
+    /** Version of docs/agreement.md the user last accepted; 0 means not yet accepted. */
+    agreedAgreementVersion: number;
   }
 
   interface CurrentSong {
