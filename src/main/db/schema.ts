@@ -412,8 +412,8 @@ export const userSettings = pgTable(
     language: varchar('language', { length: 10 }).notNull().default('zh'),
 
     // Theme settings (from AppThemeData)
-    isDarkMode: boolean('is_dark_mode').notNull().default(true),
-    useSystemTheme: boolean('use_system_theme').notNull().default(true),
+    isDarkMode: boolean('is_dark_mode').notNull().default(false),
+    useSystemTheme: boolean('use_system_theme').notNull().default(false),
 
     // Preferences
     autoLaunchApp: boolean('auto_launch_app').notNull().default(false),

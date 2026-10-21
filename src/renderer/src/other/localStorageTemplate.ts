@@ -243,7 +243,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
 export const USER_DATA_TEMPLATE: UserData = {
   language: 'en',
   isDarkMode: false,
-  useSystemTheme: true,
+  useSystemTheme: false,
   autoLaunchApp: false,
   openWindowMaximizedOnStart: false,
   openWindowAsHiddenOnSystemStart: false,
