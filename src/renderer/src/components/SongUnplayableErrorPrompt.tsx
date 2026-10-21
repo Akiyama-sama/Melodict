@@ -1,31 +1,38 @@
 import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@tanstack/react-router';
 
+import type { NeteasePlaybackBlockReason } from '../other/neteasePlayback';
 import { appPreferences } from '../../../../package.json';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { store } from '../store/store';
 import Button from './Button';
 
-type Props = { err?: Error; songPath?: string };
+type Props = { err?: Error; songPath?: string; neteaseBlockReason?: NeteasePlaybackBlockReason };
 
 const { supportedMusicExtensions } = appPreferences;
 
 const SongUnplayableErrorPrompt = (props: Props) => {
   const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
+  const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const { err, songPath: providedSongPath, neteaseBlockReason } = props;
+  const isNeteaseBlock = neteaseBlockReason !== undefined;
 
   useEffect(() => {
     addNewNotifications([
       {
         id: 'unplayableSong',
         duration: 10000,
-        content: t('songUnplayableErrorPrompt.title'),
+        content: isNeteaseBlock
+          ? t(`songUnplayableErrorPrompt.netease.${neteaseBlockReason}.title`)
+          : t('songUnplayableErrorPrompt.title'),
         iconName: 'error_outline'
       }
     ]);
-  }, [addNewNotifications, t]);
+  }, [addNewNotifications, isNeteaseBlock, neteaseBlockReason, t]);
 
-  const { err, songPath: providedSongPath } = props;
   const rawErrorMessage = err?.message ?? '';
   const errorMessage = rawErrorMessage.split(':').at(-1)?.trim() || 'UNKNOWN';
 
@@ -50,6 +57,35 @@ const SongUnplayableErrorPrompt = (props: Props) => {
       &bull; <span className="hover:underline">{ext}</span>
     </span>
   ));
+
+  if (isNeteaseBlock) {
+    return (
+      <div>
+        <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
+          <span className="material-icons-round-outlined mr-4">play_disabled</span>
+          {t(`songUnplayableErrorPrompt.netease.${neteaseBlockReason}.title`)}
+        </div>
+        <p>{t(`songUnplayableErrorPrompt.netease.${neteaseBlockReason}.description`)}</p>
+        {neteaseBlockReason === 'NETEASE_TRIAL_DISABLED' && (
+          <Button
+            label={t('songUnplayableErrorPrompt.netease.openNeteaseSettings')}
+            className="remove-song-from-library-btn bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 float-right mt-4 w-[14rem]"
+            clickHandler={() => {
+              changePromptMenuData(false);
+              navigate({
+                to: '/main-player/settings',
+                hash: 'netease-settings-container',
+                hashScrollIntoView: false
+              });
+            }}
+          />
+        )}
+        <div className="text-font-color-secondary dark:text-dark-font-color-secondary mt-6 text-xs">
+          ERROR: {errorMessage}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

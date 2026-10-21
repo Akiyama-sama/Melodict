@@ -514,7 +514,10 @@
       "logoutFailed": "退出失败，请重试。",
       "vipAccount": "VIP 账号",
       "qualityDescription": "播放网易云音乐歌曲时使用的音质。",
-      "qualityHint": "「standard」所有账号都可用；更高音质可能需要 VIP 会员。普通账号播放 VIP 歌曲时会播放 30 秒试听片段。"
+      "qualityHint": "「standard」所有账号都可用；更高音质可能需要 VIP 会员。请求的高音质不可用时会自动降级到能播放的最高档位。",
+      "allowTrialPlay": "允许播放试听片段",
+      "allowTrialPlayDescription": "当歌曲为 VIP 专属且当前账号仅获得 30 秒试听时，播放该试听片段而不是拒绝播放。",
+      "allowTrialPlayHint": "默认关闭。试听仅覆盖歌曲开头部分；使用 VIP 账号登录可完整收听，无需开启此选项。"
     }
   },
   "artistInfoPage": {
@@ -942,7 +945,22 @@
     "flacNotSupportedDescription": "此歌曲为 FLAC 格式，本应用无法原生支持。",
     "formatNotSupportedDescription": "本应用不支持此歌曲的格式。",
     "supportedFormatsLabel": "支持的音频格式：",
-    "flacConversionHint": "提示：你可以将 FLAC 音频文件转换为 MP3 或 WAV 格式以便在 Nora 中播放。"
+    "flacConversionHint": "提示：你可以将 FLAC 音频文件转换为 MP3 或 WAV 格式以便在 Nora 中播放。",
+    "netease": {
+      "NETEASE_VIP_REQUIRED": {
+        "title": "VIP 专属歌曲",
+        "description": "这首歌需要网易云音乐 VIP 才能完整收听。请使用 VIP 账号登录（或在网易云音乐中开通会员）——本应用不会绕过付费限制。"
+      },
+      "NETEASE_TRIAL_DISABLED": {
+        "title": "仅有试听片段",
+        "description": "这首歌为 VIP 专属，当前账号仅提供 30 秒试听。播放试听功能目前已关闭，可在 NetEase 设置中开启，或使用 VIP 账号登录收听完整歌曲。"
+      },
+      "NETEASE_STREAM_UNAVAILABLE": {
+        "title": "音源不可用",
+        "description": "网易云音乐未返回可播放的音源。该歌曲可能受地区限制、已下架或暂时不可用。"
+      },
+      "openNeteaseSettings": "打开 NetEase 设置"
+    }
   },
   "unsupportedFileMessagePrompt": {
     "title": "不支持的音频文件",

@@ -514,7 +514,10 @@
       "logoutFailed": "Could not log out. Try again.",
       "vipAccount": "VIP account",
       "qualityDescription": "Stream quality for songs played from NetEase.",
-      "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. Trial (30 s) fragments are played for VIP songs on free accounts."
+      "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. Trial (30 s) fragments are played for VIP songs on free accounts.",
+      "allowTrialPlay": "Allow playing trial fragments",
+      "allowTrialPlayDescription": "When a song is VIP-only and your account only gets a 30-second trial, play that trial instead of refusing playback.",
+      "allowTrialPlayHint": "Off by default. Trials only cover a fraction of the song; a VIP account plays everything without this."
     }
   },
   "artistInfoPage": {
@@ -942,7 +945,22 @@
     "flacNotSupportedDescription": "This song is in FLAC format, which is not supported natively by this app.",
     "formatNotSupportedDescription": "This song format is not supported by the app.",
     "supportedFormatsLabel": "Supported Audio Formats:",
-    "flacConversionHint": "Tip: You can convert FLAC audio files to MP3 or WAV format to play them in Nora."
+    "flacConversionHint": "Tip: You can convert FLAC audio files to MP3 or WAV format to play them in Nora.",
+    "netease": {
+      "NETEASE_VIP_REQUIRED": {
+        "title": "VIP-only song",
+        "description": "This song requires a NetEase Cloud Music VIP subscription. Log in with a VIP account (or subscribe in the NetEase app) to hear the full track — the app does not bypass the paywall."
+      },
+      "NETEASE_TRIAL_DISABLED": {
+        "title": "Only a trial fragment is available",
+        "description": "This song is VIP-only and your account is served a 30-second trial. Playing trials is currently disabled. Enable it in the NetEase settings, or log in with a VIP account for the full song."
+      },
+      "NETEASE_STREAM_UNAVAILABLE": {
+        "title": "Stream unavailable",
+        "description": "NetEase did not return a playable stream for this song. It may be region-restricted, removed, or temporarily unavailable."
+      },
+      "openNeteaseSettings": "Open NetEase settings"
+    }
   },
   "unsupportedFileMessagePrompt": {
     "title": "Unsupported audio file",

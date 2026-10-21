@@ -3,12 +3,26 @@ import { useTranslation } from 'react-i18next';
 
 import type AudioPlayer from '../other/player';
 import type PlayerQueue from '../other/playerQueue';
+import type {
+  NeteasePlaybackBlockReason,
+  NeteasePlaybackBlockedError
+} from '../other/neteasePlayback';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import log from '../utils/log';
 
 const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
 const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayableErrorPrompt'));
+
+/** Detects the typed NetEase playback blocks so the error prompt can name the real reason. */
+const asNeteaseBlockReason = (error: unknown): NeteasePlaybackBlockReason | null => {
+  const reason = (error as NeteasePlaybackBlockedError | undefined)?.reason;
+  return reason === 'NETEASE_VIP_REQUIRED' ||
+    reason === 'NETEASE_TRIAL_DISABLED' ||
+    reason === 'NETEASE_STREAM_UNAVAILABLE'
+    ? reason
+    : null;
+};
 
 /**
  * Hook for controlling audio playback.
@@ -99,6 +113,19 @@ export function usePlayerControl(
           recordListening: true,
           onError: (error) => {
             console.error('Error playing song via AudioPlayer:', error);
+            const neteaseBlockReason = asNeteaseBlockReason(error);
+            if (neteaseBlockReason) {
+              // The typed NetEase blocks carry their reason as the error message; the prompt
+              // matches on it to show the VIP / trial copy instead of the generic one.
+              changePromptMenuData(
+                true,
+                <SongUnplayableErrorPrompt
+                  err={new Error(neteaseBlockReason)}
+                  neteaseBlockReason={neteaseBlockReason}
+                />
+              );
+              return;
+            }
             changePromptMenuData(true, <SongUnplayableErrorPrompt err={error as Error} />);
           }
         });

@@ -32,7 +32,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     autoTranslateLyrics: false,
     autoConvertLyrics: false,
     autoAnalyzeLyricsWithAi: true,
-    neteaseSongQuality: 'standard'
+    neteaseSongQuality: 'standard',
+    allowNeteaseTrialPlay: false
   },
   playback: {
     currentSong: {

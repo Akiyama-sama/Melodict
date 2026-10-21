@@ -1,11 +1,14 @@
 import { neteaseQuery } from '@renderer/queries/netease';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useStore } from '@tanstack/react-store';
 import { lazy, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { store } from '../../../store/store';
 import storage from '../../../utils/localStorage';
 import Button from '../../Button';
+import Checkbox from '../../Checkbox';
 import Dropdown, { type DropdownOption } from '../../Dropdown';
 
 /** Lazy so the QR flow's bundle loads only when login is actually requested. */
@@ -22,6 +25,7 @@ const NeteaseSettings = () => {
   const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const allowTrialPlay = useStore(store, (state) => state.localStorage.preferences.allowNeteaseTrialPlay);
 
   const { data: profile } = useQuery(neteaseQuery.session);
 
@@ -124,6 +128,23 @@ const NeteaseSettings = () => {
             }}
           />
           <p className="mt-2 text-xs opacity-60">{t('settingsPage.netease.qualityHint')}</p>
+        </li>
+
+        <li className="netease-trial-play mb-4">
+          <div className="description">
+            {t('settingsPage.netease.allowTrialPlayDescription')}
+          </div>
+          <Checkbox
+            id="allowNeteaseTrialPlay"
+            labelContent={t('settingsPage.netease.allowTrialPlay')}
+            isChecked={allowTrialPlay}
+            checkedStateUpdateFunction={(state) =>
+              storage.preferences.setPreferences('allowNeteaseTrialPlay', state)
+            }
+          />
+          <p className="mt-2 text-xs opacity-60">
+            {t('settingsPage.netease.allowTrialPlayHint')}
+          </p>
         </li>
       </ul>
     </li>

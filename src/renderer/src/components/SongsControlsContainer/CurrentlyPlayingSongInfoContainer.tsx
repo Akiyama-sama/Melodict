@@ -4,6 +4,8 @@ import { useStore } from '@tanstack/react-store';
 import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { isNeteaseTrialPath } from '@common/netease';
+
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
@@ -304,6 +306,16 @@ const CurrentlyPlayingSongInfoContainer = () => {
             >
               {currentSongData.title}
             </NavLink>
+            {/* NetEase songs resolved to a trial fragment carry a `trial=1` marker in their
+                stream path; badge them in the player bar like the NetEase list rows do. */}
+            {isNeteaseTrialPath(currentSongData.path) && (
+              <span
+                className="mr-1 ml-2 rounded bg-amber-500/90 px-1 align-middle text-[0.6rem] leading-tight text-white"
+                title={t('netease.trialBadge')}
+              >
+                {t('netease.trialBadge').toUpperCase()}
+              </span>
+            )}
             {!currentSongData.isKnownSource && (
               <span
                 className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight ml-2 cursor-pointer text-xl font-light hover:underline"
