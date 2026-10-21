@@ -3,6 +3,7 @@
   "version": "4.0.0-alpha.5",
   "type": "module",
   "description": "Nora",
+  "license": "AGPL-3.0",
   "packageManager": "pnpm@10.27.0",
   "devEngines": {
     "packageManager": {

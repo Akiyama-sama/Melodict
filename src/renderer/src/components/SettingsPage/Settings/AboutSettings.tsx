@@ -23,6 +23,7 @@ import Img from '../../Img';
 import AppStats from './AppStats';
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
+const UserAgreementPrompt = lazy(() => import('../../AgreementPrompt/UserAgreementPrompt'));
 const ResetAppConfirmationPrompt = lazy(() => import('../ResetAppConfirmationPrompt'));
 const SensitiveActionConfirmPrompt = lazy(() => import('../../SensitiveActionConfirmPrompt'));
 const AppShortcutsPrompt = lazy(() => import('../AppShortcutsPrompt'));
@@ -213,6 +214,25 @@ const AboutSettings = () => {
                             {appLicense}
                           </pre>
                         </>,
+                        'flex flex-col'
+                      )
+                    }
+                  />
+                )
+              }}
+            />
+          </li>
+          <li>
+            <Trans
+              i18nKey="settingsPage.userAgreementNotice"
+              components={{
+                Button: (
+                  <Button
+                    className="show-user-agreement-btn about-link text-font-color-highlight-2 dark:text-dark-font-color-highlight-2! inline! w-fit cursor-pointer rounded-none! border-0! bg-transparent p-0! text-sm outline! outline-offset-1 hover:bg-transparent hover:underline focus:outline! dark:bg-transparent dark:hover:bg-transparent"
+                    clickHandler={() =>
+                      changePromptMenuData(
+                        true,
+                        <UserAgreementPrompt />,
                         'flex flex-col'
                       )
                     }
