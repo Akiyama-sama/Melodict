@@ -256,7 +256,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
   return (
     <div className="current-playing-song-info-container grid w-full max-w-full grid-cols-[6rem_minmax(0,1fr)] items-center gap-2 lg:grid-cols-[minmax(0,1fr)]">
       <div
-        className="song-cover-container group/cover relative flex aspect-square h-full items-center justify-center overflow-hidden p-2 lg:hidden"
+        className="song-cover-container relative flex aspect-square h-full items-center justify-center overflow-hidden p-2 lg:hidden"
         id="currentSongCover"
       >
         {/* ${
@@ -280,15 +280,6 @@ const CurrentlyPlayingSongInfoContainer = () => {
             );
           }}
         />
-        {/* Hover affordance: gaussian-blurred veil with an upward arrow, signalling the click-to-fullscreen action. */}
-        <div
-          className="pointer-events-none absolute inset-0 flex items-start justify-center rounded-lg bg-black/20 opacity-0 backdrop-blur-[6px] transition-opacity duration-200 group-hover/cover:opacity-100"
-          aria-hidden
-        >
-          <span className="material-icons-round mt-2 text-3xl text-white drop-shadow-md">
-            keyboard_double_arrow_up
-          </span>
-        </div>
       </div>
       <div className="song-info-container relative flex h-full w-full flex-col items-start justify-center drop-shadow-lg lg:ml-4 lg:w-full">
         {currentSongData.title && (
