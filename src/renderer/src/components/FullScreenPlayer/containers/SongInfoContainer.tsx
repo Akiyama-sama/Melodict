@@ -70,15 +70,15 @@ const SongInfoContainer = (props: Props) => {
     >
       {isOverlay && (
         /*
-         * Frosted-glass scrim, edge-free by construction: the blur + dark tint live on their own
-         * layer, and two intersecting masks feather EVERY boundary — the bottom melts into the
-         * lyrics and the side seams (cover column / analysis panel) fade out too, so no rectangle
-         * edge can ever show regardless of how bright the artwork behind is. The black gradient
-         * stays for text legibility (lighter than before — the blur now does part of the work).
+         * Frosted-glass scrim, edge-free by construction: the blur lives on its own layer, and two
+         * intersecting masks feather EVERY boundary — the bottom melts into the lyrics and the
+         * side seams (cover column / analysis panel) fade out too, so no rectangle edge can ever
+         * show regardless of how bright the artwork behind is. No dark tint: the blurred artwork
+         * alone backs the text.
          */
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-linear-to-b from-black/60 via-black/40 to-transparent backdrop-blur-2xl"
+          className="absolute inset-0 -z-10 backdrop-blur-2xl"
           style={{
             maskImage:
               'linear-gradient(to bottom, black 30%, transparent 95%), linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
@@ -92,8 +92,10 @@ const SongInfoContainer = (props: Props) => {
       <div
         className={
           isOverlay
-            ? // Same centered column as the lyrics block, so the cover lines up with the lyric text.
-              'mx-auto flex w-full max-w-[52rem] flex-row items-center gap-6'
+            ? // Identical centered column as the lyrics block (LyricsContainer: max-w-[60rem]
+              // inside a px-10 wrapper) — the cover's left edge therefore ALWAYS coincides with
+              // the lyric text's left edge at any window size, by construction.
+              'mx-auto flex w-full max-w-[60rem] flex-row items-center gap-6'
             : // `min(20rem, 100%)` tracks the column width — which now scales with the window —
               // so the cover shrinks alongside it instead of holding 20rem while the column
               // (and the lyrics column next to it) collapses.
