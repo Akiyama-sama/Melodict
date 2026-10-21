@@ -43,7 +43,7 @@ const AgreementPrompt = (props: Props) => {
       <div className="fixed inset-0 z-10 flex h-screen w-screen items-center justify-center overflow-y-auto p-4">
         <DialogPanel
           transition
-          className="bg-background-color-1 dark:bg-dark-background-color-1 relative flex max-h-[90%] w-full max-w-3xl flex-col overflow-hidden rounded-2xl shadow-xl"
+          className="bg-background-color-1 dark:bg-dark-background-color-1 text-font-color-black dark:text-font-color-white relative flex max-h-[90%] w-full max-w-3xl flex-col overflow-hidden rounded-2xl shadow-xl"
         >
           <div className="shrink-0 px-6 pt-6 pb-2">
             <DialogTitle className="text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
@@ -54,7 +54,7 @@ const AgreementPrompt = (props: Props) => {
           </div>
 
           <div
-            className="agreement-content mt-2 min-h-0 flex-1 overflow-y-auto px-6 text-sm leading-6 [&_h1]:hidden [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-lg [&_h2]:font-medium [&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-medium [&_li]:mb-1 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-2 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6"
+            className="agreement-content mt-2 min-h-0 flex-1 overflow-y-auto px-6 text-sm leading-6 [&_a]:text-font-color-highlight [&_a]:dark:text-dark-font-color-highlight [&_h1]:hidden [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-lg [&_h2]:font-medium [&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-medium [&_hr]:border-background-color-3 [&_hr]:dark:border-dark-background-color-3 [&_li]:mb-1 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-2 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6"
             dangerouslySetInnerHTML={{ __html: agreementHtml }}
           />
 
