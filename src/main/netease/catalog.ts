@@ -253,9 +253,16 @@ export interface NeteaseStreamInfo {
   fee: number;
   playable: boolean;
   type: string;
+  /** VIP-only song with no URL under the current account (fee 1/4); playback is paywalled. */
+  vipRequired: boolean;
 }
 
-/** Resolves a fresh CDN stream URL; NetEase URLs expire in ~20 minutes, so never cache these. */
+/**
+ * Resolves a fresh CDN stream URL at the requested quality; NetEase URLs expire in ~20 minutes,
+ * so never cache these. The requested `level` is passed through as-is — no fallback ladder: a
+ * free account asking for a tier it cannot hear simply gets no URL, and `vipRequired` reports
+ * the paywall so the renderer can pause with a clear notification.
+ */
 export const getNeteaseStream = async (
   neteaseId: number,
   quality: NeteaseQualityTypes
@@ -280,7 +287,8 @@ export const getNeteaseStream = async (
     hasTrial: isTrial,
     fee,
     playable,
-    type: typeof data.type === 'string' ? data.type : 'mp3'
+    type: typeof data.type === 'string' ? data.type : 'mp3',
+    vipRequired: !playable && (fee === 1 || fee === 4)
   };
 };
 

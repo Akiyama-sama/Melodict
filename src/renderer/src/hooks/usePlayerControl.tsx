@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type AudioPlayer from '../other/player';
 import type PlayerQueue from '../other/playerQueue';
+import { isNeteasePlaybackBlockedError, notifyNeteaseBlock } from '../other/neteasePlayback';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import log from '../utils/log';
@@ -99,6 +100,13 @@ export function usePlayerControl(
           recordListening: true,
           onError: (error) => {
             console.error('Error playing song via AudioPlayer:', error);
+            if (isNeteasePlaybackBlockedError(error)) {
+              // Typed NetEase blocks (VIP paywall / trial off / no stream) are not app errors:
+              // just pause and surface a corner notification, no modal prompt.
+              void audioPlayer.pause();
+              notifyNeteaseBlock(error);
+              return;
+            }
             changePromptMenuData(true, <SongUnplayableErrorPrompt err={error as Error} />);
           }
         });

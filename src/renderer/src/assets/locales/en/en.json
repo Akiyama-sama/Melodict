@@ -521,7 +521,10 @@
       "logoutFailed": "Could not log out. Try again.",
       "vipAccount": "VIP account",
       "qualityDescription": "Stream quality for songs played from NetEase.",
-      "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. Trial (30 s) fragments are played for VIP songs on free accounts."
+      "qualityHint": "\"standard\" works for every account; higher tiers may need a VIP subscription. VIP-only songs pause with a notification when your account cannot hear them.",
+      "allowTrialPlay": "Allow playing trial fragments",
+      "allowTrialPlayDescription": "When a song is VIP-only and your account only gets a 30-second trial, play that trial instead of refusing playback.",
+      "allowTrialPlayHint": "Off by default. Trials only cover a fraction of the song; a VIP account plays everything without this."
     },
     "userAgreement": "User Agreement & Disclaimer",
     "userAgreementNotice": "This app is free software under AGPL-3.0, for personal study and research only. By using it you accept the User Agreement & Disclaimer."
@@ -1182,6 +1185,11 @@
     "notLoggedInSectionTitle": "NetEase account not connected",
     "notLoggedInSectionDescription": "Scan the QR code to log in and browse your NetEase playlists, liked songs and recommendations.",
     "goToLogin": "Log in with QR code",
+    "playbackBlocked": {
+      "NETEASE_VIP_REQUIRED": "VIP-only song — log in with a VIP account to hear the full track. The app does not bypass the paywall.",
+      "NETEASE_TRIAL_DISABLED": "Only a 30 s trial is available and trial playback is off. Enable it in NetEase settings or use a VIP account.",
+      "NETEASE_STREAM_UNAVAILABLE": "NetEase did not return a playable stream for this song (region-restricted, removed, or temporarily unavailable)."
+    },
     "addedToNeteaseLikes": "Added `{{title}}` to your NetEase likes.",
     "removedFromNeteaseLikes": "Removed `{{title}}` from your NetEase likes."
   }

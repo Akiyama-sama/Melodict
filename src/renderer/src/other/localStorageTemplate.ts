@@ -33,6 +33,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     autoConvertLyrics: false,
     autoAnalyzeLyricsWithAi: true,
     neteaseSongQuality: 'standard',
+    allowNeteaseTrialPlay: false,
     agreedAgreementVersion: 0
   },
   playback: {

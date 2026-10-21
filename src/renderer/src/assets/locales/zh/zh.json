@@ -521,7 +521,10 @@
       "logoutFailed": "退出失败，请重试。",
       "vipAccount": "VIP 账号",
       "qualityDescription": "播放网易云音乐歌曲时使用的音质。",
-      "qualityHint": "「standard」所有账号都可用；更高音质可能需要 VIP 会员。普通账号播放 VIP 歌曲时会播放 30 秒试听片段。"
+      "qualityHint": "「standard」所有账号都可用；更高音质可能需要 VIP 会员。VIP 专属歌曲在当前账号无法收听时会暂停并弹出提醒。",
+      "allowTrialPlay": "允许播放试听片段",
+      "allowTrialPlayDescription": "当歌曲为 VIP 专属且当前账号仅获得 30 秒试听时，播放该试听片段而不是拒绝播放。",
+      "allowTrialPlayHint": "默认关闭。试听仅覆盖歌曲开头部分；使用 VIP 账号登录可完整收听，无需开启此选项。"
     },
     "userAgreement": "用户协议与免责声明",
     "userAgreementNotice": "本应用是基于 AGPL-3.0 的自由软件，仅供个人学习与研究使用。使用本应用即表示您已同意《用户协议与免责声明》。"
@@ -1182,6 +1185,11 @@
     "notLoggedInSectionTitle": "尚未连接网易云账号",
     "notLoggedInSectionDescription": "扫码登录后，即可浏览你的网易云歌单、喜欢的音乐和每日推荐。",
     "goToLogin": "扫码登录",
+    "playbackBlocked": {
+      "NETEASE_VIP_REQUIRED": "VIP 专属歌曲——请使用 VIP 账号登录以完整收听，本应用不会绕过付费限制。",
+      "NETEASE_TRIAL_DISABLED": "该歌曲仅有 30 秒试听且试听播放已关闭。可在 NetEase 设置中开启，或使用 VIP 账号。",
+      "NETEASE_STREAM_UNAVAILABLE": "网易云音乐未返回可播放的音源（可能受地区限制、已下架或暂时不可用）。"
+    },
     "addedToNeteaseLikes": "已将《{{title}}》加入网易云红心。",
     "removedFromNeteaseLikes": "已将《{{title}}》移出网易云红心。"
   }

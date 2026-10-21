@@ -530,6 +530,8 @@ declare global {
     /** Whether a playing song's synced lyrics are analyzed in the background (the app-level trigger). */
     autoAnalyzeLyricsWithAi: boolean;
     neteaseSongQuality: NeteaseQualityTypes;
+    /** Opt-in playback of 30 s trial fragments served for VIP songs on free accounts. */
+    allowNeteaseTrialPlay: boolean;
     /** Version of docs/agreement.md the user last accepted; 0 means not yet accepted. */
     agreedAgreementVersion: number;
   }

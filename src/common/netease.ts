@@ -50,6 +50,18 @@ export const getNeteaseQualityFromPath = (protocolPath: string): NeteaseQualityT
   return 'standard';
 };
 
+/**
+ * Whether this `nora://netease/song/...` path was resolved to a trial (30 s) fragment. The flag is
+ * written by the renderer's stream probe purely for display; the protocol handler ignores it.
+ */
+export const isNeteaseTrialPath = (protocolPath: string): boolean => {
+  try {
+    return new URL(protocolPath).searchParams.get('trial') === '1';
+  } catch {
+    return false;
+  }
+};
+
 /** A song summary the renderer can display and play without the local library. */
 export interface NeteaseSongSummary {
   /** Sentinel id safe for queues (negative space). */
