@@ -1,5 +1,4 @@
 import i18n from '@renderer/i18n';
-import { normalizedKeys } from '@renderer/other/appShortcuts';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, type ReactNode } from 'react';
@@ -10,6 +9,32 @@ import storage from '../utils/localStorage';
 import { useAudioPlayer } from './useAudioPlayer';
 
 const AppShortcutsPrompt = lazy(() => import('../components/SettingsPage/AppShortcutsPrompt'));
+
+/** The `appShortcutsPrompt` entries that name a key (as opposed to a shortcut label). */
+const KEY_NAME_ENTRIES = [
+  'enterKey',
+  'spaceKey',
+  'ctrlKey',
+  'shiftKey',
+  'altKey',
+  'rightArrowKey',
+  'leftArrowKey',
+  'upArrowKey',
+  'downArrowKey',
+  'homeKey'
+] as const;
+
+/** Physical `KeyboardEvent.key` values (and untranslated literals) that name one of those entries. */
+const RAW_KEY_ALIASES: Record<string, string> = {
+  ' ': 'spaceKey',
+  Enter: 'enterKey',
+  ArrowUp: 'upArrowKey',
+  ArrowDown: 'downArrowKey',
+  ArrowLeft: 'leftArrowKey',
+  ArrowRight: 'rightArrowKey',
+  Home: 'homeKey',
+  End: 'endKey'
+};
 
 /**
  * Shortcut identities are persisted as localized labels (the settings page binds keys per label),
@@ -31,6 +56,31 @@ const resolveShortcutKey = (label: string): string => {
   }
   // Unknown labels (custom future shortcuts) fall through to their literal text.
   return label;
+};
+
+/**
+ * Shortcut *keys* are persisted in the same localized way (the default template snapshots
+ * `normalizedKeys.spaceKey` etc. at module load), so a combination bound under one language
+ * never matches the translation of another. Normalize both sides to the language-independent
+ * `appShortcutsPrompt` entry name: physical keys map through `RAW_KEY_ALIASES`, and any other
+ * token (a localized key name from storage, or a plain letter) is resolved against every
+ * language table like `resolveShortcutKey` does.
+ */
+const normalizeKeyName = (key: string): string => {
+  const aliased = RAW_KEY_ALIASES[key];
+  if (aliased) return `appShortcutsPrompt.${aliased}`;
+
+  for (const entry of KEY_NAME_ENTRIES) {
+    for (const languageData of Object.values(i18n.store.data)) {
+      const translations = (
+        languageData as Record<string, Record<string, unknown>> | undefined
+      )?.translation?.appShortcutsPrompt as Record<string, string> | undefined;
+      if (translations?.[entry] === key) return `appShortcutsPrompt.${entry}`;
+    }
+  }
+
+  // Letters, digits and symbols stay as-is (case-folded like the old formatKey did).
+  return key.length === 1 ? key.toUpperCase() : key;
 };
 
 /** Dependencies required by the keyboard shortcuts hook */
@@ -132,45 +182,16 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
         .getKeyboardShortcuts()
         .flatMap((category) => category.shortcuts);
 
-      const formatKey = (key: string) => {
-        switch (key) {
-          case ' ':
-            return normalizedKeys.spaceKey;
-          case 'ArrowUp':
-            return normalizedKeys.upArrowKey;
-          case 'ArrowDown':
-            return normalizedKeys.downArrowKey;
-          case 'ArrowLeft':
-            return normalizedKeys.leftArrowKey;
-          case 'ArrowRight':
-            return normalizedKeys.rightArrowKey;
-          case 'Enter':
-            return normalizedKeys.enterKey;
-          case 'End':
-            return normalizedKeys.endKey;
-          case 'Home':
-            return normalizedKeys.homeKey;
-          case ']':
-            return ']';
-          case '[':
-            return '[';
-          case '\\':
-            return '\\';
-          default:
-            return key.length === 1 ? key.toUpperCase() : key;
-        }
-      };
-
       const pressedKeys = [
-        e.ctrlKey ? 'Ctrl' : null,
-        e.shiftKey ? 'Shift' : null,
-        e.altKey ? 'Alt' : null,
-        formatKey(e.key)
+        e.ctrlKey ? 'appShortcutsPrompt.ctrlKey' : null,
+        e.shiftKey ? 'appShortcutsPrompt.shiftKey' : null,
+        e.altKey ? 'appShortcutsPrompt.altKey' : null,
+        normalizeKeyName(e.key)
       ].filter(Boolean);
 
       const matchedShortcut = shortcuts.find((shortcut) => {
-        const storedKeys = shortcut.keys.map(formatKey).sort();
-        const comboKeys = pressedKeys.sort();
+        const storedKeys = shortcut.keys.map(normalizeKeyName).sort();
+        const comboKeys = [...pressedKeys].sort();
         return JSON.stringify(storedKeys) === JSON.stringify(comboKeys);
       });
 
