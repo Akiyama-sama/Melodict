@@ -105,14 +105,17 @@
 } */
 
 /* ? ROOT STYLES */
-/* Default theme family: Sage Green (iPhone 17 Sage finish, #A9B689 = hsl(77 24% 63%)).
-   Backgrounds are warm paper tones of the same hue; highlights sit on the sage hue.
+/* Default theme family: mint green, taken from the default song palette (the cover art the
+   user picked as the permanent theme): LightVibrant #D9ECE3, Vibrant #52AD81, DarkVibrant
+   #295B43. Static tokens mirror the dynamic theme's derivations (deriveThemeColors):
+   --background-color-2/`--side-bar-background` = LightVibrant clamped to l 0.9,
+   --background-color-3 = Vibrant clamped to l 0.7, highlights = DarkVibrant.
    `--text-color-crimson` stays a functional accent, not part of the theme family. */
 :root {
-  --background-color-1: 75 25% 98%; /* hsl(75 25% 98%) */
-  --background-color-2: 75 30% 91%; /* hsl(75 30% 91%) */
-  --background-color-3: 76 30% 84%; /* hsl(76 30% 84%) */
-  --side-bar-background: 75 30% 91%; /* hsl(75 30% 91%) */
+  --background-color-1: 152 27% 98%; /* hsl(152 27% 98%) */
+  --background-color-2: 152 33% 90%; /* hsl(152 33% 90%) */
+  --background-color-3: 151 36% 70%; /* hsl(151 36% 70%) */
+  --side-bar-background: 152 33% 90%; /* hsl(152 33% 90%) */
   --background-color-dimmed: 0 0% 30%; /* hsl(0 0% 30% / 50%) */
   --song-background-color: var(--background-color-1);
   --text-color: 0 0% 0%; /* hsl(0 0% 0%) */
@@ -120,34 +123,34 @@
   --text-color-white: 0 0% 100%; /* hsl(0 0% 100%) */
   --text-color-black: 0 0% 0%; /* hsl(0 0% 0%) */
   --text-color-crimson: 348 83% 47%; /* hsl(348 83% 47%) */
-  --text-color-highlight: 77 24% 40%; /* hsl(77 24% 40%) */
-  --text-color-highlight-2: 77 28% 44%; /* hsl(77 28% 44%) */
+  --text-color-highlight: 151 38% 26%; /* hsl(151 38% 26%) */
+  --text-color-highlight-2: 152 33% 89%; /* hsl(152 33% 89%) */
   --context-menu-background: 0 0% 100%; /* hsl(0 0% 100% / 90%) */
-  --context-menu-list-hover: 76 18% 88%; /* hsl(76 18% 88% / 75%) */
+  --context-menu-list-hover: 152 18% 88%; /* hsl(152 18% 88% / 75%) */
   --seekbar-background-color: 0 0% 20%; /* hsl(0 0% 20%) */
   --seekbar-track-background-color: 0 0% 80%; /* hsl(0 0% 80%) */
-  --foreground-color-1: 77 28% 45%; /* hsl(77 28% 45%) */
-  --scrollbar-thumb-background-color: 75 30% 91%; /* hsl(75, 30%, 91%) */
+  --foreground-color-1: 151 36% 45%; /* hsl(151 36% 45%) */
+  --scrollbar-thumb-background-color: 152 33% 90%; /* hsl(152, 33%, 90%) */
   --transition-duration-0_2s: 0.2s;
   --transition-duration-0_25s: 0.25s;
   --transition-duration-0_3s: 0.3s;
   --slider-opacity: 0.5;
 
   /* Dark colors */
-  --dark-background-color-1: 75 5% 12%; /* hsl(75 5% 12%) */
-  --dark-background-color-2: 75 6% 19%; /* hsl(75 6% 19%) */
-  --dark-background-color-3: 76 30% 80%; /* hsl(76 30% 80%) */
+  --dark-background-color-1: 152 5% 12%; /* hsl(152 5% 12%) */
+  --dark-background-color-2: 152 5% 20%; /* hsl(152 5% 20%) */
+  --dark-background-color-3: 152 33% 89%; /* hsl(152 33% 89%) */
   --dark-song-background-color: var(--background-color-2);
-  --dark-side-bar-background: 75 6% 17%; /* hsl(75 6% 17%) */
+  --dark-side-bar-background: 152 6% 17%; /* hsl(152 6% 17%) */
   --dark-text-color: 0 0% 100%; /* hsl(0 0% 100%) */
   --dark-text-color-dimmed: 0 0% 50%; /* hsl(0 0% 50%) */
-  --dark-text-color-highlight: 76 32% 84%; /* hsl(76 32% 84%) */
-  --dark-text-color-highlight-2: 76 35% 82%; /* hsl(76 35% 82%) */
-  --dark-context-menu-background: 75 5% 13%; /* hsla(75 5% 13% / 90%) */
-  --dark-context-menu-list-hover: 75 6% 26%; /* hsl(75 6% 26%) */
-  --dark-seekbar-background-color: 75 5% 84%; /* hsl(75 5% 84%) */
+  --dark-text-color-highlight: 152 33% 89%; /* hsl(152 33% 89%) */
+  --dark-text-color-highlight-2: 152 36% 80%; /* hsl(152 36% 80%) */
+  --dark-context-menu-background: 152 5% 13%; /* hsla(152 5% 13% / 90%) */
+  --dark-context-menu-list-hover: 152 6% 26%; /* hsl(152 6% 26%) */
+  --dark-seekbar-background-color: 152 5% 84%; /* hsl(152 5% 84%) */
   --dark-seekbar-track-background-color: 0 0% 25%;
-  --dark-scrollbar-thumb-background-color: 76 28% 80%; /* hsl(76, 28%, 80%) */
+  --dark-scrollbar-thumb-background-color: 152 33% 89%; /* hsl(152, 33%, 89%) */
   --dark-slider-opacity: 0.25;
 }
 

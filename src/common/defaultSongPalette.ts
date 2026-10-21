@@ -9,33 +9,33 @@ export type CompleteSongPalette = PaletteData & Required<NodeVibrantPalette>;
 export const DEFAULT_SONG_PALETTE: CompleteSongPalette = {
   paletteId: 'DEFAULT_PALETTE',
   DarkMuted: {
-    hex: '#525a3f',
-    hsl: [0.214, 0.18, 0.3],
+    hex: '#31674e',
+    hsl: [0.423, 0.355, 0.298],
     population: 0
   },
   DarkVibrant: {
-    hex: '#4c5a2b',
-    hsl: [0.217, 0.35, 0.26],
+    hex: '#295b43',
+    hsl: [0.42, 0.379, 0.259],
     population: 0
   },
   LightMuted: {
-    hex: '#a2ab87',
-    hsl: [0.208, 0.18, 0.6],
+    hex: '#c4c3bc',
+    hsl: [0.146, 0.063, 0.753],
     population: 0
   },
   LightVibrant: {
-    hex: '#cad6a4',
-    hsl: [0.206, 0.38, 0.74],
+    hex: '#d9ece3',
+    hsl: [0.421, 0.333, 0.888],
     population: 8
   },
   Muted: {
-    hex: '#727a5c',
-    hsl: [0.214, 0.14, 0.42],
+    hex: '#b7b1aa',
+    hsl: [0.09, 0.083, 0.692],
     population: 0
   },
   Vibrant: {
-    hex: '#95a960',
-    hsl: [0.214, 0.3, 0.52],
+    hex: '#52ad81',
+    hsl: [0.419, 0.357, 0.5],
     population: 2
   }
 };

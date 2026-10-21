@@ -57,12 +57,12 @@ while q:
 wing_w = np.where(GRID == 1, w[:, :, 2], 0.0)
 face_w = np.where(GRID == 2, w[:, :, 2], 0.0)
 
-# --- Sage palette (iPhone 17 Sage #A9B689 = hsl(77 24% 63%)) ---
-SAGE_BODY = hsl(77, 0.24, 0.63)  # #AAB78A
-SAGE_BG = hsl(75, 0.30, 0.91)  # #EBEFE1 pale sage canvas
-SAGE_WING = hsl(77, 0.28, 0.76)  # #C9D3B1 light sage wing
-SAGE_FACE = hsl(42, 0.65, 0.85)  # #F2E3C0 warm cream face (warm accent)
-SAGE_DARK = hsl(72, 0.12, 0.23)  # #3F4234 deep olive eyes/mouth
+# --- Mint palette (the user's chosen default theme: sidebar mint #DDEEE6 family) ---
+SAGE_BODY = hsl(151, 0.357, 0.50)  # #52AD81 = the song's Vibrant swatch
+SAGE_BG = hsl(152, 0.333, 0.90)  # #DDEEE6 = sidebar / background-color-2 mint
+SAGE_WING = hsl(152, 0.45, 0.82)  # #BCE6D2 light mint wing
+SAGE_FACE = (245, 231, 200)  # #F5E7C8 warm cream face (kept warm on purpose)
+SAGE_DARK = hsl(152, 0.15, 0.20)  # #2B3B34 deep green-grey eyes/mouth
 
 def render_sage():
     tg = np.stack([SAGE_BG, SAGE_BODY, SAGE_FACE, SAGE_DARK, np.array([255, 255, 255.0])])

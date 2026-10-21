@@ -118,10 +118,10 @@ describe('getTokenColorPalette', () => {
 
   test('falls back to the default song palette when the cover has no palette', () => {
     expect(getTokenColorPalette(undefined)).toEqual(getTokenColorPalette({}));
-    // The default palette is sage green (~77°); colour B must be its complement (~257°, violet).
+    // The default palette is mint green (~152°); colour B must be its complement (~332°, pink).
     const [a, b] = getTokenColorPalette(undefined).map(parse);
-    expect(a.h * 360).toBeCloseTo(74.2, 0);
-    expect(b.h * 360).toBeCloseTo(254.2, 0);
+    expect(a.h * 360).toBeCloseTo(151.6, 0);
+    expect(b.h * 360).toBeCloseTo(331.6, 0);
   });
 });
 
