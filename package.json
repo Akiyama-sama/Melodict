@@ -1,6 +1,6 @@
 {
   "name": "knote",
-  "version": "4.0.0-alpha.5",
+  "version": "4.1.0-alpha",
   "type": "module",
   "description": "Knote — 知音, an elegant music player",
   "license": "AGPL-3.0",
@@ -107,7 +107,8 @@
     "renderer:watch-routes": "tsr watch",
     "preversion": "pnpm test",
     "version": "pnpm install && pnpm run build",
-    "typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json --composite false"
+    "typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json --composite false",
+    "release:local": "node scripts/release-local.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.130",
