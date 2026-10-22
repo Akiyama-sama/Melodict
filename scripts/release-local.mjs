@@ -5,8 +5,8 @@
  *
  * 流程 / Pipeline:
  *   1. 预检查(gh 登录、git 状态、平台)/ preflight (gh auth, git state, platform)
- *   2. pnpm run build(electron-vite build)
- *   3. pnpm exec electron-builder --<platform> --publish=never
+ *   2. 构建:优先用项目自带的 build:<platform> 脚本(如 build:mac,含 prebuild 等前置);
+ *      没有时退回 pnpm run build + pnpm exec electron-builder --<platform> --publish=never
  *   4. 收集 dist/ 产物 / collect artifacts(含 electron-updater 所需的 latest*.yml 与 *.blockmap)
  *   5. gh release create(tag 不存在时新建)或 gh release upload --clobber(已存在时覆盖)
  *
@@ -208,8 +208,15 @@ async function main() {
   if (args.skipBuild) {
     log('   (--skip-build) 已跳过 / skipped');
   } else {
-    runVisible('pnpm', ['run', 'build']);
-    runVisible('pnpm', ['exec', 'electron-builder', BUILDER_FLAG[platform], '--publish=never']);
+    const platformScript = `build:${platform}`;
+    if (pkg.scripts?.[platformScript]) {
+      // 项目自带平台构建脚本(可能含 prebuild:wasm 等前置步骤),优先用它
+      // prefer the project's own platform build script (it may carry pre-steps)
+      runVisible('pnpm', ['run', platformScript]);
+    } else {
+      runVisible('pnpm', ['run', 'build']);
+      runVisible('pnpm', ['exec', 'electron-builder', BUILDER_FLAG[platform], '--publish=never']);
+    }
   }
 
   // [3/5] 收集产物 / collect artifacts
@@ -222,12 +229,17 @@ async function main() {
       .sort()
       .map((n) => path.join(DIST, n));
   } catch {
-    die('dist/ 不存在,请先构建 / dist/ missing, run a build first');
+    if (args.dryRun) {
+      log('   (dry-run) dist/ 不存在,跳过产物收集 / dist/ missing, skipping artifact collection');
+      files = [];
+    } else {
+      die('dist/ 不存在,请先构建 / dist/ missing, run a build first');
+    }
   }
-  if (files.length === 0) {
+  if (files.length === 0 && !args.dryRun) {
     die('dist/ 里没有可上传的产物 / no artifacts to upload in dist/');
   }
-  if (!files.some((f) => /latest.*\.yml$/.test(path.basename(f)))) {
+  if (files.length > 0 && !files.some((f) => /latest.*\.yml$/.test(path.basename(f)))) {
     log('   ⚠ 未找到 latest*.yml,自动更新将不可用 / auto-update feed missing');
   }
   for (const f of files) log(`   - ${path.basename(f)}`);
