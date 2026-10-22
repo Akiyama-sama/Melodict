@@ -20,7 +20,7 @@ Built with Electron and React • Inspired by [Oto Music](https://play.google.co
 
 Knote (知音 — "the one who truly understands your music") builds on the Nora upstream and turns the player into a study companion: beyond playing your local library, it analyzes lyrics line by line with AI — every word's meaning, pronunciation (romaji / kana / pinyin / IPA), and grammatical role is one click away, turning every foreign-language song into a text you can actually study.
 
-![Knote · fullscreen lyrics with the word panel](/resources/other/artwork/word-panel-japanese.png)
+![Knote · fullscreen lyrics with the word panel](/resources/other/artwork/fullscreen-lyrics-closeup.png)
 
 ## ✨ Feature Highlights
 

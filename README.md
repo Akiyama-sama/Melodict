@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="resources/other/nora_logo_banner.webp" alt="知音 Logo" width="480">
-
 # 知音 Knote
 
 ### 用旋律来记住单词 —— 一款会「听歌」，更会「懂歌」的桌面音乐播放器
@@ -20,7 +18,7 @@
 
 知音（Knote）把「播放器」推进为「学习伙伴」：它不只是把你的本地音乐放出来，还用 AI 逐句解析歌词——每个词的释义、读音（罗马音 / 假名 / 拼音 / IPA）、语法功能一一点开即得，让每一首外语歌都变成可精读的课文。
 
-![知音 · 全屏歌词与词语详情](/resources/other/artwork/word-panel-japanese.png)
+![知音 · 全屏歌词与词语详情](/resources/other/artwork/fullscreen-lyrics-closeup.png)
 
 ## ✨ 功能亮点
 
