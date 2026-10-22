@@ -6,7 +6,6 @@ import type {
   LyricsAnalysisProviderTestResult
 } from '../../common/lyricsAnalysis';
 import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
-import type { ProbeConcurrencyResult } from './providerGateway';
 
 /**
  * The postMessage contract between the main-process client (analysisWorkerClient.ts) and the
@@ -31,11 +30,6 @@ export type WorkerRequest =
       requestId: string;
       config: LyricsAnalysisProviderConfig;
     }
-  | {
-      type: 'probe';
-      requestId: string;
-      config: LyricsAnalysisProviderConfig;
-    }
   | { type: 'cancel'; requestId: string };
 
 export type WorkerResponse =
@@ -47,15 +41,11 @@ export type WorkerResponse =
       lines: LyricsAnalysisLine[];
       failedLineIds: string[];
       passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+      /** The AIMD window ceiling the run converged on; persisted per endpoint by the caller. */
+      learnedConcurrency: number;
     }
   | { type: 'error'; requestId: string; error: LyricsAnalysisError }
   | { type: 'test-result'; requestId: string; result: LyricsAnalysisProviderTestResult }
-  | {
-      type: 'probe-result';
-      requestId: string;
-      result?: ProbeConcurrencyResult;
-      error?: string;
-    }
   | {
       type: 'concurrency';
       requestId: string;

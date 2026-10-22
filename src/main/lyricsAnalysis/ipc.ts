@@ -7,18 +7,8 @@ import {
   type LyricsAnalysisProviderTestResult,
   type LyricsAnalysisRequest
 } from '../../common/lyricsAnalysis';
-import type { ProbeConcurrencyResult } from './providerGateway';
 import logger from '../logger';
-import {
-  probeProviderConcurrencyInWorker,
-  testLyricsAnalysisProviderInWorker
-} from './analysisWorkerClient';
-
-/** Result of the settings-page concurrency probe: verdict + per-level detail, or a reason. */
-export interface ProbeConcurrencyIpcResult extends Partial<ProbeConcurrencyResult> {
-  ok: boolean;
-  message: string;
-}
+import { testLyricsAnalysisProviderInWorker } from './analysisWorkerClient';
 import {
   deleteProviderProfile,
   getStoredProviderProfile,
@@ -44,10 +34,7 @@ const toProfilesState = async (): Promise<LyricsAnalysisProviderProfilesState> =
       modelId: profile.modelId,
       hasApiKey: profile.hasApiKey,
       apiKeyHint: profile.apiKeyHint,
-      isActive: profile.id === activeProfileId,
-      ...(profile.maxConcurrency !== undefined
-        ? { maxConcurrency: profile.maxConcurrency }
-        : {})
+      isActive: profile.id === activeProfileId
     }))
   };
 };
@@ -102,37 +89,8 @@ export const registerLyricsAnalysisIpc = () => {
     return true;
   });
 
-  // Concurrency probe for the provider form's advanced section: fires tiny requests through the
-  // analysis worker and reports the tolerated burst ceiling. A probe against an unsaved draft
-  // uses the draft's values; a probe of a saved profile falls back to its stored key.
-  ipcMain.handle(
-    'app/lyricsAnalysis/probeConcurrency',
-    async (
-      _,
-      input?: { profileId?: string; baseURL?: string; modelId?: string; apiKey?: string }
-    ): Promise<ProbeConcurrencyIpcResult> => {
-      const saved = input?.profileId ? await getStoredProviderProfile(input.profileId) : undefined;
-      const baseURL = input?.baseURL?.trim() || saved?.baseURL || '';
-      const apiKey = input?.apiKey?.trim() || saved?.apiKey || '';
-      const modelId =
-        input?.modelId?.trim() || saved?.modelId || LYRICS_ANALYSIS_DEFAULT_MODEL_ID;
-
-      if (!baseURL || !apiKey) {
-        return { ok: false, message: 'Base URL and API key are required before probing.' };
-      }
-
-      try {
-        const result = await probeProviderConcurrencyInWorker({ baseURL, modelId, apiKey });
-        return { ok: true, ...result, message: `Probed ${result.probedMaxConcurrency}.` };
-      } catch (error) {
-        logger.warn('Failed to probe the lyrics analysis concurrency.', { error });
-        return {
-          ok: false,
-          message: error instanceof Error ? error.message : String(error)
-        };
-      }
-    }
-  );
+  // Concurrency is fully adaptive at runtime (see concurrencyPool.ts / concurrencyMemory.ts);
+  // there is no probe and no user-facing concurrency ceiling to set.
 
   ipcMain.handle(
     'app/lyricsAnalysis/testProvider',

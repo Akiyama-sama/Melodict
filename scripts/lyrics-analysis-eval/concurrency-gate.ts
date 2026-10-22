@@ -40,7 +40,6 @@ const main = async () => {
   const baseURL = getArg('--base-url') ?? creds.baseURL ?? 'http://127.0.0.1:3425/v1';
   const apiKey = getArg('--api-key') ?? creds.apiKey ?? 'local';
   const modelId = getArg('--model') ?? 'workbuddy/glm-5.3-flash';
-  const maxConcurrency = getArg('--max-concurrency');
   const title = getArg('--title') ?? 'gate';
 
   const entries = await parseLrcFile(lyricsPath);
@@ -61,8 +60,7 @@ const main = async () => {
     config: {
       baseURL,
       modelId,
-      apiKey,
-      ...(maxConcurrency ? { maxConcurrency: Number(maxConcurrency) } : {})
+      apiKey
     },
     uiLanguage: 'zh-CN',
     songTitle: title,

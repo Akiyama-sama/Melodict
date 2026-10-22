@@ -169,57 +169,31 @@ describe('providerConfigRepository', () => {
     expect(state.profiles[0].name).toBe('token.ctflow.cn');
   });
 
-  test('persists maxConcurrency, clamps it, and keeps the stored value when the input omits it', async () => {
-    const state = await repository.saveStoredProviderProfile({
-      name: 'C',
-      baseURL: 'https://c.example/v1',
-      modelId: 'model-c',
-      apiKey: 'key',
-      maxConcurrency: 12
-    });
-    const id = state.profiles[0].id;
-    expect(state.profiles[0].maxConcurrency).toBe(12);
-
-    // Editing without the field keeps the stored ceiling.
-    const edited = await repository.saveStoredProviderProfile({
-      id,
-      name: 'C',
-      baseURL: 'https://c.example/v1',
-      modelId: 'model-c2'
-    });
-    expect(edited.profiles[0].maxConcurrency).toBe(12);
-
-    // Re-saving with a number overwrites; out-of-range values clamp.
-    const overwritten = await repository.saveStoredProviderProfile({
-      id,
-      name: 'C',
-      baseURL: 'https://c.example/v1',
-      modelId: 'model-c2',
-      maxConcurrency: 999
-    });
-    expect(overwritten.profiles[0].maxConcurrency).toBe(64);
-  });
-
-  test('reads profiles written before maxConcurrency existed as undefined', async () => {
-    // Simulate a pre-field profile on disk: write via the repository, then strip the field.
-    const state = await repository.saveStoredProviderProfile({
-      name: 'Old',
-      baseURL: 'https://old.example/v1',
-      modelId: 'model-old',
-      apiKey: 'key',
-      maxConcurrency: 8
+  test('ignores a maxConcurrency field left over from older stored profiles', async () => {
+    // Concurrency is fully adaptive at runtime now; a field written by an older app version
+    // must be tolerated on read (and silently dropped on the next save), never surfaced.
+    await repository.saveStoredProviderProfile({
+      name: 'Legacy',
+      baseURL: 'https://legacy.example/v1',
+      modelId: 'model-legacy',
+      apiKey: 'key'
     });
     const rawPath = path.join(userDataDir, 'lyrics-analysis-providers.json');
     const raw = JSON.parse(await fs.readFile(rawPath, 'utf-8'));
-    delete raw.profiles[0].maxConcurrency;
+    raw.profiles[0].maxConcurrency = 12;
     await fs.writeFile(rawPath, JSON.stringify(raw));
 
     const reread = await repository.getStoredProviderProfiles();
     expect(reread.profiles[0].maxConcurrency).toBeUndefined();
 
-    // The worker-facing config also defaults: no field, consumer applies 4.
-    const config = await repository.getStoredProviderConfig();
-    expect(config.maxConcurrency).toBeUndefined();
-    void state;
+    const resaved = await repository.saveStoredProviderProfile({
+      id: reread.profiles[0].id,
+      name: 'Legacy',
+      baseURL: 'https://legacy.example/v1',
+      modelId: 'model-legacy'
+    });
+    expect(resaved.profiles[0].maxConcurrency).toBeUndefined();
+    const onDisk = JSON.parse(await fs.readFile(rawPath, 'utf-8'));
+    expect(onDisk.profiles[0].maxConcurrency).toBeUndefined();
   });
 });

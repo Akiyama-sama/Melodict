@@ -293,7 +293,7 @@ describe('analyzeLyrics orchestration', () => {
     // pass. Since batches now run through a bounded concurrent pool, the batch holding the 401
     // stops all UNSTARTED batches, but batches already launched inside the same window wave
     // still fire (they are concurrent, not retries) — so the call count is bounded by the
-    // initial window (min(4, cap) = 4), never by a serial re-run.
+    // initial window (default 4), never by a serial re-run.
     const inputLines = lines('a', 'b', 'c', 'd', 'e', 'f');
     behaviors = [failWith(authError), elements(), elements(), elements()];
 

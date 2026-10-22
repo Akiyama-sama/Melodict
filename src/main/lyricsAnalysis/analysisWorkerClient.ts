@@ -9,30 +9,26 @@ import type {
 } from '../../common/lyricsAnalysis';
 import type { AnalysisPassTelemetryEvent } from '../../common/lyricsAnalysisTelemetry';
 import logger from '../logger';
-import type { ProbeConcurrencyResult } from './providerGateway';
 import workerModulePath from './worker?modulePath';
 import type { WorkerResponse as WorkerMessage } from './workerProtocol';
-
-type ProbeOutcome =
-  | { ok: true; result: ProbeConcurrencyResult }
-  | { ok: false; error: string };
 
 interface PendingAnalysis {
   resolve: (value: {
     lines: LyricsAnalysisLine[];
     failedLineIds: string[];
     passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+    learnedConcurrency: number;
   }) => void;
   reject: (error: LyricsAnalysisError) => void;
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
   onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
   onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
+  onLearnedConcurrency?: (ceiling: number) => void;
 }
 
 const pendingAnalyses = new Map<string, PendingAnalysis>();
 const pendingTests = new Map<string, (result: LyricsAnalysisProviderTestResult) => void>();
-const pendingProbes = new Map<string, (outcome: ProbeOutcome) => void>();
 
 /** RequestIds currently running an analysis in the worker (used to cancel superseded runs). */
 export const inFlightAnalysisRequestIds = () => new Set(pendingAnalyses.keys());
@@ -50,16 +46,6 @@ const createWorker = () => {
     if (message.type === 'test-result') {
       pendingTests.get(message.requestId)?.(message.result);
       pendingTests.delete(message.requestId);
-      return;
-    }
-
-    if (message.type === 'probe-result') {
-      pendingProbes.get(message.requestId)?.(
-        message.result
-          ? { ok: true, result: message.result }
-          : { ok: false, error: message.error ?? 'Unknown probe failure.' }
-      );
-      pendingProbes.delete(message.requestId);
       return;
     }
 
@@ -83,8 +69,10 @@ const createWorker = () => {
         pending.resolve({
           lines: message.lines,
           failedLineIds: message.failedLineIds,
-          passStats: message.passStats
+          passStats: message.passStats,
+          learnedConcurrency: message.learnedConcurrency
         });
+        pending.onLearnedConcurrency?.(message.learnedConcurrency);
         pendingAnalyses.delete(message.requestId);
         break;
       case 'error':
@@ -109,10 +97,6 @@ const createWorker = () => {
       pendingAnalyses.delete(requestId);
     }
     pendingTests.clear();
-    for (const [requestId, resolve] of pendingProbes) {
-      resolve({ ok: false, error: 'The background analysis process stopped unexpectedly.' });
-      pendingProbes.delete(requestId);
-    }
   });
 
   return child;
@@ -132,15 +116,20 @@ export const analyzeLyricsInWorker = (input: {
   songArtists: string[];
   lines: LyricsAnalysisInputLine[];
   sessionId?: string;
+  /** Seeds the worker's AIMD window from the cross-session concurrency memory. */
+  initialConcurrency?: number;
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
   onRepairStarted?: (failedLineIds: string[]) => void;
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
   onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
+  /** Called once with the window ceiling the run converged on (for the memory write-back). */
+  onLearnedConcurrency?: (ceiling: number) => void;
 }) =>
   new Promise<{
     lines: LyricsAnalysisLine[];
     failedLineIds: string[];
     passStats: { outputTokens: number | undefined; inputTokens: number | undefined };
+    learnedConcurrency: number;
   }>((resolve, reject) => {
     const requestId = nextRequestId();
 
@@ -150,7 +139,8 @@ export const analyzeLyricsInWorker = (input: {
       onLine: input.onLine,
       onRepairStarted: input.onRepairStarted,
       onPassCompleted: input.onPassCompleted,
-      onConcurrencyStats: input.onConcurrencyStats
+      onConcurrencyStats: input.onConcurrencyStats,
+      onLearnedConcurrency: input.onLearnedConcurrency
     });
 
     getWorker().postMessage({
@@ -161,7 +151,10 @@ export const analyzeLyricsInWorker = (input: {
       songTitle: input.songTitle,
       songArtists: input.songArtists,
       lines: input.lines,
-      sessionId: input.sessionId
+      sessionId: input.sessionId,
+      ...(input.initialConcurrency !== undefined
+        ? { initialConcurrency: input.initialConcurrency }
+        : {})
     });
   });
 
@@ -175,23 +168,6 @@ export const testLyricsAnalysisProviderInWorker = (config: LyricsAnalysisProvide
       getWorker().postMessage({ type: 'test', requestId, config });
     } catch (error) {
       pendingTests.delete(requestId);
-      reject(error);
-    }
-  });
-
-export const probeProviderConcurrencyInWorker = (config: LyricsAnalysisProviderConfig) =>
-  new Promise<ProbeConcurrencyResult>((resolve, reject) => {
-    const requestId = nextRequestId();
-
-    pendingProbes.set(requestId, (outcome) => {
-      if (outcome.ok) resolve(outcome.result);
-      else reject(new Error(outcome.error));
-    });
-
-    try {
-      getWorker().postMessage({ type: 'probe', requestId, config });
-    } catch (error) {
-      pendingProbes.delete(requestId);
       reject(error);
     }
   });

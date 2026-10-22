@@ -23,6 +23,7 @@ import {
   mergeLyricsAnalysisCache,
   readLyricsAnalysisPartialCache
 } from './cacheRepository';
+import { readConcurrencySeed, writeConcurrencyCeiling } from './concurrencyMemory';
 import {
   buildLineAnalysisCacheKey,
   hydrateLineAnalysisFromCache,
@@ -419,21 +420,22 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
   let concurrencyStats: { max: number; mean: number; rateLimitedCount: number } | undefined;
 
   try {
+    // Cross-session concurrency memory: seed this run's window with what this endpoint last
+    // converged on, and persist what it converged to this time. The worker process cannot touch
+    // Electron storage, so this runs on the session-manager side (see concurrencyMemory.ts).
+    const concurrencySeed = await readConcurrencySeed(provider.baseURL, modelId);
     const outcome = await analyzeLyricsInWorker({
       config: {
         baseURL: provider.baseURL,
         modelId,
-        apiKey: provider.apiKey,
-        // Absent on profiles saved before the field existed → the gateway default (4).
-        ...(provider.maxConcurrency !== undefined
-          ? { maxConcurrency: provider.maxConcurrency }
-          : {})
+        apiKey: provider.apiKey
       },
       uiLanguage: request.uiLanguage,
       songTitle: request.songTitle,
       songArtists: request.songArtists,
       lines: dedupedResumeLines,
       sessionId,
+      initialConcurrency: concurrencySeed,
       onLine: (line, source) => onValidatedLine({ line, source }),
       onRepairStarted: (failedLineIds) => {
         if (!isCurrent()) return;
@@ -452,6 +454,9 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
         concurrencyStats = stats;
       }
     });
+    // The learned ceiling is durable even for superseded/failed runs — it describes the endpoint,
+    // not the song — but never blocks the session's own error propagation.
+    void writeConcurrencyCeiling(provider.baseURL, modelId, outcome.learnedConcurrency);
 
     await flushPromise;
     if (!isCurrent()) {

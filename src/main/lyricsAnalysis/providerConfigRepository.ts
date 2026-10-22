@@ -13,12 +13,6 @@ interface StoredProfileFile {
   name: string;
   baseURL: string;
   modelId: string;
-  /**
-   * Ceiling for the analysis gateway's concurrent-batch window. Optional for backward
-   * compatibility: profiles written before the field existed read as `undefined` and the
-   * consumer applies the default (4).
-   */
-  maxConcurrency?: number;
   /** base64 of `safeStorage.encryptString(apiKey)` when OS encryption is available. */
   apiKeyEncrypted?: string;
   /** Only used when OS encryption is unavailable (e.g. minimal Linux environments). */
@@ -38,8 +32,6 @@ export interface StoredProviderProfile {
   modelId: string;
   apiKeyHint?: string;
   hasApiKey: boolean;
-  /** Undefined when the profile predates the field; consumers default to 4. */
-  maxConcurrency?: number;
 }
 
 export interface StoredProviderProfileWithKey extends StoredProviderProfile {
@@ -199,8 +191,7 @@ export const getStoredProviderProfiles = async () => {
         baseURL: profile.baseURL,
         modelId: profile.modelId,
         hasApiKey: Boolean(apiKey?.trim()),
-        apiKeyHint: maskApiKey(apiKey),
-        ...(profile.maxConcurrency !== undefined ? { maxConcurrency: profile.maxConcurrency } : {})
+        apiKeyHint: maskApiKey(apiKey)
       };
     })
   };
@@ -213,7 +204,6 @@ export const getStoredProviderConfig = async (): Promise<{
   baseURL: string;
   modelId: string;
   apiKey?: string;
-  maxConcurrency?: number;
 }> => {
   const state = await readState();
   const active =
@@ -226,10 +216,7 @@ export const getStoredProviderConfig = async (): Promise<{
     name: active.name,
     baseURL: active.baseURL,
     modelId: active.modelId,
-    apiKey: decryptApiKey(active),
-    ...(active.maxConcurrency !== undefined
-      ? { maxConcurrency: active.maxConcurrency }
-      : {})
+    apiKey: decryptApiKey(active)
   };
 };
 
@@ -247,18 +234,8 @@ export const getStoredProviderProfile = async (profileId: string): Promise<Store
     modelId: profile.modelId,
     hasApiKey: Boolean(apiKey?.trim()),
     apiKeyHint: maskApiKey(apiKey),
-    apiKey,
-    ...(profile.maxConcurrency !== undefined ? { maxConcurrency: profile.maxConcurrency } : {})
+    apiKey
   };
-};
-
-/**
- * Clamps the user/probe-supplied concurrency ceiling to what the AIMD window can use: a whole
- * number 1..64. `undefined` (field absent) falls through and keeps/uses the default.
- */
-const normalizeMaxConcurrency = (value: number | undefined): number | undefined => {
-  if (value === undefined || !Number.isFinite(value)) return undefined;
-  return Math.min(64, Math.max(1, Math.round(value)));
 };
 
 export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderProfileInput) => {
@@ -266,7 +243,6 @@ export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderPro
   const baseURL = input.baseURL.trim();
   const modelId = input.modelId.trim();
   const name = input.name?.trim() || deriveProfileName(baseURL);
-  const maxConcurrency = normalizeMaxConcurrency(input.maxConcurrency);
   const existingIndex = input.id
     ? state.profiles.findIndex((profile) => profile.id === input.id)
     : -1;
@@ -278,8 +254,6 @@ export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderPro
       name,
       baseURL,
       modelId,
-      // Absent input keeps the stored value; a number (including a re-saved default) overwrites.
-      maxConcurrency: maxConcurrency ?? existing.maxConcurrency,
       apiKeyEncrypted: existing.apiKeyEncrypted,
       apiKeyPlain: existing.apiKeyPlain
     };
@@ -292,7 +266,6 @@ export const saveStoredProviderProfile = async (input: LyricsAnalysisProviderPro
       name,
       baseURL,
       modelId,
-      ...(maxConcurrency !== undefined ? { maxConcurrency } : {}),
       ...encryptApiKey(input.apiKey?.trim() ?? '')
     };
 

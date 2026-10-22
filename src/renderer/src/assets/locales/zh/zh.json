@@ -1154,14 +1154,7 @@
       "profileDeleteFailed": "无法删除服务商。",
       "deleteProfileConfirmTitle": "删除服务商",
       "deleteProfileConfirmMessage": "确定要删除「{{name}}」吗？保存的 Key 也会一并删除，且无法恢复。",
-      "modelMissing": "未填写模型 ID",
-      "advancedTitle": "高级配置",
-      "maxConcurrency": "并发请求数",
-      "maxConcurrencyHint": "同时发往端点的批次上限。调高整首解析更快，但可能触发限流。留空使用默认值（4）。",
-      "probeConcurrency": "探测最大并发",
-      "probing": "探测中 {{level}}…",
-      "probeSucceeded": "端点可承受 {{n}} 路并发请求。",
-      "probeFailed": "探测失败"
+      "modelMissing": "未填写模型 ID"
     }
   },
   "netease": {

@@ -1154,14 +1154,7 @@
       "profileDeleteFailed": "Could not delete the provider.",
       "deleteProfileConfirmTitle": "Delete provider",
       "deleteProfileConfirmMessage": "Delete \"{{name}}\"? Its saved key is removed too and cannot be recovered.",
-      "modelMissing": "No model ID",
-      "advancedTitle": "Advanced",
-      "maxConcurrency": "Concurrent requests",
-      "maxConcurrencyHint": "How many line batches may run at once. Higher finishes a song sooner but can hit the endpoint's rate limit. Leave empty for the default (4).",
-      "probeConcurrency": "Probe max concurrency",
-      "probing": "Probing {{level}}…",
-      "probeSucceeded": "Endpoint tolerated {{n}} concurrent requests.",
-      "probeFailed": "Probe failed"
+      "modelMissing": "No model ID"
     }
   },
   "netease": {
