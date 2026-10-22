@@ -138,12 +138,12 @@ function sh(cmd, cmdArgs) {
   };
 }
 
-function buildBody(notesJson, version, shortSha) {
+function buildBody(notesJson, version, shortSha, productName) {
   const entry = Array.isArray(notesJson?.versions)
     ? notesJson.versions.find((v) => v.version === version)
     : null;
   const lines = [
-    `Local build of Melodict ${version}.`,
+    `Local build of ${productName} ${version}.`,
     '',
     `Built from commit ${shortSha} on ${new Date().toISOString().slice(0, 10)}.`
   ];
@@ -247,14 +247,24 @@ async function main() {
   // [4/5] 生成 release 说明 / generate release notes
   log('\n==> [4/5] 生成 release 说明 / generate release notes');
   const tag = args.tag || `v${version}`;
+  // 产品名取自 electron-builder.yml 的 productName(Knote/Melodict 各分支通用)
+  // product name comes from electron-builder.yml so it follows each branch's branding
+  let productName = 'App';
+  try {
+    productName =
+      /productName:\s*(.+)/.exec(await readFile(path.join(ROOT, 'electron-builder.yml'), 'utf8'))?.[1].trim() ||
+      'App';
+  } catch {
+    // electron-builder.yml 缺失时退回 package.json 的 name / fall back to package name
+  }
   let notesJson = {};
   try {
     notesJson = JSON.parse(await readFile(path.join(ROOT, 'release-notes.json'), 'utf8'));
   } catch {
     // 可选文件,缺失时用兜底说明 / optional file, fall back to a generic body
   }
-  const body = buildBody(notesJson, version, sha.slice(0, 7));
-  const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'melodict-release-'));
+  const body = buildBody(notesJson, version, sha.slice(0, 7), productName);
+  const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'release-local-'));
   const notesPath = path.join(tmpDir, 'notes.md');
   await writeFile(notesPath, body);
   log(`   tag=${tag}  ${args.publish ? (isPrerelease ? '(prerelease)' : '(latest)') : '(draft)'}`);
@@ -277,7 +287,7 @@ async function main() {
       tag,
       ...files,
       '--title',
-      `Melodict ${version}`,
+      `${productName} ${version}`,
       '--notes-file',
       notesPath,
       '--target',
