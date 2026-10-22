@@ -14,7 +14,10 @@ import { app } from 'electron';
 
 import { seedDatabase } from './seed';
 
-const DB_NAME = 'knote.pglite.db';
+// Typed as `string` so the legacy-name guard below stays a meaningful runtime check instead of
+// a compile-time "no overlap" error — DB_NAME is a const, so TS would otherwise narrow its type
+// to the literal and flag the comparison as always-false.
+const DB_NAME: string = 'knote.pglite.db';
 export const DB_PATH = app.getPath('userData') + '/' + DB_NAME;
 /** The database name the app used before the Knote rename; existing installs migrate from it. */
 const LEGACY_DB_NAME = 'nora.pglite.db';

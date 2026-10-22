@@ -24,26 +24,24 @@
   ],
   "main": "./out/main/main.js",
   "author": {
-    "email": "adsandakannipunajith2003@outlook.com",
-    "name": "Sandakan Nipunajith",
-    "url": "https://github.com/Sandakan"
+    "email": "sandakannipunajith@gmail.com",
+    "name": "Akiyama",
+    "url": "https://github.com/Akiyama-sama"
   },
-  "homepage": "https://github.com/Sandakan/Nora",
+  "homepage": "https://github.com/Akiyama-sama/Melodict",
   "urls": {
-    "discord_invite_url": "https://discord.gg/c5rGKnBs4y",
-    "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
-    "website_url": "https://noramusic.netlify.app/"
+    "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/"
   },
   "bugs": {
     "email": "sandakannipunajith@gmail.com",
-    "url": "https://github.com/Sandakan/Nora/issues"
+    "url": "https://github.com/Akiyama-sama/Melodict/issues"
   },
   "releaseNotes": {
-    "md": "https://raw.githubusercontent.com/Sandakan/Nora/master/CHANGELOG.md"
+    "md": "https://raw.githubusercontent.com/Akiyama-sama/Melodict/master/CHANGELOG.md"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sandakan/Nora"
+    "url": "https://github.com/Akiyama-sama/Melodict"
   },
   "appPreferences": {
     "metadataEditingSupportedExtensions": [

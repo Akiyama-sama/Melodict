@@ -498,9 +498,7 @@
     "createIssueOnKnoteGithubRepo": "create an issue on $t(settingsPage.noraGithubRepo)",
     "contact": "If you have any feedback about bugs, feature requests (etc.) about the app, please <Hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</Hyperlink>",
     "emailContact": "or contact me through my email.",
-    "loveKnote": "Made with <span>❤</span> by <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
-    "sandakanGithubProfile": "Sandakan's Github profile",
-    "beautifulSriLanka": "Beautiful Sri Lanka",
+    "loveKnote": "Made with <span>❤</span> by <Hyperlink>Akiyama</Hyperlink>.",
     "netease": {
       "navLabel": "NetEase",
       "title": "NetEase Cloud Music",
@@ -528,7 +526,8 @@
       "allowTrialPlayHint": "Off by default. Trials only cover a fraction of the song; a VIP account plays everything without this."
     },
     "userAgreement": "User Agreement & Disclaimer",
-    "userAgreementNotice": "This app is free software under AGPL-3.0, for personal study and research only. By using it you accept the User Agreement & Disclaimer."
+    "userAgreementNotice": "This app is free software under AGPL-3.0, for personal study and research only. By using it you accept the User Agreement & Disclaimer.",
+    "authorGithubProfile": "Akiyama's Github profile"
   },
   "artistInfoPage": {
     "likeArtist": "Like {{name}}",

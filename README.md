@@ -1,182 +1,123 @@
 <div align="center">
 
-<img src="resources/other/nora_logo_banner.webp" alt="Nora Logo">
+<img src="resources/other/nora_logo_banner.webp" alt="知音 Logo" width="480">
 
-# Nora Player
+# 知音 Knote
 
-### An elegant music player for the modern desktop
+### 用旋律来记住单词 —— 一款会「听歌」，更会「懂歌」的桌面音乐播放器
 
-Built with Electron and React • Inspired by [Oto Music](https://play.google.com/store/apps/details?id=com.piyush.music&gl=us)
+基于 Electron 与 React 构建 • 灵感来源于 [Oto Music](https://play.google.com/store/apps/details?id=com.piyush.music&gl=us)
 
-![GitHub all releases](https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads&style=for-the-badge)
-![GitHub release (latest by date)](https://img.shields.io/github/downloads/Sandakan/Nora/v3.1.0-stable/total?style=for-the-badge)
-![GitHub package.json version](https://img.shields.io/github/package-json/v/Sandakan/Nora?color=blue&label=latest%20version&style=for-the-badge)
+[![GitHub release](https://img.shields.io/github/package-json/v/Akiyama-sama/Melodict?color=green&label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/releases/latest)
+[![GitHub license](https://img.shields.io/github/license/Akiyama-sama/Melodict?style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/Akiyama-sama/Melodict?style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/issues)
 
-[![GitHub license](https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge)](https://github.com/Sandakan/Nora/blob/master/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge)](https://github.com/Sandakan/Nora/issues)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Sandakan/Nora/build.yml?branch=master&style=for-the-badge)
-
-[![Crowdin](https://badges.crowdin.net/nora/localized.svg)](https://crowdin.com/project/nora)
-
-[Download](https://github.com/Sandakan/Nora/releases/latest) • [Features](#-features) • [Build Guide](#-build-from-source) • [Changelog](/CHANGELOG.md) • [Discord](https://discord.gg/c5rGKnBs4y)
+[下载](#-下载) • [功能](#-功能亮点) • [构建指南](#-从源码构建) • [更新日志](/CHANGELOG.md) • [English](README.en.md)
 
 </div>
 
 ---
 
-## 🎯 Why Nora?
+知音（Knote）在 Nora 上游的基础上把「播放器」推进为「学习伙伴」：它不只是把你的本地音乐放出来，还用 AI 逐句解析歌词——每个词的释义、读音（罗马音 / 假名 / 拼音 / IPA）、语法功能一一点开即得，让每一首外语歌都变成可精读的课文。
 
-Nora reimagines desktop music playback with thoughtful design and powerful features. Built to overcome the limitations of default music apps, it provides an intuitive and beautiful experience that puts your music front and center.
+![知音主界面](/resources/other/artwork%200.webp)
 
-![Nora Banner Artwork](/resources/other/artwork%200.webp)
+## ✨ 功能亮点
 
-## ✨ Features
+**🎵 播放器基座（继承自 Nora）**
 
-**Library Management**
+- 歌手 / 专辑 / 歌单库管理，智能搜索与筛选
+- 同步歌词逐行滚动、桌面迷你歌词、系统级媒体控制
+- 亮 / 暗主题，封面取色的动态主题
+- Last.fm Scrobbling、Discord Rich Presence
 
-- ✅ Organize songs, artists, albums, and playlists with ease
-- ✅ Advanced search with smart song filters
-- ✅ Edit song metadata easily and conveniently[^3]
+**📖 AI 歌词解析（知音的核心）**
 
-**Listening Experience**
+- 逐词（Token）解析：释义、词性、语法功能，点击歌词中的词即得
+- 多语种读音标注：日语罗马音与假名、韩语罗马字、中文拼音、英语 IPA（美音）
+- 人工罗马音参照（如网易云 romalrc）作为读音基准对齐分词
+- 解析结果按歌曲缓存，副歌跨歌复用；播放中自动解析可一键关闭
+- 全屏歌词「词语面板」：选中任意词查看完整学习卡片
 
-- ✅ Sing along with song lyrics[^1]
-- ✅ Support for synced lyrics
-- ✅ Last.FM scrobbling integration
-- ✅ Mini-player mode for distraction-free listening
+**🎧 在线音源**
 
-**Personalization**
+- 网易云音乐账号登录：搜索、播放、喜欢的音乐
+- 多音质选择，歌词（含逐字 YRC）自动匹配
 
-- ✅ Keep favorite songs and artists close to you
-- ✅ Read your favorite artist's biography
-- ✅ Create playlists that meet your needs
-- ⏳ Personalized music shuffling[^2] (Upcoming)
+## 📥 下载
 
-**Customization**
+前往 **[Releases 页面](https://github.com/Akiyama-sama/Melodict/releases) > Assets > 选择你的平台**，或[直接下载最新版本](https://github.com/Akiyama-sama/Melodict/releases/latest)。
 
-- ✅ Switch between Light and Dark themes with ease
+> [!NOTE]
+> 目前仅提供 Windows 与 macOS 构建；Linux 可从源码运行。
 
-![Latest Version Artwork](/resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
+## 📸 界面预览
 
-Check out the [changelog](/CHANGELOG.md) to see what's new in the latest release.
+![在线与离线歌词](/resources/other/artwork%201.webp)
 
-## 📥 Download
+![亮暗主题切换](/resources/other/artwork%202.webp)
 
-Go to the **[Releases page](https://github.com/Sandakan/Nora/releases) > Assets > Choose your platform** or [download the latest version directly](https://github.com/Sandakan/Nora/releases/latest).
+![轻松管理音乐库](/resources/other/artwork%203.webp)
 
-## 📸 Gallery
+![迷你播放器](/resources/other/artwork%208.webp)
 
-![Support for Online and Offline Lyrics](/resources/other/artwork%201.webp)
+## 🛠 从源码构建
 
-![Switch between Dark and Light Modes](/resources/other/artwork%202.webp)
-
-![Support for Last.FM Scrobbling](/resources/other/artwork%209.webp)
-
-![Organize your music library with ease](/resources/other/artwork%203.webp)
-
-![See how your favorite artists appear on songs and albums](/resources/other/artwork%204.webp)
-
-![Keep your favorites closer to you](/resources/other/artwork%205.webp)
-
-![Search through your music library easily and efficiently](/resources/other/artwork%206.webp)
-
-![Edit song metadata and organize your library](/resources/other/artwork%207.webp)
-
-![Listen with the mini player](/resources/other/artwork%208.webp)
-
-## 💬 What People Say
-
-<div align="center">
-
-> _"A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes."_  
-> — Robert Condorache, [Softpedia](https://www.softpedia.com/get/Multimedia/Audio/Audio-Players/Oto-Music-for-Desktop.shtml)
-
----
-
-> _"The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable."_  
-> — [Apps Worth Watching in the Near Future • SSPAI](https://sspai.com/post/78669)
-
----
-
-> _"Just found the most beautiful music player for Windows: Nora"_  
-> — [r/windowsapps • Reddit](https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/)
-
-</div>
-
-## 🛠 Build From Source
-
-Clone the repository
+克隆仓库
 
 ```bash
-git clone https://github.com/Sandakan/Nora
+git clone https://github.com/Akiyama-sama/Melodict
 ```
 
-Navigate to project folder
+进入项目目录
 
 ```bash
-cd Nora
+cd Melodict
 ```
 
-Install dependencies
+安装依赖（需要 pnpm）
 
 ```bash
 pnpm install
 ```
 
-Launch in development mode
+以开发模式启动
 
 ```bash
 pnpm start
 ```
 
 > [!TIP]
-> If you encounter issues (such as `Error: Electron uninstall`), check out the [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
+> 如果遇到问题（例如 `Error: Electron uninstall`），请查阅[故障排除指南](docs/TROUBLESHOOTING.md)。
 
-## 📊 Star History
+## 📄 开源许可
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)
+本项目基于 [GNU Affero 通用公共许可证 v3.0（AGPL-3.0）](https://www.gnu.org/licenses/agpl-3.0.html)授权。
 
-## 📄 Open Source License
+- **修改与分发：** 任何修改或再分发同样必须以 **AGPL-3.0** 授权，并提供完整源代码。
+- **衍生作品：** 同样须采用 **AGPL-3.0**，并在适当位置保留本项目的许可与版权声明。
+- **署名：** 须保留原作者与版权信息。本项目 fork 自 [Sandakan/Nora](https://github.com/Sandakan/Nora)（MIT 许可），其原始版权声明保留于 [open_source_licenses.txt](open_source_licenses.txt)。
+- **商业使用：** 若用于销售或其他营利目的，须提供源代码及本项目链接。由于本项目依赖第三方服务，商业使用可能存在法律风险。
+- **免责声明：** 本软件按「原样」提供，不含任何担保，详见 AGPL-3.0 条文。
 
-This project is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
+## ⚠️ 免责声明
 
-- **Modification & distribution:** any modification or redistribution must also be licensed under **AGPL-3.0**, with the complete source code provided.
-- **Derivative works:** must adopt **AGPL-3.0** as well, and must retain this project's license and copyright notice in an appropriate place.
-- **Attribution:** the original author and copyright information must be preserved. This project is a fork of [Sandakan/Nora](https://github.com/Sandakan/Nora) (MIT-licensed); its original copyright notice is retained in [open_source_licenses.txt](open_source_licenses.txt).
-- **Commercial use:** if used for sale or any other for-profit purpose, the source code and a link to this project must be provided. Because this project relies on third-party services, commercial use may carry legal risk.
-- **Warranty:** this software is provided "as is", without warranty of any kind, as detailed in AGPL-3.0.
+本项目**仅供个人学习与研究使用**，禁止商业与违法用途。部分功能依赖第三方 API（如在线音乐平台）及用户自行配置的 AI 解析服务，用户须自行确保其使用符合所在法律法规与相关服务条款。因使用本项目产生的任何直接或间接后果，作者不承担责任。
 
-## ⚠️ Disclaimer
+本应用本身不提供、不存储、不分发任何音频内容；所有内容均来自你的本地文件、你主动登录的在线平台，或你自行配置的 AI 服务。本应用不绕过任何平台的付费或权限限制。完整《用户协议与免责声明》见 [docs/agreement.md](docs/agreement.md)，应用首次启动时也会展示。
 
-This project is intended **for personal study and research only**; commercial and illegal use is prohibited. Some features rely on third-party APIs (such as online music platforms) and on AI analysis services you configure yourself. Users must ensure on their own that their usage complies with applicable laws and regulations as well as the relevant service agreements. The authors bear no responsibility for any direct or indirect consequences arising from the use of this project.
+## 🤝 反馈与贡献
 
-The app itself does not provide, store, or distribute any audio content; all content comes from your local files, the online platforms you actively sign into, or the AI services you configure. The app does not bypass any platform's paid or permission restrictions. See [docs/agreement.md](docs/agreement.md) for the full User Agreement & Disclaimer, which is also shown inside the app on first launch.
+发现 Bug、想要新功能？欢迎通过以下方式反馈：
 
-## 🤝 Feedback & Contributing
-
-Have feedback, bug reports, or feature requests? Reach out through:
-
-- [Discord Server](https://discord.gg/c5rGKnBs4y)
-- [Email](mailto:sandakannipunajith@gmail.com)
-- [GitHub Issues](https://github.com/Sandakan/Nora/issues)
-
-Help translate Nora on [Crowdin](https://crowdin.com/project/nora)!
+- [GitHub Issues](https://github.com/Akiyama-sama/Melodict/issues)（推荐）
 
 ---
 
 <div align="center">
 
-Made with ❤️ by Sandakan Nipunajith  
-Love, Sri Lanka
+由 [Akiyama](https://github.com/Akiyama-sama) 用 ❤️ 制作 • [English](README.en.md)
 
-_All songs, artists, albums, and cover art used in demonstrations are property of their respective owners and used for illustrative purposes only. All copyrights are respected._
+_演示中出现的所有歌曲、歌手、专辑与封面版权归其各自所有者所有，仅作说明用途。_
 
 </div>
-
----
-
-[^1]: Song lyrics use the [SongLyrics](https://www.npmjs.com/package/songlyrics) package and an implementation from the [MxLRC](https://github.com/fashni/MxLRC) package.
-
-[^2]: Personalized shuffles and playlists are generated by analyzing listening patterns and play counts.
-
-[^3]: Currently, the app only supports editing MP3 files due to dependency limitations.
