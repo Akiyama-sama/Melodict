@@ -11,8 +11,8 @@
  *   5. gh release create(tag 不存在时新建)或 gh release upload --clobber(已存在时覆盖)
  *
  * 用法 / Usage:
- *   pnpm release:local                    # 当前平台,直接发布(非草稿)
- *   pnpm release:local --draft            # 上传为草稿 release,人工确认后再 publish
+ *   pnpm release:local                    # 当前平台,上传为草稿 release(默认)
+ *   pnpm release:local --publish          # 跳过草稿,直接正式发布
  *   pnpm release:local --tag v1.2.3       # 自定义 tag,默认 v{package.json 的 version}
  *   pnpm release:local --skip-build       # 跳过构建,直接上传 dist/ 里现有产物
  *   pnpm release:local --dry-run          # 演练:只打印将执行的命令,不构建、不上传
@@ -24,7 +24,8 @@
  *   - MAIN_VITE_* 环境变量:electron-vite 会自动读取根目录 .env,把 CI secrets
  *     写进 .env 即可得到与 CI 一致的构建产物。
  *   - 建议在干净的工作区运行;工作区有未提交改动时脚本只提示、不拦截。
- *   - 版本号带预发布段(如 4.0.0-alpha)时,release 会自动标记为 prerelease。
+ *   - 版本号带预发布段(如 4.1.0-alpha)时,release 会自动标记为 prerelease。
+ *   - 默认上传为草稿(draft),确认无误后在 GitHub 网页上手动 publish。
  */
 
 import { spawnSync } from 'node:child_process';
@@ -67,7 +68,7 @@ function usage() {
     '',
     '  --platform <mac|win|linux>  目标平台,默认当前系统 / target platform, defaults to current OS',
     '  --tag <tag>                 release tag,默认 v{version} / release tag, defaults to v{version}',
-    '  --draft                     上传为草稿 / upload as draft release',
+    '  --publish                   直接正式发布 / publish immediately (default is draft)',
     '  --prerelease | --stable     覆盖预发布标记 / override the prerelease flag (auto-detected from version)',
     '  --skip-build                跳过构建,复用 dist/ 现有产物 / reuse existing dist/ artifacts',
     '  --dry-run                   演练,不构建不上传 / print commands only',
@@ -79,7 +80,7 @@ function parseArgs(argv) {
   const args = {
     platform: null,
     tag: null,
-    draft: false,
+    publish: false,
     skipBuild: false,
     dryRun: false,
     prerelease: null,
@@ -99,8 +100,8 @@ function parseArgs(argv) {
       case '-h':
         args.help = true;
         break;
-      case '--draft':
-        args.draft = true;
+      case '--publish':
+        args.publish = true;
         break;
       case '--skip-build':
         args.skipBuild = true;
@@ -244,7 +245,7 @@ async function main() {
   const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'melodict-release-'));
   const notesPath = path.join(tmpDir, 'notes.md');
   await writeFile(notesPath, body);
-  log(`   tag=${tag}  ${args.draft ? '(draft)' : isPrerelease ? '(prerelease)' : '(latest)'}`);
+  log(`   tag=${tag}  ${args.publish ? (isPrerelease ? '(prerelease)' : '(latest)') : '(draft)'}`);
   if (args.dryRun) log(body.split('\n').slice(0, 40).join('\n'));
 
   // [5/5] 上传 / upload
@@ -270,9 +271,12 @@ async function main() {
       '--target',
       sha
     ];
-    if (args.draft) cmdArgs.push('--draft');
-    else if (isPrerelease) cmdArgs.push('--prerelease');
-    else cmdArgs.push('--latest');
+    if (args.publish) {
+      if (isPrerelease) cmdArgs.push('--prerelease');
+      else cmdArgs.push('--latest');
+    } else {
+      cmdArgs.push('--draft');
+    }
   }
   log(`   $ gh ${cmdArgs.join(' ')}`);
   if (!args.dryRun) {
