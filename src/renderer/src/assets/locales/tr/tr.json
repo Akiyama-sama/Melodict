@@ -419,8 +419,6 @@
     "storageMetricsGenerationError": "Görünüşe göre bizim tarafımızda bir şeyler ters gitti.",
     "about": "Hakkında",
     "releasedOn": "{{val, datetime}} tarihinde yayınlandı",
-    "noraWebsite": "Knote Resmi Web Sitesi",
-    "noraDiscordServer": "Knote Resmi Discord Sunucusu",
     "noraGithubRepo": "Knote Github Deposu",
     "noraDescription": "Knote, Electron ve React kullanılarak oluşturulmuş zarif bir müzik çalar.",
     "noraInspiration": "Piyush Mamidwar'dan <hyperlink>Android için Oto Music'ten</hyperlink> esinlenilmiştir.",
@@ -445,9 +443,8 @@
     "createIssueOnKnoteGithubRepo": "$t üzerinde bir sorun oluştur (settingsPage.noraGithubRepo)",
     "contact": "Uygulama hakkında hatalar, özellik istekleri vb. hakkında herhangi bir geri bildiriminiz varsa, lütfen <hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</hyperlink>",
     "emailContact": "E - postam aracılığıyla benimle iletişime geçin.",
-    "loveKnote": "<span>Sandakan Nipunajith tarafından ile yapılmıştır</span>. <hyperlink>❤</hyperlink>",
-    "sandakanGithubProfile": "Sandakan'ın Github Profili",
-    "beautifulSriLanka": "Güzel Sri Lanka"
+    "loveKnote": "<span>Akiyama tarafından yapılmıştır</span>. <hyperlink>❤</hyperlink>",
+    "authorGithubProfile": "Akiyama'nın Github Profili"
   },
   "artistInfoPage": {
     "likeArtist": "{{name}} gibi",

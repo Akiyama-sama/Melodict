@@ -1,6 +1,6 @@
-# Contributing Guide for Nora
+# Contributing Guide for Knote
 
-First off, Thank you for deciding to contribute to Nora. It's people like you that make Nora live a long time.
+First off, Thank you for deciding to contribute to Nora. It's people like you that make Knote live a long time.
 
 Following these guidelines helps to communicate that you respect the time of the developers managing and developing this open source project. In return, they should reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests.
 
@@ -29,11 +29,11 @@ Following these guidelines helps to communicate that you respect the time of the
 
 ### How to report a bug
 
-> You can follow the [bug report template](./ISSUE_TEMPLATE/bug_report.md) when adding a new bug report for Nora.
+> You can follow the [bug report template](./ISSUE_TEMPLATE/bug_report.md) when adding a new bug report for Knote.
 
 ### How to suggest a feature or enhancement
 
-> You can follow the [feature request template](./ISSUE_TEMPLATE/bug_report.md) when adding new feature request for Nora.
+> You can follow the [feature request template](./ISSUE_TEMPLATE/bug_report.md) when adding new feature request for Knote.
 
 <br>
 

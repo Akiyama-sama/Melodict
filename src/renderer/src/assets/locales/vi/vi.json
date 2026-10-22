@@ -485,11 +485,8 @@
 
     "about": "Về ứng dụng",
     "releasedOn": "Phát hành vào {{val, datetime}}",
-    "noraWebsite": "Trang web chính thức của Knote",
-    "noraDiscordServer": "Máy chủ Discord chính thức của Knote",
     "noraGithubRepo": "kho mã nguồn của Knote trên GitHub",
     "noraGithubIssues": "Trang issue của Knote trên GitHub",
-    "noraLocalizationStatus": "Trạng thái dịch thuật của Knote",
     "noraDescription": "Knote là một trình phát nhạc thanh lịch được xây dựng bằng Electron và React.",
     "noraInspiration": "Lấy cảm hứng từ <Hyperlink>Oto Music cho Android</Hyperlink> bởi Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music trên Cửa hàng Play",
@@ -514,9 +511,8 @@
     "createIssueOnKnoteGithubRepo": "tạo issue mới trong $t(settingsPage.noraGithubRepo)",
     "contact": "Nếu bạn có bất kỳ phản hồi nào liên quan đến lỗi, yêu cầu tính năng mới,... về ứng dụng, vui lòng <Hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</Hyperlink>",
     "emailContact": "hoặc liên hệ tôi qua email.",
-    "loveKnote": "Được tạo ra với tất cả <span>❤</span> của <Hyperlink>Sandakan Nipunajith</Hyperlink>và những người đóng góp.",
-    "sandakanGithubProfile": "Trang cá nhân của Sandakan trên GitHub",
-    "beautifulSriLanka": "Sri Lanka Tuyệt Đẹp"
+    "loveKnote": "Được tạo ra với tất cả <span>❤</span> của <Hyperlink>Akiyama</Hyperlink> và những người đóng góp.",
+    "authorGithubProfile": "Trang cá nhân của Akiyama trên GitHub"
   },
 
   "artistInfoPage": {

@@ -45,7 +45,7 @@ const parseLrclibResponseData = (
   if ('statusCode' in data) return undefined;
 
   const lyricsArr: string[] = [];
-  lyricsArr.push(`[re:Knote (https://github.com/Sandakan/Nora)]`);
+  lyricsArr.push(`[re:Knote (https://github.com/Akiyama-sama/knote)]`);
   lyricsArr.push(`[ve:${version}]`);
   lyricsArr.push(`[ti:${data.trackName}]`);
   lyricsArr.push(`[ar:${data.artistName}]`);

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>app.netlify.noramusic.Nora</id>
-  <launchable type="desktop-id">app.netlify.noramusic.Nora.desktop</launchable>
-  <name>Nora</name>
-  <developer id="app.netlify.noramusic">
-    <name>Nora Music Developers</name>
+  <id>io.github.Akiyama-sama.knote</id>
+  <launchable type="desktop-id">io.github.Akiyama-sama.knote.desktop</launchable>
+  <name>Knote</name>
+  <developer id="io.github.Akiyama-sama">
+    <name>Akiyama</name>
   </developer>
   <summary>An elegant music player inspired from Oto Music</summary>
-  <project_license>MIT</project_license>
+  <project_license>AGPL-3.0</project_license>
   <metadata_license>MIT</metadata_license>
-  <url type="homepage">https://noramusic.netlify.app/</url>
-  <url type="bugtracker">https://github.com/Sandakan/Nora/issues</url>
-  <url type="vcs-browser">https://github.com/Sandakan/Nora</url>
+  <url type="homepage">https://github.com/Akiyama-sama/knote</url>
+  <url type="bugtracker">https://github.com/Akiyama-sama/knote/issues</url>
+  <url type="vcs-browser">https://github.com/Akiyama-sama/knote</url>
   <description>
     <p><em>Experience Everything a Music Player Should Have</em></p>
-    <p>Nora is an elegant music player built using Electron and React. It is inspired from Oto Music for Android by Piyush Mamidwar.</p>
+    <p>Knote is an elegant music player built using Electron and React. It is inspired from Oto Music for Android by Piyush Mamidwar.</p>
     <p>With simplicity and design in mind, this app was made to overcome problems when using default music apps on platforms that lack essential features.</p>
     <p><em>App features</em></p>
     <ul>
@@ -33,52 +33,52 @@
   <screenshots>
     <screenshot type="default">
       <image>
-        https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%200.webp
+        https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%200.webp
       </image>
       <caption>Main artowork</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%201.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%201.webp</image>
       <caption>Support for online and offline lyrics</caption>
     </screenshot>
 
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%202.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%202.webp</image>
       <caption>Switch between light and dark mode</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%203.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%203.webp</image>
       <caption>Supports Last.FM Scrobbling</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%204.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%204.webp</image>
       <caption>Organize your music library with ease</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%205.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%205.webp</image>
       <caption>See how your favorite artists appear on songs and albums</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%206.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%206.webp</image>
       <caption>Keep your favorites closer to you</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%207.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%207.webp</image>
       <caption>Search through your music library easily and efficiently</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%208.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%208.webp</image>
       <caption>Edit song metadata and organize your library</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%209.webp</image>
+      <image>https://github.com/Akiyama-sama/knote/raw/refs/heads/master/resources/other/artwork%209.webp</image>
       <caption>Listen with the mini player</caption>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.0" />
   <releases>
     <release version="3.1.0" date="2024-03-29">
-    <url type="details">https://github.com/Sandakan/Nora/blob/master/CHANGELOG.md#310-stable---2025-03-29</url>
+    <url type="details">https://github.com/Akiyama-sama/knote/blob/master/CHANGELOG.md#310-stable---2025-03-29</url>
     <description>
       <p>🎉 New Features and Updates</p>
       <ul>
@@ -89,8 +89,8 @@
         <li>Original lyric will now be shown along with the translated lyric.</li>
         <li>Added support for reading LRC files without the relevant song extension.</li>
         <li>Added support for symbolic links in file paths. Thanks @Brunight.</li>
-        <li>Configured to build Nora in the rpm package. Fixes #261.</li>
-        <li>Configured to build Nora for arm systems. Fixes #268.</li>
+        <li>Configured to build the app in the rpm package. Fixes #261.</li>
+        <li>Configured to build the app for arm systems. Fixes #268.</li>
         <li>Added support for copying lyrics lines. Fixes #253.</li>
         <li>Added a blurred background for the flil and mini player.</li>
         <li>Added a how to use prompt when visiting the lyrics editor for the first time.</li>
@@ -116,17 +116,17 @@
         <li>Updated hyperlinks always to be underlined.</li>
         <li>Fixed lyrics that were not updated on LyricsPage right after modifying them in LyricsEditingPage.</li>
         <li>Fixed lyrics lines in LyricsEditingPage don't follow dynamic theme colors.</li>
-        <li>Fixed app name showing "Electron" instead of Nora. Fixes #288.</li>
+        <li>Fixed app name showing "Electron" instead of the app name. Fixes #288.</li>
         <li>Removed full-screen player that starts with lyrics showing.</li>
         <li>Updated discord-rich-presence to display the current song position. Thanks @ElectroHeavenVN.</li>
         <li>Fixed song filenames cut off at periods. Fixes #308.</li>
-        <li>Added a fix for file names with special characters that cannot be played in Nora player. Fixes #323.</li>
+        <li>Added a fix for file names with special characters that cannot be played in the player. Fixes #323.</li>
         <li>Set true to disable background artworks as default to improve app accessibility and to maintain text contrast.</li>
         <li>Update font-family stack in styles.css for improved typography consistency.</li>
         <li>Added an advanced settings section with an experimental setting to toggle saving verbose logs.</li>
         <li>Fixed translated lyrics do not show their original lyric above them.</li>
         <li>Added a fix for image alignment issues. Fixes #307.</li>
-        <li>Added a fix for the app description shown when Nora is viewed in Task Manager. Fixes #333.</li>
+        <li>Added a fix for the app description shown when the app is viewed in Task Manager. Fixes #333.</li>
         <li>Fixed the like button not working in the mini-player. Fixes #341.</li>
         <li>Fixed incorrect song ordering in playlists. Fixes #342.</li>
         <li>Fixed the shuffle button not working and some shuffling issues. Fixes #343.</li>
@@ -135,9 +135,9 @@
       <p>🚀 Development updates</p>
       <ul>
         <li>Migrated to @tanstack/store for efficient app state management reducing unnecessary re-renders and resource usage.</li>
-        <li>Nora was fully converted to an ESM-packaged app.</li>
+        <li>The app was fully converted to an ESM-packaged app.</li>
         <li>Fixed some localization errors in the en.json file.</li>
-        <li>Updated the build workflow to fix a bug for the Nora app that is missing sharp dependencies in Linux environments.</li>
+        <li>Updated the build workflow to fix a bug for the app that is missing sharp dependencies in Linux environments.</li>
         <li>Updated app dependencies.</li>
       </ul>
 

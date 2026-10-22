@@ -13,7 +13,7 @@ export const readStoredCredentials = async (): Promise<
 > => {
   const configPath = path.join(
     process.env.HOME ?? '',
-    'Library/Application Support/nora/lyrics-analysis-providers.json'
+    'Library/Application Support/knote/lyrics-analysis-providers.json'
   );
   try {
     const state = JSON.parse(await fsPromises.readFile(configPath, 'utf-8')) as {

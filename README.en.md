@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="resources/other/nora_logo_banner.webp" alt="Knote Logo" width="480">
+<img src="resources/logo_light_mode.png" alt="Knote Logo" width="200">
 
 # Knote (知音)
 

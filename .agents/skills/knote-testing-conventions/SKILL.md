@@ -1,10 +1,10 @@
-# Nora Testing Conventions
+# Knote Testing Conventions
 
-> **Establishing consistent test file organization and structure for the Nora Music Player project.**
+> **Establishing consistent test file organization and structure for the Knote Music Player project.**
 
 ## Overview
 
-This skill defines the testing conventions for Nora to ensure consistency, maintainability, and clear organization of test files across the codebase.
+This skill defines the testing conventions for Knote to ensure consistency, maintainability, and clear organization of test files across the codebase.
 
 ## Core Principles
 
@@ -194,7 +194,7 @@ pnpm run coverage
 
 ## Related Documentation
 
-- **Nora copilot-instructions.md**: Main project architecture and patterns
+- **Knote copilot-instructions.md**: Main project architecture and patterns
 - **TanStack Query Patterns Skill**: Data fetching conventions
 - **Vitest Configuration**: `vitest.config.ts` in project root
 
@@ -273,5 +273,5 @@ When refactoring source files:
 
 ---
 
-**Status**: Active convention for Nora v4.0.0+  
+**Status**: Active convention for Knote v4.0.0+  
 **Last Updated**: 2026-05-02

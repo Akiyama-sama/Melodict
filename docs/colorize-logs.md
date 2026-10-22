@@ -1,6 +1,6 @@
 # colorize-logs
 
-NDJSON log colorizer and tailer for Nora (companion docs).
+NDJSON log colorizer and tailer for Knote (companion docs).
 
 ## Synopsis
 
@@ -33,7 +33,7 @@ yarn colorize-logs [--path <file>] [--no-follow] [--levels <levels>] [--depth N]
 ## Notes
 
 - The script searches the current working directory for files matching `*.log`, `*.ndjson`, or `*.txt`.
-- If none are found, it falls back to `%APPDATA%/nora/logs` on Windows or `$HOME/nora/logs` on Unix-like systems.
+- If none are found, it falls back to `%APPDATA%/knote/logs` on Windows or `$HOME/.config/Knote/logs` on Unix-like systems.
 
 ## Integration
 

@@ -1,10 +1,10 @@
-# Privacy Policy for Nora
+# Privacy Policy for Knote
 
-Nora is committed to protecting your privacy. This privacy policy outlines our practices regarding data collection and usage.
+Knote is committed to protecting your privacy. This privacy policy outlines our practices regarding data collection and usage.
 
-- Nora does not collect, store, or share personally-identifiable information.
-- Nora does not require users to create an account, log in, or provide any identifying details.
-- Nora does not sell, share, or disclose personal information to third parties.
+- Knote does not collect, store, or share personally-identifiable information.
+- Knote does not require users to create an account, log in, or provide any identifying details.
+- Knote does not sell, share, or disclose personal information to third parties.
 
 ## Changes to This Policy
 

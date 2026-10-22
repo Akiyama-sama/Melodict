@@ -504,11 +504,8 @@
 
     "about": "Sobre",
     "releasedOn": "Lançado em {{val, datetime}}",
-    "noraWebsite": "Site oficial do Knote",
-    "noraDiscordServer": "Servidor oficial do Knote no Discord",
     "noraGithubRepo": "Repositório Github do Knote",
     "noraGithubIssues": "Issues Github do Knote",
-    "noraLocalizationStatus": "Status de localização do Knote",
     "noraDescription": "O Knote é um player de música elegante construído com Electron e React.",
     "noraInspiration": "Inspirado por <Hyperlink>Oto Music para Android</Hyperlink> de Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music para Android na Play Store",
@@ -533,9 +530,8 @@
     "createIssueOnKnoteGithubRepo": "criar um issue no $t(settingsPage.noraGithubRepo)",
     "contact": "Se você tiver algum feedback sobre bugs, solicitações de recursos (etc.) sobre o aplicativo, por favor, <Hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</Hyperlink>",
     "emailContact": "ou entre em contato pelo meu e-mail.",
-    "loveKnote": "Feito com <span>❤</span> por <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
-    "sandakanGithubProfile": "Perfil Github do Sandakan",
-    "beautifulSriLanka": "Linda Sri Lanka"
+    "loveKnote": "Feito com <span>❤</span> por <Hyperlink>Akiyama</Hyperlink>.",
+    "authorGithubProfile": "Perfil Github do Akiyama"
   },
 
   "artistInfoPage": {

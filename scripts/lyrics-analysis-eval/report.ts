@@ -194,7 +194,7 @@ ${telemetryHtml ? renderSection('埋点数据', telemetryHtml) : ''}
 const readTelemetryRows = async (): Promise<Array<Record<string, unknown>>> => {
   const telemetryPath = path.join(
     process.env.HOME ?? '',
-    'Library/Application Support/nora/lyrics-analysis-telemetry'
+    'Library/Application Support/knote/lyrics-analysis-telemetry'
   );
   try {
     const shards = (await fs.readdir(telemetryPath)).filter((f) => f.endsWith('.jsonl')).sort().slice(-2);

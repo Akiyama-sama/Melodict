@@ -1,39 +1,39 @@
 {
-  "name": "Nora",
+  "name": "Knote",
   "iconUrl": "/blob/master/resources/logo_light_mode.png?raw=true",
   "category": "Music",
   "privacyPolicyUrl": "/blob/master/PRIVACY-POLICY.md",
-  "developerEmail": "sandakannipunajith@gmail.com",
+  "developerEmail": "lichengyu2005119@gmail.com",
   "windowsExecutablePackage": {
-    "gitHubReleasesX64FileName": "Nora.v{{version:3}}-stable-win-x64.exe",
-    "gitHubReleasesArm64FileName": "Nora.v{{version:3}}-stable-win-arm64.exe"
+    "gitHubReleasesX64FileName": "Knote v{{version:3}}-win-x64.exe",
+    "gitHubReleasesArm64FileName": "Knote v{{version:3}}-win-arm64.exe"
   },
   "storeListings": [
     {
       "language": "en",
-      "name": "Nora",
-      "description": "Nora is an elegant music player built using Electron and React. Inspired from Oto Music (Android) by Piyush Mamidwar.",
-      "shortDescription": "Nora is an elegant music player built using Electron and React.",
+      "name": "Knote",
+      "description": "Knote is an elegant music player built using Electron and React. Inspired by Oto Music (Android) by Piyush Mamidwar.",
+      "shortDescription": "Knote is an elegant music player built using Electron and React.",
       "screenshots": [
         {
-          "url": "/raw/v3.1.0-stable/resources/other/artwork%201.webp?raw=true",
-          "caption": "Support for Online and Offline lyrics"
+          "url": "/raw/master/resources/other/artwork/word-panel-japanese.png?raw=true",
+          "caption": "AI lyrics analysis with word-level study cards"
         },
         {
-          "url": "/raw/v3.1.0-stable/resources/other/artwork%202.webp?raw=true",
-          "caption": "Switdch between Dark Mode and Light Mode"
+          "url": "/raw/master/resources/other/artwork/home-light.png?raw=true",
+          "caption": "Organize your music library with ease"
         },
         {
-          "url": "/raw/v3.1.0-stable/resources/other/artwork%209.webp?raw=true",
-          "caption": "Support for Last.FM Scrobbling"
+          "url": "/raw/master/resources/other/artwork/fullscreen-lyrics-tokens-macbook.png?raw=true",
+          "caption": "Fullscreen lyrics with word-by-word highlight"
         },
         {
-          "url": "/raw/v3.1.0-stable/resources/other/artwork%203.webp?raw=true",
-          "caption": "Organize your Music Library with ease"
+          "url": "/raw/master/resources/other/artwork/artist-page-light.png?raw=true",
+          "caption": "Dynamic themes derived from album art"
         }
       ],
       "keywords": [],
-      "developedBy": "Sandakan Nipunajith"
+      "developedBy": "Akiyama"
     }
   ]
 }

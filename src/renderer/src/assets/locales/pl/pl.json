@@ -385,7 +385,7 @@
     "second_other": "sekund",
 
     "accounts": "Konta",
-    "integrateLastFm": "Zintegruj LastFM z Norą.",
+    "integrateLastFm": "Zintegruj LastFM z Knote.",
     "lastFmLogo": "Logo LastFM",
     "lastFmConnected": "Połączono z LastFM",
     "lastFmNotConnected": "Nie połączono z LastFM",
@@ -402,7 +402,7 @@
     "sendFavoritesToLastFm": "Wysyłaj dane o ulubionych utworach",
     "sendNowPlayingToLastFmDescription": "Wysyłaj informację o aktualnie odtwarzanym utworze do LastFM automatycznie po rozpoczęciu odtwarzania.",
     "sendNowPlayingToLastFm": "Wysyłaj dane o aktualnie granym utworze",
-    "enableDiscordRpcDescription": "Zintegruj Discord Rich Presence z Norą",
+    "enableDiscordRpcDescription": "Zintegruj Discord Rich Presence z Knote",
     "enableDiscordRpc": "Włącz Discord Rich Presence",
 
     "doNotSaveLyricsAutomatically": "Nie zapisuj tekstów automatycznie",
@@ -452,11 +452,11 @@
     "performance": "Wydajność",
     "removeAnimationOnBatteryDescription": "Usuwa animacje, gdy system działa na baterii.",
     "removeAnimationOnBattery": "Wyłącz animacje na baterii",
-    "allowToPreventScreenSleepingDescription": "Pozwól Norze zapobiegać wygaszaniu ekranu w sytuacjach braku aktywności użytkownika, jak wyświetlanie tekstu utworu.",
+    "allowToPreventScreenSleepingDescription": "Pozwól Knote zapobiegać wygaszaniu ekranu w sytuacjach braku aktywności użytkownika, jak wyświetlanie tekstu utworu.",
     "allowToPreventScreenSleeping": "Zapobiegaj usypianiu ekranu",
 
     "startupAndWindowCustomization": "Uruchamianie i okna",
-    "autoLaunchAtStartDescription": "Automatycznie uruchamiaj Norę po zalogowaniu do systemu.",
+    "autoLaunchAtStartDescription": "Automatycznie uruchamiaj Knote po zalogowaniu do systemu.",
     "autoLaunchAtStart": "Uruchamiaj przy starcie systemu",
     "hideWindowAtStartDescription": "Czy Knote ma być widoczna po uruchomieniu.",
     "hideWindowAtStart": "Uruchamiaj zminimalizowane do zasobnika (Tray)",
@@ -499,11 +499,8 @@
 
     "about": "O aplikacji",
     "releasedOn": "Wydano dnia {{val, datetime}}",
-    "noraWebsite": "Oficjalna strona internetowa Nory",
-    "noraDiscordServer": "Oficjalny Serwer Discord Nory",
-    "noraGithubRepo": "Repozytorium Github Nory",
+    "noraGithubRepo": "Repozytorium Github Knote",
     "noraGithubIssues": "Zgłoszenia (Issues) na Githubie",
-    "noraLocalizationStatus": "Status tłumaczeń Nory",
     "noraDescription": "Knote to elegancki odtwarzacz muzyki zbudowany przy użyciu o Electron i React.",
     "noraInspiration": "Zainspirowane przez <Hyperlink>Oto Music for Android</Hyperlink> autorstwa Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music dla Androida w Sklepie Play",
@@ -528,9 +525,8 @@
     "createIssueOnKnoteGithubRepo": "utwórz zgłoszenie w $t(settingsPage.noraGithubRepo)",
     "contact": "Jeśli masz uwagi na temat błędów, sugestie funkcji, i tak dalej, proszę <Hyperlink>$t(settingsPage.createIssueOnKnoteGithubRepo)</Hyperlink>",
     "emailContact": "lub skontaktuj się ze mną mailowo.",
-    "loveKnote": "Stworzone z <span>❤</span> przez <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
-    "sandakanGithubProfile": "Profil Github Sandakana",
-    "beautifulSriLanka": "Piękna Sri Lanka"
+    "loveKnote": "Stworzone z <span>❤</span> przez <Hyperlink>Akiyama</Hyperlink>.",
+    "authorGithubProfile": "Profil Github Akiyamy"
   },
 
   "artistInfoPage": {
@@ -821,7 +817,7 @@
   },
 
   "lyricsEditorHelpPrompt": {
-    "title": "Jak używać edytora tekstu Nory",
+    "title": "Jak używać edytora tekstu Knote",
     "subTitle1": "Jak zacząć korzystać z edytora?",
     "subTitle1Message": " <ol><li>Odtwórz utwór, którego tekst próbujesz edytować. (Jeśli nie będziesz na właściwym utworze, aplikacja zablokuje dodawanie błędnych metadanych do linii tekstu.)</li><li>Kliknij w obszar strony, aby ustawić na niej fokus. (Fokus na stronie jest wymagany, aby skróty klawiszowe specyficzne dla tej strony działały poprawnie.)</li><li>Zacznij odtwarzać utwór od początku. Jeśli chcesz mieć większą kontrolę nad odtwarzaniem, ustaw powtarzanie bieżącego utworu.</li><li>Gdy w utworze padają słowa z danej linii tekstu, naciśnij <ShortcutButton>$t(appShortcutsPrompt.enterKey)</ShortcutButton>, aby podświetlić następną linię i dodać znacznik czasu rozpoczęcia.</li><li>Kontynuuj aż do ostatniej linijki tekstu.</li></ol>",
     "subTitle2": "Jakie skróty klawiszowe mogę używać w edytorze tekstu?",
@@ -857,7 +853,7 @@
     "outdatedChangelogNotice": "Możesz oglądać przestarzały dziennik zmian.",
     "versionCheckError": "<br/><span>Nie udało się sprawdzić aktualizacji. Coś jest nie tak po naszej stronie.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
     "versionCheckNetworkError": "<br/><span> Nie udało się sprawdzić aktualizacji. Sprawdź swoje połączenie z internetem i spróbuj ponownie.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
-    "noraReleases": "Wydania Nory",
+    "noraReleases": "Wydania Knote",
     "changelog": "Dziennik zmian",
     "doNotRemindThisVersionUpdate": "Nie przypominaj mi więcej o tej wersji.",
     "current": "Obecna",

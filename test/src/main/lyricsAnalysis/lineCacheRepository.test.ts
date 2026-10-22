@@ -8,7 +8,7 @@ import type { LyricsAnalysisLine } from '../../../../src/common/lyricsAnalysis';
 
 const userDataDir = path.join(
   os.tmpdir(),
-  `nora-line-cache-${process.pid}-${Math.random().toString(36).slice(2)}`
+  `knote-line-cache-${process.pid}-${Math.random().toString(36).slice(2)}`
 );
 
 vi.mock('electron', async (importOriginal) => {

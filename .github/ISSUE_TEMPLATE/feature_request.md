@@ -1,9 +1,9 @@
 ---
 name: Feature request
 description: Suggest an idea for this project
-title: Feature Request for Nora
+title: Feature Request for Knote
 labels: enhancement
-assignees: Sandakan
+assignees: Akiyama-sama
 ---
 
 **Consent**

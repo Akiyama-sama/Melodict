@@ -3,7 +3,7 @@ name: changelog-entry
 description: Guide for creating a new entry in CHANGELOG.md following Keep a Changelog 1.1.0 conventions. Use when asked to document changes, add a version release, or edit CHANGELOG.md.
 ---
 
-This skill guides you through the process of adding a new entry to `CHANGELOG.md` in the Nora project. The project adheres to the [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) format.
+This skill guides you through the process of adding a new entry to `CHANGELOG.md` in the Knote project. The project adheres to the [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) format.
 
 ## Overview of Keep a Changelog 1.1.0
 
@@ -21,7 +21,7 @@ The changelog tracks changes chronologically in reverse order (newest at the top
    - `### Removed` for features that were removed.
    - `### Deprecated` for soon-to-be-removed features.
    - `### Security` in case of vulnerabilities.
-   - `### Known Issues` (Custom category used in Nora to list unresolved bugs).
+   - `### Known Issues` (Custom category used in Knote to list unresolved bugs).
 5. **No empty headers**: Do not include subheadings if there are no changes in that category.
 6. **Compare Links**: Add a GitHub comparison link at the bottom of the file comparing the new version with the previous version.
 
@@ -40,7 +40,7 @@ Locate the top version header (below the introduction block and the tip note). I
 ```markdown
 ## [3.2.0-stable] - 2026-06-13
 
-![Nora v3.2.0-stable version artwork](resources/other/release%20artworks/whats-new-v3.2.0-stable.webp)
+![Knote v3.2.0-stable version artwork](resources/other/release%20artworks/whats-new-v3.2.0-stable.webp)
 
 ### Added
 
@@ -56,7 +56,7 @@ Locate the top version header (below the introduction block and the tip note). I
 Go to the bottom of `CHANGELOG.md` and add the comparison link in alphabetical/version order:
 
 ```markdown
-[3.2.0-stable]: https://github.com/Sandakan/Nora/compare/v3.1.0-stable...v3.2.0-stable
+[3.2.0-stable]: https://github.com/Akiyama-sama/knote/compare/v3.1.0-stable...v3.2.0-stable
 ```
 
 Update the previous version's comparison link to point to the version before it if needed, ensuring the comparison chain is unbroken.

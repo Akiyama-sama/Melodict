@@ -102,7 +102,7 @@ const convertLyricsToLrcFormat = (songLyrics: SongLyrics) => {
 
   const { title, artist, album, length, offset, copyright } = getLrcLyricsMetadata(songLyrics);
 
-  lyricsArr.push(`[re:Knote (https://github.com/Sandakan/Nora)]`);
+  lyricsArr.push(`[re:Knote (https://github.com/Akiyama-sama/knote)]`);
   lyricsArr.push(`[ve:${version}]`);
   lyricsArr.push(`[ti:${title}]`);
 

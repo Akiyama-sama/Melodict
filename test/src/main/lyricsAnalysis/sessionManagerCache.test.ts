@@ -22,7 +22,7 @@ import type {
 
 const userDataDir = path.join(
   os.tmpdir(),
-  `nora-session-cache-${process.pid}-${Math.random().toString(36).slice(2)}`
+  `knote-session-cache-${process.pid}-${Math.random().toString(36).slice(2)}`
 );
 
 vi.mock('electron', async (importOriginal) => {

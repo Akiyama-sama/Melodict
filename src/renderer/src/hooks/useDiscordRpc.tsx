@@ -59,7 +59,7 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       buttons: [
         {
           label: t('discordrpc.noraOnGitHub'),
-          url: 'https://github.com/Sandakan/Nora/'
+          url: 'https://github.com/Akiyama-sama/knote'
         }
       ]
     };

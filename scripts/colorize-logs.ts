@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Colorize-logs.ts — NDJSON log colorizer and tailer for Nora
+ * Colorize-logs.ts — NDJSON log colorizer and tailer for Knote
  *
  * Usage: yarn colorize-logs [--path <file>] [--no-follow] [--levels <levels>] [--depth N]
  * [--use-env-log-path] [--show-latest] [--help]
@@ -16,8 +16,8 @@
  *
  * Notes:
  *
- * - If no `--path` is provided, the script searches CWD, then %APPDATA%/nora/logs.
- * - On Windows, %APPDATA% is used; on Unix, $HOME is used.
+ * - If no `--path` is provided, the script searches CWD, then %APPDATA%/knote/logs.
+ * - On Windows, %APPDATA% is used; on Unix, $HOME is used (the Electron userData dir is ~/Library/Application Support/Knote on macOS, ~/.config/Knote on Linux).
  *
  * Created: 2025-12-09T14:41:55.216Z
  */
@@ -70,7 +70,7 @@ interface LogFile {
 
 // Constants
 const APPDATA = process.env.APPDATA || process.env.HOME || '.';
-const DEFAULT_LOG_DIR = path.join(APPDATA, 'nora', 'logs');
+const DEFAULT_LOG_DIR = path.join(APPDATA, 'knote', 'logs');
 const LOG_FILE_PATTERN = /\.(log|ndjson|txt)$/i;
 const TAIL_LINE_COUNT = 100;
 const POLL_INTERVAL_MS = 1000;

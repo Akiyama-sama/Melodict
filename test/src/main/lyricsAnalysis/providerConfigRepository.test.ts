@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 // module instance keeps it isolated from the other test files that exercise the same repository.
 const userDataDir = path.join(
   os.tmpdir(),
-  `nora-provider-profiles-${process.pid}-${Math.random().toString(36).slice(2)}`
+  `knote-provider-profiles-${process.pid}-${Math.random().toString(36).slice(2)}`
 );
 
 // `test/setup.ts` already mocks `electron` globally, so override the pieces this module needs

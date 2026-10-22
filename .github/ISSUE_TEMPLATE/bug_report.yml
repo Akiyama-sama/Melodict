@@ -20,7 +20,7 @@ body:
   - type: textarea
     id: app-version
     attributes:
-      label: Nora app Version
+      label: Knote app Version
       description: Please provide detailed version information and installation method, such as v2.5.0-stable and Linux dmg file, Windows exe file, etc.
     placeholder: |
       version: v2.5.0-stable
@@ -63,7 +63,7 @@ body:
         Provide any additional information such as logs, screenshots, scenarios in which the bug occurs so that it facilitates resolving the issue.
 
         Also attach the log file of the app to better understand what went wrong in the app.
-        It is situated in C:\Users\USER_NAME\AppData\Roaming\nora\logs.txt
+        It is situated in C:\Users\USER_NAME\AppData\Roaming\knote\logs.txt
 
   - type: checkboxes
     id: checkboxes

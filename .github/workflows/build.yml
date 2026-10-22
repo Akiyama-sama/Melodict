@@ -63,7 +63,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           draft: true
-          name: Nora Release ${{ github.ref }} ${{ github.sha }}
+          name: Knote Release ${{ github.ref }} ${{ github.sha }}
           files: |
             dist/*.exe
             dist/*.zip

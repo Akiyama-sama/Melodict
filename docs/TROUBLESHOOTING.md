@@ -1,6 +1,6 @@
 # Troubleshooting & Common Issues
 
-This document covers known development setup issues and their solutions when working with Nora.
+This document covers known development setup issues and their solutions when working with Knote.
 
 ---
 
@@ -25,7 +25,7 @@ Error: Electron uninstall
 
 #### Solution
 
-1. Ensure no background instances of `electron.exe` or Nora are currently running.
+1. Ensure no background instances of `electron.exe` or Knote are currently running.
 2. Manually execute Electron's binary download script:
    ```bash
    node node_modules/electron/install.js

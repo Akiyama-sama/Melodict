@@ -1,10 +1,10 @@
 ---
 name: tanstack-query-patterns
-description: Guide for using TanStack Query patterns in the Nora project. Use when implementing data fetching, creating query modules, or consuming IPC data in React components.
+description: Guide for using TanStack Query patterns in the Knote project. Use when implementing data fetching, creating query modules, or consuming IPC data in React components.
 applyTo: 'src/renderer/src/**/*.ts*'
 ---
 
-# TanStack Query Pattern Guide for Nora
+# TanStack Query Pattern Guide for Knote
 
 **Context**: Use this skill when adding new data fetching features, creating query modules, or consuming data from IPC in React components.
 

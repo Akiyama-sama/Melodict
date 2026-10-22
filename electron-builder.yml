@@ -1,7 +1,7 @@
 appId: com.sandakannipunajith.knote
 productName: Knote
 executableName: Knote
-copyright: Copyright © 2024 Sandakan Nipunajith
+copyright: Copyright © 2022-2026 Akiyama
 icon: ./build/icon.ico
 artifactName: '${productName} v${version}-${os}-${arch}.${ext}'
 

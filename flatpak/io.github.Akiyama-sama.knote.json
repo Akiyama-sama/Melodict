@@ -1,5 +1,5 @@
 {
-  "app-id": "app.netlify.noramusic.Nora",
+  "app-id": "io.github.Akiyama-sama.knote",
   "runtime": "org.freedesktop.Platform",
   "runtime-version": "24.08",
   "sdk": "org.freedesktop.Sdk",
@@ -25,12 +25,12 @@
   },
   "modules": [
     {
-      "name": "Nora",
+      "name": "Knote",
       "buildsystem": "simple",
       "build-options": {
         "env": {
-          "XDG_CACHE_HOME": "/run/build/Nora/flatpak-node/cache",
-          "npm_config_cache": "/run/build/Nora/flatpak-node/npm-cache",
+          "XDG_CACHE_HOME": "/run/build/Knote/flatpak-node/cache",
+          "npm_config_cache": "/run/build/Knote/flatpak-node/npm-cache",
           "npm_config_offline": "true"
         }
       },
@@ -39,9 +39,9 @@
         "npm run build:flatpak",
         "cp -a dist/linux*unpacked /app/main",
         "install -Dm755 -t /app/bin/ ../run.sh",
-        "install -Dm644 resources/logo_light_mode.png /app/share/icons/hicolor/scalable/apps/app.netlify.noramusic.Nora.png",
-        "install -Dm644 flatpak/app.netlify.noramusic.Nora.desktop /app/share/applications/app.netlify.noramusic.Nora.desktop",
-        "install -Dm644 flatpak/app.netlify.noramusic.Nora.metainfo.xml /app/share/metainfo/app.netlify.noramusic.Nora.appdata.xml"
+        "install -Dm644 resources/logo_light_mode.png /app/share/icons/hicolor/scalable/apps/io.github.Akiyama-sama.knote.png",
+        "install -Dm644 flatpak/io.github.Akiyama-sama.knote.desktop /app/share/applications/io.github.Akiyama-sama.knote.desktop",
+        "install -Dm644 flatpak/io.github.Akiyama-sama.knote.metainfo.xml /app/share/metainfo/io.github.Akiyama-sama.knote.appdata.xml"
       ],
       "subdir": "main",
       "sources": [
@@ -58,7 +58,7 @@
         {
           "type": "script",
           "dest-filename": "run.sh",
-          "commands": ["cd /", "zypak-wrapper.sh /app/main/Nora --ozone-platform-hint=auto \"$@\""]
+          "commands": ["cd /", "zypak-wrapper.sh /app/main/Knote --ozone-platform-hint=auto \"$@\""]
         }
       ]
     }

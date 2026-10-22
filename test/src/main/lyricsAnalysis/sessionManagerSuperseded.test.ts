@@ -28,7 +28,7 @@ import type {
 
 const userDataDir = path.join(
   os.tmpdir(),
-  `nora-session-superseded-${process.pid}-${Math.random().toString(36).slice(2)}`
+  `knote-session-superseded-${process.pid}-${Math.random().toString(36).slice(2)}`
 );
 
 const { sendLine, sendSnapshot, fakeWindows } = vi.hoisted(() => {
