@@ -8,9 +8,9 @@
 
 Built with Electron and React • Inspired by [Oto Music](https://play.google.com/store/apps/details?id=com.piyush.music&gl=us)
 
-[![GitHub release](https://img.shields.io/github/package-json/v/Akiyama-sama/Melodict?color=green&label=latest%20version&style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/releases/latest)
-[![GitHub license](https://img.shields.io/github/license/Akiyama-sama/Melodict?style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/blob/master/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/Akiyama-sama/Melodict?style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/issues)
+[![GitHub release](https://img.shields.io/github/package-json/v/Akiyama-sama/knote?color=green&label=latest%20version&style=for-the-badge)](https://github.com/Akiyama-sama/knote/releases/latest)
+[![GitHub license](https://img.shields.io/github/license/Akiyama-sama/knote?style=for-the-badge)](https://github.com/Akiyama-sama/knote/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/Akiyama-sama/knote?style=for-the-badge)](https://github.com/Akiyama-sama/knote/issues)
 
 [Download](#-download) • [Features](#-feature-highlights) • [Build Guide](#%EF%B8%8F-build-from-source) • [Changelog](/CHANGELOG.md) • [简体中文](README.md)
 
@@ -20,7 +20,7 @@ Built with Electron and React • Inspired by [Oto Music](https://play.google.co
 
 Knote (知音 — "the one who truly understands your music") builds on the Nora upstream and turns the player into a study companion: beyond playing your local library, it analyzes lyrics line by line with AI — every word's meaning, pronunciation (romaji / kana / pinyin / IPA), and grammatical role is one click away, turning every foreign-language song into a text you can actually study.
 
-![Knote main interface](/resources/other/artwork%200.webp)
+![Knote · fullscreen lyrics with the word panel](/resources/other/artwork/word-panel-japanese.png)
 
 ## ✨ Feature Highlights
 
@@ -46,33 +46,51 @@ Knote (知音 — "the one who truly understands your music") builds on the Nora
 
 ## 📥 Download
 
-Head to the **[Releases page](https://github.com/Akiyama-sama/Melodict/releases) > Assets > choose your platform**, or [download the latest version directly](https://github.com/Akiyama-sama/Melodict/releases/latest).
+Head to the **[Releases page](https://github.com/Akiyama-sama/knote/releases) > Assets > choose your platform**, or [download the latest version directly](https://github.com/Akiyama-sama/knote/releases/latest).
 
 > [!NOTE]
 > Windows and macOS builds are provided; on Linux, run from source.
 
 ## 📸 Gallery
 
-![Online and offline lyrics](/resources/other/artwork%201.webp)
+### AI lyrics analysis · word panel
 
-![Light and dark modes](/resources/other/artwork%202.webp)
+Fullscreen lyrics highlight word by word; click any word for its study card: meaning, grammar, pronunciation (KANA / ROMAJI / pinyin / IPA).
 
-![Organize your music library](/resources/other/artwork%203.webp)
+![Japanese lyrics · word panel](/resources/other/artwork/word-panel-japanese-wide.png)
 
-![Mini player](/resources/other/artwork%208.webp)
+![English lyrics · IPA pronunciation](/resources/other/artwork/word-panel-english.png)
+
+![Word panel · closeup](/resources/other/artwork/word-panel-closeup.png)
+
+### Player
+
+![Home · favorites and NetEase daily recommendations](/resources/other/artwork/home-light.png)
+
+![Artist page · dynamic palette theming](/resources/other/artwork/artist-page-light.png)
+
+### Fullscreen lyrics · per-word highlight
+
+The word being sung lights up as it sounds.
+
+![Fullscreen lyrics · word highlight](/resources/other/artwork/fullscreen-lyrics-tokens-macbook.png)
+
+![Fullscreen lyrics · English](/resources/other/artwork/fullscreen-lyrics-english.png)
+
+![Fullscreen lyrics · wide](/resources/other/artwork/fullscreen-lyrics-tilted.png)
 
 ## 🛠️ Build From Source
 
 Clone the repository
 
 ```bash
-git clone https://github.com/Akiyama-sama/Melodict
+git clone https://github.com/Akiyama-sama/knote
 ```
 
 Navigate to the project folder
 
 ```bash
-cd Melodict
+cd knote
 ```
 
 Install dependencies (pnpm required)
@@ -110,7 +128,7 @@ The app itself does not provide, store, or distribute any audio content; all con
 
 Found a bug or want a feature? Please reach out through:
 
-- [GitHub Issues](https://github.com/Akiyama-sama/Melodict/issues) (preferred)
+- [GitHub Issues](https://github.com/Akiyama-sama/knote/issues) (preferred)
 
 ---
 

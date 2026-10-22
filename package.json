@@ -28,20 +28,20 @@
     "name": "Akiyama",
     "url": "https://github.com/Akiyama-sama"
   },
-  "homepage": "https://github.com/Akiyama-sama/Melodict",
+  "homepage": "https://github.com/Akiyama-sama/knote",
   "urls": {
     "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/"
   },
   "bugs": {
     "email": "sandakannipunajith@gmail.com",
-    "url": "https://github.com/Akiyama-sama/Melodict/issues"
+    "url": "https://github.com/Akiyama-sama/knote/issues"
   },
   "releaseNotes": {
-    "md": "https://raw.githubusercontent.com/Akiyama-sama/Melodict/master/CHANGELOG.md"
+    "md": "https://raw.githubusercontent.com/Akiyama-sama/knote/master/CHANGELOG.md"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Akiyama-sama/Melodict"
+    "url": "https://github.com/Akiyama-sama/knote"
   },
   "appPreferences": {
     "metadataEditingSupportedExtensions": [

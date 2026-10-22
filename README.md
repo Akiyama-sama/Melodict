@@ -8,9 +8,9 @@
 
 基于 Electron 与 React 构建 • 灵感来源于 [Oto Music](https://play.google.com/store/apps/details?id=com.piyush.music&gl=us)
 
-[![GitHub release](https://img.shields.io/github/package-json/v/Akiyama-sama/Melodict?color=green&label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/releases/latest)
-[![GitHub license](https://img.shields.io/github/license/Akiyama-sama/Melodict?style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/blob/master/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/Akiyama-sama/Melodict?style=for-the-badge)](https://github.com/Akiyama-sama/Melodict/issues)
+[![GitHub release](https://img.shields.io/github/package-json/v/Akiyama-sama/knote?color=green&label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&style=for-the-badge)](https://github.com/Akiyama-sama/knote/releases/latest)
+[![GitHub license](https://img.shields.io/github/license/Akiyama-sama/knote?style=for-the-badge)](https://github.com/Akiyama-sama/knote/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/Akiyama-sama/knote?style=for-the-badge)](https://github.com/Akiyama-sama/knote/issues)
 
 [下载](#-下载) • [功能](#-功能亮点) • [构建指南](#-从源码构建) • [更新日志](/CHANGELOG.md) • [English](README.en.md)
 
@@ -18,9 +18,9 @@
 
 ---
 
-知音（Knote）在 Nora 上游的基础上把「播放器」推进为「学习伙伴」：它不只是把你的本地音乐放出来，还用 AI 逐句解析歌词——每个词的释义、读音（罗马音 / 假名 / 拼音 / IPA）、语法功能一一点开即得，让每一首外语歌都变成可精读的课文。
+知音（Knote）把「播放器」推进为「学习伙伴」：它不只是把你的本地音乐放出来，还用 AI 逐句解析歌词——每个词的释义、读音（罗马音 / 假名 / 拼音 / IPA）、语法功能一一点开即得，让每一首外语歌都变成可精读的课文。
 
-![知音主界面](/resources/other/artwork%200.webp)
+![知音 · 全屏歌词与词语详情](/resources/other/artwork/word-panel-japanese.png)
 
 ## ✨ 功能亮点
 
@@ -46,33 +46,51 @@
 
 ## 📥 下载
 
-前往 **[Releases 页面](https://github.com/Akiyama-sama/Melodict/releases) > Assets > 选择你的平台**，或[直接下载最新版本](https://github.com/Akiyama-sama/Melodict/releases/latest)。
+前往 **[Releases 页面](https://github.com/Akiyama-sama/knote/releases) > Assets > 选择你的平台**，或[直接下载最新版本](https://github.com/Akiyama-sama/knote/releases/latest)。
 
 > [!NOTE]
 > 目前仅提供 Windows 与 macOS 构建；Linux 可从源码运行。
 
 ## 📸 界面预览
 
-![在线与离线歌词](/resources/other/artwork%201.webp)
+### AI 歌词解析 · 词语详情
 
-![亮暗主题切换](/resources/other/artwork%202.webp)
+全屏歌词逐词高亮，点击任意词打开学习卡片：释义、语法功能、读音（KANA / ROMAJI / 拼音 / IPA）一屏尽览。
 
-![轻松管理音乐库](/resources/other/artwork%203.webp)
+![日语歌词 · 词语详情](/resources/other/artwork/word-panel-japanese-wide.png)
 
-![迷你播放器](/resources/other/artwork%208.webp)
+![英语歌词 · IPA 读音标注](/resources/other/artwork/word-panel-english.png)
+
+![词语面板 · 特写](/resources/other/artwork/word-panel-closeup.png)
+
+### 播放器
+
+![主页 · 收藏与网易云每日推荐](/resources/other/artwork/home-light.png)
+
+![艺人页 · 动态主题取色](/resources/other/artwork/artist-page-light.png)
+
+### 全屏歌词 · 逐词高亮
+
+唱到哪个词，哪个词点亮。
+
+![全屏歌词 · 逐词点亮](/resources/other/artwork/fullscreen-lyrics-tokens-macbook.png)
+
+![全屏歌词 · 英语](/resources/other/artwork/fullscreen-lyrics-english.png)
+
+![全屏歌词 · 宽幅](/resources/other/artwork/fullscreen-lyrics-tilted.png)
 
 ## 🛠 从源码构建
 
 克隆仓库
 
 ```bash
-git clone https://github.com/Akiyama-sama/Melodict
+git clone https://github.com/Akiyama-sama/knote
 ```
 
 进入项目目录
 
 ```bash
-cd Melodict
+cd knote
 ```
 
 安装依赖（需要 pnpm）
@@ -110,7 +128,7 @@ pnpm start
 
 发现 Bug、想要新功能？欢迎通过以下方式反馈：
 
-- [GitHub Issues](https://github.com/Akiyama-sama/Melodict/issues)（推荐）
+- [GitHub Issues](https://github.com/Akiyama-sama/knote/issues)（推荐）
 
 ---
 
