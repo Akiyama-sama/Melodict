@@ -281,7 +281,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 if (process.platform === 'win32') {
-  app.setAppUserModelId('com.sandakannipunajith.knote');
+  app.setAppUserModelId('io.github.Akiyama-sama.knote');
 }
 
 app
