@@ -99,6 +99,14 @@ mac:
       arch:
         - x64
         - arm64
+    # electron-updater's MacUpdater can only install from a .zip (Squirrel); a dmg-only build
+    # publishes a latest-mac.yml that points at the dmg and the in-app updater dies with
+    # "ZIP file not provided" (this shipped broken since v3.1.0). The dmg stays for manual
+    # downloads; the zip is what the auto-updater consumes.
+    - target: zip
+      arch:
+        - x64
+        - arm64
 
 linux:
   target:
