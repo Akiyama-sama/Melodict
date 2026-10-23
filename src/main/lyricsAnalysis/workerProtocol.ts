@@ -24,6 +24,8 @@ export type WorkerRequest =
       songArtists: string[];
       lines: LyricsAnalysisInputLine[];
       sessionId?: string;
+      /** The endpoint is known to reject response_format; the wire request skips the field. */
+      skipResponseFormat?: boolean;
     }
   | {
       type: 'test';
@@ -50,5 +52,11 @@ export type WorkerResponse =
       type: 'concurrency';
       requestId: string;
       stats: { max: number; mean: number; rateLimitedCount: number };
+    }
+  | {
+      /** The endpoint refused response_format mid-run; the caller persists it (providerCapabilities). */
+      type: 'provider-capability';
+      requestId: string;
+      capability: 'responseFormatRefused';
     }
   | { type: 'pass'; requestId: string; pass: AnalysisPassTelemetryEvent };

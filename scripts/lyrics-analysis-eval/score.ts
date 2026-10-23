@@ -19,8 +19,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, type LanguageModel } from 'ai';
+import OpenAI from 'openai';
 
 import { aggregateCategoryMeans, aggregateOverallMean, aggregatePerCategory } from './lib/aggregate';
 import { graderVerdictSchema } from './lib/graderSchema';
@@ -131,20 +130,28 @@ const buildGraderPrompt = (input: {
 };
 
 const gradeOneLine = async (input: {
-  model: LanguageModel;
+  client: OpenAI;
+  modelId: string;
   goldLine: GoldLine;
   producedLine: EvalLine;
 }) => {
   try {
-    const result = await generateText({
-      model: input.model,
-      prompt: buildGraderPrompt({ goldLine: input.goldLine, producedLine: input.producedLine }),
+    const result = await input.client.chat.completions.create({
+      model: input.modelId,
+      messages: [
+        {
+          role: 'user',
+          content: buildGraderPrompt({ goldLine: input.goldLine, producedLine: input.producedLine })
+        }
+      ],
       temperature: 0,
-      maxOutputTokens: 2000,
-      providerOptions: { openai: { strictJsonSchema: false } }
+      max_tokens: 2000
     });
 
-    const text = result.text.trim().replace(/^```(json)?|```$/g, '');
+    const text = (result.choices[0]?.message?.content ?? '')
+      .trim()
+      .replace(/^```(json)?/, '')
+      .replace(/```$/, '');
     const parsed = graderVerdictSchema.safeParse(JSON.parse(text));
     if (!parsed.success) {
       console.error(`  [score] grader JSON invalid: ${parsed.error.message.slice(0, 120)}`);
@@ -168,8 +175,7 @@ const main = async () => {
   const analysis = await readJson<EvalAnalysisResult>(args.analysisPath);
   const gold = await readJson<GoldStandard>(args.goldPath);
 
-  const provider = createOpenAI({ apiKey: args.apiKey, baseURL: args.baseURL });
-  const model = provider.chat(args.modelId);
+  const client = new OpenAI({ apiKey: args.apiKey, baseURL: args.baseURL, maxRetries: 0 });
 
   // For every gold line, find the produced line with the same normalized text (or by index order
   // as fallback), then grade the pair. Unmatched gold lines score 0 across categories.
@@ -194,7 +200,12 @@ const main = async () => {
         status: 'unavailable'
       };
 
-      const verdict = await gradeOneLine({ model, goldLine, producedLine: effectiveProduced });
+      const verdict = await gradeOneLine({
+        client,
+        modelId: args.modelId,
+        goldLine,
+        producedLine: effectiveProduced
+      });
       if (!verdict) continue;
 
       for (const score of verdict.categoryScores) categoryScores.push(score);

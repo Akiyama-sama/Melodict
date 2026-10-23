@@ -17,8 +17,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText } from 'ai';
+import OpenAI from 'openai';
 
 import { findUncoveredLineWords } from '../../src/common/lyricsAnalysis';
 import { ROMALRC_MATCH_WINDOW_MS } from '../../src/common/lyricsTiming';
@@ -181,8 +180,7 @@ const main = async () => {
 
   // ---- Stage 2: grading with N graders -------------------------------------------------------
   console.error(`[run] grading with ${args.graders}× ${args.graderModelId} …`);
-  const provider = createOpenAI({ apiKey, baseURL });
-  const graderModel = provider.chat(args.graderModelId);
+  const provider = new OpenAI({ apiKey, baseURL, maxRetries: 0 });
 
   /**
    * The PDF's teaching units cut lines differently from any streaming lyrics source (e.g. the PDF
@@ -280,27 +278,37 @@ const main = async () => {
       };
 
       try {
-        const result = await generateText({
-          model: graderModel,
+        const result = await provider.chat.completions.create({
+          model: args.graderModelId,
           temperature: 0,
           // The gateway clamps per-request output tokens (~1200 observed); stay well under it and
           // keep rationales terse so the verdict JSON never hits the cap.
-          maxOutputTokens: 900,
-          providerOptions: { openai: { strictJsonSchema: false } },
-          prompt: [
-            '为「歌词语言学习标注」评分。金标准（人类专家）vs 系统输出，按 7 维度各打 0-10。',
-            '维度: ' + Object.entries(CATEGORY_LABELS).map(([key, label]) => `${key}=${label.split('—')[1] ?? label}`).join('; '),
-            '基准: 10=等价或更优; 7-9=小瑕疵; 4-6=一半错误; 0-3=大面积错误/缺失。缺失信息按 0 分。',
-            '每个维度 rationale ≤15 字，不给 examples。',
-            '',
-            `金标准: ${JSON.stringify(goldView)}`,
-            `系统输出: ${JSON.stringify(producedView)}`,
-            '',
-            'Return ONLY compact JSON: {"categoryScores":[{"category","score","rationale"}]}'
-          ].join('\n')
+          max_tokens: 900,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                '为「歌词语言学习标注」评分。金标准（人类专家）vs 系统输出，按 7 维度各打 0-10。',
+                '维度: ' +
+                  Object.entries(CATEGORY_LABELS)
+                    .map(([key, label]) => `${key}=${label.split('—')[1] ?? label}`)
+                    .join('; '),
+                '基准: 10=等价或更优; 7-9=小瑕疵; 4-6=一半错误; 0-3=大面积错误/缺失。缺失信息按 0 分。',
+                '每个维度 rationale ≤15 字，不给 examples。',
+                '',
+                `金标准: ${JSON.stringify(goldView)}`,
+                `系统输出: ${JSON.stringify(producedView)}`,
+                '',
+                'Return ONLY compact JSON: {"categoryScores":[{"category","score","rationale"}]}'
+              ].join('\n')
+            }
+          ]
         });
 
-        const text = result.text.trim().replace(/^```(json)?|```$/g, '');
+        const text = (result.choices[0]?.message?.content ?? '')
+          .trim()
+          .replace(/^```(json)?/, '')
+          .replace(/```$/, '');
         const parsed = graderVerdictSchema.safeParse(JSON.parse(text));
         if (!parsed.success) {
           console.error(`  [run] grader ${graderIndex + 1} JSON invalid for one line, skipping line`);
