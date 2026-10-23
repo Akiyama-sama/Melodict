@@ -20,6 +20,7 @@ const runAnalysis = async (
       songArtists: request.songArtists,
       lines: request.lines,
       sessionId: request.sessionId,
+      skipResponseFormat: request.skipResponseFormat,
       signal: controller.signal,
       onLine: (line, source) =>
         post({ type: 'line', requestId: request.requestId, line, source }),
@@ -27,7 +28,9 @@ const runAnalysis = async (
         post({ type: 'repairing', requestId: request.requestId, failedLineIds }),
       onPassCompleted: (pass) => post({ type: 'pass', requestId: request.requestId, pass }),
       onConcurrencyStats: (stats) =>
-        post({ type: 'concurrency', requestId: request.requestId, stats })
+        post({ type: 'concurrency', requestId: request.requestId, stats }),
+      onFormatRefused: () =>
+        post({ type: 'provider-capability', requestId: request.requestId, capability: 'responseFormatRefused' })
     });
 
     post({

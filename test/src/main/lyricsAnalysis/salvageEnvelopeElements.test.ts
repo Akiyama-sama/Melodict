@@ -1,28 +1,15 @@
-import { NoObjectGeneratedError } from 'ai';
 import { describe, expect, test } from 'vitest';
 
-import {
-  salvageEnvelopeElements,
-  type LyricsAnalysisTransportLine
-} from '../../../../src/main/lyricsAnalysis/providerGateway';
+import { salvageEnvelopeElements } from '../../../../src/main/lyricsAnalysis/salvageEnvelopeElements';
+import type { LyricsAnalysisTransportLine } from '../../../../src/common/lyricsAnalysis';
 
 /**
- * Constructs the failure shape the SDK actually hands to salvage: `NoObjectGeneratedError` with the
- * raw model completion in `.text`. Fixtures below are minimal reproductions of the real corruptions
- * glm-5.3-flash produced in production logs (trailing punctuation, transposed/omitted closers,
- * mid-completion truncation).
+ * Salvage takes the raw model completion text. Fixtures below are minimal reproductions of the
+ * real corruptions glm-5.3-flash produced in production logs (trailing punctuation,
+ * transposed/omitted closers, mid-completion truncation).
  */
-const makeFailure = (text: string) => {
-  const failure = new NoObjectGeneratedError({
-    message: 'No object generated: could not parse the response.',
-    text,
-    cause: new SyntaxError('Unexpected token in JSON')
-  });
-  return failure;
-};
-
 const parse = (text: string | null | undefined) => {
-  const elements = salvageEnvelopeElements(makeFailure(text ?? ''));
+  const elements = salvageEnvelopeElements(text ?? '');
   return elements?.map((element: LyricsAnalysisTransportLine) => element.lineId) ?? [];
 };
 
@@ -84,7 +71,7 @@ describe('salvageEnvelopeElements', () => {
   });
 
   test('returns null for text without an elements envelope', () => {
-    expect(salvageEnvelopeElements(makeFailure('The model refused in plain prose.'))).toBeNull();
+    expect(salvageEnvelopeElements('The model refused in plain prose.')).toBeNull();
   });
 
   test('returns null when no element carries a string lineId', () => {
@@ -111,15 +98,13 @@ describe('salvageEnvelopeElements', () => {
 });
 
 describe('salvageEnvelopeElements — unescaped quotes inside string values', () => {
-  const make = (text: string) => makeFailure(text);
-
-  test('escapes an unescaped quote inside a value and recovers the element', () => {
+    test('escapes an unescaped quote inside a value and recovers the element', () => {
     // Real corruption: `"grammarFunction":"作定语修饰"こと"，表示…"` — the inner half-width
     // quotes sever the JSON string for the strict parser.
     const text =
       '{"elements":[{"lineId":"line-0","tokens":[{"startChar":0,"endChar":3,' +
       '"card":{"grammarFunction":"作定语修饰"こと"，表示受伤害"}}]}]}';
-    const elements = salvageEnvelopeElements(make(text)) ?? [];
+    const elements = salvageEnvelopeElements(text) ?? [];
     expect(elements.map((e) => e.lineId)).toEqual(['line-0']);
     expect((elements[0]?.tokens?.[0]?.card?.grammarFunction as string) ?? '').toContain('こと');
   });
@@ -127,7 +112,7 @@ describe('salvageEnvelopeElements — unescaped quotes inside string values', ()
   test('still closes a genuine string before a real structural follower', () => {
     const text =
       '{"elements":[{"lineId":"line-0","translation":"夜の匂い","tokens":[]},{"lineId":"line-1","tokens":[]}]}';
-    expect((salvageEnvelopeElements(make(text)) ?? []).map((e) => e.lineId)).toEqual([
+    expect((salvageEnvelopeElements(text) ?? []).map((e) => e.lineId)).toEqual([
       'line-0',
       'line-1'
     ]);

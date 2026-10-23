@@ -1,12 +1,10 @@
-import { NoObjectGeneratedError } from 'ai';
-
 import type { LyricsAnalysisTransportLine } from '../../common/lyricsAnalysis';
 
 /**
- * Best-effort recovery when the model's completion defies the all-or-nothing final parse. The
- * SDK's complete-output parse is strict: one structurally-broken token voids the entire batch even
- * when most lines are perfectly usable. The raw completion text (`failure.text`) is intact, so we
- * reparse it leniently instead:
+ * Best-effort recovery when the streamed parse leaves gaps. The tolerant envelope parser drops
+ * elements it could not close (a truncated tail, a runaway middle), but the raw completion text is
+ * usually still full of usable lines, so it is reparsed here with heavier repair heuristics than
+ * the stream can afford:
  *
  * 1. Strip any markdown fence and slice the text into per-element chunks at each `{"lineId"`
  *    anchor, so a broken element never poisons its neighbors.
@@ -18,9 +16,8 @@ import type { LyricsAnalysisTransportLine } from '../../common/lyricsAnalysis';
  * 4. Strip residual separator characters, JSON.parse the repaired chunk, and hand it to the same
  *    app-side validation a streamed element would go through. Returns null when nothing survived.
  */
-export const salvageEnvelopeElements = (failure: unknown): LyricsAnalysisTransportLine[] | null => {
-  const text = NoObjectGeneratedError.isInstance(failure) ? (failure.text ?? '') : '';
-  const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text)?.[1] ?? text;
+export const salvageEnvelopeElements = (rawText: string): LyricsAnalysisTransportLine[] | null => {
+  const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(rawText)?.[1] ?? rawText;
 
   const elementsStart = fenced.indexOf('"elements"');
   if (elementsStart < 0) return null;
