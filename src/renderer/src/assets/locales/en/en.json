@@ -716,9 +716,9 @@
   "sideBar": {
     "home": "Home",
     "search": "Search",
-    "neteaseMyPlaylists": "My NetEase Playlists",
-    "neteaseLiked": "Liked Songs (NetEase)",
-    "neteaseToplists": "Toplists (NetEase)"
+    "neteaseMyPlaylists": "My Playlists",
+    "neteaseLiked": "Liked Songs",
+    "neteaseToplists": "Toplists"
   },
   "renamePlaylistPrompt": {
     "renamePlaylistWithName": "Rename `{{name}}` playlist",
