@@ -38,7 +38,7 @@ const LyricsAnalysisOnboardingCard = () => {
   if (hasProfiles !== false) return null;
 
   return (
-    <SecondaryContainer className="appear-from-bottom mt-4 h-fit max-h-full w-full pb-4 pl-8">
+    <SecondaryContainer className="appear-from-bottom mt-4 h-fit max-h-full w-full pb-4 pl-8 pr-2">
       <div className="lyrics-analysis-onboarding-card flex flex-col gap-4 rounded-2xl bg-background-color-2/50 px-6 py-5 dark:bg-dark-background-color-2/50 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-4">
           <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight text-4xl">
