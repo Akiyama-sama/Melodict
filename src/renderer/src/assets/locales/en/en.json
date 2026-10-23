@@ -1071,6 +1071,11 @@
     "playingASong": "Playing a song"
   },
   "lyricsAnalysis": {
+    "onboarding": {
+      "title": "Set up lyrics analysis",
+      "description": "Connect an AI provider to break lyric lines into clickable learning tokens.",
+      "setup": "Set up now"
+    },
     "panelTitle": "Word details",
     "noTokenSelected": "Click a word in the lyrics to see its details",
     "closePanel": "Close panel",

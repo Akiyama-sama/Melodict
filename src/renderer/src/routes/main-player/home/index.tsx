@@ -1,6 +1,7 @@
 import { SpecialPlaylists } from '@common/playlists.enum';
 import roundTo from '@common/roundTo';
 import Button from '@renderer/components/Button';
+import LyricsAnalysisOnboardingCard from '@renderer/components/HomePage/LyricsAnalysisOnboardingCard';
 import MostLovedArtists from '@renderer/components/HomePage/MostLovedArtists';
 import MostLovedSongs from '@renderer/components/HomePage/MostLovedSongs';
 import RecentlyAddedSongs from '@renderer/components/HomePage/RecentlyAddedSongs';
@@ -313,6 +314,8 @@ function HomePage() {
       ref={recentlyAddedSongsContainerRef}
     >
       <>
+        {/* First-run guidance: only appears while no lyrics-analysis provider is configured. */}
+        <LyricsAnalysisOnboardingCard />
         <SecondaryContainer className="appear-from-bottom mt-4 h-fit max-h-full w-full pb-4 pl-8">
           <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between text-2xl font-medium">
             {t('homePage.favoritesAndRecaps')}

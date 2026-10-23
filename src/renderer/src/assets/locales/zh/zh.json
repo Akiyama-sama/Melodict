@@ -1071,6 +1071,11 @@
     "playingASong": "正在播放歌曲"
   },
   "lyricsAnalysis": {
+    "onboarding": {
+      "title": "配置歌词解析",
+      "description": "接入一个 AI 供应商，把歌词逐句拆成可点击的学习词块。",
+      "setup": "去配置"
+    },
     "panelTitle": "词语详情",
     "noTokenSelected": "点击歌词中的词语查看详解",
     "closePanel": "关闭侧边栏",
