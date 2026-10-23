@@ -405,13 +405,15 @@ describe('analyzeLyrics orchestration', () => {
     expect(onLine).toHaveBeenCalledTimes(2);
   });
 
-  test('a batch whose model burned its whole budget on reasoning goes to repair, not fatal', async () => {
+  test('a batch whose model burned its whole budget on reasoning retries once, then goes to repair', async () => {
     // Reasoning models (deepseek-flash) can emit nothing but reasoning tokens and finish at the
-    // max_tokens cap with an empty body. That batch must cost only its own lines: the run keeps
-    // going, the empty batch's lines are queued for repair, and the repair pass supplies them.
+    // max_tokens cap with an empty body. The batch retries once in place; when the retry also
+    // comes back empty, its lines degrade to the repair queue (the run itself keeps going), and
+    // the repair pass supplies them.
     const emptyStream = new AnalysisOutputError('', 'length');
     behaviors = [
       failWith(emptyStream), // the batch: reasoning burned everything, no content
+      failWith(emptyStream), // the in-place retry: same wall
       elements(fullDraft('line-0', 'a', 1), fullDraft('line-1', 'b', 1)) // repair covers both
     ];
 
@@ -421,6 +423,64 @@ describe('analyzeLyrics orchestration', () => {
     expect(onRepairStarted).toHaveBeenCalledWith(['line-0', 'line-1']);
     expect(outcome.lines.map((line) => line.lineId)).toEqual(['line-0', 'line-1']);
     expect(onLine).toHaveBeenCalledTimes(2);
+  });
+
+  test('an empty-output batch whose retry succeeds needs no repair pass', async () => {
+    // The retry is a fresh coin flip: when the second request streams fine, the run converges
+    // with the first pass alone — no repair wave, no extra wire cost.
+    const emptyStream = new AnalysisOutputError('', 'length');
+    behaviors = [
+      failWith(emptyStream),
+      elements(fullDraft('line-0', 'a', 1), fullDraft('line-1', 'b', 1))
+    ];
+
+    const { outcome, onRepairStarted } = await runAnalyze(lines('a', 'b'));
+
+    expect(outcome.failedLineIds).toEqual([]);
+    expect(onRepairStarted).not.toHaveBeenCalled();
+    expect(outcome.lines.map((line) => line.lineId)).toEqual(['line-0', 'line-1']);
+  });
+
+  test('a repair wave that recovers nothing does not trigger a second wave', async () => {
+    // Repair re-asks the same lines with the same model: when the first wave recovers nothing
+    // (every repair request also burns its budget), a second wave would just repeat the wall.
+    // The lines end in failedLineIds after exactly two calls per batch.
+    const emptyStream = new AnalysisOutputError('', 'length');
+    behaviors = [failWith(emptyStream), failWith(emptyStream), failWith(emptyStream), failWith(emptyStream)];
+
+    const { outcome, onRepairStarted } = await runAnalyze(lines('a', 'b'));
+
+    expect(calls).toHaveLength(4); // first + retry + repair + repair-retry, then stop
+    expect(onRepairStarted).toHaveBeenCalledTimes(1);
+    expect(outcome.failedLineIds).toEqual(['line-0', 'line-1']);
+  });
+
+  test('a partially successful repair wave triggers one more wave for the rest', async () => {
+    // Wave 1 recovers line-0 only (progress but gaps remain); wave 2 recovers line-1. Both lines
+    // end ready without any of them landing in failedLineIds.
+    const emptyStream = new AnalysisOutputError('', 'length');
+    behaviors = [
+      failWith(emptyStream), // first batch burns out
+      failWith(emptyStream), // its retry too
+      elements(fullDraft('line-0', 'a', 1)), // wave 1 repair: only line-0 comes back
+      failWith(emptyStream), // the same repair batch is re-run for line-1 in wave 2...
+      elements(fullDraft('line-1', 'b', 1)) // ...wait — wave 1's own retry fires first
+    ];
+
+    // Simpler contract: wave 1's single batch call returns line-0 (its target was both lines, so
+    // line-1 is missing with progress made); wave 2's call returns line-1.
+    behaviors = [
+      failWith(emptyStream),
+      failWith(emptyStream),
+      elements(fullDraft('line-0', 'a', 1)), // wave 1: line-0 recovered, line-1 still missing
+      elements(fullDraft('line-1', 'b', 1)) // wave 2: line-1 recovered
+    ];
+
+    const { outcome, onRepairStarted } = await runAnalyze(lines('a', 'b'));
+
+    expect(outcome.failedLineIds).toEqual([]);
+    expect(onRepairStarted).toHaveBeenCalledTimes(1);
+    expect(outcome.lines.map((line) => line.lineId)).toEqual(['line-0', 'line-1']);
   });
 });
 

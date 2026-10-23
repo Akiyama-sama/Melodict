@@ -466,6 +466,47 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
   };
 
   /**
+   * Batch-level retry for the two failure shapes a single request can hit on its own:
+   *
+   * - A transient provider error (429/5xx/timeout/network): the AIMD window has already cooled
+   *   down and shrunk when `pooledStreamPass` saw the error, so the retry rides that cooldown
+   *   instead of hammering the endpoint.
+   * - An empty output (`AnalysisOutputError`): a reasoning model that burned its whole budget on
+   *   thinking. A fresh request is a new coin flip at temperature 0 (server-side batching/load
+   *   changes the reasoning length), and Stay Alive's logs show repair is not enough on its own —
+   *   the repair pass can hit the same wall the first pass did.
+   *
+   * Exactly one retry: a second failure means the endpoint/model is having a bad time with this
+   * batch, and the normal degradation (first pass → repair queue; repair pass → failedLineIds)
+   * takes over. Fatal errors (auth/abort/config) are re-thrown untouched.
+   */
+  const pooledStreamPassWithRetry = async (input: {
+    batchIndex: number;
+    prompt: string;
+    targetLines: LyricsAnalysisInputLine[];
+    maxOutputTokens: number;
+    passKind: 'first' | 'repair';
+    preferOver?: Map<string, LyricsAnalysisLine>;
+  }) => {
+    try {
+      return await pooledStreamPass(input);
+    } catch (error) {
+      const retryable = !signal?.aborted && (isThrottlingError(error) || error instanceof AnalysisOutputError);
+      if (!retryable) throw error;
+      logWorkerWarning('Batch failed with a retryable error; retrying once.', {
+        batchIndex: input.batchIndex,
+        passKind: input.passKind,
+        lines: input.targetLines.length,
+        reason: error instanceof AnalysisOutputError ? 'empty-output' : 'transient',
+        throttled: isThrottlingError(error)
+      });
+      // pooledStreamPass already taught the window (cooldown/shrink); waitThroughCooldown holds
+      // this slot through the advised interval before the wire sees the retry.
+      return pooledStreamPass(input);
+    }
+  };
+
+  /**
    * Runs one streamPass wrapped for the pool:AIMD settles on the pass outcome (a thrown pass is
    * a failure only when the cause is transient — config/abort failures are fatal and reported
    * as-is), and the pass event carries the window value that was in effect for the batch.
@@ -508,12 +549,13 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     } catch (error) {
       // Aborts and permanent config failures end the run either way; only transient
       // provider trouble (429/5xx/timeout/network) teaches the window something.
-      // An empty model output (AnalysisOutputError) is NOT fatal: a reasoning model that burns
-      // its whole budget thinking produced nothing for this batch, but its lines are ordinary
-      // repair targets — the batch's failure must cost only its own lines, like any other gap.
-      if (signal?.aborted || (!isThrottlingError(error) && !(error instanceof AnalysisOutputError)))
+      // An empty model output (AnalysisOutputError) is NOT fatal and NOT a load signal: a
+      // reasoning model that burns its whole budget thinking says nothing about endpoint
+      // congestion, so the window neither shrinks nor cools — the batch-level retry (and the
+      // repair queue) own the recovery.
+      if (signal?.aborted || (!isThrottlingError(error) && !(error instanceof AnalysisOutputError))) {
         fatalFailure ??= error;
-      else {
+      } else if (isThrottlingError(error)) {
         window.onThrottled(retryAfterMsFromError(error));
         reportWindowStats();
       }
@@ -531,7 +573,7 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
     // surface as the run's outcome.
     let pass;
     try {
-      pass = await pooledStreamPass({
+      pass = await pooledStreamPassWithRetry({
         batchIndex,
         prompt: buildUserPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
         targetLines: batch,
@@ -566,6 +608,64 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
   }
 
   if (firstPassFailures.size > 0 && !signal?.aborted) {
+    // One repair wave: chunk the targets, run every batch (each with its own retry), emit one
+    // telemetry event per batch. Returns the number of targets still missing after the wave, so
+    // the caller can decide whether a second wave is worth its wire cost. Targets carry the
+    // first-pass failure `reason`, which the repair prompt re-states for the model.
+    const runRepairWave = async (
+      targets: Array<LyricsAnalysisInputLine & { reason: string }>
+    ): Promise<number> => {
+      const repairBatches = chunk(targets, ANALYSIS_BATCH_SIZE);
+      let repairedLines = 0;
+      const repairTasks = repairBatches.map((batch, batchIndex) => async () => {
+        const pass = await pooledStreamPassWithRetry({
+          batchIndex,
+          prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
+          targetLines: batch,
+          maxOutputTokens: 600 + batch.length * 500 + 5000,
+          passKind: 'repair',
+          preferOver: finalLines
+        });
+        repairedLines += batch.length - pass.failedIds.size;
+        return { batch, pass, batchIndex, repairedLinesAfter: repairedLines };
+      });
+
+      try {
+        // Repair quality gate: `preferOver` reads `finalLines`, which every pass mutates through
+        // acceptLine — running batches concurrently means a repair may compare against a line a
+        // sibling repair just improved. That is safe (strictly-better-only acceptance is
+        // order-insensitive for the final state) and the same guarantee the serial loop had.
+        const repairOutcome = await runWithConcurrency(repairTasks, () => window.value, () =>
+          fatalFailure !== undefined
+        );
+        for (const entry of repairOutcome.results) {
+          if (!entry) continue;
+          // Telemetry for repair waves is emitted HERE ONLY — pooledStreamPass would also emit
+          // one for the same pass, and Stay Alive's logs showed every repair event twice.
+          emitPassTelemetry({
+            sessionId,
+            batchIndex: entry.batchIndex,
+            passKind: 'repair',
+            targetLines: entry.batch.length,
+            okLines: entry.batch.length - entry.pass.failedIds.size,
+            failedLines: entry.pass.failedIds.size,
+            passStartedAt: entry.pass.passStartedAt,
+            finishReason: entry.pass.finishReason,
+            outputTokens: entry.pass.passOutputTokens,
+            inputTokens: entry.pass.passInputTokens,
+            repairedLines: entry.repairedLinesAfter
+          });
+        }
+        const repairErrorIndex = [...repairOutcome.errors.keys()].sort((a, b) => a - b)[0];
+        if (repairErrorIndex !== undefined) throw repairOutcome.errors.get(repairErrorIndex);
+      } catch (error) {
+        // A failed repair pass must not discard the lines that already succeeded.
+        if (signal?.aborted) throw error;
+      }
+
+      return targets.filter((line) => !finalLines.has(line.lineId)).length;
+    };
+
     const repairTargets = lines
       .filter((line) => firstPassFailures.has(line.lineId))
       .slice(0, MAX_REPAIR_LINES)
@@ -573,50 +673,25 @@ export const analyzeLyrics = async (options: AnalyzeLyricsOptions) => {
 
     options.onRepairStarted?.(repairTargets.map((line) => line.lineId));
 
-    const repairBatches = chunk(repairTargets, ANALYSIS_BATCH_SIZE);
-    let repairedLines = 0;
-    const repairTasks = repairBatches.map((batch, batchIndex) => async () => {
-      const pass = await pooledStreamPass({
-        batchIndex,
-        prompt: buildRepairPrompt({ uiLanguage, songTitle, songArtists, lines: batch }),
-        targetLines: batch,
-        maxOutputTokens: 600 + batch.length * 500 + 5000,
-        passKind: 'repair',
-        preferOver: finalLines
-      });
-      repairedLines += batch.length - pass.failedIds.size;
-      return { batch, pass, batchIndex, repairedLinesAfter: repairedLines };
-    });
+    const stillMissingAfterFirstWave = await runRepairWave(repairTargets);
 
-    try {
-      // Repair quality gate: `preferOver` reads `finalLines`, which every pass mutates through
-      // acceptLine — running batches concurrently means a repair may compare against a line a
-      // sibling repair just improved. That is safe (strictly-better-only acceptance is
-      // order-insensitive for the final state) and the same guarantee the serial loop had.
-      const repairOutcome = await runWithConcurrency(repairTasks, () => window.value, () =>
-        fatalFailure !== undefined
-      );
-      for (const entry of repairOutcome.results) {
-        if (!entry) continue;
-        emitPassTelemetry({
-          sessionId,
-          batchIndex: entry.batchIndex,
-          passKind: 'repair',
-          targetLines: entry.batch.length,
-          okLines: entry.batch.length - entry.pass.failedIds.size,
-          failedLines: entry.pass.failedIds.size,
-          passStartedAt: entry.pass.passStartedAt,
-          finishReason: entry.pass.finishReason,
-          outputTokens: entry.pass.passOutputTokens,
-          inputTokens: entry.pass.passInputTokens,
-          repairedLines: entry.repairedLinesAfter
-        });
-      }
-      const repairErrorIndex = [...repairOutcome.errors.keys()].sort((a, b) => a - b)[0];
-      if (repairErrorIndex !== undefined) throw repairOutcome.errors.get(repairErrorIndex);
-    } catch (error) {
-      // A failed repair pass must not discard the lines that already succeeded.
-      if (signal?.aborted) throw error;
+    // A second wave only when the first made progress and gaps remain: repair re-asks the same
+    // lines with the same model, so a wave that recovered nothing (the endpoint stuck on the same
+    // wall — truncation, reasoning burnout) will not do better on repeat and the lines go to
+    // failedLineIds instead of burning another round of tokens.
+    if (stillMissingAfterFirstWave > 0 && stillMissingAfterFirstWave < repairTargets.length) {
+      const secondWaveTargets = lines
+        .filter((line) => !finalLines.has(line.lineId))
+        .slice(0, MAX_REPAIR_LINES)
+        .map((line) => ({
+          ...line,
+          reason: firstPassFailures.get(line.lineId) ?? 'invalid-analysis'
+        }));
+      logWorkerWarning('Repair pass left gaps with progress; running a second repair wave.', {
+        stillMissing: stillMissingAfterFirstWave,
+        firstWaveTargets: repairTargets.length
+      });
+      await runRepairWave(secondWaveTargets);
     }
   }
 
