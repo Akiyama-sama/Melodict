@@ -1166,6 +1166,7 @@
     "sectionName": "网易云音乐",
     "searchTitle": "搜索网易云音乐",
     "searchPlaceholder": "搜索网易云的歌曲、专辑、歌手和歌单…",
+    "searchSuggestions": "搜索建议",
     "searchStartHint": "在上方输入以搜索网易云音乐曲库。",
     "noSearchResults": "没有找到结果",
     "noSearchResultsHint": "换个关键词或换一个搜索分类试试。",

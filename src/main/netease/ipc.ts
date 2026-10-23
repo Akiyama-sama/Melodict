@@ -16,7 +16,8 @@ import {
   getNeteaseToplists,
   getNeteaseUserPlaylists,
   likeUnlikeNeteaseSong,
-  searchNetease
+  searchNetease,
+  searchNeteaseSuggestions
 } from './catalog';
 import { NeteaseApiError } from './client';
 import { getNeteaseLyrics } from './lyrics';
@@ -60,6 +61,10 @@ export const registerNeteaseIpc = () => {
     'app/netease/search',
     (_, keywords: string, type: NeteaseSearchTypes) =>
       withNeteaseErrorHandling(() => searchNetease(keywords, type))
+  );
+
+  ipcMain.handle('app/netease/searchSuggest', (_, keywords: string) =>
+    withNeteaseErrorHandling(() => searchNeteaseSuggestions(keywords))
   );
 
   ipcMain.handle('app/netease/getPlaylist', (_, playlistId: string) =>

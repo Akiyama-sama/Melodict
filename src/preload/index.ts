@@ -296,6 +296,8 @@ const neteaseControls = {
 
   search: (keywords: string, type: NeteaseSearchTypes): Promise<NeteaseApiSearchResult> =>
     ipcRenderer.invoke('app/netease/search', keywords, type),
+  searchSuggest: (keywords: string): Promise<string[]> =>
+    ipcRenderer.invoke('app/netease/searchSuggest', keywords),
   getPlaylist: (
     playlistId: string
   ): Promise<{ playlist: NeteasePlaylistSummary; songs: NeteaseSongSummary[] }> =>

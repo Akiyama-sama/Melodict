@@ -1166,6 +1166,7 @@
     "sectionName": "NetEase Cloud Music",
     "searchTitle": "Search NetEase Cloud Music",
     "searchPlaceholder": "Search songs, albums, artists and playlists on NetEase…",
+    "searchSuggestions": "Search suggestions",
     "searchStartHint": "Type above to search the NetEase catalog.",
     "noSearchResults": "No results found",
     "noSearchResultsHint": "Try different keywords or another search filter.",
