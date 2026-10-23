@@ -475,7 +475,7 @@
     "noraDescription": "知音是一款使用 Electron 和 React 构建的优雅音乐播放器。",
     "noraInspiration": "灵感来源于 Piyush Mamidwar 的 <Hyperlink>Oto Music for Android</Hyperlink>。",
     "otoMusicOnPlayStore": "Google Play 商店中的 Oto Music for Android",
-    "noraLicenseNotice": "本产品根据 <Button>MIT 许可证</Button> 授权。",
+    "noraLicenseNotice": "本产品根据 <Button>AGPL-3.0 许可证</Button> 授权。",
     "appLicense": "应用许可证",
     "releaseNotes": "发行说明",
     "openSourceLicenses": "开源许可证",

@@ -509,7 +509,7 @@
     "noraDescription": "O Knote é um player de música elegante construído com Electron e React.",
     "noraInspiration": "Inspirado por <Hyperlink>Oto Music para Android</Hyperlink> de Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music para Android na Play Store",
-    "noraLicenseNotice": "Este produto é licenciado sob a <Button>licença MIT.</Button>",
+    "noraLicenseNotice": "Este produto é licenciado sob a <Button>licença AGPL-3.0.</Button>",
     "appLicense": "Licença do aplicativo",
     "releaseNotes": "Notas de versão",
     "openSourceLicenses": "Licenças de código aberto",

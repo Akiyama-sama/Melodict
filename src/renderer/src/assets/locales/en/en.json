@@ -475,7 +475,7 @@
     "noraDescription": "Knote is an elegant music player built using Electron and React.",
     "noraInspiration": "Inspired by <Hyperlink>Oto Music for Android</Hyperlink> by Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music for Android on the Play Store",
-    "noraLicenseNotice": "This product is licensed under the <Button>MIT licence.</Button>",
+    "noraLicenseNotice": "This product is licensed under the <Button>AGPL-3.0 license.</Button>",
     "appLicense": "App license",
     "releaseNotes": "Release notes",
     "openSourceLicenses": "Open-source licenses",

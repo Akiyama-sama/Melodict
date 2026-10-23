@@ -8,7 +8,7 @@
   </developer>
   <summary>An elegant music player inspired from Oto Music</summary>
   <project_license>AGPL-3.0</project_license>
-  <metadata_license>MIT</metadata_license>
+  <metadata_license>AGPL-3.0</metadata_license>
   <url type="homepage">https://github.com/Akiyama-sama/knote</url>
   <url type="bugtracker">https://github.com/Akiyama-sama/knote/issues</url>
   <url type="vcs-browser">https://github.com/Akiyama-sama/knote</url>

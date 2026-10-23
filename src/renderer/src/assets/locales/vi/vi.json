@@ -490,7 +490,7 @@
     "noraDescription": "Knote là một trình phát nhạc thanh lịch được xây dựng bằng Electron và React.",
     "noraInspiration": "Lấy cảm hứng từ <Hyperlink>Oto Music cho Android</Hyperlink> bởi Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music trên Cửa hàng Play",
-    "noraLicenseNotice": "Sản phẩm này được cấp phép dưới <Button>giấy phép mã nguồn mở MIT.</Button>",
+    "noraLicenseNotice": "Sản phẩm này được cấp phép dưới <Button>giấy phép mã nguồn mở AGPL-3.0.</Button>",
     "appLicense": "Giấy phép ứng dụng",
     "releaseNotes": "Ghi chú phát hành",
     "openSourceLicenses": "Giấy phép mã nguồn mở",
