@@ -18,6 +18,8 @@ Built with Electron and React • Inspired by [Oto Music](https://play.google.co
 
 ---
 
+> **Knote (知音)** — in an old Chinese story, a qin player and a listener understood each other through music alone, and a word was born: *zhīyīn*, "to know the song, and be known by it." Knote hands that listening to AI — every word it glosses is one more attentive ear turned to your song. As for the English name: *kin* met *note*, and the K keeps quiet, as in *know* — some understanding is never spoken.
+
 Knote (知音 — "the one who truly understands your music") builds on the Nora upstream and turns the player into a study companion: beyond playing your local library, it analyzes lyrics line by line with AI — every word's meaning, pronunciation (romaji / kana / pinyin / IPA), and grammatical role is one click away, turning every foreign-language song into a text you can actually study.
 
 ![Knote · fullscreen lyrics with the word panel](/resources/other/artwork/fullscreen-lyrics-closeup.png)
