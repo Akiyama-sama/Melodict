@@ -59,11 +59,21 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: pnpm run build:win
 
+      - name: Resolve version
+        id: ver
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # 上传到按 package.json 版本命名的草稿 release(与本地 pnpm release:local 共用同一个草稿);
+      # 草稿不存在时 softprops 会按 tag 新建一个,同样保持 draft。
+      # Upload into the draft release named after package.json's version — the same draft
+      # that `pnpm release:local` fills; softprops creates it (still a draft) if missing.
       - name: release
         uses: softprops/action-gh-release@v3
         with:
           draft: true
-          name: Knote Release ${{ github.ref }} ${{ github.sha }}
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Knote v${{ steps.ver.outputs.version }}
           files: |
             dist/*.exe
             dist/*.zip
