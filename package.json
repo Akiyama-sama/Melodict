@@ -1,6 +1,6 @@
 {
   "name": "knote",
-  "version": "4.1.0-alpha",
+  "version": "4.1.1",
   "type": "module",
   "description": "Knote — 知音, an elegant music player",
   "license": "AGPL-3.0",
