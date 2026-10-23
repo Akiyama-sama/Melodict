@@ -73,22 +73,27 @@ jobs:
       # 草稿不存在时 softprops 会按 tag 新建一个,同样保持 draft。
       # Upload into the draft release named after package.json's version — the same draft
       # that `pnpm release:local` fills; softprops creates it (still a draft) if missing.
-      - name: release
-        uses: softprops/action-gh-release@v3
-        with:
-          draft: true
-          tag_name: v${{ steps.ver.outputs.version }}
-          name: Knote v${{ steps.ver.outputs.version }}
-          files: |
-            dist/*.exe
-            dist/*.zip
-            dist/*.dmg
-            dist/*.AppImage
-            dist/*.snap
-            dist/*.deb
-            dist/*.rpm
-            dist/*.tar.gz
-            dist/*.yml
-            dist/*.blockmap
+      # 用 gh 上传到按 package.json 版本命名的草稿 release(与本地 pnpm release:local 共用同一个草稿)。
+      # softprops/action-gh-release 在更新他人创建的草稿时会 403(Resource not accessible by
+      # integration),gh release upload --repo 按标签直传,无此问题;草稿不存在时 create 兜底。
+      # Upload with gh into the draft release named after package.json's version — the same
+      # draft that `pnpm release:local` fills. softprops fails with 403 when updating a draft
+      # created by another token; gh release upload --repo does not have that problem.
+      - name: Upload to draft release
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -e
+          ASSETS=$(find dist -maxdepth 1 -type f \( -name '*.exe' -o -name '*.zip' -o -name '*.dmg' \
+            -o -name '*.AppImage' -o -name '*.snap' -o -name '*.deb' -o -name '*.rpm' \
+            -o -name '*.tar.gz' -o -name '*.yml' -o -name '*.blockmap' \) \
+            ! -name 'builder-debug.yml' ! -name 'builder-effective-config.yaml')
+          echo "Assets to upload:"; ls -la $ASSETS
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" --json id >/dev/null 2>&1; then
+            gh release upload "v$VERSION" $ASSETS --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "v$VERSION" $ASSETS --repo "$GITHUB_REPOSITORY" \
+              --title "Knote v$VERSION" --draft --target "$GITHUB_SHA"
+          fi
