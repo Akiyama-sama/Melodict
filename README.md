@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="resources/logo_light_mode.png" alt="知音 Knote Logo" width="200">
+
 # 知音 Knote
 
 ### 用旋律来记住单词 —— 一款会「听歌」，更会「懂歌」的桌面音乐播放器

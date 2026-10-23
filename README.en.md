@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="resources/logo_light_mode.png" alt="Knote Logo" width="200">
+<img src="resources/logo_light_mode.png" alt="Knote (知音) Logo" width="200">
 
 # Knote (知音)
 
