@@ -56,6 +56,8 @@ function NeteaseSearchPage() {
   const searchContainerRef = useRef(null);
   const [searchText, setSearchText] = useState(keyword);
 
+  // The input echoes instantly through local state; the URL keyword (throttled) is what drives
+  // the results query below, so typing and searching run on separate clocks.
   const throttledSetSearch = useThrottledCallback(
     (value) => {
       navigate({ search: (prev) => ({ ...prev, keyword: value }), replace: true });
@@ -92,7 +94,10 @@ function NeteaseSearchPage() {
   );
 
   return (
-    <MainContainer className="netease-search-page h-full! [scrollbar-gutter:stable] pb-0! pl-8!" ref={searchContainerRef}>
+    <MainContainer
+      className="netease-search-page h-full! overflow-hidden [scrollbar-gutter:stable] pb-0! pl-8!"
+      ref={searchContainerRef}
+    >
       <div className="search-controls-container">
         <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between pr-4 text-3xl font-medium">
           {t('netease.searchTitle')}
@@ -134,7 +139,12 @@ function NeteaseSearchPage() {
           </ul>
         </div>
       </div>
-      <div className="search-results-container relative h-full!">
+      {/* The results area owns the scrolling. The app shell around every page is
+          `overflow-hidden`, so this page — the only NetEase page rendering a plain flow list —
+          lost everything below the fold before it grew its own scroll container (the library
+          pages scroll inside react-virtuoso instead and never hit this). `min-h-0` lets the
+          flex-1 area shrink to the space left under the fixed controls. */}
+      <div className="search-results-container relative h-full! min-h-0 flex-1 overflow-y-auto pr-4">
         {trimmedKeyword.length === 0 && (
           <div className="text-sm opacity-60">{t('netease.searchStartHint')}</div>
         )}

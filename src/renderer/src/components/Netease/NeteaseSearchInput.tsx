@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next';
 
 import { neteaseQuery } from '../../queries/netease';
 
+/** Settle time before a keystroke fires a suggest request; react-query dedupes per keyword. */
+const SUGGEST_DEBOUNCE_MS = 250;
+
 interface NeteaseSearchInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -16,8 +19,6 @@ interface NeteaseSearchInputProps {
   autoFocus?: boolean;
 }
 
-const SUGGEST_DEBOUNCE_MS = 250;
-
 /**
  * The inner content of a NetEase search input (icon, text field, clear button) plus its
  * keyword-suggestion dropdown, built on Headless UI's `Combobox` for keyboard navigation,
@@ -27,8 +28,8 @@ const SUGGEST_DEBOUNCE_MS = 250;
  * the input's mid-animation position.
  *
  * The pill-shaped shell stays with the caller — its width differs per page — while this component
- * fills it. Suggestions debounce 250 ms and are cached per keyword by react-query; Enter always
- * searches the typed text, while clicking (or arrowing into) a suggestion searches that one.
+ * fills it. Enter always searches the typed text, while clicking (or arrowing into) a suggestion
+ * searches that one.
  */
 const NeteaseSearchInput = ({
   value,
@@ -62,8 +63,8 @@ const NeteaseSearchInput = ({
     <Combobox
       value={value}
       onChange={(keyword) => {
-        // Option selection lands here; a picked suggestion fills the field and runs the search
-        // in one step.
+        // Only option selection lands here (typing is handled by ComboboxInput's own onChange);
+        // a picked suggestion fills the field and runs the search in one step.
         if (typeof keyword !== 'string') return;
         onChange(keyword);
         submit(keyword);
@@ -77,6 +78,8 @@ const NeteaseSearchInput = ({
           ref={inputRef}
           aria-label={ariaLabel}
           placeholder={placeholder}
+          // The displayed text is always the controlled `value`, regardless of which option
+          // Headless UI thinks is "selected".
           displayValue={() => value}
           className="text-font-color-black placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight h-full w-full border-2 border-[transparent] bg-[transparent] outline-hidden [&::-webkit-search-cancel-button]:hidden"
           onChange={(e) => onChange(e.currentTarget.value)}
@@ -113,9 +116,13 @@ const NeteaseSearchInput = ({
         anchor="bottom start"
         // Headless UI writes inline `maxHeight: min(var(--anchor-max-height, 100vh), …px)`, which
         // outranks any max-h-* class; with few suggestions the list never overflowed, so wheel
-        // events fell through to the page behind it. Cap it through the official variable.
-        className="bg-background-color-1 dark:bg-dark-background-color-1 z-100 mt-1 w-[var(--input-width)] [--anchor-max-height:18rem] overflow-y-auto rounded-2xl p-2 shadow-xl empty:hidden"
+        // events fell through to the page behind it. Cap it through the official variable. The
+        // class must stay a literal — Tailwind's scanner does not see interpolated class names
+        // (keep it in sync with SUGGEST_MAX_HEIGHT above).
+        className="bg-background-color-1 dark:bg-dark-background-color-1 z-100 mt-1 w-[var(--input-width)] overflow-y-auto rounded-2xl p-2 shadow-xl empty:hidden [--anchor-max-height:18rem]"
       >
+        {/* Gate on the debounced keyword too: right after clearing the input, the previous
+            keyword's options would otherwise flash for a frame until the debounce catches up. */}
         {keywords.length > 0 &&
           suggestions.map((keyword) => (
             <ComboboxOption
