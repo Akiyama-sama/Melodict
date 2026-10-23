@@ -209,6 +209,17 @@ export const searchNetease = async (
   };
 };
 
+export const searchNeteaseSuggestions = async (keywords: string): Promise<string[]> => {
+  // type=mobile hits the keyword-completion endpoint (result.allMatch); the default web variant
+  // returns entity previews (songs/artists/...) instead, which is not keyword suggestion data.
+  const body = await callNeteaseForBody('search_suggest', { keywords, type: 'mobile' });
+  const result = (body.result ?? {}) as { allMatch?: { keyword?: unknown }[] };
+
+  return (result.allMatch ?? [])
+    .map((entry) => (typeof entry.keyword === 'string' ? entry.keyword : ''))
+    .filter((keyword) => keyword.length > 0);
+};
+
 export const getNeteaseUserPlaylists = async (userId: number): Promise<NeteasePlaylistSummary[]> => {
   const body = await callCatalog('user_playlist', { uid: userId, limit: 1000 });
   const playlists = Array.isArray(body.playlist)

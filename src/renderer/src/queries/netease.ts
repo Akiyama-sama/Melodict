@@ -52,6 +52,11 @@ export const neteaseQuery = createQueryKeys('netease', {
     queryKey: [`${data.type}`, data.keywords],
     queryFn: () => window.api.neteaseControls.search(data.keywords, data.type)
   }),
+  /** Keyword-completion suggestions for the search input's dropdown. */
+  searchSuggest: (keywords: string) => ({
+    queryKey: ['suggest', keywords],
+    queryFn: () => window.api.neteaseControls.searchSuggest(keywords)
+  }),
   songSummaries: (neteaseIds: number[]) => ({
     queryKey: [
       [...neteaseIds].sort((a, b) => a - b).join(',')

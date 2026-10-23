@@ -3,6 +3,7 @@ import MainContainer from '@renderer/components/MainContainer';
 import NeteaseAlbumCard from '@renderer/components/Netease/NeteaseAlbumCard';
 import NeteaseArtistCard from '@renderer/components/Netease/NeteaseArtistCard';
 import NeteasePlaylistCard from '@renderer/components/Netease/NeteasePlaylistCard';
+import NeteaseSearchInput from '@renderer/components/Netease/NeteaseSearchInput';
 import NeteaseSongRow from '@renderer/components/Netease/NeteaseSongRow';
 import SecondaryContainer from '@renderer/components/SecondaryContainer';
 import { neteaseQuery } from '@renderer/queries/netease';
@@ -98,20 +99,14 @@ function NeteaseSearchPage() {
         </div>
         <div className="search-input-container appear-from-bottom mb-4 flex items-center">
           <div className="search-bar-container bg-background-color-2 dark:bg-dark-background-color-2 flex w-1/2 max-w-xl min-w-[25rem] items-center rounded-3xl px-2 py-1">
-            <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight mx-3 text-2xl">
-              search
-            </span>
-            {/* SEARCH INPUT */}
-            <input
-              type="search"
-              name="neteaseSearch"
-              id="neteaseSearchBar"
-              className="text-font-color-black placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight h-full w-full border-2 border-[transparent] bg-[transparent] outline-hidden"
-              aria-label={t('netease.searchTitle')}
-              placeholder={t('netease.searchPlaceholder')}
+            <NeteaseSearchInput
               value={searchText}
-              onChange={(e) => updateSearchInput(e.currentTarget.value)}
-              onKeyDown={(e) => e.stopPropagation()}
+              onChange={updateSearchInput}
+              onSubmit={(keyword) =>
+                navigate({ search: (prev) => ({ ...prev, keyword }), replace: true })
+              }
+              placeholder={t('netease.searchPlaceholder')}
+              ariaLabel={t('netease.searchTitle')}
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
