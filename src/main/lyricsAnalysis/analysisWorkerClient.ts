@@ -25,6 +25,7 @@ interface PendingAnalysis {
   onPassCompleted?: (pass: AnalysisPassTelemetryEvent) => void;
   onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
   onLearnedConcurrency?: (ceiling: number) => void;
+  onFormatRefused?: () => void;
 }
 
 const pendingAnalyses = new Map<string, PendingAnalysis>();
@@ -64,6 +65,9 @@ const createWorker = () => {
         break;
       case 'concurrency':
         pending.onConcurrencyStats?.(message.stats);
+        break;
+      case 'provider-capability':
+        pending.onFormatRefused?.();
         break;
       case 'done':
         pending.resolve({
@@ -116,6 +120,8 @@ export const analyzeLyricsInWorker = (input: {
   songArtists: string[];
   lines: LyricsAnalysisInputLine[];
   sessionId?: string;
+  /** The endpoint is known to reject response_format; the wire request skips the field. */
+  skipResponseFormat?: boolean;
   /** Seeds the worker's AIMD window from the cross-session concurrency memory. */
   initialConcurrency?: number;
   onLine: (line: LyricsAnalysisLine, source: 'first' | 'repair') => void;
@@ -124,6 +130,8 @@ export const analyzeLyricsInWorker = (input: {
   onConcurrencyStats?: (stats: { max: number; mean: number; rateLimitedCount: number }) => void;
   /** Called once with the window ceiling the run converged on (for the memory write-back). */
   onLearnedConcurrency?: (ceiling: number) => void;
+  /** The endpoint live-refused response_format during this run; persist it. */
+  onFormatRefused?: () => void;
 }) =>
   new Promise<{
     lines: LyricsAnalysisLine[];
@@ -140,7 +148,8 @@ export const analyzeLyricsInWorker = (input: {
       onRepairStarted: input.onRepairStarted,
       onPassCompleted: input.onPassCompleted,
       onConcurrencyStats: input.onConcurrencyStats,
-      onLearnedConcurrency: input.onLearnedConcurrency
+      onLearnedConcurrency: input.onLearnedConcurrency,
+      onFormatRefused: input.onFormatRefused
     });
 
     getWorker().postMessage({
@@ -152,6 +161,7 @@ export const analyzeLyricsInWorker = (input: {
       songArtists: input.songArtists,
       lines: input.lines,
       sessionId: input.sessionId,
+      ...(input.skipResponseFormat ? { skipResponseFormat: true } : {}),
       ...(input.initialConcurrency !== undefined
         ? { initialConcurrency: input.initialConcurrency }
         : {})

@@ -62,12 +62,10 @@ const runVariant = async (variant: 'full' | 'directive-only' | 'roma-only' | 'v2
     );
   }
 
-  const { createOpenAI } = await import('@ai-sdk/openai');
-  const { streamText, Output } = await import('ai');
-  const { lyricsAnalysisTransportSchema } = await import('../../src/common/lyricsAnalysis');
+  const { default: OpenAI } = await import('openai');
+  const { EnvelopeStreamParser } = await import('../../src/main/lyricsAnalysis/envelopeStream');
 
-  const provider = createOpenAI({ apiKey, baseURL: baseURL.replace(/\/+$/, '') });
-  const model = provider.chat('qwen-flash');
+  const client = new OpenAI({ apiKey, baseURL: baseURL.replace(/\/+$/, ''), maxRetries: 0 });
 
   // A true v2 baseline sends no romanizedText at all — the unexplained field itself is a variable.
   const linesToSend =
@@ -75,31 +73,41 @@ const runVariant = async (variant: 'full' | 'directive-only' | 'roma-only' | 'v2
       ? probeLines.map(({ romanizedText: _r, ...rest }) => rest)
       : probeLines;
 
-  const result = streamText({
-    model,
-    system: `${base.join('\n')}${directive ? `\n\n${directive}` : ''}`,
-    prompt: JSON.stringify(
+  const stream = await client.chat.completions.create({
+    model: 'qwen-flash',
+    messages: [
+      { role: 'system', content: `${base.join('\n')}${directive ? `\n\n${directive}` : ''}` },
       {
-        uiLanguage: 'zh-CN',
-        songTitle: "Don't say lazy",
-        songArtists: ['放課後ティータイム'],
-        lines: linesToSend
-      },
-      null,
-      2
-    ),
+        role: 'user',
+        content: JSON.stringify(
+          {
+            uiLanguage: 'zh-CN',
+            songTitle: "Don't say lazy",
+            songArtists: ['放課後ティータイム'],
+            lines: linesToSend
+          },
+          null,
+          2
+        )
+      }
+    ],
     temperature: 0,
-    maxOutputTokens: 5000,
-    providerOptions: { openai: { strictJsonSchema: false } },
-    output: Output.array({ element: lyricsAnalysisTransportSchema, name: 'lyric_lines', description: 'One annotated lyric line' })
+    max_tokens: 5000,
+    stream: true,
+    response_format: { type: 'json_object' }
   });
 
   const counts = new Map<string, number>();
   let elementCount = 0;
-  for await (const element of result.elementStream) {
-    elementCount += 1;
-    const id = String(element.lineId ?? '?');
-    counts.set(id, (counts.get(id) ?? 0) + 1);
+  const parser = new EnvelopeStreamParser();
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (!delta) continue;
+    for (const element of parser.push(delta)) {
+      elementCount += 1;
+      const id = String(element.lineId ?? '?');
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
   }
 
   const summary = [...counts.entries()].map(([id, n]) => `${id}:${n}`).join(' ');

@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { app, BrowserWindow } from 'electron';
 
 import {
   LYRICS_ANALYSIS_DEFAULT_MODEL_ID,
@@ -24,6 +24,10 @@ import {
   readLyricsAnalysisPartialCache
 } from './cacheRepository';
 import { readConcurrencySeed, writeConcurrencyCeiling } from './concurrencyMemory';
+import {
+  addProviderCapability,
+  hasProviderCapability
+} from './providerCapabilities';
 import {
   buildLineAnalysisCacheKey,
   hydrateLineAnalysisFromCache,
@@ -424,6 +428,12 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
     // converged on, and persist what it converged to this time. The worker process cannot touch
     // Electron storage, so this runs on the session-manager side (see concurrencyMemory.ts).
     const concurrencySeed = await readConcurrencySeed(provider.baseURL, modelId);
+    const skipResponseFormat = await hasProviderCapability(
+      app.getPath('userData'),
+      provider.baseURL,
+      modelId,
+      'responseFormatRefused'
+    );
     const outcome = await analyzeLyricsInWorker({
       config: {
         baseURL: provider.baseURL,
@@ -435,7 +445,18 @@ export const prepareLyricsAnalysisSession = async (request: LyricsAnalysisReques
       songArtists: request.songArtists,
       lines: dedupedResumeLines,
       sessionId,
+      skipResponseFormat,
       initialConcurrency: concurrencySeed,
+      onFormatRefused: () => {
+        // Persist the refusal so every later session skips response_format from the start
+        // (magpie's markUnfit). Best-effort: a failed write costs one re-detected 400.
+        void addProviderCapability(
+          app.getPath('userData'),
+          provider.baseURL,
+          modelId,
+          'responseFormatRefused'
+        );
+      },
       onLine: (line, source) => onValidatedLine({ line, source }),
       onRepairStarted: (failedLineIds) => {
         if (!isCurrent()) return;

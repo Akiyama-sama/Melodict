@@ -1,4 +1,16 @@
-import { NoObjectGeneratedError } from 'ai';
+/**
+ * Orchestration tests for `analyzeLyrics` (providerGateway): batching, the repair gate, the
+ * repair quality gate (`preferOver` / lineQuality), the auth-failure short circuit, and the
+ * `response_format` refusal fallback.
+ *
+ * The OpenAI client is injected through the `createClient` seam with a scripted fake: each
+ * scenario queues per-call behaviors — `elements(...)` encodes a successful envelope of transport
+ * lines as chat-completion stream chunks (so the test rides the same EnvelopeStreamParser the
+ * real wire path uses), `failWith(...)` throws before streaming, `refuse(...)` answers a 400
+ * naming `response_format` before streaming its follow-up behaviors. The fake never imports
+ * Electron and never touches the network.
+ */
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type {
@@ -6,93 +18,88 @@ import type {
   LyricsAnalysisLine,
   LyricsAnalysisTransportLine
 } from '../../../../src/common/lyricsAnalysis';
-
-/**
- * Orchestration tests for `analyzeLyrics` (providerGateway): batching, the repair gate, the
- * repair quality gate (`preferOver` / lineQuality), and the auth-failure short circuit.
- *
- * The AI SDK's `streamText` is mocked at module level with a scripted fake. Each scenario
- * provides a queue of per-call behaviors — `elements(...)` for a successful envelope of
- * transport lines, `failWith(...)` for a thrown error — consumed in call order. The fake never
- * imports Electron, and the model itself is injected through the `createModel` seam, so the
- * real OpenAI client is never constructed.
- */
+import { AnalysisOutputError, type AnalysisOpenAIClient } from '../../../../src/main/lyricsAnalysis/providerGateway';
 
 type CallBehavior =
   | { kind: 'elements'; elements: LyricsAnalysisTransportLine[] }
-  | { kind: 'error'; error: unknown };
+  | { kind: 'error'; error: unknown }
+  | { kind: 'raw'; text: string }
+  | {
+      kind: 'refuse';
+      refusalStatus: number;
+      refusalBody: string;
+      then: CallBehavior[];
+    };
 
 interface StreamCall {
   prompt: string;
   system: string;
-  maxOutputTokens: number;
+  askForJson: boolean;
 }
 
 const calls: StreamCall[] = [];
 let behaviors: CallBehavior[] = [];
 
-vi.mock('ai', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('ai')>();
-
-  const streamTextMock = (input: {
-    prompt: string;
-    system: string;
-    maxOutputTokens: number;
-    onError: (event: { error: unknown }) => void;
-    output: unknown;
-  }) => {
-    calls.push({ prompt: input.prompt, system: input.system, maxOutputTokens: input.maxOutputTokens });
-    const behavior = behaviors.shift() ?? { kind: 'elements', elements: [] };
-
-    if (behavior.kind === 'error') {
-      const error = behavior.error;
-      const failed = () => Promise.reject(error);
-      return {
-        elementStream: {
-          [Symbol.asyncIterator]: () => ({
-            next: async () => {
-              throw error;
-            }
-          })
-        },
-        textStream: { [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true }) }) },
-        finishReason: Promise.resolve('error' as const),
-        usage: Promise.resolve({ inputTokens: undefined, outputTokens: undefined }),
-        output: failed()
-      };
+/** Encodes transport lines as the SSE-shaped chunks the openai SDK stream yields. */
+const chunksFor = (elements: LyricsAnalysisTransportLine[]) => {
+  const text = JSON.stringify({ elements });
+  // Split into two deltas so the parser's cross-push buffering is exercised on every scenario.
+  const mid = Math.floor(text.length / 2);
+  return [
+    { choices: [{ index: 0, delta: { content: text.slice(0, mid) }, finish_reason: null }] },
+    { choices: [{ index: 0, delta: { content: text.slice(mid) }, finish_reason: null }] },
+    {
+      choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
+      usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 }
     }
+  ];
+};
 
-    const elements = behavior.elements;
-    return {
-      elementStream: {
-        [Symbol.asyncIterator]: () => {
-          let index = 0;
-          return {
-            next: async () =>
-              index < elements.length
-                ? { value: elements[index++], done: false }
-                : { value: undefined, done: true }
-          };
-        }
-      },
-      textStream: { [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true }) }) },
-      finishReason: Promise.resolve('stop' as const),
-      usage: Promise.resolve({ inputTokens: 10, outputTokens: 20 }),
-      output: Promise.resolve([elements])
-    };
-  };
+const makeFakeClient = (): AnalysisOpenAIClient => {
+  const create = vi.fn(
+    async (
+      params: { messages: Array<{ role: string; content: string }>; response_format?: unknown },
+      _options?: { signal?: AbortSignal }
+    ) => {
+      const behavior = behaviors.shift() ?? { kind: 'elements', elements: [] };
+      calls.push({
+        prompt: params.messages.find((m) => m.role === 'user')?.content ?? '',
+        system: params.messages.find((m) => m.role === 'system')?.content ?? '',
+        askForJson: params.response_format !== undefined
+      });
 
-  return {
-    ...actual,
-    streamText: streamTextMock,
-    // mapProviderError dispatches on these; re-export the real classes so instanceof still works.
-    APICallError: actual.APICallError,
-    NoObjectGeneratedError: actual.NoObjectGeneratedError,
-    TypeValidationError: actual.TypeValidationError
-  };
-});
+      if (behavior.kind === 'error') throw behavior.error;
+      if (behavior.kind === 'raw') {
+        // Streams literal completion text (broken envelope fixtures) as two deltas, then stop.
+        const mid = Math.floor(behavior.text.length / 2);
+        return (async function* () {
+          yield { choices: [{ index: 0, delta: { content: behavior.text.slice(0, mid) }, finish_reason: null }] };
+          yield { choices: [{ index: 0, delta: { content: behavior.text.slice(mid) }, finish_reason: null }] };
+          yield { choices: [{ index: 0, delta: {}, finish_reason: 'stop' }] };
+        })();
+      }
+      if (behavior.kind === 'refuse') {
+        // The endpoint answers 400 naming the field; the gateway's retry (no response_format)
+        // then consumes the queued follow-up behaviors.
+        const { refusalStatus, refusalBody, then: followUps } = behavior;
+        behaviors.unshift(...followUps);
+        const { APIError } = await import('openai');
+        throw new APIError(refusalStatus, { error: { message: refusalBody } }, refusalBody, new Headers());
+      }
+
+      const elements = behavior.elements;
+      return (async function* () {
+        for (const chunk of chunksFor(elements)) yield chunk;
+      })();
+    }
+  );
+  return { chat: { completions: { create } } } as unknown as AnalysisOpenAIClient;
+};
+
+let fakeClient: AnalysisOpenAIClient;
 
 const providerGateway = await import('../../../../src/main/lyricsAnalysis/providerGateway');
+
 
 const fullDraft = (lineId: string, text: string, tokenCount = 2): LyricsAnalysisTransportLine => ({
   lineId,
@@ -157,6 +164,14 @@ const elements = (...elements_: LyricsAnalysisTransportLine[]): CallBehavior => 
 
 const failWith = (error: unknown): CallBehavior => ({ kind: 'error', error });
 
+/** A 400/422 naming `response_format`, followed by the behaviors the retry should consume. */
+const refuse = (refusalBody: string, then: CallBehavior[]): CallBehavior => ({
+  kind: 'refuse',
+  refusalStatus: 400,
+  refusalBody,
+  then
+});
+
 const runAnalyze = async (
   inputLines: LyricsAnalysisInputLine[],
   overrides: Partial<Parameters<typeof providerGateway.analyzeLyrics>[0]> = {}
@@ -171,7 +186,7 @@ const runAnalyze = async (
     lines: inputLines,
     onLine,
     onRepairStarted,
-    createModel: () => ({}) as never,
+    createClient: () => fakeClient,
     ...overrides
   });
   return { outcome, onLine, onRepairStarted };
@@ -180,6 +195,7 @@ const runAnalyze = async (
 beforeEach(() => {
   calls.length = 0;
   behaviors = [];
+  fakeClient = makeFakeClient();
 });
 
 describe('analyzeLyrics orchestration', () => {
@@ -282,13 +298,13 @@ describe('analyzeLyrics orchestration', () => {
   });
 
   test('an authFailed error from the model short-circuits: no retries, no repair', async () => {
-    const authError = new actual_APICallError({
-      message: 'Invalid API key',
-      url: 'http://127.0.0.1:9/v1/chat/completions',
-      requestBodyValues: {},
-      statusCode: 401,
-      isRetryable: false
-    });
+    const { APIError } = await import('openai');
+    const authError = new APIError(
+      401,
+      { error: { message: 'Invalid API key' } },
+      'Invalid API key',
+      new Headers()
+    );
     // Two batches' worth of lines. The run must reject with the 401 and never reach a repair
     // pass. Since batches now run through a bounded concurrent pool, the batch holding the 401
     // stops all UNSTARTED batches, but batches already launched inside the same window wave
@@ -298,8 +314,8 @@ describe('analyzeLyrics orchestration', () => {
     behaviors = [failWith(authError), elements(), elements(), elements()];
 
     await expect(runAnalyze(inputLines)).rejects.toMatchObject({
-      name: 'AI_APICallError',
-      statusCode: 401
+      name: 'Error',
+      status: 401
     });
 
     expect(calls.length).toBeGreaterThan(0);
@@ -320,7 +336,8 @@ describe('analyzeLyrics orchestration', () => {
       lines: inputLines,
       sessionId: 'sess-1',
       onLine,
-      onPassCompleted
+      onPassCompleted,
+      createClient: () => fakeClient
     });
 
     expect(onPassCompleted).toHaveBeenCalledTimes(1);
@@ -368,10 +385,10 @@ describe('analyzeLyrics orchestration', () => {
     expect(outcome.lines[0]?.status).toBe('ready');
   });
 
-  test('salvage recovers usable lines from a NoObjectGeneratedError completion', async () => {
+  test('salvage recovers usable lines from a truncated completion', async () => {
     // Element 0 is truncated mid-structure: its closing `}}` never arrives before the next
-    // `{"lineId"` anchor. Salvage slices each element into an independent chunk, closes what is
-    // open, and both lines must validate.
+    // `{"lineId"` anchor. The streamed parser drops the element it cannot close, so only line-1
+    // streams; salvage re-parses the raw completion with repair heuristics and recovers line-0.
     const truncated = [
       'Here is your analysis:',
       '```json',
@@ -379,7 +396,7 @@ describe('analyzeLyrics orchestration', () => {
       '{"lineId":"line-1","translation":"译:b","tokens":[{"startChar":0,"endChar":1,"text":"b","card":{"meaning":"m","grammarFunction":"g"}}]}]}',
       '```'
     ].join('\n');
-    behaviors = [failWith(new NoObjectGeneratedError({ message: 'no object', text: truncated }))];
+    behaviors = [{ kind: 'raw', text: truncated }];
 
     const { outcome, onLine } = await runAnalyze(lines('a', 'b'));
 
@@ -387,7 +404,83 @@ describe('analyzeLyrics orchestration', () => {
     expect(outcome.lines.map((line) => line.lineId)).toEqual(['line-0', 'line-1']);
     expect(onLine).toHaveBeenCalledTimes(2);
   });
+
+  test('a batch whose model burned its whole budget on reasoning retries once, then goes to repair', async () => {
+    // Reasoning models (deepseek-flash) can emit nothing but reasoning tokens and finish at the
+    // max_tokens cap with an empty body. The batch retries once in place; when the retry also
+    // comes back empty, its lines degrade to the repair queue (the run itself keeps going), and
+    // the repair pass supplies them.
+    const emptyStream = new AnalysisOutputError('', 'length');
+    behaviors = [
+      failWith(emptyStream), // the batch: reasoning burned everything, no content
+      failWith(emptyStream), // the in-place retry: same wall
+      elements(fullDraft('line-0', 'a', 1), fullDraft('line-1', 'b', 1)) // repair covers both
+    ];
+
+    const { outcome, onLine, onRepairStarted } = await runAnalyze(lines('a', 'b'));
+
+    expect(outcome.failedLineIds).toEqual([]);
+    expect(onRepairStarted).toHaveBeenCalledWith(['line-0', 'line-1']);
+    expect(outcome.lines.map((line) => line.lineId)).toEqual(['line-0', 'line-1']);
+    expect(onLine).toHaveBeenCalledTimes(2);
+  });
+
+  test('an empty-output batch whose retry succeeds needs no repair pass', async () => {
+    // The retry is a fresh coin flip: when the second request streams fine, the run converges
+    // with the first pass alone — no repair wave, no extra wire cost.
+    const emptyStream = new AnalysisOutputError('', 'length');
+    behaviors = [
+      failWith(emptyStream),
+      elements(fullDraft('line-0', 'a', 1), fullDraft('line-1', 'b', 1))
+    ];
+
+    const { outcome, onRepairStarted } = await runAnalyze(lines('a', 'b'));
+
+    expect(outcome.failedLineIds).toEqual([]);
+    expect(onRepairStarted).not.toHaveBeenCalled();
+    expect(outcome.lines.map((line) => line.lineId)).toEqual(['line-0', 'line-1']);
+  });
+
+  test('a repair wave that recovers nothing does not trigger a second wave', async () => {
+    // Repair re-asks the same lines with the same model: when the first wave recovers nothing
+    // (every repair request also burns its budget), a second wave would just repeat the wall.
+    // The lines end in failedLineIds after exactly two calls per batch.
+    const emptyStream = new AnalysisOutputError('', 'length');
+    behaviors = [failWith(emptyStream), failWith(emptyStream), failWith(emptyStream), failWith(emptyStream)];
+
+    const { outcome, onRepairStarted } = await runAnalyze(lines('a', 'b'));
+
+    expect(calls).toHaveLength(4); // first + retry + repair + repair-retry, then stop
+    expect(onRepairStarted).toHaveBeenCalledTimes(1);
+    expect(outcome.failedLineIds).toEqual(['line-0', 'line-1']);
+  });
+
+  test('a partially successful repair wave triggers one more wave for the rest', async () => {
+    // Wave 1 recovers line-0 only (progress but gaps remain); wave 2 recovers line-1. Both lines
+    // end ready without any of them landing in failedLineIds.
+    const emptyStream = new AnalysisOutputError('', 'length');
+    behaviors = [
+      failWith(emptyStream), // first batch burns out
+      failWith(emptyStream), // its retry too
+      elements(fullDraft('line-0', 'a', 1)), // wave 1 repair: only line-0 comes back
+      failWith(emptyStream), // the same repair batch is re-run for line-1 in wave 2...
+      elements(fullDraft('line-1', 'b', 1)) // ...wait — wave 1's own retry fires first
+    ];
+
+    // Simpler contract: wave 1's single batch call returns line-0 (its target was both lines, so
+    // line-1 is missing with progress made); wave 2's call returns line-1.
+    behaviors = [
+      failWith(emptyStream),
+      failWith(emptyStream),
+      elements(fullDraft('line-0', 'a', 1)), // wave 1: line-0 recovered, line-1 still missing
+      elements(fullDraft('line-1', 'b', 1)) // wave 2: line-1 recovered
+    ];
+
+    const { outcome, onRepairStarted } = await runAnalyze(lines('a', 'b'));
+
+    expect(outcome.failedLineIds).toEqual([]);
+    expect(onRepairStarted).toHaveBeenCalledTimes(1);
+    expect(outcome.lines.map((line) => line.lineId)).toEqual(['line-0', 'line-1']);
+  });
 });
 
-// Import after the mock declaration so the class identity matches what the mock re-exports.
-const { APICallError: actual_APICallError } = await import('ai');
