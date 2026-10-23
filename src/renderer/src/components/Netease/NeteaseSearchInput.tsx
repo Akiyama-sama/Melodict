@@ -9,7 +9,7 @@ import { neteaseQuery } from '../../queries/netease';
 interface NeteaseSearchInputProps {
   value: string;
   onChange: (value: string) => void;
-  /** Enter with no suggestion highlighted submits the raw input text. */
+  /** Enter submits the raw typed text; picking a suggestion calls this with it instead. */
   onSubmit: (keyword: string) => void;
   placeholder: string;
   ariaLabel: string;
@@ -27,8 +27,8 @@ const SUGGEST_DEBOUNCE_MS = 250;
  * the input's mid-animation position.
  *
  * The pill-shaped shell stays with the caller — its width differs per page — while this component
- * fills it. Suggestions debounce 250 ms and are cached per keyword by react-query; Enter with no
- * option highlighted submits the raw input text.
+ * fills it. Suggestions debounce 250 ms and are cached per keyword by react-query; Enter always
+ * searches the typed text, while clicking (or arrowing into) a suggestion searches that one.
  */
 const NeteaseSearchInput = ({
   value,
@@ -83,9 +83,13 @@ const NeteaseSearchInput = ({
           onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
             // Keystrokes in the search field must not reach the app's global shortcuts.
             e.stopPropagation();
-            // Headless UI consumes Enter while an option is highlighted (and prevents default);
-            // a plain Enter reaches here and submits the raw input text.
-            if (e.key === 'Enter' && !e.defaultPrevented) submit(e.currentTarget.value);
+            // Enter always searches what the user actually typed. Merged handler order puts this
+            // first and skips Headless UI's own Enter branch once default is prevented — without
+            // this, its default-to-first-option logic commits the top suggestion instead.
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              submit(e.currentTarget.value);
+            }
           }}
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus={autoFocus}
@@ -107,7 +111,10 @@ const NeteaseSearchInput = ({
       </div>
       <ComboboxOptions
         anchor="bottom start"
-        className="bg-background-color-1 dark:bg-dark-background-color-1 z-100 mt-1 max-h-72 w-[var(--input-width)] overflow-y-auto rounded-2xl p-2 shadow-xl empty:hidden"
+        // Headless UI writes inline `maxHeight: min(var(--anchor-max-height, 100vh), …px)`, which
+        // outranks any max-h-* class; with few suggestions the list never overflowed, so wheel
+        // events fell through to the page behind it. Cap it through the official variable.
+        className="bg-background-color-1 dark:bg-dark-background-color-1 z-100 mt-1 w-[var(--input-width)] [--anchor-max-height:18rem] overflow-y-auto rounded-2xl p-2 shadow-xl empty:hidden"
       >
         {keywords.length > 0 &&
           suggestions.map((keyword) => (
