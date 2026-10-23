@@ -193,8 +193,16 @@ async function main() {
   if (!sh('gh', ['auth', 'token']).ok) {
     die('gh 未登录 / gh not authenticated:请先运行 `gh auth login`');
   }
+  // 显式解析仓库(owner/name)传给 gh,不依赖 gh 的 remote 推断和 per-directory 默认仓库
+  // resolve owner/name explicitly; never rely on gh's inference or per-directory default repo
+  const remoteUrl = sh('git', ['remote', 'get-url', 'origin']).stdout;
+  const repoMatch = /github\.com[:/](.+?)\/(.+?)(?:\.git)?$/.exec(remoteUrl);
+  if (!repoMatch) {
+    die(`无法从 origin 解析 GitHub 仓库 / cannot resolve GitHub repo from origin: ${remoteUrl}`);
+  }
+  const repo = `${repoMatch[1]}/${repoMatch[2]}`;
   log(
-    `   version=${version}  platform=${platform}  commit=${sha.slice(0, 7)}${args.dryRun ? '  (dry-run)' : ''}`
+    `   version=${version}  platform=${platform}  commit=${sha.slice(0, 7)}  repo=${repo}${args.dryRun ? '  (dry-run)' : ''}`
   );
 
   // [2/5] 构建 / build
@@ -272,20 +280,22 @@ async function main() {
 
   // [5/5] 上传 / upload
   log('\n==> [5/5] 上传到 GitHub Releases / upload to GitHub Releases');
-  const view = sh('gh', ['release', 'view', tag, '--json', 'isDraft,url']);
+  const view = sh('gh', ['release', 'view', tag, '--repo', repo, '--json', 'isDraft,url']);
   const existing = view.ok ? JSON.parse(view.stdout) : null;
   let cmdArgs;
   if (existing) {
     log(
       `   release 已存在(${existing.isDraft ? 'draft' : 'published'}),追加并覆盖同名资产 / uploading with --clobber`
     );
-    cmdArgs = ['release', 'upload', tag, ...files, '--clobber'];
+    cmdArgs = ['release', 'upload', tag, ...files, '--repo', repo, '--clobber'];
   } else {
     cmdArgs = [
       'release',
       'create',
       tag,
       ...files,
+      '--repo',
+      repo,
       '--title',
       `${productName} ${version}`,
       '--notes-file',
@@ -306,7 +316,7 @@ async function main() {
     if (r.status !== 0) die('上传失败 / upload failed');
   }
 
-  const url = sh('gh', ['release', 'view', tag, '--json', 'url', '-q', '.url']).stdout;
+  const url = sh('gh', ['release', 'view', tag, '--repo', repo, '--json', 'url', '-q', '.url']).stdout;
   log(`\n✓ 完成 / done${url ? `: ${url}` : ''}`);
 }
 
