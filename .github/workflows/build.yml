@@ -87,14 +87,23 @@ jobs:
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
           set -e
-          ASSETS=$(find dist -maxdepth 1 -type f \( -name '*.exe' -o -name '*.zip' -o -name '*.dmg' \
-            -o -name '*.AppImage' -o -name '*.snap' -o -name '*.deb' -o -name '*.rpm' \
-            -o -name '*.tar.gz' -o -name '*.yml' -o -name '*.blockmap' \) \
-            ! -name 'builder-debug.yml' ! -name 'builder-effective-config.yaml')
-          echo "Assets to upload:"; ls -la $ASSETS
+          # 产物名含空格(如 "Knote v4.1.0-alpha-win-x64.exe"):NUL 分隔收集进数组,展开传参。
+          # 不用 mapfile(兼容 bash 3.2)也不用 grep -z(BSD grep 无 -z)。
+          # names contain spaces: collect NUL-delimited into an array, expand quoted.
+          # no mapfile (bash 3.2 compat) and no grep -z (BSD grep lacks it).
+          ASSETS=()
+          while IFS= read -r -d '' f; do
+            case "$f" in
+              dist/builder-debug.yml | dist/builder-effective-config.yaml) continue ;;
+            esac
+            ASSETS+=("$f")
+          done < <(find dist -maxdepth 1 -type f \( -name '*.exe' -o -name '*.zip' \
+            -o -name '*.dmg' -o -name '*.AppImage' -o -name '*.snap' -o -name '*.deb' \
+            -o -name '*.rpm' -o -name '*.tar.gz' -o -name '*.yml' -o -name '*.blockmap' \) -print0)
+          ls -la "${ASSETS[@]}"
           if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" --json id >/dev/null 2>&1; then
-            gh release upload "v$VERSION" $ASSETS --repo "$GITHUB_REPOSITORY" --clobber
+            gh release upload "v$VERSION" "${ASSETS[@]}" --repo "$GITHUB_REPOSITORY" --clobber
           else
-            gh release create "v$VERSION" $ASSETS --repo "$GITHUB_REPOSITORY" \
+            gh release create "v$VERSION" "${ASSETS[@]}" --repo "$GITHUB_REPOSITORY" \
               --title "Knote v$VERSION" --draft --target "$GITHUB_SHA"
           fi
