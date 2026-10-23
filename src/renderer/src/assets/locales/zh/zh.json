@@ -716,9 +716,9 @@
   "sideBar": {
     "home": "主页",
     "search": "搜索",
-    "neteaseMyPlaylists": "我的网易云歌单",
-    "neteaseLiked": "网易云喜欢的音乐",
-    "neteaseToplists": "网易云排行榜"
+    "neteaseMyPlaylists": "我的歌单",
+    "neteaseLiked": "我喜欢的音乐",
+    "neteaseToplists": "排行榜"
   },
   "renamePlaylistPrompt": {
     "renamePlaylistWithName": "重命名歌单 “{{name}}”",

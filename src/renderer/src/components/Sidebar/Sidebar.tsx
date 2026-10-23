@@ -7,6 +7,12 @@ import { useTranslation } from 'react-i18next';
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
 
+/** A pure-visual divider row between route groups; rendered as an `<hr>` between the items. */
+interface SidebarSeparator {
+  id: string;
+  separator: true;
+}
+
 const Sidebar = memo(() => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   // const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
@@ -15,96 +21,104 @@ const Sidebar = memo(() => {
 
   const linkData = useMemo(
     () =>
-      linkOptions([
-        {
-          to: '/main-player/home',
-          id: 'Home',
-          parentClassName: 'home',
-          icon: 'home',
-          content: t('sideBar.home'),
-          isActive: true
-        },
-        {
-          to: '/main-player/songs',
-          id: 'Songs',
-          parentClassName: 'songs',
-          icon: 'music_note',
-          content: t('common.song_other'),
-          isActive: false
-        },
-        {
-          to: '/main-player/playlists',
-          id: 'Playlists',
-          parentClassName: 'playlists',
-          icon: 'queue_music',
-          content: t('common.playlist_other'),
-          isActive: false
-        },
-        {
-          to: '/main-player/folders',
-          id: 'Folders',
-          parentClassName: 'folders',
-          icon: 'folder',
-          content: t('common.folder_other'),
-          isActive: false
-        },
-        {
-          to: '/main-player/artists',
-          id: 'Artists',
-          parentClassName: 'artists',
-          icon: 'people',
-          content: t('common.artist_other'),
-          isActive: false
-        },
-        {
-          to: '/main-player/albums',
-          id: 'Albums',
-          parentClassName: 'albums',
-          icon: 'album',
-          content: t('common.album_other'),
-          isActive: false
-        },
-        {
-          to: '/main-player/genres',
-          id: 'Genres',
-          parentClassName: 'genres',
-          icon: 'track_changes',
-          content: t('common.genre_other'),
-          isActive: false
-        },
-        {
-          to: '/main-player/netease/playlists',
-          id: 'NeteaseMyPlaylists',
-          parentClassName: 'netease-my-playlists',
-          icon: 'public',
-          content: t('sideBar.neteaseMyPlaylists'),
-          isActive: false
-        },
-        {
-          to: '/main-player/netease/liked',
-          id: 'NeteaseLiked',
-          parentClassName: 'netease-liked',
-          icon: 'favorite',
-          content: t('sideBar.neteaseLiked'),
-          isActive: false
-        },
-        {
-          to: '/main-player/netease/toplists',
-          id: 'NeteaseToplists',
-          parentClassName: 'netease-toplists',
-          icon: 'leaderboard',
-          content: t('sideBar.neteaseToplists'),
-          isActive: false
-        },
-        {
-          to: '/main-player/settings',
-          id: 'Settings',
-          parentClassName: 'settings',
-          icon: 'settings',
-          content: t('settingsPage.settings'),
-          isActive: false
-        }
-      ]),
+      [
+        ...linkOptions([
+          {
+            to: '/main-player/home',
+            id: 'Home',
+            parentClassName: 'home',
+            icon: 'home',
+            content: t('sideBar.home'),
+            isActive: true
+          },
+          {
+            to: '/main-player/songs',
+            id: 'Songs',
+            parentClassName: 'songs',
+            icon: 'music_note',
+            content: t('common.song_other'),
+            isActive: false
+          },
+          {
+            to: '/main-player/playlists',
+            id: 'Playlists',
+            parentClassName: 'playlists',
+            icon: 'queue_music',
+            content: t('common.playlist_other'),
+            isActive: false
+          },
+          {
+            to: '/main-player/folders',
+            id: 'Folders',
+            parentClassName: 'folders',
+            icon: 'folder',
+            content: t('common.folder_other'),
+            isActive: false
+          },
+          {
+            to: '/main-player/artists',
+            id: 'Artists',
+            parentClassName: 'artists',
+            icon: 'people',
+            content: t('common.artist_other'),
+            isActive: false
+          },
+          {
+            to: '/main-player/albums',
+            id: 'Albums',
+            parentClassName: 'albums',
+            icon: 'album',
+            content: t('common.album_other'),
+            isActive: false
+          },
+          {
+            to: '/main-player/genres',
+            id: 'Genres',
+            parentClassName: 'genres',
+            icon: 'track_changes',
+            content: t('common.genre_other'),
+            isActive: false
+          }
+        ]),
+        // Separates the local-library routes from the NetEase ones.
+        { id: 'NeteaseSeparator', separator: true } as SidebarSeparator,
+        ...linkOptions([
+          {
+            to: '/main-player/netease/playlists',
+            id: 'NeteaseMyPlaylists',
+            parentClassName: 'netease-my-playlists',
+            icon: 'public',
+            content: t('sideBar.neteaseMyPlaylists'),
+            isActive: false
+          },
+          {
+            to: '/main-player/netease/liked',
+            id: 'NeteaseLiked',
+            parentClassName: 'netease-liked',
+            icon: 'favorite',
+            content: t('sideBar.neteaseLiked'),
+            isActive: false
+          },
+          {
+            to: '/main-player/netease/toplists',
+            id: 'NeteaseToplists',
+            parentClassName: 'netease-toplists',
+            icon: 'leaderboard',
+            content: t('sideBar.neteaseToplists'),
+            isActive: false
+          }
+        ]),
+        ...linkOptions([
+          {
+            to: '/main-player/settings',
+            id: 'Settings',
+            parentClassName: 'settings',
+            icon: 'settings',
+            content: t('settingsPage.settings'),
+            isActive: false
+          }
+        ])
+      ],
     [t]
   );
 
@@ -117,15 +131,25 @@ const Sidebar = memo(() => {
   const sideBarItems = useMemo(
     () =>
       data
-        ? data.map((link) => (
-            <SideBarItem
-              to={link.to}
-              key={link.id}
-              parentClassName={link.parentClassName}
-              icon={link.icon}
-              content={link.content}
-            />
-          ))
+        ? data.map((link) =>
+            'to' in link ? (
+              <SideBarItem
+                to={link.to}
+                key={link.id}
+                parentClassName={link.parentClassName}
+                icon={link.icon}
+                content={link.content}
+              />
+            ) : (
+              // Separator entry. Same rule as the context menu's separator; centred like the
+              // items' 95% width. Not a link, so it takes no focus and announces nothing.
+              <hr
+                key={link.id}
+                aria-hidden
+                className="my-2 h-[1px] w-[95%] self-center border-0 bg-[hsla(0deg,0%,57%,0.5)]"
+              />
+            )
+          )
         : [],
     [data]
   );
