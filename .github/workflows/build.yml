@@ -20,6 +20,11 @@ jobs:
   release:
     runs-on: ${{ matrix.os }}
 
+    # 创建/更新 release 资产需要 GITHUB_TOKEN 的 contents 写权限(默认只读)
+    # creating/updating releases needs GITHUB_TOKEN contents:write (read-only by default)
+    permissions:
+      contents: write
+
     strategy:
       fail-fast: false
       matrix:
