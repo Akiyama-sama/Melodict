@@ -1,12 +1,13 @@
 name: Build/release
 
 on:
-  # push:
-  #   branches: ['master']
+  # main(生产分支)有合并/更新时,自动做一次三平台构建并把产物追加进版本草稿
+  # on every merge/update to main (the production branch), build all three
+  # platforms automatically and append the artifacts to the version draft
+  push:
+    branches: ['main']
 
-  # pull_request:
-  #   branches: ['master']
-
+  # 手动触发保留 / manual runs stay available
   workflow_dispatch:
 
 env:
