@@ -45,8 +45,12 @@ const LyricsAnalysisOnboardingCard = () => {
             translate
           </span>
           <div className="min-w-0">
-            <p className="text-lg font-medium">{t('lyricsAnalysis.onboarding.title')}</p>
-            <p className="text-sm opacity-70">{t('lyricsAnalysis.onboarding.description')}</p>
+            <p className="text-font-color dark:text-dark-font-color text-lg font-medium">
+              {t('lyricsAnalysis.onboarding.title')}
+            </p>
+            <p className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-sm">
+              {t('lyricsAnalysis.onboarding.description')}
+            </p>
           </div>
         </div>
         <Button
