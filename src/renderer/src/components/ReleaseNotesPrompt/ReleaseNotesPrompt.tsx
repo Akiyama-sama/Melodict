@@ -151,7 +151,7 @@ const ReleaseNotesPrompt = () => {
             {isOnline && latestUpdatedInfo.artwork && (
               <div className="version-artwork-container mb-4 p-4 empty:mb-0 empty:p-0">
                 <Img
-                  src={`${urls.raw_repository_url}master${latestUpdatedInfo.artwork}`}
+                  src={`${urls.raw_repository_url}main${latestUpdatedInfo.artwork}`}
                   fallbackSrc={latestUpdatedInfo.artwork}
                   className="mx-auto rounded-lg"
                   alt=""
