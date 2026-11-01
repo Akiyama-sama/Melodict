@@ -11,9 +11,6 @@ export interface Query {
   cookie?: string | Record<string, string>;
   /** Custom User-Agent. */
   ua?: string;
-  /** Real IP (X-Real-IP / X-Forwarded-For). */
-  realIP?: string;
-  ip?: string;
   /** Ask the server to encrypt the response body (weapi/eapi only). */
   e_r?: boolean;
   /** Referer / domain override. */
@@ -32,8 +29,6 @@ export const createOption = (query: Query, crypto: CryptoMode | '' = ''): Reques
   crypto: (query.crypto as CryptoMode | undefined) || crypto,
   cookie: query.cookie,
   ua: query.ua || '',
-  realIP: query.realIP,
-  ip: query.ip,
   e_r: query.e_r,
   domain: query.domain || ''
 });

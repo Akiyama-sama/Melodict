@@ -86,7 +86,10 @@ describe('callNetease', () => {
 
     await callNetease('login_status', {});
 
-    expect(patchNeteaseSession).toHaveBeenCalledWith(['MUSIC_U=renewed; Path=/', '__csrf=fresh; Path=/']);
+    expect(patchNeteaseSession).toHaveBeenCalledWith(
+      ['MUSIC_U=renewed; Path=/', '__csrf=fresh; Path=/'],
+      {}
+    );
   });
 
   test('does not persist set-cookie from plain catalog endpoints', async () => {

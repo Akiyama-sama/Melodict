@@ -4,7 +4,7 @@ import path from 'path';
 
 import type { NeteaseSessionProfile } from '../../common/netease';
 import logger from '../logger';
-import { cookieObjToString, cookieToJson, parseSetCookie } from './core/cookie';
+import { cookieToJson, parseSetCookie } from './core/cookie';
 import { setAnonymousToken, setDeviceId } from './core/device';
 import { resetXeapiKey } from './core/xeapi';
 
@@ -20,6 +20,10 @@ interface StoredNeteaseSession {
   /** Fallback for environments without OS-level encryption (some Linux setups). */
   cookiesPlain?: Record<string, string>;
   profile?: NeteaseSessionProfile;
+  /** @deprecated v1 shape: the cookie was stored as one joined string. Migrated on read. */
+  cookieEncrypted?: string;
+  /** @deprecated v1 shape fallback for environments without OS-level encryption. */
+  cookiePlain?: string;
 }
 
 export interface StoredNeteaseSessionData {
@@ -54,7 +58,33 @@ const decryptCookies = (stored: StoredNeteaseSession): Record<string, string> | 
     }
   }
 
-  return stored.cookiesPlain;
+  if (stored.cookiesPlain) return stored.cookiesPlain;
+
+  // v1 file (cookie stored as a single joined string): migrate it in place so existing users
+  // keep their MUSIC_U across the upgrade instead of being silently logged out.
+  const legacyEncrypted = stored.cookieEncrypted;
+  const legacyPlain = stored.cookiePlain;
+  if (!legacyEncrypted && !legacyPlain) return undefined;
+
+  let cookie: string | undefined;
+  if (legacyEncrypted) {
+    try {
+      cookie = safeStorage.decryptString(Buffer.from(legacyEncrypted, 'base64'));
+    } catch (error) {
+      logger.warn('Failed to decrypt the legacy NetEase session cookie.', { error });
+      return undefined;
+    }
+  } else {
+    cookie = legacyPlain;
+  }
+
+  const migrated = cookieToJson(cookie);
+  if (!migrated.MUSIC_U) return undefined;
+
+  logger.info('Migrated the NetEase session file to v2.');
+  // best-effort rewrite; the in-memory map is already usable even if the disk write fails.
+  void writeNeteaseSession(migrated, stored.profile).catch(() => undefined);
+  return migrated;
 };
 
 const readJsonFile = async (filePath: string): Promise<StoredNeteaseSession | undefined> => {
@@ -130,9 +160,12 @@ export const writeNeteaseSession = async (
   logger.debug('Updated the NetEase session file.', { hasProfile: Boolean(next.profile) });
 };
 
-/** Merges a set-cookie patch into the stored session (keeps login refreshes and server state). */
-export const patchNeteaseSession = async (setCookie: string[]): Promise<void> => {
-  const patch = parseSetCookie(setCookie);
+/** Merges a cookie patch (set-cookie lines and/or pre-parsed entries) into the stored session. */
+export const patchNeteaseSession = async (
+  setCookie: string[],
+  extra: Record<string, string> = {}
+): Promise<void> => {
+  const patch = { ...parseSetCookie(setCookie), ...extra };
   if (!Object.keys(patch).length) return;
 
   const stored = await readStoredCookies();
@@ -156,13 +189,6 @@ export const clearNeteaseSession = async (): Promise<void> => {
   } catch (error) {
     logger.warn('Failed to clear the NetEase session file.', { error });
   }
-};
-
-/** The stored session as a cookie string, for direct use as the `cookie` param of API calls. */
-export const readNeteaseSessionCookie = async (): Promise<string | undefined> => {
-  const session = await readNeteaseSession();
-  if (!session) return undefined;
-  return cookieObjToString(session.cookies);
 };
 
 /** The stored cookie map, or undefined when logged out. */

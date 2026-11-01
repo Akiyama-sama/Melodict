@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 const fetchMock = vi.hoisted(() => vi.fn());
 
-import { cookieObjToString } from '@main/netease/core/cookie';
 import { setAnonymousToken, setDeviceId } from '@main/netease/core/device';
 import { resetXeapiKey } from '@main/netease/core/xeapi';
 import { createRequest } from '@main/netease/core/request';
@@ -66,8 +65,6 @@ describe('createRequest cookie assembly', () => {
   test('reuses a stable _ntes_nuid per explicit cookie only (no leaking across calls)', async () => {
     await createRequest('/api/test', {}, { crypto: 'eapi' });
     await createRequest('/api/test', {}, { crypto: 'eapi' });
-    const first = cookieObjToString;
-    void first;
     // Both calls generate a fresh random nuid (no persistence expected) but the deviceId is stable.
     const idA = /deviceId=([A-F0-9]+)/.exec(sentCookie(0))?.[1];
     const idB = /deviceId=([A-F0-9]+)/.exec(sentCookie(1))?.[1];

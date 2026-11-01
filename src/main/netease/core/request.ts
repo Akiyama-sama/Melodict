@@ -35,13 +35,9 @@ export interface RequestOptions {
   /** Referer / domain override. */
   domain?: string;
   /** Real IP (X-Real-IP / X-Forwarded-For). */
-  realIP?: string;
-  ip?: string;
   /** Ask the server to encrypt the response body (weapi/eapi only). */
   e_r?: boolean;
 }
-
-export { NeteaseRequestError, type RequestResponse } from './response';
 
 interface NeteaseBody {
   code?: number | string;
@@ -137,11 +133,6 @@ export const createRequest = async (
   options: RequestOptions
 ): Promise<RequestResponse> => {
   const headers: Record<string, string> = {};
-  const ip = options.realIP || options.ip || '';
-  if (ip) {
-    headers['X-Real-IP'] = ip;
-    headers['X-Forwarded-For'] = ip;
-  }
 
   let crypto: CryptoMode | '' = options.crypto ?? '';
   if (crypto === '') crypto = 'eapi';

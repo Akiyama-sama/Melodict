@@ -1,10 +1,10 @@
 import logger from '../logger';
-import { parseSetCookie } from './core/cookie';
 import { getDeviceId } from './core/device';
 import { createRequest } from './core/request';
 import { modules } from './modules';
 import type { Query } from './core/option';
 import { patchNeteaseSession, readNeteaseSessionCookies } from './session';
+import { ensureNeteaseAnonymousSession } from './anonymousSession';
 
 export interface NeteaseApiRawResult {
   /** Business status reported by the request layer; 200 means success. */
@@ -30,13 +30,27 @@ export class NeteaseApiError extends Error {
 
 const NETWORK_ERROR_MESSAGE = 'NETEASE_NETWORK_ERROR';
 
-/** Endpoints whose set-cookie responses update the stored session credentials. */
+/**
+ * Endpoints whose set-cookie responses update the stored session credentials. `like` is
+ * deliberately absent: its set-cookie only refreshes anon-tracking cookies, and persisting it
+ * would treat every like/unlike as a session event.
+ */
 const SESSION_MUTATING: ReadonlySet<string> = new Set([
   'login_qr_check',
   'login_status',
   'login_refresh',
   'logout',
   'register_anonimous'
+]);
+
+/**
+ * Endpoints that may bootstrap the guest identity themselves (or would recurse through it):
+ * never trigger ensureNeteaseAnonymousSession for these.
+ */
+const GUEST_BOOTSTRAP_EXEMPT: ReadonlySet<string> = new Set([
+  ...SESSION_MUTATING,
+  'login_qr_key',
+  'login_qr_create'
 ]);
 
 type NeteaseCallOptions = {
@@ -75,6 +89,12 @@ export const callNetease = async (
   const query: Query = { ...params };
   if (cookie) query.cookie = cookie;
 
+  // While logged out, catalog endpoints must still go out under a coherent guest identity
+  // (stable persisted deviceId + MUSIC_A); mint it once, then fall through on failure.
+  if (!cookie && !GUEST_BOOTSTRAP_EXEMPT.has(name)) {
+    await ensureNeteaseAnonymousSession().catch(() => undefined);
+  }
+
   let result;
   try {
     result = await fn(query, createRequest);
@@ -96,13 +116,13 @@ export const callNetease = async (
 
   // Keep login renewals and server-issued session state (NMTID, __csrf, MUSIC_U refreshes).
   if (SESSION_MUTATING.has(name)) {
-    const patch = parseSetCookie(result.cookie ?? []);
+    const extra: Record<string, string> = {};
     if (name === 'register_anonimous') {
       const token = (result.body as { token?: unknown }).token;
-      if (typeof token === 'string') patch.MUSIC_A = token;
-      patch.deviceId = getDeviceId();
+      if (typeof token === 'string') extra.MUSIC_A = token;
+      extra.deviceId = getDeviceId();
     }
-    if (Object.keys(patch).length) await patchNeteaseSession(result.cookie ?? []);
+    await patchNeteaseSession(result.cookie ?? [], extra);
   }
 
   return result;

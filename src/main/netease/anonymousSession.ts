@@ -6,7 +6,6 @@
  */
 
 import logger from '../logger';
-import { callNetease } from './client';
 import { getAnonymousToken, getDeviceId } from './core/device';
 import { readNeteaseSessionCookies, writeNeteaseSession } from './session';
 
@@ -29,6 +28,7 @@ const registerGuestSession = async (): Promise<string> => {
     try {
       // The token arrives as a MUSIC_A set-cookie; callNetease persists the whole patch
       // (token + deviceId + __csrf) into the session map so it survives restarts.
+      const { callNetease } = await import('./client');
       const result = await callNetease('register_anonimous', {});
       const setCookie = (result.cookie as string[] | undefined) ?? [];
       const token =
@@ -48,25 +48,31 @@ const registerGuestSession = async (): Promise<string> => {
   throw lastError ?? new Error('netease anonymous registration failed');
 };
 
-/** Ensures a logged-out caller has a stable MUSIC_A + deviceId before hitting the API. */
+/**
+ * Ensures a logged-out caller has a stable MUSIC_A + deviceId before hitting the API.
+ * Rejects when registration keeps failing so callers (QR login) can surface a distinct
+ * error instead of proceeding with the fingerprint that gets risk-blocked.
+ */
 export const ensureNeteaseAnonymousSession = async (): Promise<void> => {
   const cookies = await readNeteaseSessionCookies().catch(() => undefined);
   if (cookies?.MUSIC_U || cookies?.MUSIC_A || getAnonymousToken()) return;
   if (anonymousSessionPromise) return anonymousSessionPromise;
 
-  anonymousSessionPromise = registerGuestSession()
-    .then(async (token) => {
+  anonymousSessionPromise = (async () => {
+    try {
+      const token = await registerGuestSession();
       // Seed the persisted session map. The MUSIC_U-less map is still a valid session state;
       // readNeteaseSession treats it as logged out while readNeteaseSessionCookies exposes it.
       await writeNeteaseSession({ MUSIC_A: token, deviceId: getDeviceId() });
       logger.info('Initialized the NetEase guest session.');
-    })
-    .catch((error) => {
+    } catch (error) {
+      // Logged-out catalog calls degrade gracefully (see callNetease); QR login rethrows.
       logger.warn('Failed to initialize the NetEase guest session.', { error });
-    })
-    .finally(() => {
+      throw error instanceof Error ? error : new Error(String(error));
+    } finally {
       anonymousSessionPromise = null;
-    });
+    }
+  })();
 
   return anonymousSessionPromise;
 };

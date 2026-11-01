@@ -29,7 +29,6 @@ import {
   clearNeteaseSession,
   patchNeteaseSession,
   readNeteaseSession,
-  readNeteaseSessionCookie,
   readNeteaseSessionCookies,
   writeNeteaseSession
 } from '../../../../src/main/netease/session';
@@ -66,14 +65,6 @@ describe('readNeteaseSession', () => {
     const session = await readNeteaseSession();
     expect(session?.cookies).toEqual(cookies);
     expect(session?.profile).toEqual({ userId: 7, nickname: 'n' });
-  });
-});
-
-describe('readNeteaseSessionCookie', () => {
-  test('serializes the map into a joined string', async () => {
-    fsMock.readFile.mockResolvedValue(storedFile({ MUSIC_U: 'uv', os: 'pc' }));
-
-    expect(await readNeteaseSessionCookie()).toBe('MUSIC_U=uv; os=pc');
   });
 });
 
