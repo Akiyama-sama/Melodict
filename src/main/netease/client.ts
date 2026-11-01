@@ -1,28 +1,17 @@
-import { createRequire } from 'module';
-
 import logger from '../logger';
-import { readNeteaseSessionCookie } from './session';
-
-// The package is CJS and the main bundle is ESM, so reach it through createRequire. The require is
-// created lazily (inside callNetease) to keep test environments from paying package-load cost on
-// module import.
-let neteaseApi: Record<string, (data?: unknown) => Promise<NeteaseApiRawResult>> | undefined;
-
-const getNeteaseApi = () => {
-  if (!neteaseApi) {
-    const require = createRequire(import.meta.url);
-    neteaseApi = require('NeteaseCloudMusicApi') as typeof neteaseApi;
-  }
-
-  return neteaseApi;
-};
+import { parseSetCookie } from './core/cookie';
+import { getDeviceId } from './core/device';
+import { createRequest } from './core/request';
+import { modules } from './modules';
+import type { Query } from './core/option';
+import { patchNeteaseSession, readNeteaseSessionCookies } from './session';
 
 export interface NeteaseApiRawResult {
-  /** HTTP status reported by the library; usually 200 even for business errors. */
+  /** Business status reported by the request layer; 200 means success. */
   status: number;
   /** Result body; code 200 means success, 301 means auth required, etc. */
   body: Record<string, unknown>;
-  /** Set-Cookie lines returned by the server (used to keep sessions fresh). */
+  /** Set-Cookie lines returned by the server (persisted to keep the session fresh). */
   cookie: unknown;
 }
 
@@ -41,14 +30,24 @@ export class NeteaseApiError extends Error {
 
 const NETWORK_ERROR_MESSAGE = 'NETEASE_NETWORK_ERROR';
 
+/** Endpoints whose set-cookie responses update the stored session credentials. */
+const SESSION_MUTATING: ReadonlySet<string> = new Set([
+  'login_qr_check',
+  'login_status',
+  'login_refresh',
+  'logout',
+  'register_anonimous'
+]);
+
 type NeteaseCallOptions = {
-  /** Cookie string (joined `k=v; ...`), overriding the default session cookie. */
-  cookie?: string;
+  /** Cookie string (joined `k=v; ...`) or map, overriding the default session cookie. */
+  cookie?: string | Record<string, string>;
 };
 
 /**
- * Calls one NCM module function (`login_qr_check`, `song_url_v1`, ...). Merges the caller's
- * cookie, unwraps into the response body and converts business errors into `NeteaseApiError`.
+ * Calls one NCM endpoint by module name (`login_qr_check`, `song_url_v1`, ...). Merges the
+ * caller's cookie with the stored session, keeps server-issued session state, and converts
+ * business errors into `NeteaseApiError`.
  *
  * Some endpoints return "success-ish" business codes (QR polling 800/801/802/803, etc.), so this
  * only throws when the code is clearly an error; callers inspect semantics themselves.
@@ -58,38 +57,55 @@ export const callNetease = async (
   params: Record<string, unknown> = {},
   options: NeteaseCallOptions = {}
 ): Promise<NeteaseApiRawResult> => {
-  const api = getNeteaseApi();
-  if (!api) throw new NeteaseApiError('NetEase API failed to load.');
-  const fn = api[name];
+  const fn = modules[name];
   if (!fn) throw new NeteaseApiError(`Unknown Netease API call: ${name}`);
 
-  // An explicit cookie wins; otherwise default to the stored session so every endpoint (login_status,
-  // user_playlist, ...) automatically behaves as the logged-in user, exactly as NCM deployments do.
+  // An explicit cookie wins; otherwise default to the stored session so every endpoint
+  // (login_status, user_playlist, ...) automatically behaves as the logged-in user. While logged
+  // out the request layer injects the anonymous token + stable deviceId itself.
   let cookie = options.cookie;
   if (!cookie) {
     try {
-      cookie = await readNeteaseSessionCookie();
+      cookie = await readNeteaseSessionCookies();
     } catch {
       // No session file yet (first run): proceed anonymously.
     }
   }
-  const extraCookie = cookie ? { cookie } : {};
 
+  const query: Query = { ...params };
+  if (cookie) query.cookie = cookie;
+
+  let result;
   try {
-    const result = (await fn({ ...params, ...extraCookie })) as NeteaseApiRawResult;
-
-    // HTTP-level failures without a business code (rare: the lib usually wraps them in a body).
-    if (result?.status >= 400 && typeof result?.body?.code !== 'number') {
-      throw new NeteaseApiError(`NetEase request failed: ${name}`, undefined, result?.status);
-    }
-
-    return result;
+    result = await fn(query, createRequest);
   } catch (error) {
-    if (error instanceof NeteaseApiError) throw error;
+    // Non-200 outcomes arrive as NeteaseRequestError carrying the business body; map that onto
+    // the NeteaseApiError contract the rest of the app already switches on.
+    if (error instanceof Error && error.name === 'NeteaseRequestError') {
+      const response = (error as { response?: { status?: number; body?: Record<string, unknown> } })
+        .response;
+      const body = response?.body ?? {};
+      const code = typeof body.code === 'number' ? body.code : undefined;
+      logger.warn('NetEase API call failed.', { name, code, error });
+      throw new NeteaseApiError(`NetEase ${name} failed`, code, response?.status);
+    }
 
     logger.error('NetEase API call failed.', { name, error });
     throw new NeteaseApiError(NETWORK_ERROR_MESSAGE, undefined, undefined);
   }
+
+  // Keep login renewals and server-issued session state (NMTID, __csrf, MUSIC_U refreshes).
+  if (SESSION_MUTATING.has(name)) {
+    const patch = parseSetCookie(result.cookie ?? []);
+    if (name === 'register_anonimous') {
+      const token = (result.body as { token?: unknown }).token;
+      if (typeof token === 'string') patch.MUSIC_A = token;
+      patch.deviceId = getDeviceId();
+    }
+    if (Object.keys(patch).length) await patchNeteaseSession(result.cookie ?? []);
+  }
+
+  return result;
 };
 
 /** The body of a successful call, throwing on non-200 business codes (except QR poll states). */
@@ -127,4 +143,7 @@ export const QR_STATE_CONFIRMED = 803;
 
 /** QR-login polling codes (800 expired, 801 waiting, 802 scanned, 803 confirmed). */
 const isNeteasePollStateCode = (code: number) =>
-  code === QR_STATE_EXPIRED || code === QR_STATE_WAITING || code === QR_STATE_SCANNED || code === QR_STATE_CONFIRMED;
+  code === QR_STATE_EXPIRED ||
+  code === QR_STATE_WAITING ||
+  code === QR_STATE_SCANNED ||
+  code === QR_STATE_CONFIRMED;

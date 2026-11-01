@@ -4,50 +4,57 @@ import path from 'path';
 
 import type { NeteaseSessionProfile } from '../../common/netease';
 import logger from '../logger';
+import { cookieObjToString, cookieToJson, parseSetCookie } from './core/cookie';
+import { setAnonymousToken, setDeviceId } from './core/device';
+import { resetXeapiKey } from './core/xeapi';
 
 const SESSION_FILE_NAME = 'netease-session.json';
 
 interface StoredNeteaseSession {
-  version: 1;
-  /** base64 of `safeStorage.encryptString(cookie)` when OS encryption is available. */
-  cookieEncrypted?: string;
+  version: 2;
+  /**
+   * The full cookie map (MUSIC_U plus the device/session fields the server issues). Encrypted as
+   * base64 of `safeStorage.encryptString(JSON.stringify(cookies))` when OS encryption is available.
+   */
+  cookiesEncrypted?: string;
   /** Fallback for environments without OS-level encryption (some Linux setups). */
-  cookiePlain?: string;
+  cookiesPlain?: Record<string, string>;
   profile?: NeteaseSessionProfile;
 }
 
 export interface StoredNeteaseSessionData {
-  cookie: string;
+  /** The full cookie map (MUSIC_U, __csrf, NMTID, MUSIC_A, deviceId, ...). */
+  cookies: Record<string, string>;
   profile?: NeteaseSessionProfile;
 }
 
 const getSessionPath = () => path.join(app.getPath('userData'), SESSION_FILE_NAME);
 
-const createEmptySessionFileVersion = (): StoredNeteaseSession => ({ version: 1 });
-
-const encryptCookie = (cookie: string): Pick<StoredNeteaseSession, 'cookieEncrypted' | 'cookiePlain'> => {
+const encryptCookies = (
+  cookies: Record<string, string>
+): Pick<StoredNeteaseSession, 'cookiesEncrypted' | 'cookiesPlain'> => {
   try {
     if (safeStorage.isEncryptionAvailable()) {
-      return { cookieEncrypted: safeStorage.encryptString(cookie).toString('base64') };
+      return { cookiesEncrypted: safeStorage.encryptString(JSON.stringify(cookies)).toString('base64') };
     }
   } catch (error) {
-    logger.warn('Failed to encrypt the NetEase session cookie; storing it plainly.', { error });
+    logger.warn('Failed to encrypt the NetEase session cookies; storing them plainly.', { error });
   }
 
-  return { cookiePlain: cookie };
+  return { cookiesPlain: cookies };
 };
 
-const decryptCookie = (stored: StoredNeteaseSession): string | undefined => {
-  if (stored.cookieEncrypted) {
+const decryptCookies = (stored: StoredNeteaseSession): Record<string, string> | undefined => {
+  if (stored.cookiesEncrypted) {
     try {
-      return safeStorage.decryptString(Buffer.from(stored.cookieEncrypted, 'base64'));
+      return JSON.parse(safeStorage.decryptString(Buffer.from(stored.cookiesEncrypted, 'base64')));
     } catch (error) {
-      logger.warn('Failed to decrypt the stored NetEase session cookie.', { error });
+      logger.warn('Failed to decrypt the stored NetEase session cookies.', { error });
       return undefined;
     }
   }
 
-  return stored.cookiePlain;
+  return stored.cookiesPlain;
 };
 
 const readJsonFile = async (filePath: string): Promise<StoredNeteaseSession | undefined> => {
@@ -72,51 +79,92 @@ const writeSessionFile = async (state: StoredNeteaseSession) => {
   await fs.rename(tempPath, sessionPath);
 };
 
-/** Returns the decrypted cookie together with the cached profile snapshot, if any. */
-export const readNeteaseSession = async (): Promise<StoredNeteaseSessionData | undefined> => {
+/** Syncs the persisted fingerprint into the process-level device state. */
+const syncDeviceState = (cookies: Record<string, string>): void => {
+  if (cookies.deviceId) setDeviceId(cookies.deviceId);
+  // Only overwrite when the map actually carries a token: some set-cookie patches arrive without
+  // a MUSIC_A line, and clearing the in-process guest token then would force a re-registration.
+  if (cookies.MUSIC_A) setAnonymousToken(cookies.MUSIC_A);
+};
+
+/** Reads the decrypted cookie map straight from the file (no logged-in gating). */
+const readStoredCookies = async (): Promise<{
+  cookies: Record<string, string>;
+  profile?: NeteaseSessionProfile;
+} | undefined> => {
   const stored = await readJsonFile(getSessionPath());
   if (!stored) return undefined;
 
-  const cookie = decryptCookie(stored);
-  if (!cookie?.includes('MUSIC_U')) return undefined;
+  const cookies = decryptCookies(stored);
+  if (!cookies) return undefined;
 
-  return {
-    cookie,
-    profile: stored.profile
-  };
+  return { cookies, profile: stored.profile };
+};
+
+/** Returns the decrypted cookie map together with the cached profile snapshot, if any. */
+export const readNeteaseSession = async (): Promise<StoredNeteaseSessionData | undefined> => {
+  const stored = await readStoredCookies();
+  if (!stored?.cookies.MUSIC_U) return undefined;
+
+  syncDeviceState(stored.cookies);
+  return { cookies: stored.cookies, profile: stored.profile };
 };
 
 export const writeNeteaseSession = async (
-  cookie: string,
+  cookie: string | Record<string, string>,
   profile?: NeteaseSessionProfile
 ): Promise<void> => {
-  const current = await readJsonFile(getSessionPath());
+  const current = await readStoredCookies();
+  const merged = {
+    ...(current?.cookies ?? {}),
+    ...(typeof cookie === 'string' ? cookieToJson(cookie) : cookie)
+  };
   const next: StoredNeteaseSession = {
-    ...createEmptySessionFileVersion(),
-    ...encryptCookie(cookie),
+    version: 2,
+    ...encryptCookies(merged),
     profile: profile ?? current?.profile
   };
 
   await writeSessionFile(next);
+  syncDeviceState(merged);
   logger.debug('Updated the NetEase session file.', { hasProfile: Boolean(next.profile) });
 };
 
+/** Merges a set-cookie patch into the stored session (keeps login refreshes and server state). */
+export const patchNeteaseSession = async (setCookie: string[]): Promise<void> => {
+  const patch = parseSetCookie(setCookie);
+  if (!Object.keys(patch).length) return;
+
+  const stored = await readStoredCookies();
+  // No file yet (e.g. guest registration on first launch): the patch *is* the initial state.
+  await writeNeteaseSession({ ...(stored?.cookies ?? {}), ...patch }, stored?.profile);
+};
+
 export const updateNeteaseSessionProfile = async (profile: NeteaseSessionProfile): Promise<void> => {
-  const stored = await readJsonFile(getSessionPath());
+  const stored = await readStoredCookies();
   if (!stored) return;
 
-  await writeSessionFile({ ...stored, profile });
+  await writeNeteaseSession(stored.cookies, profile);
 };
 
 export const clearNeteaseSession = async (): Promise<void> => {
   try {
     await fs.rm(getSessionPath(), { force: true });
+    setAnonymousToken('');
+    resetXeapiKey();
     logger.debug('Cleared the NetEase session file.');
   } catch (error) {
     logger.warn('Failed to clear the NetEase session file.', { error });
   }
 };
 
-/** Cookie joined for direct use as the `cookie` param of the npm package calls. */
-export const readNeteaseSessionCookie = async (): Promise<string | undefined> =>
-  (await readNeteaseSession())?.cookie;
+/** The stored session as a cookie string, for direct use as the `cookie` param of API calls. */
+export const readNeteaseSessionCookie = async (): Promise<string | undefined> => {
+  const session = await readNeteaseSession();
+  if (!session) return undefined;
+  return cookieObjToString(session.cookies);
+};
+
+/** The stored cookie map, or undefined when logged out. */
+export const readNeteaseSessionCookies = async (): Promise<Record<string, string> | undefined> =>
+  (await readStoredCookies())?.cookies;

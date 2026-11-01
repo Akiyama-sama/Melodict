@@ -1,8 +1,8 @@
 import { dataUpdateEvent } from '../main';
 import logger from '../logger';
-import { callNetease, QR_STATE_CONFIRMED, QR_STATE_EXPIRED, QR_STATE_SCANNED, QR_STATE_WAITING } from './client';
-import type { NeteaseApiRawResult } from './client';
+import { callNetease, callNeteaseForBody, QR_STATE_CONFIRMED, QR_STATE_EXPIRED, QR_STATE_SCANNED, QR_STATE_WAITING } from './client';
 import type { NeteaseSessionProfile } from '../../common/netease';
+import { ensureNeteaseAnonymousSession } from './anonymousSession';
 import {
   clearNeteaseSession,
   readNeteaseSession,
@@ -14,27 +14,20 @@ export const startNeteaseQrLogin = async (): Promise<{
   key: string;
   qrImgUrl: string;
 }> => {
-  const keyBody = await callNeteaseForBodyChecked('login_qr_key', {});
-  // The endpoint nests { code, unikey } under `data` (some deployments unwrap it to the body).
+  // The QR key must be minted under a plausible guest identity (stable deviceId + MUSIC_A), or
+  // the risk engine blocks the scan with "当前设备环境异常,本次操作已拦截".
+  await ensureNeteaseAnonymousSession();
+
+  const keyBody = await callNeteaseForBody('login_qr_key', {});
+  // The endpoint nests { code, unikey } under `data`.
   const keyData = (keyBody.data ?? keyBody) as { unikey?: string };
   const unikey = keyData.unikey;
   if (!unikey) throw new Error('NetEase QR login failed: missing unikey.');
 
-  const createResult = await callNetease('login_qr_create', { key: unikey, qrimg: true });
-  const data = (createResult.body?.data ?? {}) as { qrurl?: string; qrimg?: string };
+  const createResult = await callNeteaseForBody('login_qr_create', { key: unikey, qrimg: true });
+  const data = (createResult.data ?? {}) as { qrurl?: string; qrimg?: string };
 
   return { key: unikey, qrImgUrl: data.qrimg ?? '' };
-};
-
-/** Thin variant of callNeteaseForBody that also throws on a bare HTTP failure body. */
-const callNeteaseForBodyChecked = async (
-  name: string,
-  params: Record<string, unknown>
-): Promise<Record<string, unknown>> => {
-  const result = await callNetease(name, params);
-  if (typeof result.body?.code !== 'number') return result.body ?? {};
-  if (result.body.code === 200) return result.body;
-  throw new Error(`NetEase ${name} failed with code ${result.body.code}`);
 };
 
 export type NeteaseQrPollResult = {
@@ -43,15 +36,15 @@ export type NeteaseQrPollResult = {
 };
 
 export const checkNeteaseQrLogin = async (key: string): Promise<NeteaseQrPollResult> => {
-  let result: NeteaseApiRawResult;
+  let body: Record<string, unknown>;
   try {
-    result = await callNetease('login_qr_check', { key });
+    body = await callNeteaseForBody('login_qr_check', { key });
   } catch {
     // Network hiccups mid-polling should not kill the QR flow; report a transient error state.
     return { state: 'error' };
   }
 
-  const code = typeof result.body?.code === 'number' ? result.body.code : undefined;
+  const code = typeof body.code === 'number' ? body.code : undefined;
 
   if (code === QR_STATE_WAITING || code === undefined) return { state: 'waiting' };
   if (code === QR_STATE_SCANNED) return { state: 'scanned' };
@@ -59,7 +52,7 @@ export const checkNeteaseQrLogin = async (key: string): Promise<NeteaseQrPollRes
   if (code !== QR_STATE_CONFIRMED) return { state: 'error' };
 
   // Success: the body.cookie is the joined MUSIC_U session; persist it.
-  const cookie = result.body?.cookie;
+  const cookie = body.cookie;
   if (typeof cookie !== 'string' || !cookie.includes('MUSIC_U')) {
     logger.warn('NetEase QR login confirmed without a MUSIC_U cookie.', { code });
     return { state: 'error' };
@@ -76,8 +69,8 @@ export const checkNeteaseQrLogin = async (key: string): Promise<NeteaseQrPollRes
 
 const fetchNeteaseProfile = async (): Promise<NeteaseSessionProfile | undefined> => {
   try {
-    const body = await callNeteaseForBodyChecked('login_status', {});
-    // login_status nests account/profile under `data` (plain-body deployments are handled too).
+    const body = await callNeteaseForBody('login_status', {});
+    // login_status nests account/profile under `data`.
     const payload = (body.data ?? body) as {
       account?: { id?: number } | null;
       profile?: { nickname?: string; avatarUrl?: string; vipType?: number } | null;

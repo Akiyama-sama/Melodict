@@ -7,6 +7,7 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     include: ['test/**/*.test.ts'],
+    exclude: ['test/smoke/**', '**/node_modules/**'],
     setupFiles: ['./test/setup.ts'],
     coverage: {
       provider: 'v8',
